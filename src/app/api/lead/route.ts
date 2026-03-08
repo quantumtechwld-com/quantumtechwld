@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { computeComplexity } from "@/lib/complexity";
 
 type LeadPayload = {
+  // Campos do wizard
+  projectType?: string;
+  painPoints?: string;
+  targetAudience?: string;
+  features?: string[];
+  customFeatures?: string;
+  timeline?: string;
+  // Campos base (mantidos por compatibilidade)
   name: string;
   email: string;
   company?: string;
@@ -30,10 +40,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Salvar briefing no banco (upsert do user por email)
+    const cx = computeComplexity(
+      payload.projectType ?? payload.service,
+      payload.features ?? [],
+      payload.customFeatures ?? ""
+    );
+
+    await prisma.user.upsert({
+      where: { email: payload.email },
+      update: {},
+      create: { email: payload.email, name: payload.name },
+    }).then((user) =>
+      prisma.briefing.create({
+        data: {
+          userId:         user.id,
+          projectType:    payload.projectType ?? payload.service,
+          painPoints:     payload.painPoints  ?? payload.message,
+          targetAudience: payload.targetAudience ?? "",
+          features:       payload.features ?? [],
+          customFeatures: payload.customFeatures,
+          budget:         payload.budget,
+          timeline:       payload.timeline ?? "",
+          complexityScore: cx.score,
+          hoursMin:        cx.hoursMin,
+          hoursMax:        cx.hoursMax,
+        },
+      })
+    ).catch((err) => {
+      // Não falha a requisição se o banco não estiver configurado
+      console.warn("Briefing não persistido no banco:", err instanceof Error ? err.message : err);
+    });
+
     const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
 
     if (!n8nWebhookUrl) {
-      console.log("Lead recebido sem webhook configurado:", payload);
       return NextResponse.json({
         ok: true,
         message: "Lead recebido localmente. Configure N8N_WEBHOOK_URL.",
@@ -46,6 +87,9 @@ export async function POST(request: NextRequest) {
     const n8nPayload = {
       ...payload,
       body: payload,
+      complexityScore: cx.score,
+      hoursMin: cx.hoursMin,
+      hoursMax: cx.hoursMax,
       source: "agency-site",
       receivedAt: new Date().toISOString(),
     };

@@ -20,8 +20,8 @@
 - [x] Create and Run Task
   - Etapa dispensada: scripts padrão do `package.json` já atendem execução local e build.
 
-- [ ] Launch the Project
-  - Pendente confirmação do usuário para rodar em modo debug/execução assistida.
+- [x] Launch the Project
+  - Servidor de desenvolvimento iniciado e confirmado em http://localhost:3000.
 
 - [x] Ensure Documentation is Complete
   - README atualizado com setup local, variável `N8N_WEBHOOK_URL` e fluxo de lead.
