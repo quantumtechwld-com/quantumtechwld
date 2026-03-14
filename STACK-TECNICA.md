@@ -878,13 +878,21 @@ pnpm typecheck
 # ============================================
 # DATABASE
 # ============================================
-DATABASE_URL=postgresql://devflow:password@localhost:5432/devflow
+DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/quantum_devflow
 CLICKHOUSE_URL=http://localhost:8123
 REDIS_URL=redis://localhost:6379
 
+```
+
+Notas operacionais:
+- o banco local canônico deste projeto é `quantum_devflow`
+- no ambiente atual, esse banco fica na instância PostgreSQL local em `localhost:5432`
+- não usar `mydb` ou `devflow` como referência de banco para o setup atual
+
+```env
+
 # ============================================
 # AUTH
-# ============================================
 AUTH_SECRET=your-secret-key-min-32-chars
 AUTH_URL=http://localhost:3000
 

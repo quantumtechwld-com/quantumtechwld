@@ -13,21 +13,27 @@ Landing page premium para agência de desenvolvimento de software com:
 npm install
 ```
 
-2. Configure variáveis de ambiente:
+2. Crie ou ajuste o arquivo `.env.local`.
 
-```bash
-cp .env.example .env.local
+Configuração local mínima esperada:
+
+```env
+DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/quantum_devflow
+N8N_WEBHOOK_URL=https://seu-webhook
 ```
 
-3. Ajuste a variável `N8N_WEBHOOK_URL` em `.env.local`.
+Observações:
+- o banco canônico local deste projeto é `quantum_devflow`
+- o projeto usa a instância PostgreSQL local em `localhost:5432`
+- a configuração efetivamente carregada pelo Prisma vem de `.env.local`
 
-4. Inicie o projeto:
+3. Inicie o projeto:
 
 ```bash
 npm run dev
 ```
 
-5. Acesse `http://localhost:3000`.
+4. Acesse `http://localhost:3000`.
 
 ## Fluxo de lead
 
