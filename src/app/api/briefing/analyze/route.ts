@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { generateEmbedding, buildEmbeddingText, cosineSimilarity } from "@/lib/embeddings";
+import { prisma } from "@/lib/prisma";
 
 const PROJECT_TYPES = ["website", "webapp", "mobile", "ecommerce", "automation", "system"];
 
@@ -39,7 +41,54 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "GEMINI_API_KEY não configurada." }, { status: 500 });
   }
 
-  const prompt = `Analise o seguinte texto de briefing de projeto e extraia as informações estruturadas.
+  // ── S6: Buscar projetos similares para enriquecer o contexto do Gemini ──
+  let similarContext = "";
+  try {
+    const queryEmbedding = await generateEmbedding(
+      buildEmbeddingText({ projectType: "", description: text })
+    );
+
+    type RefRow = {
+      title: string;
+      projectType: string;
+      features: string[];
+      hoursActual: number;
+      budgetRange: string;
+      complexityScore: number;
+      embedding: string;
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allProjects = (await (prisma as any).referenceProject.findMany({
+      select: {
+        title: true, projectType: true, features: true,
+        hoursActual: true, budgetRange: true, complexityScore: true, embedding: true,
+      },
+    })) as RefRow[];
+
+    const similar = allProjects
+      .map((p: RefRow) => ({
+        ...p,
+        similarity: cosineSimilarity(queryEmbedding, JSON.parse(p.embedding) as number[]),
+      }))
+      .filter((p) => p.similarity >= 0.7)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 3);
+
+    if (similar.length > 0) {
+      const items = similar
+        .map(
+          (p) =>
+            `- "${p.title}" (${p.projectType}): ${p.hoursActual}h reais, complexidade ${p.complexityScore}/10, orçamento ${p.budgetRange}, funcionalidades: ${p.features.join(", ")}`
+        )
+        .join("\n");
+      similarContext = `\n\nPROJETOS SIMILARES JÁ ENTREGUES (use como referência para estimativas):\n${items}`;
+    }
+  } catch {
+    // Biblioteca vazia ou banco indisponível — continua sem contexto extra
+  }
+
+  const prompt = `Analise o seguinte texto de briefing de projeto e extraia as informações estruturadas.${similarContext}
 
 TEXTO DO CLIENTE:
 ${text}
@@ -79,7 +128,7 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem explicaçõ
 
   const rawText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-  const match = rawText.match(/\{[\s\S]*\}/);
+  const match = /\{[\s\S]*\}/.exec(rawText);
   if (!match) {
     return NextResponse.json({ error: "Resposta inválida da IA." }, { status: 502 });
   }

@@ -40,12 +40,20 @@ export default async function PortalPage() {
           <h1 className="mt-1 text-3xl font-bold text-white">Os seus projetos</h1>
           <p className="mt-1 text-sm text-slate-400">{session.user.email}</p>
         </div>
-        <Link
-          href="/api/auth/signout"
-          className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-        >
-          Sair
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/portal/biblioteca"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+          >
+            Biblioteca
+          </Link>
+          <Link
+            href="/api/auth/signout"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+          >
+            Sair
+          </Link>
+        </div>
       </div>
 
       {briefings.length === 0 ? (

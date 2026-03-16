@@ -66,12 +66,13 @@ model Briefing {
   customFeatures String?
   budget         String
   timeline       String
-  complexityScore Int?
-  hoursMin       Int?
-  hoursMax       Int?
-  status         BriefingStatus @default(RECEIVED)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  complexityScore  Int?
+  hoursMin         Int?
+  hoursMax         Int?
+  status           BriefingStatus @default(RECEIVED)
+  referenceProject ReferenceProject?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 enum BriefingStatus {
@@ -82,4 +83,25 @@ enum BriefingStatus {
   APPROVED
   IN_PROGRESS
   DELIVERED
+}
+
+// ─── S6: Similar Projects Library ────────────────────────────────────────────
+
+/// Projeto de referência vetorizado para busca por similaridade.
+/// O embedding é armazenado como JSON (array de 768 floats).
+/// A busca por similaridade (cosine) é calculada na aplicação.
+model ReferenceProject {
+  id              String    @id @default(cuid())
+  title           String
+  description     String    @db.Text
+  projectType     String
+  features        String[]
+  techStack       String[]
+  complexityScore Int
+  hoursActual     Int
+  budgetRange     String
+  briefingId      String?   @unique
+  briefing        Briefing? @relation(fields: [briefingId], references: [id])
+  embedding       String    @db.Text // JSON array de 768 floats
+  createdAt       DateTime  @default(now())
 }
