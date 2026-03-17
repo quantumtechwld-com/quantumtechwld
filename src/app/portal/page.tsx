@@ -115,11 +115,19 @@ export default async function PortalPage() {
                 </div>
               )}
 
-              <p className="mt-4 text-xs text-slate-600">
-                Submetido em {new Date(b.createdAt).toLocaleDateString("pt-PT", {
-                  day: "2-digit", month: "long", year: "numeric",
-                })}
-              </p>
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-xs text-slate-600">
+                  Submetido em {new Date(b.createdAt).toLocaleDateString("pt-PT", {
+                    day: "2-digit", month: "long", year: "numeric",
+                  })}
+                </p>
+                <Link
+                  href={`/portal/briefing/${b.id}`}
+                  className="rounded-xl bg-sky-500/15 px-3 py-1.5 text-xs font-medium text-sky-300 transition hover:bg-sky-500/25"
+                >
+                  Ver escopo →
+                </Link>
+              </div>
             </div>
           ))}
         </div>

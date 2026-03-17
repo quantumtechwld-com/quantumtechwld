@@ -70,6 +70,7 @@ model Briefing {
   hoursMin         Int?
   hoursMax         Int?
   status           BriefingStatus @default(RECEIVED)
+  scope            Scope?
   referenceProject ReferenceProject?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -83,6 +84,27 @@ enum BriefingStatus {
   APPROVED
   IN_PROGRESS
   DELIVERED
+}
+
+// ─── M2: Escopo Técnico ──────────────────────────────────────────────────────
+
+/// Escopo técnico gerado pelo Cérebro de Arquitetura (M2).
+model Scope {
+  id               String   @id @default(cuid())
+  briefingId       String   @unique
+  briefing         Briefing @relation(fields: [briefingId], references: [id], onDelete: Cascade)
+  features         Json     // ScopeFeature[]
+  userStories      Json     // UserStory[]
+  screens          Json     // string[]
+  integrations     Json     // string[]
+  techRecommended  Json     // string[]
+  hoursEstimate    Int
+  costMin          Float
+  costMax          Float
+  confidence       Int      // 0-100
+  generatedBy      String   @default("gemini-flash-latest")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // ─── S6: Similar Projects Library ────────────────────────────────────────────
