@@ -166,13 +166,17 @@ Retorne APENAS um JSON válido com esta estrutura exata (sem markdown, sem expli
 Seja preciso e realista. Baseie as horas em desenvolvimento profissional real, não em estimativas otimistas.`;
 
   const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 },
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 8192,
+          responseMimeType: "application/json",
+        },
       }),
     }
   );
@@ -184,19 +188,34 @@ Seja preciso e realista. Baseie as horas em desenvolvimento profissional real, n
 
   interface GeminiResponse {
     candidates?: Array<{
-      content?: { parts?: Array<{ text?: string }> };
+      content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+      finishReason?: string;
     }>;
   }
 
   const geminiData = (await geminiRes.json()) as GeminiResponse;
-  const raw = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-  const cleaned = raw.replaceAll(/```json\s*/gi, "").replaceAll(/```\s*/g, "").trim();
+
+  // Gemini 2.5-flash (thinking model) pode ter múltiplas parts; pegar a última com texto
+  const parts = geminiData.candidates?.[0]?.content?.parts ?? [];
+  const raw = [...parts].reverse().find((p) => p.text)?.text ?? "";
+
+  if (!raw) {
+    const reason = geminiData.candidates?.[0]?.finishReason ?? "unknown";
+    return NextResponse.json({ error: `Gemini não retornou conteúdo (finishReason: ${reason}).` }, { status: 502 });
+  }
+
+  // Extracção robusta: encontrar o primeiro { e último } para isolar o JSON
+  const jsonStart = raw.indexOf("{");
+  const jsonEnd = raw.lastIndexOf("}");
+  const cleaned = jsonStart !== -1 && jsonEnd > jsonStart
+    ? raw.slice(jsonStart, jsonEnd + 1)
+    : raw.replaceAll(/```json\s*/gi, "").replaceAll(/```\s*/g, "").trim();
 
   let parsed: GeneratedScope;
   try {
     parsed = JSON.parse(cleaned) as GeneratedScope;
   } catch {
-    return NextResponse.json({ error: "Resposta inválida do modelo.", raw }, { status: 502 });
+    return NextResponse.json({ error: `Resposta inválida do modelo. Início: ${cleaned.slice(0, 200)}` }, { status: 502 });
   }
 
   // Garantir que costMin/costMax estejam corretos mesmo que o modelo erre
