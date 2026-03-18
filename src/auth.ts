@@ -25,6 +25,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     session({ session, user }) {
       session.user.id = user.id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      session.user.role = (user as any).role ?? "CLIENT";
       return session;
     },
   },
