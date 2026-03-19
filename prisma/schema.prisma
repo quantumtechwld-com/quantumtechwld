@@ -190,6 +190,7 @@ model Order {
   updatedAt       DateTime    @updatedAt
   messages        OrderMessage[]
   payment         Payment?
+  rating          OrderRating?
 }
 
 enum OrderStatus {
@@ -258,4 +259,16 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+}
+
+// ─── M10: Avaliação pós-conclusão ───────────────────────────────────────────
+
+/// Avaliação do cliente após o pedido ser concluído.
+model OrderRating {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  score     Int      // 1–5 estrelas
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
 }

@@ -67,6 +67,12 @@ export default async function PortalPage() {
             Biblioteca
           </Link>
           <Link
+            href="/portal/guide"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+          >
+            Guia
+          </Link>
+          <Link
             href="/portal/profile"
             className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
           >

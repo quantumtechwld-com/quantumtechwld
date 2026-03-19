@@ -5,6 +5,7 @@ import Link from "next/link";
 import { OrderClientActions } from "./OrderClientActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import { PayOrderButton } from "./PayOrderButton";
+import { RatingWidget } from "./RatingWidget";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -65,7 +66,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       where: { id },
       include: {
         client:  { select: { email: true, name: true } },
-        payment: { select: { status: true } },
+        payment: { select: { status: true, amountCents: true } },
+        rating:  true,
       },
     }),
     prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
@@ -174,6 +176,40 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       {order.status === "APPROVED" && order.payment?.status !== "PAID" && order.estimatedValue && (
         <div className="mt-4">
           <PayOrderButton orderId={order.id} estimatedValue={Number(order.estimatedValue)} />
+        </div>
+      )}
+
+      {/* Fatura: visível quando pagamento confirmado */}
+      {order.payment?.status === "PAID" && (
+        <div className="mt-4">
+          <Link
+            href={`/portal/orders/${order.id}/invoice`}
+            className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20"
+          >
+            📄 Ver fatura
+          </Link>
+        </div>
+      )}
+
+      {/* Avaliação: visível quando concluído e sem rating */}
+      {order.status === "COMPLETED" && !order.rating && (
+        <div className="mt-6">
+          <RatingWidget orderId={order.id} />
+        </div>
+      )}
+
+      {/* Rating já submetido */}
+      {order.rating && (
+        <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4">
+          <p className="text-xs font-semibold text-yellow-300 mb-1">A sua avaliação</p>
+          <p className="text-lg">
+            {Array.from({ length: 5 }, (_, i) => (
+              <span key={i} className={i < order.rating.score ? "text-yellow-400" : "text-slate-600"}>★</span>
+            ))}
+          </p>
+          {order.rating.comment && (
+            <p className="mt-1 text-sm text-slate-300">{order.rating.comment}</p>
+          )}
         </div>
       )}
 
