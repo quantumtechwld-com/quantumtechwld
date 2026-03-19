@@ -9,7 +9,7 @@ type Order = {
   type:   string;
 };
 
-export function OrderAdminActions({ order }: { order: Order }) {
+export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymentPaid?: boolean }) {
   const router = useRouter();
   const [loading, setLoading]         = useState<string | null>(null);
   const [error,   setError]           = useState("");
@@ -140,38 +140,46 @@ export function OrderAdminActions({ order }: { order: Order }) {
       {/* Marcar em produção */}
       {canStartProd && (
         <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
-          <p className="text-sm text-slate-300 mb-3">
-            O cliente aprovou a proposta. Marque o pedido como <strong>Em produção</strong> quando iniciar os trabalhos.
-          </p>
-          {error && (
-            <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-              {error}
+          {paymentPaid ? (
+            <p className="text-sm text-emerald-300">
+              ✅ Pagamento confirmado pelo Stripe. O pedido foi automaticamente marcado como <strong>Em produção</strong>.
             </p>
-          )}
-          {confirmAction === "start_production" ? (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => runAction("start_production")}
-                disabled={!!loading}
-                className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60"
-              >
-                {loading === "start_production" ? "A actualizar…" : "Confirmar"}
-              </button>
-              <button
-                onClick={() => setConfirmAction(null)}
-                className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
-              >
-                Cancelar
-              </button>
-            </div>
           ) : (
-            <button
-              onClick={() => setConfirmAction("start_production")}
-              disabled={!!loading}
-              className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60"
-            >
-              Marcar em produção
-            </button>
+            <>
+              <p className="text-sm text-slate-300 mb-3">
+                O cliente aprovou a proposta. Marque o pedido como <strong>Em produção</strong> quando iniciar os trabalhos.
+              </p>
+              {error && (
+                <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                  {error}
+                </p>
+              )}
+              {confirmAction === "start_production" ? (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => runAction("start_production")}
+                    disabled={!!loading}
+                    className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60"
+                  >
+                    {loading === "start_production" ? "A actualizar…" : "Confirmar"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmAction(null)}
+                    className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmAction("start_production")}
+                  disabled={!!loading}
+                  className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60"
+                >
+                  Marcar em produção
+                </button>
+              )}
+            </>
           )}
         </div>
       )}

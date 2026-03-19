@@ -64,7 +64,10 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
   const [order, me] = await Promise.all([
     db.order.findUnique({
       where: { id },
-      include: { client: { select: { id: true, name: true, email: true } } },
+      include: {
+        client:  { select: { id: true, name: true, email: true } },
+        payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
+      },
     }),
     prisma.user.findUnique({ where: { email: session.user.email! }, select: { id: true } }),
   ]);
@@ -173,9 +176,62 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
           </section>
         )}
 
+        {/* Pagamento (quando existir registo Stripe) */}
+        {order.payment && (
+          <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-emerald-400 mb-3">Pagamento</h2>
+            <div className="flex flex-wrap gap-6 text-sm">
+              <div>
+                {(() => {
+                  const PAYMENT_COLOR: Record<string, string> = {
+                    PAID:     "text-emerald-300",
+                    PENDING:  "text-yellow-300",
+                    FAILED:   "text-red-300",
+                    REFUNDED: "text-slate-300",
+                  };
+                  const PAYMENT_LABEL: Record<string, string> = {
+                    PAID:     "Pago ✓",
+                    PENDING:  "Aguarda pagamento",
+                    FAILED:   "Pagamento falhado",
+                    REFUNDED: "Reembolsado",
+                  };
+                  return (
+                    <>
+                      <span className="text-slate-500 text-xs">Estado</span>
+                      <p className={`mt-0.5 font-medium ${PAYMENT_COLOR[order.payment.status] ?? "text-slate-300"}`}>
+                        {PAYMENT_LABEL[order.payment.status] ?? order.payment.status}
+                      </p>
+                    </>
+                  );
+                })()}
+              </div>
+              <div>
+                <span className="text-slate-500 text-xs">Valor</span>
+                <p className="mt-0.5 text-white font-semibold">
+                  {(order.payment.amountCents / 100).toLocaleString("pt-PT", {
+                    style: "currency",
+                    currency: order.payment.currency ?? "EUR",
+                  })}
+                </p>
+              </div>
+              {order.payment.paidAt && (
+                <div>
+                  <span className="text-slate-500 text-xs">Data de pagamento</span>
+                  <p className="mt-0.5 text-slate-300">
+                    {new Date(order.payment.paidAt).toLocaleDateString("pt-PT", {
+                      day: "2-digit", month: "long", year: "numeric",
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* Acções do admin */}
         <OrderAdminActions
           order={{ id: order.id, status: order.status, type: order.type }}
+          paymentPaid={order.payment?.status === "PAID"}
         />
 
         {/* Canal de mensagens */}

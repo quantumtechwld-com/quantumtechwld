@@ -189,6 +189,7 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   messages        OrderMessage[]
+  payment         Payment?
 }
 
 enum OrderStatus {
@@ -233,4 +234,28 @@ model OrderMessage {
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   body      String   @db.Text
   createdAt DateTime @default(now())
+}
+
+// ─── M7: Pagamentos Stripe ──────────────────────────────────────────────────
+
+/// Registo de pagamento associado a um pedido.
+model Payment {
+  id                  String        @id @default(cuid())
+  orderId             String        @unique
+  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stripeSessionId     String        @unique
+  stripePaymentIntent String?
+  amountCents         Int           // valor em cêntimos (ex: 150000 = €1500)
+  currency            String        @default("eur")
+  status              PaymentStatus @default(PENDING)
+  paidAt              DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }

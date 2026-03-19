@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OrderClientActions } from "./OrderClientActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
+import { PayOrderButton } from "./PayOrderButton";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -49,7 +50,7 @@ const URGENCY_LABEL: Record<string, string> = {
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-export default async function OrderDetailPage({ params }: RouteParams) {
+export default async function OrderDetailPage({ params }: Readonly<RouteParams>) {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
@@ -57,7 +58,10 @@ export default async function OrderDetailPage({ params }: RouteParams) {
   const [order, me] = await Promise.all([
     db.order.findUnique({
       where: { id },
-      include: { client: { select: { email: true, name: true } } },
+      include: {
+        client:  { select: { email: true, name: true } },
+        payment: { select: { status: true } },
+      },
     }),
     prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
   ]);
@@ -150,6 +154,13 @@ export default async function OrderDetailPage({ params }: RouteParams) {
           adminNote:      order.adminNote,
         }}
       />
+
+      {/* Pagamento Stripe: visível apenas quando APPROVED e sem pagamento confirmado */}
+      {order.status === "APPROVED" && order.payment?.status !== "PAID" && order.estimatedValue && (
+        <div className="mt-4">
+          <PayOrderButton orderId={order.id} estimatedValue={Number(order.estimatedValue)} />
+        </div>
+      )}
 
       <div className="mt-6">
         <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
