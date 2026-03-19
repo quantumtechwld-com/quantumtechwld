@@ -48,6 +48,7 @@ model User {
   briefings     Briefing[]
   comments      ProposalComment[]
   orders        Order[]
+  orderMessages OrderMessage[]
 }
 
 enum UserRole {
@@ -187,6 +188,7 @@ model Order {
   respondedAt     DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  messages        OrderMessage[]
 }
 
 enum OrderStatus {
@@ -218,4 +220,17 @@ model ReferenceProject {
   briefing        Briefing? @relation(fields: [briefingId], references: [id])
   embedding       String    @db.Text // JSON array de 768 floats
   createdAt       DateTime  @default(now())
+}
+
+// ─── M6: Canal de Mensagens nos Pedidos ─────────────────────────────────────
+
+/// Mensagem numa thread de pedido (client ↔ admin).
+model OrderMessage {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String   @db.Text
+  createdAt DateTime @default(now())
 }

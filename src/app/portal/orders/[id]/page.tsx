@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OrderClientActions } from "./OrderClientActions";
+import { MessagesPanel } from "@/components/MessagesPanel";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -53,10 +54,13 @@ export default async function OrderDetailPage({ params }: RouteParams) {
   if (!session?.user?.email) redirect("/portal/login");
 
   const { id } = await params;
-  const order = await db.order.findUnique({
-    where: { id },
-    include: { client: { select: { email: true, name: true } } },
-  });
+  const [order, me] = await Promise.all([
+    db.order.findUnique({
+      where: { id },
+      include: { client: { select: { email: true, name: true } } },
+    }),
+    prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
+  ]);
 
   if (!order) notFound();
   if (order.client.email !== session.user.email) notFound();
@@ -146,6 +150,10 @@ export default async function OrderDetailPage({ params }: RouteParams) {
           adminNote:      order.adminNote,
         }}
       />
+
+      <div className="mt-6">
+        <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
+      </div>
     </main>
   );
 }

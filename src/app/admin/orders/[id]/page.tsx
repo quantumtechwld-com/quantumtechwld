@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OrderAdminActions } from "./OrderAdminActions";
+import { MessagesPanel } from "@/components/MessagesPanel";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -60,10 +61,13 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
   if (!session?.user || session.user.role !== "ADMIN") redirect("/portal");
 
   const { id } = await params;
-  const order = await db.order.findUnique({
-    where: { id },
-    include: { client: { select: { id: true, name: true, email: true } } },
-  });
+  const [order, me] = await Promise.all([
+    db.order.findUnique({
+      where: { id },
+      include: { client: { select: { id: true, name: true, email: true } } },
+    }),
+    prisma.user.findUnique({ where: { email: session.user.email! }, select: { id: true } }),
+  ]);
 
   if (!order) notFound();
 
@@ -173,6 +177,9 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
         <OrderAdminActions
           order={{ id: order.id, status: order.status, type: order.type }}
         />
+
+        {/* Canal de mensagens */}
+        <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
       </main>
     </div>
   );

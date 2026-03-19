@@ -301,3 +301,33 @@ export function tplOrderCompleted(opts: {
     </div>
   `;
 }
+
+/** Notificação: nova mensagem na thread do pedido */
+export function tplOrderNewMessage(opts: {
+  recipientName: string;
+  senderRole: "admin" | "client";
+  senderEmail?: string;
+  orderType: string;
+  body: string;
+  orderUrl: string;
+}) {
+  const clientLabel = opts.senderEmail ? `o cliente (${opts.senderEmail})` : "o cliente";
+  const senderLabel = opts.senderRole === "admin" ? "a equipa Quantum Technology" : clientLabel;
+  return /* html */ `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Nova mensagem no pedido 💬</h1>
+      <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.recipientName ? ` ${opts.recipientName}` : ""},</p>
+      <p style="color:#94a3b8;margin:0 0 16px">
+        Recebeu uma nova mensagem de ${senderLabel} no pedido de
+        <strong style="color:#fff">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</strong>.
+      </p>
+      <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
+        <p style="color:#e2e8f0;font-size:14px;margin:0;white-space:pre-wrap">${opts.body.slice(0, 500)}${opts.body.length > 500 ? "…" : ""}</p>
+      </div>
+      <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
+        Responder →
+      </a>
+      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+    </div>
+  `;
+}
