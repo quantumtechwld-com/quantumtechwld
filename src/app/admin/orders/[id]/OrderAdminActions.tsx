@@ -16,7 +16,7 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
   const [productionInfo, setProductionInfo] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
   const [adminNote,       setAdminNote]     = useState("");
-  const [confirmAction,  setConfirmAction]  = useState<"start_production" | "complete" | null>(null);
+  const [confirmAction,  setConfirmAction]  = useState<"start_production" | "complete" | "reject" | null>(null);
 
   async function sendProposal() {
     setError("");
@@ -48,7 +48,7 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
     }
   }
 
-  async function runAction(action: "start_production" | "complete") {
+  async function runAction(action: "start_production" | "complete" | "admin_reject") {
     setError("");
     setLoading(action);
     try {
@@ -73,8 +73,9 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
   const canPropose       = ["PENDING", "EVALUATING", "REVISION"].includes(order.status);
   const canStartProd     = order.status === "APPROVED";
   const canComplete      = order.status === "IN_PRODUCTION";
+  const canReject        = ["PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED"].includes(order.status);
 
-  if (!canPropose && !canStartProd && !canComplete) return null;
+  if (!canPropose && !canStartProd && !canComplete && !canReject) return null;
 
   return (
     <div className="mt-6 space-y-4">
@@ -218,6 +219,48 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
               className="rounded-xl bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-400 disabled:opacity-60"
             >
               Marcar concluído
+            </button>
+          )}
+        </div>
+      )}
+      {/* Rejeitar pedido */}
+      {canReject && (
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
+          <p className="text-sm text-slate-300 mb-3">
+            Rejeite o pedido caso não seja possível dar seguimento.
+            O cliente será notificado e o estado será alterado para <strong>Recusado</strong>.
+          </p>
+          {confirmAction === "reject" && (
+            <>
+              {error && (
+                <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                  {error}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => runAction("admin_reject")}
+                  disabled={!!loading}
+                  className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 disabled:opacity-60"
+                >
+                  {loading === "admin_reject" ? "A recusar…" : "Confirmar recusa"}
+                </button>
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </>
+          )}
+          {confirmAction !== "reject" && (
+            <button
+              onClick={() => setConfirmAction("reject")}
+              disabled={!!loading}
+              className="rounded-xl border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:opacity-60"
+            >
+              Rejeitar pedido
             </button>
           )}
         </div>

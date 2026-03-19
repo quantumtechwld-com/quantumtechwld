@@ -107,6 +107,9 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     } else if (body.action === "complete") {
       if (!isAdmin) return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
       updateData = { status: "COMPLETED" };
+    } else if (body.action === "admin_reject") {
+      if (!isAdmin) return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
+      updateData = { status: "REJECTED" };
 
     // ── Acções do cliente ────────────────────────────────────────────────────
     } else if (body.action === "approve") {

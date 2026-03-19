@@ -48,13 +48,18 @@ const URGENCY_LABEL: Record<string, string> = {
   critical: "Crítica",
 };
 
-type RouteParams = { params: Promise<{ id: string }> };
+type RouteParams = {
+  params:      Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string>>;
+};
 
-export default async function OrderDetailPage({ params }: Readonly<RouteParams>) {
+export default async function OrderDetailPage({ params, searchParams }: Readonly<RouteParams>) {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
   const { id } = await params;
+  const sp = (await searchParams) ?? {};
+  const paymentCancelled = sp.payment === "cancelled";
   const [order, me] = await Promise.all([
     db.order.findUnique({
       where: { id },
@@ -71,6 +76,16 @@ export default async function OrderDetailPage({ params }: Readonly<RouteParams>)
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
+      {paymentCancelled && (
+        <div className="mb-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-300">
+          ⚠️ Pagamento cancelado. Pode tentar novamente quando quiser.
+        </div>
+      )}
+      {order.payment?.status === "FAILED" && (
+        <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          ❌ O pagamento anterior falhou. Verifique os dados do cartão e tente novamente.
+        </div>
+      )}
       <div className="mb-8">
         <Link href="/portal/orders" className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
           ← Pedidos
