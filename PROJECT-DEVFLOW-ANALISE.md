@@ -251,6 +251,96 @@ Para projetos corporativos, permitir que **múltiplos stakeholders** revisem e a
 
 ---
 
+## Requisito — Portal de Pedidos para Clientes Existentes
+
+**Função:** Clientes já cadastrados na plataforma acedem de forma autónoma ao seu espaço, consultam as suas informações e submetem novos pedidos. Cada pedido é enviado diretamente ao admin para avaliação; o admin responde com as informações de produção e o valor estimado.
+
+### Fluxo de uso
+
+1. **Acesso autenticado:** Cliente existente faz login com as suas credenciais (e-mail + password ou magic link)
+2. **Dashboard do cliente:** Visualiza os dados de perfil, histórico de projetos e pedidos anteriores
+3. **Novo pedido:** Preenche o formulário de solicitação (tipo, descrição, urgência, ficheiros de referência)
+4. **Envio ao admin:** Pedido submetido → estado "Aguardando avaliação"
+5. **Avaliação pelo admin:** Admin acede ao painel, revê o pedido e preenche as informações de produção (prazo, recursos) e valor (orçamento em €)
+6. **Notificação ao cliente:** Cliente recebe notificação (e-mail + plataforma) com a proposta de produção e valor
+7. **Aprovação / Negociação:** Cliente aceita, pede revisão ou rejeita o pedido diretamente na plataforma
+
+### Componentes necessários
+
+#### Portal do Cliente (frontend)
+- Página de perfil: dados pessoais, empresa, contacto, histórico de pedidos
+- Formulário de novo pedido: tipo (`new_feature`, `bug_fix`, `new_project`, `support`, `other`), descrição livre, urgência, upload de ficheiros de referência
+- Listagem de pedidos com badge de estado: `Rascunho → Em avaliação → Proposta recebida → Aprovado → Em produção → Concluído`
+- Página de detalhe do pedido: visualiza a resposta do admin com informações de produção + valor
+
+#### Painel Admin (frontend)
+- Listagem de pedidos recebidos com filtro por estado, cliente e data
+- Página de detalhe: formulário para preencher informações de produção + valor + nota interna
+- Ações: **Enviar proposta**, **Pedir mais informação**, **Recusar**
+
+#### API (backend)
+
+| Rota | Método | Actor | Descrição |
+|------|--------|-------|-----------|
+| `/api/orders` | GET | Cliente | Lista os pedidos do cliente autenticado |
+| `/api/orders` | POST | Cliente | Cria novo pedido |
+| `/api/orders/[id]` | GET | Cliente / Admin | Detalhe de um pedido |
+| `/api/orders/[id]` | PATCH | Admin / Cliente | Admin envia proposta; cliente aprova/recusa/pede revisão |
+| `/api/admin/orders` | GET | Admin | Lista todos os pedidos da plataforma |
+
+#### Schema Prisma
+
+```prisma
+model Order {
+  id             String      @id @default(cuid())
+  clientId       String
+  client         User        @relation(fields: [clientId], references: [id])
+  type           String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other"
+  description    String      @db.Text
+  urgency        String      @default("normal") // "low" | "normal" | "high" | "critical"
+  attachments    String[]    // URLs dos ficheiros enviados
+  status         OrderStatus @default(PENDING)
+  // Resposta do admin
+  productionInfo String?     @db.Text  // recursos, prazo, metodologia
+  estimatedValue Float?      // valor estimado em EUR
+  adminNote      String?     @db.Text
+  respondedAt    DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  DRAFT            // rascunho
+  PENDING          // aguardando avaliação do admin
+  EVALUATING       // admin a avaliar
+  PROPOSAL_SENT    // proposta de produção + valor enviada ao cliente
+  APPROVED         // cliente aprovou
+  REVISION         // cliente pediu revisão
+  REJECTED         // cliente recusou
+  IN_PRODUCTION    // em execução
+  COMPLETED        // concluído
+}
+```
+
+### Notificações automáticas
+
+| Evento | Destinatário | Canal |
+|--------|-------------|-------|
+| Novo pedido submetido | Admin | E-mail + painel |
+| Proposta enviada pelo admin | Cliente | E-mail + notificação na plataforma |
+| Cliente aprova pedido | Admin | E-mail + painel |
+| Cliente pede revisão | Admin | E-mail + painel |
+| Pedido em produção | Cliente | E-mail + notificação na plataforma |
+| Pedido concluído | Cliente | E-mail + notificação na plataforma |
+
+### Integração com módulos existentes
+
+- **M3 (Deal Room):** Pedidos aprovados podem gerar automaticamente uma proposta formal no Deal Room, mantendo histórico de negociação e assinatura digital
+- **M4 (Produção):** Após aprovação, o pedido é vinculado a um sprint/projeto no painel de produção
+- **M7 (Cérebro Central):** Pedidos de clientes existentes alimentam métricas de recorrência, LTV (Lifetime Value) e Predictive Client Churn
+
+---
+
 ## Módulo 4 — Cérebro de Produção (Gestão do Desenvolvimento)
 
 **Função:** Orquestrar o time de desenvolvimento e manter tudo sincronizado.

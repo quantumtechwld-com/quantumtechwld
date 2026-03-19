@@ -6,6 +6,7 @@ import { BriefingStatus } from "@prisma/client";
 import type { GeneratedScope } from "@/app/api/briefing/scope/route";
 import AdminStatusForm from "./AdminStatusForm";
 import ScopeView from "./ScopeView";
+import ProposalManager from "./ProposalManager";
 
 const STATUS_LABEL: Record<BriefingStatus, string> = {
   RECEIVED: "Recebido",
@@ -69,6 +70,23 @@ export default async function AdminBriefingDetailPage({
     screens: string[];
     integrations: string[];
     techRecommended: string[];
+  } | null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const proposalRaw = await (prisma as any).proposal.findUnique({
+    where: { briefingId: id },
+  }) as {
+    id: string;
+    version: number;
+    status: string;
+    summary: string;
+    content: string;
+    hoursTotal: number;
+    costMin: number;
+    costMax: number;
+    clientNote: string | null;
+    reviewedAt: string | null;
+    createdAt: Date;
   } | null;
 
   return (
@@ -155,6 +173,16 @@ export default async function AdminBriefingDetailPage({
 
         {/* Scope section */}
         <ScopeView briefingId={id} initialScope={scopeRaw} />
+
+        {/* M3: Proposta Comercial */}
+        <div>
+          <h2 className="text-base font-semibold text-white/70 uppercase tracking-wider mb-4">Proposta Comercial (M3)</h2>
+          <ProposalManager
+            briefingId={id}
+            initialProposal={proposalRaw ? { ...proposalRaw, createdAt: proposalRaw.createdAt.toISOString() } as never : null}
+            hasScope={!!scopeRaw}
+          />
+        </div>
       </main>
     </div>
   );

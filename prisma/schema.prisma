@@ -44,6 +44,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   briefings     Briefing[]
+  comments      ProposalComment[]
 }
 
 enum UserRole {
@@ -77,6 +78,7 @@ model Briefing {
   hoursMax         Int?
   status           BriefingStatus @default(RECEIVED)
   scope            Scope?
+  proposal         Proposal?
   referenceProject ReferenceProject?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -114,6 +116,54 @@ model Scope {
 }
 
 // ─── S6: Similar Projects Library ────────────────────────────────────────────
+
+// ─── M3: Deal Room ───────────────────────────────────────────────────────────
+
+/// Proposta comercial gerada a partir do escopo M2.
+model Proposal {
+  id          String            @id @default(cuid())
+  briefingId  String            @unique
+  briefing    Briefing          @relation(fields: [briefingId], references: [id], onDelete: Cascade)
+  version     Int               @default(1)
+  status      ProposalStatus    @default(DRAFT)
+  /// Conteúdo HTML/Markdown da proposta gerada pela IA
+  content     String            @db.Text
+  /// Sumário executivo (texto curto para preview)
+  summary     String            @db.Text
+  /// Total de horas e custo (copiados do Scope para histórico)
+  hoursTotal  Int
+  costMin     Float
+  costMax     Float
+  /// Comentário do cliente ao solicitar alterações
+  clientNote  String?           @db.Text
+  /// Quando foi aprovado/rejeitado
+  reviewedAt  DateTime?
+  comments    ProposalComment[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+/// Comentário inline do cliente numa proposta (por parágrafo/cláusula).
+model ProposalComment {
+  id         String   @id @default(cuid())
+  proposalId String
+  proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  /// Trecho de texto citado para contexto
+  excerpt    String   @db.Text
+  body       String   @db.Text
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+enum ProposalStatus {
+  DRAFT          // rascunho (gerado pela IA, admin ainda não enviou)
+  SENT           // enviada ao cliente (status briefing → PROPOSAL_SENT)
+  REVISION       // cliente pediu alterações
+  APPROVED       // cliente aprovou (status briefing → APPROVED)
+  REJECTED       // cliente rejeitou
+}
 
 /// Projeto de referência vetorizado para busca por similaridade.
 /// O embedding é armazenado como JSON (array de 768 floats).

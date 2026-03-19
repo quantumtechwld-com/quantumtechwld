@@ -41,6 +41,13 @@ export default async function BriefingDetailPage({ params }: PageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const scopeRow = await (prisma as any).scope.findUnique({ where: { briefingId: id } });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const proposalRow = await (prisma as any).proposal.findUnique({
+    where: { briefingId: id },
+    select: { status: true },
+  }) as { status: string } | null;
+  const proposalVisible = proposalRow && proposalRow.status !== "DRAFT";
+
   const initialScope: GeneratedScope | null = scopeRow
     ? {
         features:        scopeRow.features,
@@ -124,6 +131,18 @@ export default async function BriefingDetailPage({ params }: PageProps) {
                 {f}
               </span>
             ))}
+          </div>
+        )}
+
+        {proposalVisible && (
+          <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+            <p className="text-sm text-slate-400">A sua proposta comercial está disponível.</p>
+            <Link
+              href={`/portal/briefing/${id}/proposta`}
+              className="rounded-xl bg-sky-500/15 px-4 py-2 text-sm font-medium text-sky-300 hover:bg-sky-500/25 transition"
+            >
+              Ver proposta →
+            </Link>
           </div>
         )}
       </div>
