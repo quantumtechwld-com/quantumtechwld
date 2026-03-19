@@ -45,9 +45,9 @@ const ALL_STATUSES = [
 
 type SearchParams = Promise<Record<string, string | undefined>>;
 
-export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function AdminOrdersPage({ searchParams }: Readonly<{ searchParams: SearchParams }>) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") redirect("/portal");
+  if (session?.user?.role !== "ADMIN") redirect("/portal");
 
   const sp = await searchParams;
   const statusFilter = sp.status ?? "";
@@ -77,7 +77,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       <header className="sticky top-0 z-10 border-b border-white/5 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 text-sm font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold">
               A
             </div>
             <span className="font-semibold">Admin Panel</span>
@@ -121,7 +121,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
           <Link
             href="/admin/orders"
             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              !statusFilter
+              statusFilter === ""
                 ? "border-violet-500/50 bg-violet-500/20 text-violet-300"
                 : "border-white/15 text-slate-400 hover:bg-white/5"
             }`}
@@ -150,7 +150,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-slate-500">{total} pedido{total !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-slate-500">{total} pedido{total === 1 ? "" : "s"}</p>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {orders.map((o: any) => (
               <Link

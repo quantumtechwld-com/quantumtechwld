@@ -11,7 +11,7 @@ type Order = {
   adminNote?:     string | null;
 };
 
-export function OrderClientActions({ order }: { order: Order }) {
+export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
   const router = useRouter();
   const [revisionNote, setRevisionNote] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
@@ -52,10 +52,11 @@ export function OrderClientActions({ order }: { order: Order }) {
 
       {/* Revision note */}
       <div className="mb-4">
-        <label className="block text-xs text-slate-400 mb-1">
+        <label htmlFor="revision-note" className="block text-xs text-slate-400 mb-1">
           Nota de revisão (opcional para aprovar, obrigatória para pedir revisão)
         </label>
         <textarea
+          id="revision-note"
           value={revisionNote}
           onChange={(e) => setRevisionNote(e.target.value)}
           rows={3}

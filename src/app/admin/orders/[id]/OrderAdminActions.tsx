@@ -9,7 +9,7 @@ type Order = {
   type:   string;
 };
 
-export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymentPaid?: boolean }) {
+export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Order; paymentPaid?: boolean }>) {
   const router = useRouter();
   const [loading, setLoading]         = useState<string | null>(null);
   const [error,   setError]           = useState("");
@@ -21,7 +21,7 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
   async function sendProposal() {
     setError("");
     if (!productionInfo.trim()) { setError("Informações de produção são obrigatórias."); return; }
-    if (!estimatedValue || isNaN(parseFloat(estimatedValue)) || parseFloat(estimatedValue) < 0) {
+    if (!estimatedValue || Number.isNaN(Number.parseFloat(estimatedValue)) || Number.parseFloat(estimatedValue) < 0) {
       setError("Valor estimado inválido."); return;
     }
     setLoading("propose");
@@ -32,7 +32,7 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
         body:    JSON.stringify({
           action:         "propose",
           productionInfo: productionInfo.trim(),
-          estimatedValue: parseFloat(estimatedValue),
+          estimatedValue: Number.parseFloat(estimatedValue),
           adminNote:      adminNote.trim() || undefined,
         }),
       });
@@ -85,10 +85,11 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
           <h3 className="text-sm font-semibold text-violet-300 mb-4">Enviar proposta ao cliente</h3>
           <div className="grid gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1">
+              <label htmlFor="admin-production-info" className="block text-xs text-slate-400 mb-1">
                 Informações de produção <span className="text-red-400">*</span>
               </label>
               <textarea
+                id="admin-production-info"
                 value={productionInfo}
                 onChange={(e) => setProductionInfo(e.target.value)}
                 rows={4}
@@ -97,10 +98,11 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">
+              <label htmlFor="admin-estimated-value" className="block text-xs text-slate-400 mb-1">
                 Valor estimado (€) <span className="text-red-400">*</span>
               </label>
               <input
+                id="admin-estimated-value"
                 type="number"
                 min="0"
                 step="0.01"
@@ -111,8 +113,9 @@ export function OrderAdminActions({ order, paymentPaid }: { order: Order; paymen
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Nota adicional (opcional)</label>
+              <label htmlFor="admin-note" className="block text-xs text-slate-400 mb-1">Nota adicional (opcional)</label>
               <textarea
+                id="admin-note"
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
                 rows={2}

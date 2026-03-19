@@ -47,10 +47,109 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
   }
 }
 
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+type PatchBody = {
+  action: string;
+  productionInfo?: string;
+  estimatedValue?: number;
+  adminNote?: string;
+};
+
+type ApiError = { error: string; status: number };
+
+function buildAdminUpdateData(
+  body: PatchBody,
+  order: { status: string },
+): Record<string, unknown> | ApiError {
+  switch (body.action) {
+    case "propose":
+      if (!body.productionInfo?.trim()) return { error: "Informações de produção obrigatórias.", status: 422 };
+      if (body.estimatedValue == null || body.estimatedValue < 0) return { error: "Valor estimado inválido.", status: 422 };
+      return {
+        status:         "PROPOSAL_SENT",
+        productionInfo: body.productionInfo.trim(),
+        estimatedValue: body.estimatedValue,
+        adminNote:      body.adminNote?.trim() ?? null,
+        respondedAt:    new Date(),
+      };
+    case "start_production": return { status: "IN_PRODUCTION" };
+    case "complete":         return { status: "COMPLETED" };
+    case "admin_reject":     return { status: "REJECTED" };
+    default:                 return { error: "Acção inválida.", status: 422 };
+  }
+}
+
+function buildClientUpdateData(
+  body: PatchBody,
+  order: { status: string },
+): Record<string, unknown> | ApiError {
+  switch (body.action) {
+    case "approve":
+      if (order.status !== "PROPOSAL_SENT") return { error: "Só é possível aprovar uma proposta enviada.", status: 422 };
+      return { status: "APPROVED" };
+    case "revision":
+      if (order.status !== "PROPOSAL_SENT") return { error: "Só é possível pedir revisão de uma proposta enviada.", status: 422 };
+      return { status: "REVISION", adminNote: body.adminNote?.trim() ?? null };
+    case "reject": return { status: "REJECTED" };
+    default:       return { error: "Acção inválida.", status: 422 };
+  }
+}
+
+function isApiError(v: Record<string, unknown>): v is ApiError {
+  return typeof v.error === "string" && typeof v.status === "number";
+}
+
+type EmailContext = {
+  action: string;
+  updated: { type: string; estimatedValue?: number | null; productionInfo?: string | null };
+  clientEmail: string;
+  clientName: string;
+  adminEmail: string;
+  orderUrl: string;
+  adminOrderUrl: string;
+  adminNote: string;
+};
+
+function dispatchPostUpdateEmail(ctx: EmailContext) {
+  const { action, updated, clientEmail, clientName, adminEmail, orderUrl, adminOrderUrl, adminNote } = ctx;
+  const adminActions: Record<string, () => Promise<void>> = {
+    propose: () => sendMail({
+      to: clientEmail,
+      subject: "[DevFlow] Proposta de produção recebida",
+      html: tplOrderProposalSent({ clientName, orderType: updated.type, estimatedValue: updated.estimatedValue ?? 0, productionInfo: updated.productionInfo ?? "", orderUrl }),
+    }),
+    start_production: () => sendMail({
+      to: clientEmail,
+      subject: "[DevFlow] O seu pedido está em produção",
+      html: tplOrderInProduction({ clientName, orderType: updated.type, orderUrl }),
+    }),
+    complete: () => sendMail({
+      to: clientEmail,
+      subject: "[DevFlow] Pedido concluído",
+      html: tplOrderCompleted({ clientName, orderType: updated.type, orderUrl }),
+    }),
+    approve: () => sendMail({
+      to: adminEmail,
+      subject: "[DevFlow] Pedido aprovado pelo cliente",
+      html: tplOrderApprovedAdmin({ clientEmail, orderType: updated.type, adminUrl: adminOrderUrl }),
+    }),
+    revision: () => sendMail({
+      to: adminEmail,
+      subject: "[DevFlow] Revisão solicitada pelo cliente",
+      html: tplOrderRevisionAdmin({ clientEmail, orderType: updated.type, adminNote, adminUrl: adminOrderUrl }),
+    }),
+  };
+
+  const fn = adminActions[action];
+  if (fn && (clientEmail || adminEmail)) {
+    fn().catch((e: unknown) => console.error(`[email:${action}]`, e));
+  }
+}
+
 // ─── PATCH /api/orders/[id] ──────────────────────────────────────────────────
 // Admin: { action: "propose", productionInfo, estimatedValue, adminNote? }
-//        { action: "start_production" }
-//        { action: "complete" }
+//        { action: "start_production" | "complete" | "admin_reject" }
 // Cliente: { action: "approve" | "revision" | "reject", adminNote? }
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
@@ -60,12 +159,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
 
     const { id } = await params;
-    const body = (await request.json()) as {
-      action: string;
-      productionInfo?: string;
-      estimatedValue?: number;
-      adminNote?: string;
-    };
+    const body = (await request.json()) as PatchBody;
 
     const order = await db.order.findUnique({
       where: { id },
@@ -80,123 +174,43 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-    const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
+    const adminActions = new Set(["propose", "start_production", "complete", "admin_reject"]);
+    if (adminActions.has(body.action) && !isAdmin) {
+      return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
+    }
+    if (!adminActions.has(body.action) && !isOwner) {
+      return NextResponse.json({ error: "Apenas o dono do pedido." }, { status: 403 });
+    }
 
-    let updateData: Record<string, unknown> = {};
+    const result = adminActions.has(body.action)
+      ? buildAdminUpdateData(body, order)
+      : buildClientUpdateData(body, order);
 
-    // ── Acções do admin ──────────────────────────────────────────────────────
-    if (body.action === "propose") {
-      if (!isAdmin) return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
-      if (!body.productionInfo?.trim()) {
-        return NextResponse.json({ error: "Informações de produção obrigatórias." }, { status: 422 });
-      }
-      if (body.estimatedValue == null || body.estimatedValue < 0) {
-        return NextResponse.json({ error: "Valor estimado inválido." }, { status: 422 });
-      }
-      updateData = {
-        status:         "PROPOSAL_SENT",
-        productionInfo: body.productionInfo.trim(),
-        estimatedValue: body.estimatedValue,
-        adminNote:      body.adminNote?.trim() ?? null,
-        respondedAt:    new Date(),
-      };
-    } else if (body.action === "start_production") {
-      if (!isAdmin) return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
-      updateData = { status: "IN_PRODUCTION" };
-    } else if (body.action === "complete") {
-      if (!isAdmin) return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
-      updateData = { status: "COMPLETED" };
-    } else if (body.action === "admin_reject") {
-      if (!isAdmin) return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
-      updateData = { status: "REJECTED" };
-
-    // ── Acções do cliente ────────────────────────────────────────────────────
-    } else if (body.action === "approve") {
-      if (!isOwner) return NextResponse.json({ error: "Apenas o dono do pedido." }, { status: 403 });
-      if (order.status !== "PROPOSAL_SENT") {
-        return NextResponse.json({ error: "Só é possível aprovar uma proposta enviada." }, { status: 422 });
-      }
-      updateData = { status: "APPROVED" };
-    } else if (body.action === "revision") {
-      if (!isOwner) return NextResponse.json({ error: "Apenas o dono do pedido." }, { status: 403 });
-      if (order.status !== "PROPOSAL_SENT") {
-        return NextResponse.json({ error: "Só é possível pedir revisão de uma proposta enviada." }, { status: 422 });
-      }
-      updateData = { status: "REVISION", adminNote: body.adminNote?.trim() ?? null };
-    } else if (body.action === "reject") {
-      if (!isOwner) return NextResponse.json({ error: "Apenas o dono do pedido." }, { status: 403 });
-      updateData = { status: "REJECTED" };
-    } else {
-      return NextResponse.json({ error: "Acção inválida." }, { status: 422 });
+    if (isApiError(result)) {
+      return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
     const updated = await db.order.update({
       where: { id },
-      data: updateData,
+      data: result,
       include: { client: { select: { name: true, email: true } } },
     });
 
-    // ── Emails pós-actualização ──────────────────────────────────────────────
-    const orderUrl = `${baseUrl}/portal/orders/${id}`;
-    const adminOrderUrl = `${baseUrl}/admin/orders/${id}`;
+    const baseUrl    = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
     const clientEmail = updated.client.email as string;
-    const clientName = (updated.client.name ?? "") as string;
+    const clientName  = (updated.client.name ?? "") as string;
 
-    if (body.action === "propose" && clientEmail) {
-      sendMail({
-        to: clientEmail,
-        subject: "[DevFlow] Proposta de produção recebida",
-        html: tplOrderProposalSent({
-          clientName,
-          orderType:      updated.type,
-          estimatedValue: updated.estimatedValue ?? 0,
-          productionInfo: updated.productionInfo ?? "",
-          orderUrl,
-        }),
-      }).catch((e: unknown) => console.error("[tplOrderProposalSent]", e));
-    } else if (body.action === "approve" && adminEmail) {
-      sendMail({
-        to: adminEmail,
-        subject: "[DevFlow] Pedido aprovado pelo cliente",
-        html: tplOrderApprovedAdmin({
-          clientEmail,
-          orderType: updated.type,
-          adminUrl:  adminOrderUrl,
-        }),
-      }).catch((e: unknown) => console.error("[tplOrderApprovedAdmin]", e));
-    } else if (body.action === "revision" && adminEmail) {
-      sendMail({
-        to: adminEmail,
-        subject: "[DevFlow] Revisão solicitada pelo cliente",
-        html: tplOrderRevisionAdmin({
-          clientEmail,
-          orderType: updated.type,
-          adminNote: body.adminNote ?? "",
-          adminUrl:  adminOrderUrl,
-        }),
-      }).catch((e: unknown) => console.error("[tplOrderRevisionAdmin]", e));
-    } else if (body.action === "start_production" && clientEmail) {
-      sendMail({
-        to: clientEmail,
-        subject: "[DevFlow] O seu pedido está em produção",
-        html: tplOrderInProduction({
-          clientName,
-          orderType: updated.type,
-          orderUrl,
-        }),
-      }).catch((e: unknown) => console.error("[tplOrderInProduction]", e));
-    } else if (body.action === "complete" && clientEmail) {
-      sendMail({
-        to: clientEmail,
-        subject: "[DevFlow] Pedido concluído",
-        html: tplOrderCompleted({
-          clientName,
-          orderType: updated.type,
-          orderUrl,
-        }),
-      }).catch((e: unknown) => console.error("[tplOrderCompleted]", e));
-    }
+    dispatchPostUpdateEmail({
+      action:       body.action,
+      updated,
+      clientEmail,
+      clientName,
+      adminEmail,
+      orderUrl:     `${baseUrl}/portal/orders/${id}`,
+      adminOrderUrl: `${baseUrl}/admin/orders/${id}`,
+      adminNote:    body.adminNote ?? "",
+    });
 
     return NextResponse.json({ order: updated });
   } catch (err) {

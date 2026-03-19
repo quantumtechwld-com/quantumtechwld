@@ -56,9 +56,9 @@ const URGENCY_COLOR: Record<string, string> = {
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-export default async function AdminOrderDetailPage({ params }: RouteParams) {
+export default async function AdminOrderDetailPage({ params }: Readonly<RouteParams>) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") redirect("/portal");
+  if (session?.user?.role !== "ADMIN") redirect("/portal");
 
   const { id } = await params;
   const [order, me] = await Promise.all([
@@ -67,6 +67,7 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
       include: {
         client:  { select: { id: true, name: true, email: true } },
         payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
+        rating:  true,
       },
     }),
     prisma.user.findUnique({ where: { email: session.user.email! }, select: { id: true } }),
@@ -84,7 +85,7 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
       <header className="sticky top-0 z-10 border-b border-white/5 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 text-sm font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold">
               A
             </div>
             <Link href="/admin/orders" className="text-sm text-white/50 hover:text-white/80 transition-colors">
@@ -225,6 +226,29 @@ export default async function AdminOrderDetailPage({ params }: RouteParams) {
                 </div>
               )}
             </div>
+          </section>
+        )}
+
+        {/* Avaliação do cliente (quando concluído) */}
+        {order.rating && (
+          <section className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-yellow-400 mb-3">Avaliação do cliente</h2>
+            <div className="flex items-center gap-3">
+              <p className="text-xl">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <span key={i} className={i < order.rating.score ? "text-yellow-400" : "text-slate-600"}>★</span>
+                ))}
+              </p>
+              <span className="text-sm font-semibold text-yellow-300">{order.rating.score}/5</span>
+            </div>
+            {order.rating.comment && (
+              <p className="mt-2 text-sm text-slate-300">{order.rating.comment}</p>
+            )}
+            <p className="mt-2 text-xs text-slate-500">
+              {new Date(order.rating.createdAt).toLocaleDateString("pt-PT", {
+                day: "2-digit", month: "long", year: "numeric",
+              })}
+            </p>
           </section>
         )}
 

@@ -1,20 +1,33 @@
 "use client";
 
-import { useState, FormEvent } from "react";
-import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { sendMagicLink } from "./actions";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = async (e: FormEvent) => {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    await signIn("nodemailer", { email, callbackUrl: "/portal", redirect: false });
-    setSent(true);
-    setLoading(false);
-  };
+    setErrorMsg("");
+    try {
+      await sendMagicLink(email);
+      // Se a server action não redirecionou (modo dev sem SMTP), mostra feedback
+      setSent(true);
+    } catch (err: unknown) {
+      // NEXT_REDIRECT é lançado pelo redirect() do Next.js — não é um erro real
+      if (err && typeof err === "object" && "digest" in err) {
+        // Redirect a caminho — não fazer nada, o browser vai redirecionar
+        return;
+      }
+      setErrorMsg("Erro ao enviar o link. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
@@ -44,6 +57,11 @@ export default function LoginPage() {
                 placeholder="O seu e-mail"
                 className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-sky-400 w-full"
               />
+              {errorMsg && (
+                <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                  {errorMsg}
+                </p>
+              )}
               <button
                 type="submit"
                 disabled={loading}

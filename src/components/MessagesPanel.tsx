@@ -90,7 +90,7 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
       </div>
 
       {/* Message list */}
-      <div className="flex flex-col gap-3 px-5 py-4 min-h-[120px] max-h-96 overflow-y-auto">
+      <div className="flex flex-col gap-3 px-5 py-4 min-h-30 max-h-96 overflow-y-auto">
         {messages.length === 0 ? (
           <p className="text-xs text-slate-600 text-center mt-6">
             Ainda não há mensagens. Inicie a conversa abaixo.

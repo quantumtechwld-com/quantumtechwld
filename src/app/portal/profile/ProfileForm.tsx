@@ -10,7 +10,7 @@ type User = {
   company: string | null;
 };
 
-export function ProfileForm({ user }: { user: User }) {
+export function ProfileForm({ user }: Readonly<{ user: User }>) {
   const router  = useRouter();
   const [name,    setName]    = useState(user.name    ?? "");
   const [phone,   setPhone]   = useState(user.phone   ?? "");
@@ -19,7 +19,7 @@ export function ProfileForm({ user }: { user: User }) {
   const [error,   setError]   = useState("");
   const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -47,7 +47,7 @@ export function ProfileForm({ user }: { user: User }) {
     <form onSubmit={handleSubmit} className="grid gap-5">
       {/* Email — read only */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">E-mail</label>
+        <p className="block text-sm font-medium text-slate-300 mb-1.5">E-mail</p>
         <div className="w-full rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-slate-400 text-sm">
           {user.email}
         </div>
@@ -56,8 +56,9 @@ export function ProfileForm({ user }: { user: User }) {
 
       {/* Name */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Nome completo</label>
+        <label htmlFor="profile-name" className="block text-sm font-medium text-slate-300 mb-1.5">Nome completo</label>
         <input
+          id="profile-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -68,8 +69,9 @@ export function ProfileForm({ user }: { user: User }) {
 
       {/* Company */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Empresa</label>
+        <label htmlFor="profile-company" className="block text-sm font-medium text-slate-300 mb-1.5">Empresa</label>
         <input
+          id="profile-company"
           type="text"
           value={company}
           onChange={(e) => setCompany(e.target.value)}
@@ -80,8 +82,9 @@ export function ProfileForm({ user }: { user: User }) {
 
       {/* Phone */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Telefone</label>
+        <label htmlFor="profile-phone" className="block text-sm font-medium text-slate-300 mb-1.5">Telefone</label>
         <input
+          id="profile-phone"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}

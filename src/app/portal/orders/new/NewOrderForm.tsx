@@ -26,7 +26,7 @@ export function NewOrderForm() {
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     if (!description.trim()) { setError("A descrição é obrigatória."); return; }
@@ -54,10 +54,11 @@ export function NewOrderForm() {
     <form onSubmit={handleSubmit} className="grid gap-6">
       {/* Tipo */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
+        <label htmlFor="order-type" className="block text-sm font-medium text-slate-300 mb-2">
           Tipo de pedido
         </label>
         <select
+          id="order-type"
           value={type}
           onChange={(e) => setType(e.target.value)}
           className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white focus:border-sky-500 focus:outline-none"
@@ -72,10 +73,11 @@ export function NewOrderForm() {
 
       {/* Descrição */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
+        <label htmlFor="order-description" className="block text-sm font-medium text-slate-300 mb-2">
           Descrição detalhada <span className="text-red-400">*</span>
         </label>
         <textarea
+          id="order-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={6}
@@ -86,9 +88,9 @@ export function NewOrderForm() {
 
       {/* Urgência */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
+        <p className="block text-sm font-medium text-slate-300 mb-2">
           Urgência
-        </label>
+        </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {URGENCY_OPTIONS.map((u) => (
             <button

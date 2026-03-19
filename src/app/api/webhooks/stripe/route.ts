@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+    const session = event.data.object as unknown as Stripe.Checkout.Session;
     const orderId = session.metadata?.orderId;
     if (!orderId) return NextResponse.json({ received: true });
 
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.expired" || event.type === "payment_intent.payment_failed") {
-    const obj = event.data.object as Stripe.Checkout.Session | Stripe.PaymentIntent;
+    const obj = event.data.object as unknown as Stripe.Checkout.Session | Stripe.PaymentIntent;
     const sessionId = "id" in obj ? obj.id : null;
     if (sessionId) {
       await db.payment

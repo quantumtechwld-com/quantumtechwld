@@ -43,7 +43,7 @@ export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
       <p className="text-xs text-slate-400 mb-4">A sua avaliação ajuda-nos a melhorar.</p>
 
       {/* Estrelas */}
-      <div className="flex gap-1 mb-1" onMouseLeave={() => setHover(0)}>
+      <div role="radiogroup" aria-label="Avaliação" tabIndex={-1} className="flex gap-1 mb-1" onMouseLeave={() => setHover(0)}>
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}

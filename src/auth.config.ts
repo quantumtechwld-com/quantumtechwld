@@ -6,8 +6,9 @@ import type { NextAuthConfig } from "next-auth";
  */
 export const authConfig = {
   pages: {
-    signIn: "/portal/login",
+    signIn:        "/portal/login",
     verifyRequest: "/portal/verificar",
+    error:         "/portal/erro",
   },
   session: { strategy: "jwt" as const },
   callbacks: {

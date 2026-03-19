@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { SignOutButton } from "@/components/SignOutButton";
 
 const STATUS_LABEL: Record<string, string> = {
   RECEIVED:        "Recebido",
@@ -78,12 +79,7 @@ export default async function PortalPage() {
           >
             Perfil
           </Link>
-          <Link
-            href="/api/auth/signout"
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-          >
-            Sair
-          </Link>
+          <SignOutButton className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" />
         </div>
       </div>
 
