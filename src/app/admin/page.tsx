@@ -33,6 +33,40 @@ const PROJECT_LABEL: Record<string, string> = {
   custom: "Personalizado",
 };
 
+const ORDER_STATUS_LABEL: Record<string, string> = {
+  PENDING:        "Pendente",
+  EVALUATING:     "Em análise",
+  PROPOSAL_SENT:  "Proposta enviada",
+  APPROVED:       "Aprovado",
+  REVISION:       "Revisão",
+  REJECTED:       "Recusado",
+  IN_PRODUCTION:  "Em produção",
+  COMPLETED:      "Concluído",
+};
+
+const ORDER_STATUS_COLOR: Record<string, string> = {
+  PENDING:        "bg-blue-500/20 text-blue-300",
+  EVALUATING:     "bg-yellow-500/20 text-yellow-300",
+  PROPOSAL_SENT:  "bg-sky-500/20 text-sky-300",
+  APPROVED:       "bg-emerald-500/20 text-emerald-300",
+  REVISION:       "bg-orange-500/20 text-orange-300",
+  REJECTED:       "bg-red-500/20 text-red-300",
+  IN_PRODUCTION:  "bg-purple-500/20 text-purple-300",
+  COMPLETED:      "bg-green-500/20 text-green-300",
+};
+
+const ORDER_TYPE_LABEL: Record<string, string> = {
+  new_feature: "Nova funcionalidade",
+  bug_fix:     "Correção de bug",
+  new_project: "Novo projeto",
+  support:     "Suporte",
+  other:       "Outro",
+};
+
+function fmtEur(cents: number) {
+  return (cents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+}
+
 export default async function AdminDashboardPage() {
   const session = await auth();
 
@@ -54,10 +88,52 @@ export default async function AdminDashboardPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dbAny = prisma as any;
-  const [orderPending, orderInProd] = await Promise.all([
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  type RecentOrder = {
+    id: string;
+    type: string;
+    status: string;
+    updatedAt: Date;
+    client: { name: string | null; email: string };
+    payment: { status: string; amountCents: number } | null;
+  };
+
+  const [
+    orderPending,
+    orderInProd,
+    orderCompleted,
+    totalRevenue,
+    monthRevenue,
+    recentOrdersRaw,
+  ] = await Promise.all([
     dbAny.order.count({ where: { status: { in: ["PENDING", "EVALUATING", "REVISION"] } } }),
     dbAny.order.count({ where: { status: "IN_PRODUCTION" } }),
+    dbAny.order.count({ where: { status: "COMPLETED" } }),
+    dbAny.payment.aggregate({ _sum: { amountCents: true }, where: { status: "PAID" } }),
+    dbAny.payment.aggregate({
+      _sum: { amountCents: true },
+      where: { status: "PAID", paidAt: { gte: startOfMonth } },
+    }),
+    dbAny.order.findMany({
+      take: 6,
+      orderBy: { updatedAt: "desc" },
+      where: { status: { notIn: ["DRAFT"] } },
+      include: {
+        client: { select: { name: true, email: true } },
+        payment: { select: { status: true, amountCents: true } },
+      },
+    }),
   ]);
+
+  const recentOrders = recentOrdersRaw as RecentOrder[];
+  const totalRevenueCents: number =
+    (totalRevenue as { _sum: { amountCents: number | null } })._sum.amountCents ?? 0;
+  const monthRevenueCents: number =
+    (monthRevenue as { _sum: { amountCents: number | null } })._sum.amountCents ?? 0;
 
   const counts = {
     total: briefings.length,
@@ -116,6 +192,30 @@ export default async function AdminDashboardPage() {
           </Link>
         )}
 
+        {/* Receita */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+            <p className="text-xs text-emerald-400/70 uppercase tracking-wider mb-1">Receita total</p>
+            <p className="text-3xl font-bold text-emerald-300">{fmtEur(totalRevenueCents)}</p>
+            <p className="text-xs text-slate-500 mt-1">pagamentos confirmados</p>
+          </div>
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+            <p className="text-xs text-cyan-400/70 uppercase tracking-wider mb-1">
+              {new Date().toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}
+            </p>
+            <p className="text-3xl font-bold text-cyan-300">{fmtEur(monthRevenueCents)}</p>
+            <p className="text-xs text-slate-500 mt-1">receita este mês</p>
+          </div>
+          <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-5">
+            <p className="text-xs text-purple-400/70 uppercase tracking-wider mb-1">Em produção</p>
+            <p className="text-3xl font-bold text-purple-300">{orderInProd}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {orderCompleted === 1 ? "1 concluído" : `${orderCompleted} concluídos`}
+            </p>
+          </div>
+        </div>
+
+        {/* Briefings */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total de Briefings", value: counts.total, color: "from-violet-500 to-purple-600" },
@@ -135,7 +235,88 @@ export default async function AdminDashboardPage() {
           ))}
         </div>
 
-        {/* Table */}
+        {/* Últimos pedidos */}
+        {recentOrders.length > 0 && (
+          <div className="rounded-xl border border-white/8 bg-white/3 overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+              <h2 className="font-semibold text-white">Últimos pedidos</h2>
+              <Link
+                href="/admin/orders"
+                className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+              >
+                Ver todos →
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/5 text-white/40 text-xs uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left">Cliente</th>
+                    <th className="px-6 py-3 text-left">Tipo</th>
+                    <th className="px-6 py-3 text-left">Estado</th>
+                    <th className="px-6 py-3 text-left">Pagamento</th>
+                    <th className="px-6 py-3 text-left">Atualizado</th>
+                    <th className="px-6 py-3 text-left"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {recentOrders.map((o) => (
+                    <tr key={o.id} className="hover:bg-white/2 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="text-white font-medium">{o.client.name ?? "—"}</p>
+                        <p className="text-white/40 text-xs">{o.client.email}</p>
+                      </td>
+                      <td className="px-6 py-4 text-white/70">
+                        {ORDER_TYPE_LABEL[o.type] ?? o.type}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            ORDER_STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"
+                          }`}
+                        >
+                          {ORDER_STATUS_LABEL[o.status] ?? o.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          if (o.payment?.status === "PAID") {
+                            return (
+                              <span className="text-emerald-300 text-xs font-medium">
+                                {fmtEur(o.payment.amountCents)} ✓
+                              </span>
+                            );
+                          }
+                          if (o.payment?.status === "PENDING") {
+                            return <span className="text-yellow-300/70 text-xs">Pendente</span>;
+                          }
+                          return <span className="text-white/30 text-xs">—</span>;
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 text-white/40 text-xs whitespace-nowrap">
+                        {new Date(o.updatedAt).toLocaleDateString("pt-PT", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/admin/orders/${o.id}`}
+                          className="text-violet-400 hover:text-violet-300 text-xs font-medium transition-colors"
+                        >
+                          Ver →
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Briefings */}
         <div className="rounded-xl border border-white/8 bg-white/3 overflow-hidden">
           <div className="px-6 py-4 border-b border-white/5">
             <h2 className="font-semibold text-white">Todos os Briefings</h2>
@@ -178,7 +359,7 @@ export default async function AdminDashboardPage() {
                       <td className="px-6 py-4">
                         {scopeSet.has(b.id) ? (
                           <span className="inline-flex items-center gap-1 text-emerald-400 text-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{" "}
                             Gerado
                           </span>
                         ) : (
