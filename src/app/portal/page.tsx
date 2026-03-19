@@ -27,10 +27,23 @@ export default async function PortalPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
-  const briefings = await prisma.briefing.findMany({
-    where: { user: { email: session.user.email } },
-    orderBy: { createdAt: "desc" },
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = prisma as any;
+
+  const [briefings, pendingOrders] = await Promise.all([
+    prisma.briefing.findMany({
+      where: { user: { email: session.user.email } },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.order.findMany({
+      where: {
+        client: { email: session.user.email },
+        status: { in: ["PENDING", "PROPOSAL_SENT", "IN_PRODUCTION"] },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    }),
+  ]);
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
@@ -40,12 +53,24 @@ export default async function PortalPage() {
           <h1 className="mt-1 text-3xl font-bold text-white">Os seus projetos</h1>
           <p className="mt-1 text-sm text-slate-400">{session.user.email}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/portal/orders"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+          >
+            Pedidos
+          </Link>
           <Link
             href="/portal/biblioteca"
             className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
           >
             Biblioteca
+          </Link>
+          <Link
+            href="/portal/profile"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+          >
+            Perfil
           </Link>
           <Link
             href="/api/auth/signout"
@@ -55,6 +80,45 @@ export default async function PortalPage() {
           </Link>
         </div>
       </div>
+
+      {/* Alertas de pedidos activos */}
+      {pendingOrders.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-sky-300">Pedidos com ação pendente</p>
+            <Link href="/portal/orders" className="text-xs text-sky-400 hover:text-sky-300">
+              Ver todos →
+            </Link>
+          </div>
+          <div className="grid gap-2">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {pendingOrders.map((o: any) => {
+              const alertColor: Record<string, string> = {
+                PROPOSAL_SENT: "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+                IN_PRODUCTION: "bg-purple-500/20 text-purple-300 border border-purple-500/30",
+              };
+              const alertLabel: Record<string, string> = {
+                PROPOSAL_SENT: "Proposta recebida",
+                IN_PRODUCTION: "Em produção",
+              };
+              const colorClass = alertColor[o.status] ?? "bg-blue-500/20 text-blue-300 border border-blue-500/30";
+              const labelText  = alertLabel[o.status]  ?? "Pendente";
+              return (
+                <Link
+                  key={o.id}
+                  href={`/portal/orders/${o.id}`}
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/8 transition"
+                >
+                  <span className="text-slate-300 truncate">{o.description.slice(0, 60)}{o.description.length > 60 ? "…" : ""}</span>
+                  <span className={`ml-3 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${colorClass}`}>
+                    {labelText}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {briefings.length === 0 ? (
         <div className="rounded-2xl border border-white/15 bg-white/5 p-8 text-center">

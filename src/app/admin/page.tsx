@@ -52,6 +52,13 @@ export default async function AdminDashboardPage() {
 
   const scopeSet = new Set(scopes.map((s: { briefingId: string }) => s.briefingId));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbAny = prisma as any;
+  const [orderPending, orderInProd] = await Promise.all([
+    dbAny.order.count({ where: { status: { in: ["PENDING", "EVALUATING", "REVISION"] } } }),
+    dbAny.order.count({ where: { status: "IN_PRODUCTION" } }),
+  ]);
+
   const counts = {
     total: briefings.length,
     received: briefings.filter((b) => b.status === "RECEIVED").length,
@@ -71,17 +78,44 @@ export default async function AdminDashboardPage() {
             <span className="font-semibold text-white">Admin Panel</span>
             <span className="text-white/30 text-sm">Quantum Technology</span>
           </div>
-          <Link
-            href="/portal"
-            className="text-sm text-white/50 hover:text-white/80 transition-colors"
-          >
-            ← Portal do Cliente
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin/orders"
+              className="text-sm text-white/50 hover:text-white/80 transition-colors"
+            >
+              Pedidos
+            </Link>
+            <Link
+              href="/portal"
+              className="text-sm text-white/50 hover:text-white/80 transition-colors"
+            >
+              ← Portal do Cliente
+            </Link>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
         {/* Stats */}
+        {/* Alerta pedidos pendentes */}
+        {orderPending > 0 && (
+          <Link
+            href="/admin/orders?status=PENDING"
+            className="flex items-center gap-3 rounded-xl border border-orange-500/30 bg-orange-500/10 px-5 py-3 text-sm text-orange-300 hover:bg-orange-500/15 transition"
+          >
+            <span className="text-lg">⏳</span>
+            <span>
+              <strong>{orderPending}</strong> pedido{orderPending === 1 ? "" : "s"} a aguardar resposta
+              {orderInProd > 0 && (
+                <span className="ml-3 text-purple-300">
+                  · <strong>{orderInProd}</strong> em produção
+                </span>
+              )}
+            </span>
+            <span className="ml-auto text-xs opacity-70">Ver pedidos →</span>
+          </Link>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total de Briefings", value: counts.total, color: "from-violet-500 to-purple-600" },

@@ -1,3 +1,4 @@
 http://localhost:3000/portal/login   - usuario
 http://localhost:3000/   - landing page
+http://localhost:3000/admin
 

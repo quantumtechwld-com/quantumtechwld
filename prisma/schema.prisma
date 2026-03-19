@@ -41,10 +41,13 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole   @default(CLIENT)
+  phone         String?
+  company       String?
   accounts      Account[]
   sessions      Session[]
   briefings     Briefing[]
   comments      ProposalComment[]
+  orders        Order[]
 }
 
 enum UserRole {
@@ -163,6 +166,39 @@ enum ProposalStatus {
   REVISION       // cliente pediu alterações
   APPROVED       // cliente aprovou (status briefing → APPROVED)
   REJECTED       // cliente rejeitou
+}
+
+// ─── M4: Portal de Pedidos ──────────────────────────────────────────────────
+
+/// Pedido submetido por um cliente existente.
+model Order {
+  id              String      @id @default(cuid())
+  clientId        String
+  client          User        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  type            String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other"
+  description     String      @db.Text
+  urgency         String      @default("normal") // "low" | "normal" | "high" | "critical"
+  attachments     String[]    // URLs dos ficheiros enviados
+  status          OrderStatus @default(PENDING)
+  /// Resposta do admin
+  productionInfo  String?     @db.Text
+  estimatedValue  Float?
+  adminNote       String?     @db.Text
+  respondedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  DRAFT            // rascunho (ainda não submetido)
+  PENDING          // aguardando avaliação do admin
+  EVALUATING       // admin a avaliar
+  PROPOSAL_SENT    // proposta de produção + valor enviada ao cliente
+  APPROVED         // cliente aprovou
+  REVISION         // cliente pediu revisão
+  REJECTED         // cliente recusou
+  IN_PRODUCTION    // em execução
+  COMPLETED        // concluído
 }
 
 /// Projeto de referência vetorizado para busca por similaridade.
