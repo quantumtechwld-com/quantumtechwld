@@ -53,13 +53,13 @@ jobs:
       - name: Create deploy package
         run: |
           tar -czf deploy.tar.gz \
+            --exclude='.next/cache' \
             .next \
             public \
             package.json \
             package-lock.json \
             next.config.* \
-            prisma \
-            --exclude='.next/cache'
+            prisma
 
       # ── 5. Enviar para EC2 via SCP ─────────────────────────────────────────
       - name: Upload to EC2
