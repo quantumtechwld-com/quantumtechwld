@@ -1,27 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import ProposalComments from "@/app/portal/briefing/[id]/proposta/ProposalComments";
 import {
   PROPOSAL_STATUS_LABEL as STATUS_LABEL,
   PROPOSAL_STATUS_COLOR as STATUS_COLOR,
-  type ProposalStatus,
 } from "@/lib/constants";
-
-type ProposalRow = {
-  id: string;
-  version: number;
-  status: ProposalStatus;
-  summary: string;
-  content: string;
-  hoursTotal: number;
-  costMin: number;
-  costMax: number;
-  clientNote: string | null;
-  reviewedAt: string | null;
-  createdAt: string;
-};
+import type { ProposalRow } from "./proposal-types";
+import { useProposalActions } from "./useProposalActions";
+import ProposalEditForm from "./ProposalEditForm";
 
 type Props = Readonly<{
   briefingId: string;
@@ -30,119 +16,11 @@ type Props = Readonly<{
 }>;
 
 export default function ProposalManager({ briefingId, initialProposal, hasScope }: Props) {
-  const [proposal, setProposal] = useState<ProposalRow | null>(initialProposal);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [preview, setPreview] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    summary: "",
-    content: "",
-    hoursTotal: 0,
-    costMin: 0,
-    costMax: 0,
-  });
-  const [rewriting, setRewriting] = useState(false);
-  const router = useRouter();
-
-  async function generate(send: boolean) {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/proposal/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ briefingId, send }),
-      });
-      const data = (await res.json()) as { proposal?: ProposalRow; error?: string };
-      if (!res.ok) { setError(data.error ?? "Erro ao gerar proposta."); return; }
-      setProposal(data.proposal ?? null);
-      router.refresh();
-    } catch {
-      setError("Erro de rede. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function startEditing() {
-    if (!proposal) return;
-    setEditForm({
-      summary: proposal.summary,
-      content: proposal.content,
-      hoursTotal: proposal.hoursTotal,
-      costMin: proposal.costMin,
-      costMax: proposal.costMax,
-    });
-    setEditing(true);
-    setPreview(false);
-  }
-
-  async function saveEdits() {
-    if (!proposal) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/proposal/${proposal.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "update", ...editForm }),
-      });
-      const data = (await res.json()) as { proposal?: ProposalRow; error?: string };
-      if (!res.ok) { setError(data.error ?? "Erro ao guardar alterações."); return; }
-      setProposal(data.proposal ?? null);
-      setEditing(false);
-      router.refresh();
-    } catch {
-      setError("Erro de rede.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function rewriteWithAI() {
-    if (!proposal || !editForm.content.trim()) return;
-    setRewriting(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/proposal/${proposal.id}/rewrite`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ excerpt: editForm.content }),
-      });
-      const data = (await res.json()) as { rewritten?: string; error?: string };
-      if (res.ok && data.rewritten) {
-        setEditForm(f => ({ ...f, content: data.rewritten ?? "" }));
-      } else {
-        setError(data.error ?? "Erro ao reescrever com IA.");
-      }
-    } catch {
-      setError("Erro de rede.");
-    } finally {
-      setRewriting(false);
-    }
-  }
-
-  async function sendProposal() {
-    if (!proposal) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/proposal/${proposal.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "send" }),
-      });
-      const data = (await res.json()) as { proposal?: ProposalRow; error?: string };
-      if (!res.ok) { setError(data.error ?? "Erro ao enviar proposta."); return; }
-      setProposal(data.proposal ?? null);
-      router.refresh();
-    } catch {
-      setError("Erro de rede.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const {
+    proposal, loading, error, preview, setPreview,
+    editing, setEditing, editForm, setEditForm, rewriting,
+    generate, startEditing, saveEdits, rewriteWithAI, sendProposal,
+  } = useProposalActions(briefingId, initialProposal);
 
   if (!hasScope) {
     return (
@@ -265,70 +143,12 @@ export default function ProposalManager({ briefingId, initialProposal, hasScope 
 
         {/* Sumário — visualização ou edição */}
         {editing ? (
-          <div className="pt-2 border-t border-white/5 space-y-4">
-            <div>
-              <label htmlFor="edit-summary" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Sumário executivo</label>
-              <textarea
-                id="edit-summary"
-                rows={3}
-                value={editForm.summary}
-                onChange={e => setEditForm(f => ({ ...f, summary: e.target.value }))}
-                className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-sky-500/50 resize-none"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label htmlFor="edit-hours" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Horas</label>
-                <input
-                  id="edit-hours"
-                  type="number"
-                  value={editForm.hoursTotal}
-                  onChange={e => setEditForm(f => ({ ...f, hoursTotal: Number(e.target.value) }))}
-                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500/50"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-cost-min" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Custo mín (€)</label>
-                <input
-                  id="edit-cost-min"
-                  type="number"
-                  value={editForm.costMin}
-                  onChange={e => setEditForm(f => ({ ...f, costMin: Number(e.target.value) }))}
-                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500/50"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-cost-max" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Custo máx (€)</label>
-                <input
-                  id="edit-cost-max"
-                  type="number"
-                  value={editForm.costMax}
-                  onChange={e => setEditForm(f => ({ ...f, costMax: Number(e.target.value) }))}
-                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500/50"
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="edit-content" className="text-xs text-white/30 uppercase tracking-wider">Conteúdo completo da proposta</label>
-                <button
-                  type="button"
-                  onClick={rewriteWithAI}
-                  disabled={rewriting}
-                  className="rounded-lg border border-purple-500/30 px-3 py-1 text-xs text-purple-300/80 hover:text-purple-200 hover:bg-purple-500/10 transition disabled:opacity-40"
-                >
-                  {rewriting ? "A reescrever…" : "✨ Reescrever com IA"}
-                </button>
-              </div>
-              <textarea
-                id="edit-content"
-                rows={16}
-                value={editForm.content}
-                onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))}
-                className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white/80 font-mono placeholder:text-white/20 focus:outline-none focus:border-sky-500/50 resize-y"
-              />
-            </div>
-          </div>
+          <ProposalEditForm
+            editForm={editForm}
+            onChange={setEditForm}
+            onRewrite={rewriteWithAI}
+            rewriting={rewriting}
+          />
         ) : (
           <div className="pt-2 border-t border-white/5">
             <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Sumário executivo</p>
