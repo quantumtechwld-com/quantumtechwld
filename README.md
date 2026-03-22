@@ -20,17 +20,30 @@ Landing page + sistema DevFlow para agência de desenvolvimento de software.
 npm install
 ```
 
-2. Crie ou ajuste `.env.local`:
+2. Copie o arquivo de exemplo e preencha as variáveis:
+
+```bash
+cp .env.example .env.local
+```
+
+Variáveis obrigatórias em `.env.local`:
 
 ```env
-DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/quantum_devflow
-N8N_WEBHOOK_URL=https://seu-webhook
-GEMINI_API_KEY=sua_chave_gemini
+DATABASE_URL=postgresql://user:senha@host:5432/quantum_devflow
 AUTH_SECRET=string_aleatoria_32_chars
+AUTH_URL=http://localhost:3000
+GEMINI_API_KEY=sua_chave_gemini
+N8N_WEBHOOK_URL=https://seu-webhook
+EMAIL_SERVER_HOST=smtp.gmail.com
+EMAIL_SERVER_PORT=465
 EMAIL_SERVER_USER=seu@gmail.com
 EMAIL_SERVER_PASSWORD=app_password_gmail
-EMAIL_FROM=seu@gmail.com
-NEXTAUTH_URL=http://localhost:3000
+EMAIL_FROM=Nome <seu@gmail.com>
+EMAIL_ADMIN=seu@gmail.com
+ADMIN_EMAIL=seu@gmail.com
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_MOCK=true
 ```
 
 3. Execute a migração do banco:
@@ -47,13 +60,11 @@ npm run dev
 
 5. Acesse `http://localhost:3000`.
 
-## Fluxo principal
+## Deploy em produção
 
-```
-Cliente acessa / → texto livre "Analisar com IA" (S5)
-  → Gemini extrai requisitos + busca projetos similares (S6)
-  → Wizard pré-preenchido (S1–S2)
-  → Complexity Score calculado (S3)
+O deploy é feito automaticamente via GitHub Actions a cada push na branch `main`.
+
+Consulte o guia completo em [docs/DEPLOY.md](docs/DEPLOY.md).
   → Lead salvo no banco + webhook n8n
   → Magic link enviado por e-mail (S4)
   → Cliente acessa /portal → dashboard com status
@@ -80,9 +91,10 @@ npm run start
 
 ## Banco de dados
 
-- Instância: PostgreSQL 15, `localhost:5432`
+- **Produção:** AWS RDS PostgreSQL 16.6 (`db.t3.micro`, `sa-east-1`)
+- **Local:** PostgreSQL rodando localmente
 - Banco: `quantum_devflow`
 - Migrações em: `prisma/migrations/`
 - Schema em: `prisma/schema.prisma`
 
-OS DADOS DO BANCO E AS CHAVES DE API NUNCA DEVEM SER COMMITADOS.
+> **Segurança:** Credenciais e chaves de API NUNCA devem ser commitadas. Use `.env.local` localmente e GitHub Secrets em produção.
