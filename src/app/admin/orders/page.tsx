@@ -2,46 +2,15 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import {
+  ORDER_STATUS_LABEL as STATUS_LABEL,
+  ORDER_STATUS_COLOR as STATUS_COLOR,
+  ORDER_TYPE_LABEL,
+  ALL_ORDER_STATUSES as ALL_STATUSES,
+} from "@/lib/constants";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
-
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT:          "Rascunho",
-  PENDING:        "Pendente",
-  EVALUATING:     "Em análise",
-  PROPOSAL_SENT:  "Proposta enviada",
-  APPROVED:       "Aprovado",
-  REVISION:       "Revisão",
-  REJECTED:       "Recusado",
-  IN_PRODUCTION:  "Em produção",
-  COMPLETED:      "Concluído",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  DRAFT:          "bg-slate-500/20 text-slate-300 border border-slate-500/30",
-  PENDING:        "bg-blue-500/20 text-blue-300 border border-blue-500/30",
-  EVALUATING:     "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-  PROPOSAL_SENT:  "bg-sky-500/20 text-sky-300 border border-sky-500/30",
-  APPROVED:       "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
-  REVISION:       "bg-orange-500/20 text-orange-300 border border-orange-500/30",
-  REJECTED:       "bg-red-500/20 text-red-300 border border-red-500/30",
-  IN_PRODUCTION:  "bg-purple-500/20 text-purple-300 border border-purple-500/30",
-  COMPLETED:      "bg-green-500/20 text-green-300 border border-green-500/30",
-};
-
-const ORDER_TYPE_LABEL: Record<string, string> = {
-  new_feature:  "Nova funcionalidade",
-  bug_fix:      "Correção de bug",
-  new_project:  "Novo projeto",
-  support:      "Suporte",
-  other:        "Outro",
-};
-
-const ALL_STATUSES = [
-  "PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED",
-  "REVISION", "REJECTED", "IN_PRODUCTION", "COMPLETED",
-];
 
 type SearchParams = Promise<Record<string, string | undefined>>;
 

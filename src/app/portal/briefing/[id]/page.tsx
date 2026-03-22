@@ -4,26 +4,10 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import ScopeGenerator from "./ScopeGenerator";
 import type { GeneratedScope } from "@/app/api/briefing/scope/route";
-
-const STATUS_LABEL: Record<string, string> = {
-  RECEIVED:       "Recebido",
-  IN_ANALYSIS:    "Em análise",
-  PROPOSAL_SENT:  "Proposta enviada",
-  IN_NEGOTIATION: "Em negociação",
-  APPROVED:       "Aprovado",
-  IN_PROGRESS:    "Em desenvolvimento",
-  DELIVERED:      "Entregue",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  RECEIVED:       "bg-slate-500/30 text-slate-200",
-  IN_ANALYSIS:    "bg-yellow-500/20 text-yellow-300",
-  PROPOSAL_SENT:  "bg-blue-500/20 text-blue-300",
-  IN_NEGOTIATION: "bg-purple-500/20 text-purple-300",
-  APPROVED:       "bg-emerald-500/20 text-emerald-300",
-  IN_PROGRESS:    "bg-sky-500/20 text-sky-300",
-  DELIVERED:      "bg-green-500/20 text-green-300",
-};
+import {
+  BRIEFING_STATUS_LABEL as STATUS_LABEL,
+  BRIEFING_STATUS_COLOR as STATUS_COLOR,
+} from "@/lib/constants";
 
 type PageProps = Readonly<{ params: Promise<{ id: string }> }>;
 

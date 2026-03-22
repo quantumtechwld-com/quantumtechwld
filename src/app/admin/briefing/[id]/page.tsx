@@ -2,40 +2,15 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { BriefingStatus } from "@prisma/client";
 import type { GeneratedScope } from "@/app/api/briefing/scope/route";
 import AdminStatusForm from "./AdminStatusForm";
 import ScopeView from "./ScopeView";
 import ProposalManager from "./ProposalManager";
-
-const STATUS_LABEL: Record<BriefingStatus, string> = {
-  RECEIVED: "Recebido",
-  IN_ANALYSIS: "Em Análise",
-  PROPOSAL_SENT: "Proposta Enviada",
-  IN_NEGOTIATION: "Em Negociação",
-  APPROVED: "Aprovado",
-  IN_PROGRESS: "Em Desenvolvimento",
-  DELIVERED: "Entregue",
-};
-
-const STATUS_COLOR: Record<BriefingStatus, string> = {
-  RECEIVED: "bg-blue-500/20 text-blue-300 border border-blue-500/30",
-  IN_ANALYSIS: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-  PROPOSAL_SENT: "bg-purple-500/20 text-purple-300 border border-purple-500/30",
-  IN_NEGOTIATION: "bg-orange-500/20 text-orange-300 border border-orange-500/30",
-  APPROVED: "bg-green-500/20 text-green-300 border border-green-500/30",
-  IN_PROGRESS: "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30",
-  DELIVERED: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
-};
-
-const PROJECT_LABEL: Record<string, string> = {
-  landing_page: "Landing Page",
-  ecommerce: "E-commerce",
-  saas: "SaaS",
-  mobile_app: "App Mobile",
-  corporate_site: "Site Corporativo",
-  custom: "Personalizado",
-};
+import {
+  BRIEFING_STATUS_LABEL as STATUS_LABEL,
+  BRIEFING_STATUS_COLOR as STATUS_COLOR,
+  PROJECT_TYPE_LABEL as PROJECT_LABEL,
+} from "@/lib/constants";
 
 export default async function AdminBriefingDetailPage({
   params,

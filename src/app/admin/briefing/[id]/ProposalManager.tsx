@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProposalComments from "@/app/portal/briefing/[id]/proposta/ProposalComments";
-
-type ProposalStatus = "DRAFT" | "SENT" | "REVISION" | "APPROVED" | "REJECTED";
+import {
+  PROPOSAL_STATUS_LABEL as STATUS_LABEL,
+  PROPOSAL_STATUS_COLOR as STATUS_COLOR,
+  type ProposalStatus,
+} from "@/lib/constants";
 
 type ProposalRow = {
   id: string;
@@ -25,22 +28,6 @@ type Props = Readonly<{
   initialProposal: ProposalRow | null;
   hasScope: boolean;
 }>;
-
-const STATUS_LABEL: Record<ProposalStatus, string> = {
-  DRAFT:    "Rascunho",
-  SENT:     "Enviada",
-  REVISION: "Revisão pedida",
-  APPROVED: "Aprovada ✓",
-  REJECTED: "Rejeitada",
-};
-
-const STATUS_COLOR: Record<ProposalStatus, string> = {
-  DRAFT:    "bg-slate-500/20 text-slate-300",
-  SENT:     "bg-blue-500/20 text-blue-300",
-  REVISION: "bg-orange-500/20 text-orange-300",
-  APPROVED: "bg-emerald-500/20 text-emerald-300",
-  REJECTED: "bg-red-500/20 text-red-300",
-};
 
 export default function ProposalManager({ briefingId, initialProposal, hasScope }: Props) {
   const [proposal, setProposal] = useState<ProposalRow | null>(initialProposal);
