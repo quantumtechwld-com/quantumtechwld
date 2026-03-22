@@ -139,9 +139,7 @@ jobs:
             npm ci --omit=dev
 
             # Carrega variáveis de ambiente
-            set -a
-            source "$APP_DIR/.env.production.local"
-            set +a
+            export DATABASE_URL=$(grep '^DATABASE_URL=' "$APP_DIR/.env.production.local" | cut -d'=' -f2-)
 
             # Aplica migrations do Prisma
             npx prisma migrate deploy
