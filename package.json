@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NEXT_DISABLE_TURBOPACK=1 next dev",
+    "dev": "next dev",
     "start:dev": "next build && next start",
     "build": "next build",
     "start": "next start",
@@ -13,6 +13,7 @@
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "gsap": "^3.14.2",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "nodemailer": "^7.0.13",

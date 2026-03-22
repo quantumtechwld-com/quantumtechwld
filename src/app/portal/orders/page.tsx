@@ -29,8 +29,7 @@ export default async function OrdersPage() {
           </Link>
           <h1 className="mt-2 text-3xl font-bold text-white">Os seus pedidos</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Solicite novas funcionalidades, suporte ou projetos ao nosso
-            time.
+            Solicite novas funcionalidades, suporte ou projetos ao nosso time.
           </p>
         </div>
         <Link
@@ -91,3 +90,5 @@ export default async function OrdersPage() {
     </main>
   );
 }
+
+

@@ -1,0 +1,13 @@
+const EMAIL_WRAPPER_OPEN = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">`;
+const EMAIL_WRAPPER_CLOSE = `</div>`;
+
+export function emailWrap(inner: string) {
+  return `${EMAIL_WRAPPER_OPEN}${inner}${EMAIL_WRAPPER_CLOSE}`;
+}
+
+export const FOOTER_TEAM = `<p style="color:#475569;font-size:12px;margin-top:32px">— Equipa Quantum Technology</p>`;
+export const FOOTER_SYSTEM = `<p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>`;
+
+export function primaryBtn(href: string, label: string, bg = "#0ea5e9") {
+  return `<a href="${href}" style="display:inline-block;background:${bg};color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">${label}</a>`;
+}

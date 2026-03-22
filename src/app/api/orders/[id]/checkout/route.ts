@@ -1,7 +1,11 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
+
+const isMock =
+  !process.env.STRIPE_SECRET_KEY ||
+  process.env.STRIPE_SECRET_KEY === "sk_test_SUBSTITUIR" ||
+  process.env.STRIPE_MOCK === "true";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -42,6 +46,43 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Valor estimado inválido" }, { status: 400 });
   }
 
+  const amountCents = Math.round(order.estimatedValue * 100);
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+
+  // ── MODO MOCK: sem chave Stripe real ─────────────────────────────────────
+  if (isMock) {
+    const mockSessionId = `mock_${Date.now()}_${id}`;
+    await db.payment.upsert({
+      where: { orderId: id },
+      create: {
+        orderId:         id,
+        stripeSessionId: mockSessionId,
+        amountCents,
+        currency: "eur",
+        status:   "PAID",
+        paidAt:   new Date(),
+      },
+      update: {
+        stripeSessionId: mockSessionId,
+        amountCents,
+        status:  "PAID",
+        paidAt:  new Date(),
+      },
+    });
+    // Avança o pedido para IN_PRODUCTION
+    await db.order.update({
+      where: { id },
+      data:  { status: "IN_PRODUCTION" },
+    });
+    return NextResponse.json({
+      url:  `${baseUrl}/portal/orders/${id}/payment/success?session_id=${mockSessionId}`,
+      mock: true,
+    });
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const { stripe } = await import("@/lib/stripe");
+
   // Reutiliza sessão existente se ainda válida
   if (order.payment?.stripeSessionId && order.payment.status === "PENDING") {
     const existing = await stripe.checkout.sessions.retrieve(order.payment.stripeSessionId);
@@ -49,9 +90,6 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ url: existing.url });
     }
   }
-
-  const amountCents = Math.round(order.estimatedValue * 100);
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -75,11 +113,10 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
     cancel_url:  `${baseUrl}/portal/orders/${id}?payment=cancelled`,
   });
 
-  // Upsert payment record
   await db.payment.upsert({
     where:  { orderId: id },
     create: {
-      orderId:        id,
+      orderId:         id,
       stripeSessionId: checkoutSession.id,
       amountCents,
       currency: "eur",
@@ -94,3 +131,4 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
 
   return NextResponse.json({ url: checkoutSession.url });
 }
+

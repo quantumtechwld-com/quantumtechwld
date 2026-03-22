@@ -1,4 +1,28 @@
-http://localhost:3000/portal/login   - usuario
-http://localhost:3000/   - landing page
-http://localhost:3000/admin
+Portal cliente: http://localhost:3000/portal
+Login: http://localhost:3000/portal/login
+Pedidos: http://localhost:3000/portal/orders
+Admin: http://localhost:3000/admin
+
+Gmail
+quantumtechwld@gmail.com
+161803phi@#
+
+Github
+https://github.com/quantumtechwld-com
+acesso com login google
+
+quantumtechwld.com
+Godaddy - login google
+
+
+AWS EC2
+https://us-east-1.console.aws.amazon.com/
+Account ID
+5653-8786-8790
+Account name
+quantumtechwld
+Senha 161803Phi@
+
+
+
 
