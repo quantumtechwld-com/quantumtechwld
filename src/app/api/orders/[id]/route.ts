@@ -60,7 +60,6 @@ type ApiError = { error: string; status: number };
 
 function buildAdminUpdateData(
   body: PatchBody,
-  order: { status: string },
 ): Record<string, unknown> | ApiError {
   switch (body.action) {
     case "propose":
@@ -183,7 +182,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
 
     const result = adminActions.has(body.action)
-      ? buildAdminUpdateData(body, order)
+      ? buildAdminUpdateData(body)
       : buildClientUpdateData(body, order);
 
     if (isApiError(result)) {

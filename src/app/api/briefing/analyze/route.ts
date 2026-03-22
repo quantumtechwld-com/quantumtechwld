@@ -111,7 +111,11 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem explicaçõ
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1024 },
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 8192,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     }
   );
@@ -123,10 +127,14 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem explicaçõ
   }
 
   const geminiJson = await geminiRes.json() as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string; thought?: boolean }> } }>;
   };
 
-  const rawText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  const parts = geminiJson.candidates?.[0]?.content?.parts ?? [];
+  const rawText = parts
+    .filter((p) => !p.thought)
+    .map((p) => p.text ?? "")
+    .join("\n");
 
   const match = /\{[\s\S]*\}/.exec(rawText);
   if (!match) {
