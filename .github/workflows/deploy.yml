@@ -138,6 +138,11 @@ jobs:
             cd "$APP_DIR"
             npm ci --omit=dev
 
+            # Carrega variáveis de ambiente
+            set -a
+            source "$APP_DIR/.env.production.local"
+            set +a
+
             # Aplica migrations do Prisma
             npx prisma migrate deploy
 
