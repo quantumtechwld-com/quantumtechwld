@@ -55,7 +55,8 @@ jobs:
             package.json \
             package-lock.json \
             next.config.* \
-            prisma
+            prisma \
+            prisma.config.ts
 
       - name: Upload to EC2
         uses: appleboy/scp-action@v0.1.7
