@@ -1,4 +1,4 @@
-name: Deploy → EC2 Production
+﻿name: Deploy → EC2 Production
 
 on:
   push:
@@ -11,18 +11,18 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # ── 1. Checkout ────────────────────────────────────────────────────────
+      # ── 1. Checkout ───────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── 2. Setup Node ──────────────────────────────────────────────────────
+      # ── 2. Setup Node ─────────────────────────────────────────────────────
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
 
-      # ── 3. Install & Build ─────────────────────────────────────────────────
+      # ── 3. Install, Generate Prisma & Build ───────────────────────────────
       - name: Install dependencies
         run: npm ci
 
@@ -31,25 +31,25 @@ jobs:
 
       - name: Build Next.js
         env:
-          DATABASE_URL:            ${{ secrets.DATABASE_URL }}
-          AUTH_SECRET:             ${{ secrets.AUTH_SECRET }}
-          AUTH_URL:                ${{ secrets.AUTH_URL }}
-          EMAIL_SERVER_HOST:       ${{ secrets.EMAIL_SERVER_HOST }}
-          EMAIL_SERVER_PORT:       ${{ secrets.EMAIL_SERVER_PORT }}
-          EMAIL_SERVER_USER:       ${{ secrets.EMAIL_SERVER_USER }}
-          EMAIL_SERVER_PASSWORD:   ${{ secrets.EMAIL_SERVER_PASSWORD }}
-          EMAIL_FROM:              ${{ secrets.EMAIL_FROM }}
-          EMAIL_ADMIN:             ${{ secrets.EMAIL_ADMIN }}
-          ADMIN_EMAIL:             ${{ secrets.ADMIN_EMAIL }}
-          STRIPE_SECRET_KEY:       ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET:   ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          STRIPE_MOCK:             "false"
-          GEMINI_API_KEY:          ${{ secrets.GEMINI_API_KEY }}
-          N8N_WEBHOOK_URL:         ${{ secrets.N8N_WEBHOOK_URL }}
-          NODE_ENV:                production
+          DATABASE_URL:           ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET:            ${{ secrets.AUTH_SECRET }}
+          AUTH_URL:               ${{ secrets.AUTH_URL }}
+          EMAIL_SERVER_HOST:      ${{ secrets.EMAIL_SERVER_HOST }}
+          EMAIL_SERVER_PORT:      ${{ secrets.EMAIL_SERVER_PORT }}
+          EMAIL_SERVER_USER:      ${{ secrets.EMAIL_SERVER_USER }}
+          EMAIL_SERVER_PASSWORD:  ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          EMAIL_FROM:             ${{ secrets.EMAIL_FROM }}
+          EMAIL_ADMIN:            ${{ secrets.EMAIL_ADMIN }}
+          ADMIN_EMAIL:            ${{ secrets.ADMIN_EMAIL }}
+          STRIPE_SECRET_KEY:      ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET:  ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_MOCK:            "false"
+          GEMINI_API_KEY:         ${{ secrets.GEMINI_API_KEY }}
+          N8N_WEBHOOK_URL:        ${{ secrets.N8N_WEBHOOK_URL }}
+          NODE_ENV:               production
         run: npm run build
 
-      # ── 4. Empacotar artefato (exclui node_modules e src) ─────────────────
+      # ── 4. Empacotar artefato ─────────────────────────────────────────────
       - name: Create deploy package
         run: |
           tar -czf deploy.tar.gz \
@@ -61,88 +61,74 @@ jobs:
             next.config.* \
             prisma
 
-      # ── 5. Enviar para EC2 via SCP ─────────────────────────────────────────
+      # ── 5. Enviar para EC2 via SCP ────────────────────────────────────────
       - name: Upload to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host:        ${{ secrets.EC2_HOST }}
-          username:    ubuntu
-          key:         ${{ secrets.EC2_SSH_KEY }}
-          source:      deploy.tar.gz
-          target:      /home/ubuntu/app-deploy
+          host:     ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          source:   deploy.tar.gz
+          target:   /home/ubuntu/app-deploy
 
-      # ── 6. Gravar .env.production.local no servidor (runtime vars) ──────────
-      - name: Write env file on EC2
+      # ── 6. Gravar env + Deploy ────────────────────────────────────────────
+      - name: Write env & Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
-          SECRET_DATABASE_URL:          ${{ secrets.DATABASE_URL }}
-          SECRET_AUTH_SECRET:           ${{ secrets.AUTH_SECRET }}
-          SECRET_AUTH_URL:              ${{ secrets.AUTH_URL }}
-          SECRET_EMAIL_HOST:            ${{ secrets.EMAIL_SERVER_HOST }}
-          SECRET_EMAIL_PORT:            ${{ secrets.EMAIL_SERVER_PORT }}
-          SECRET_EMAIL_USER:            ${{ secrets.EMAIL_SERVER_USER }}
-          SECRET_EMAIL_PASS:            ${{ secrets.EMAIL_SERVER_PASSWORD }}
-          SECRET_EMAIL_FROM:            ${{ secrets.EMAIL_FROM }}
-          SECRET_EMAIL_ADMIN:           ${{ secrets.EMAIL_ADMIN }}
-          SECRET_ADMIN_EMAIL:           ${{ secrets.ADMIN_EMAIL }}
-          SECRET_STRIPE_KEY:            ${{ secrets.STRIPE_SECRET_KEY }}
-          SECRET_STRIPE_WEBHOOK:        ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          SECRET_GEMINI:                ${{ secrets.GEMINI_API_KEY }}
-          SECRET_N8N:                   ${{ secrets.N8N_WEBHOOK_URL }}
+          V_DATABASE_URL:          ${{ secrets.DATABASE_URL }}
+          V_AUTH_SECRET:           ${{ secrets.AUTH_SECRET }}
+          V_AUTH_URL:              ${{ secrets.AUTH_URL }}
+          V_EMAIL_SERVER_HOST:     ${{ secrets.EMAIL_SERVER_HOST }}
+          V_EMAIL_SERVER_PORT:     ${{ secrets.EMAIL_SERVER_PORT }}
+          V_EMAIL_SERVER_USER:     ${{ secrets.EMAIL_SERVER_USER }}
+          V_EMAIL_SERVER_PASSWORD: ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          V_EMAIL_FROM:            ${{ secrets.EMAIL_FROM }}
+          V_EMAIL_ADMIN:           ${{ secrets.EMAIL_ADMIN }}
+          V_ADMIN_EMAIL:           ${{ secrets.ADMIN_EMAIL }}
+          V_STRIPE_SECRET_KEY:     ${{ secrets.STRIPE_SECRET_KEY }}
+          V_STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          V_GEMINI_API_KEY:        ${{ secrets.GEMINI_API_KEY }}
+          V_N8N_WEBHOOK_URL:       ${{ secrets.N8N_WEBHOOK_URL }}
         with:
           host:     ${{ secrets.EC2_HOST }}
           username: ubuntu
           key:      ${{ secrets.EC2_SSH_KEY }}
-          envs: SECRET_DATABASE_URL,SECRET_AUTH_SECRET,SECRET_AUTH_URL,SECRET_EMAIL_HOST,SECRET_EMAIL_PORT,SECRET_EMAIL_USER,SECRET_EMAIL_PASS,SECRET_EMAIL_FROM,SECRET_EMAIL_ADMIN,SECRET_ADMIN_EMAIL,SECRET_STRIPE_KEY,SECRET_STRIPE_WEBHOOK,SECRET_GEMINI,SECRET_N8N
-          script: |
-            APP_DIR="/home/ubuntu/quantum-agency"
-            mkdir -p "$APP_DIR"
-            cat > "$APP_DIR/.env.production.local" <<EOF
-            NODE_ENV=production
-            DATABASE_URL=${SECRET_DATABASE_URL}
-            AUTH_SECRET=${SECRET_AUTH_SECRET}
-            AUTH_URL=${SECRET_AUTH_URL}
-            EMAIL_SERVER_HOST=${SECRET_EMAIL_HOST}
-            EMAIL_SERVER_PORT=${SECRET_EMAIL_PORT}
-            EMAIL_SERVER_USER=${SECRET_EMAIL_USER}
-            EMAIL_SERVER_PASSWORD=${SECRET_EMAIL_PASS}
-            EMAIL_FROM=${SECRET_EMAIL_FROM}
-            EMAIL_ADMIN=${SECRET_EMAIL_ADMIN}
-            ADMIN_EMAIL=${SECRET_ADMIN_EMAIL}
-            STRIPE_SECRET_KEY=${SECRET_STRIPE_KEY}
-            STRIPE_WEBHOOK_SECRET=${SECRET_STRIPE_WEBHOOK}
-            STRIPE_MOCK=false
-            GEMINI_API_KEY=${SECRET_GEMINI}
-            N8N_WEBHOOK_URL=${SECRET_N8N}
-            EOF
-            chmod 600 "$APP_DIR/.env.production.local"
-
-      # ── 7. Executar deploy no servidor ────────────────────────────────────
-      - name: Deploy on EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host:     ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key:      ${{ secrets.EC2_SSH_KEY }}
+          envs: V_DATABASE_URL,V_AUTH_SECRET,V_AUTH_URL,V_EMAIL_SERVER_HOST,V_EMAIL_SERVER_PORT,V_EMAIL_SERVER_USER,V_EMAIL_SERVER_PASSWORD,V_EMAIL_FROM,V_EMAIL_ADMIN,V_ADMIN_EMAIL,V_STRIPE_SECRET_KEY,V_STRIPE_WEBHOOK_SECRET,V_GEMINI_API_KEY,V_N8N_WEBHOOK_URL
           script: |
             set -e
-
             APP_DIR="/home/ubuntu/quantum-agency"
+            mkdir -p "$APP_DIR"
+
+            # Escreve .env.production.local sem heredoc (compativel com ssh-action)
+            ENV_FILE="$APP_DIR/.env.production.local"
+            printf 'NODE_ENV=production\n' > "$ENV_FILE"
+            printf 'DATABASE_URL=%s\n' "$V_DATABASE_URL" >> "$ENV_FILE"
+            printf 'AUTH_SECRET=%s\n' "$V_AUTH_SECRET" >> "$ENV_FILE"
+            printf 'AUTH_URL=%s\n' "$V_AUTH_URL" >> "$ENV_FILE"
+            printf 'EMAIL_SERVER_HOST=%s\n' "$V_EMAIL_SERVER_HOST" >> "$ENV_FILE"
+            printf 'EMAIL_SERVER_PORT=%s\n' "$V_EMAIL_SERVER_PORT" >> "$ENV_FILE"
+            printf 'EMAIL_SERVER_USER=%s\n' "$V_EMAIL_SERVER_USER" >> "$ENV_FILE"
+            printf 'EMAIL_SERVER_PASSWORD=%s\n' "$V_EMAIL_SERVER_PASSWORD" >> "$ENV_FILE"
+            printf 'EMAIL_FROM=%s\n' "$V_EMAIL_FROM" >> "$ENV_FILE"
+            printf 'EMAIL_ADMIN=%s\n' "$V_EMAIL_ADMIN" >> "$ENV_FILE"
+            printf 'ADMIN_EMAIL=%s\n' "$V_ADMIN_EMAIL" >> "$ENV_FILE"
+            printf 'STRIPE_SECRET_KEY=%s\n' "$V_STRIPE_SECRET_KEY" >> "$ENV_FILE"
+            printf 'STRIPE_WEBHOOK_SECRET=%s\n' "$V_STRIPE_WEBHOOK_SECRET" >> "$ENV_FILE"
+            printf 'STRIPE_MOCK=false\n' >> "$ENV_FILE"
+            printf 'GEMINI_API_KEY=%s\n' "$V_GEMINI_API_KEY" >> "$ENV_FILE"
+            printf 'N8N_WEBHOOK_URL=%s\n' "$V_N8N_WEBHOOK_URL" >> "$ENV_FILE"
+            chmod 600 "$ENV_FILE"
 
             # Extrai o build
-            mkdir -p "$APP_DIR"
             tar -xzf /home/ubuntu/app-deploy/deploy.tar.gz -C "$APP_DIR"
             rm /home/ubuntu/app-deploy/deploy.tar.gz
 
-            # Instala apenas dependências de produção
+            # Instala dependencias de producao
             cd "$APP_DIR"
             npm ci --omit=dev
 
-            # Carrega variáveis de ambiente
-            export DATABASE_URL=$(grep '^DATABASE_URL=' "$APP_DIR/.env.production.local" | cut -d'=' -f2-)
-
-            # Aplica migrations do Prisma
-            npx prisma migrate deploy
+            # Aplica migrations do Prisma passando DATABASE_URL diretamente
+            DATABASE_URL="$V_DATABASE_URL" npx prisma migrate deploy
 
             # Reinicia com PM2 (zero-downtime reload)
             pm2 reload ecosystem.config.cjs --update-env || pm2 start ecosystem.config.cjs
