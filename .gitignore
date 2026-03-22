@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Guias locais (não versionar)
 GUIA-LAYOUT-MODERNO-AUTOMATIZADO.md
+
+# AWS keys
+*.pem

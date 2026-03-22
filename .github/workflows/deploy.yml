@@ -29,8 +29,8 @@ jobs:
       - name: Build Next.js
         env:
           DATABASE_URL:            ${{ secrets.DATABASE_URL }}
-          NEXTAUTH_SECRET:         ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL:            ${{ secrets.NEXTAUTH_URL }}
+          AUTH_SECRET:             ${{ secrets.AUTH_SECRET }}
+          AUTH_URL:                ${{ secrets.AUTH_URL }}
           EMAIL_SERVER_HOST:       ${{ secrets.EMAIL_SERVER_HOST }}
           EMAIL_SERVER_PORT:       ${{ secrets.EMAIL_SERVER_PORT }}
           EMAIL_SERVER_USER:       ${{ secrets.EMAIL_SERVER_USER }}
@@ -68,7 +68,53 @@ jobs:
           source:      deploy.tar.gz
           target:      /home/ubuntu/app-deploy
 
-      # ── 6. Executar deploy no servidor ────────────────────────────────────
+      # ── 6. Gravar .env.production.local no servidor (runtime vars) ──────────
+      - name: Write env file on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          SECRET_DATABASE_URL:          ${{ secrets.DATABASE_URL }}
+          SECRET_AUTH_SECRET:           ${{ secrets.AUTH_SECRET }}
+          SECRET_AUTH_URL:              ${{ secrets.AUTH_URL }}
+          SECRET_EMAIL_HOST:            ${{ secrets.EMAIL_SERVER_HOST }}
+          SECRET_EMAIL_PORT:            ${{ secrets.EMAIL_SERVER_PORT }}
+          SECRET_EMAIL_USER:            ${{ secrets.EMAIL_SERVER_USER }}
+          SECRET_EMAIL_PASS:            ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          SECRET_EMAIL_FROM:            ${{ secrets.EMAIL_FROM }}
+          SECRET_EMAIL_ADMIN:           ${{ secrets.EMAIL_ADMIN }}
+          SECRET_ADMIN_EMAIL:           ${{ secrets.ADMIN_EMAIL }}
+          SECRET_STRIPE_KEY:            ${{ secrets.STRIPE_SECRET_KEY }}
+          SECRET_STRIPE_WEBHOOK:        ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          SECRET_GEMINI:                ${{ secrets.GEMINI_API_KEY }}
+          SECRET_N8N:                   ${{ secrets.N8N_WEBHOOK_URL }}
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          envs: SECRET_DATABASE_URL,SECRET_AUTH_SECRET,SECRET_AUTH_URL,SECRET_EMAIL_HOST,SECRET_EMAIL_PORT,SECRET_EMAIL_USER,SECRET_EMAIL_PASS,SECRET_EMAIL_FROM,SECRET_EMAIL_ADMIN,SECRET_ADMIN_EMAIL,SECRET_STRIPE_KEY,SECRET_STRIPE_WEBHOOK,SECRET_GEMINI,SECRET_N8N
+          script: |
+            APP_DIR="/home/ubuntu/quantum-agency"
+            mkdir -p "$APP_DIR"
+            cat > "$APP_DIR/.env.production.local" <<EOF
+            NODE_ENV=production
+            DATABASE_URL=${SECRET_DATABASE_URL}
+            AUTH_SECRET=${SECRET_AUTH_SECRET}
+            AUTH_URL=${SECRET_AUTH_URL}
+            EMAIL_SERVER_HOST=${SECRET_EMAIL_HOST}
+            EMAIL_SERVER_PORT=${SECRET_EMAIL_PORT}
+            EMAIL_SERVER_USER=${SECRET_EMAIL_USER}
+            EMAIL_SERVER_PASSWORD=${SECRET_EMAIL_PASS}
+            EMAIL_FROM=${SECRET_EMAIL_FROM}
+            EMAIL_ADMIN=${SECRET_EMAIL_ADMIN}
+            ADMIN_EMAIL=${SECRET_ADMIN_EMAIL}
+            STRIPE_SECRET_KEY=${SECRET_STRIPE_KEY}
+            STRIPE_WEBHOOK_SECRET=${SECRET_STRIPE_WEBHOOK}
+            STRIPE_MOCK=false
+            GEMINI_API_KEY=${SECRET_GEMINI}
+            N8N_WEBHOOK_URL=${SECRET_N8N}
+            EOF
+            chmod 600 "$APP_DIR/.env.production.local"
+
+      # ── 7. Executar deploy no servidor ────────────────────────────────────
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
