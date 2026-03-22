@@ -1,11 +1,5 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import GsapAnimations from "./GsapAnimations";
 import LeadForm from "@/components/lead-form";
-
-gsap.registerPlugin(ScrollTrigger);
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const SERVICES = [
@@ -88,183 +82,16 @@ const PROJECTS = [
 
 // ── COMPONENT ─────────────────────────────────────────────────────────────────
 export default function HomeClient() {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-
-      // ── NAV ────────────────────────────────────────────────────────────
-      gsap.from("[data-gsap='nav']", {
-        y: -70,
-        opacity: 0,
-        duration: 0.9,
-        ease: "power3.out",
-        delay: 0.15,
-      });
-
-      // ── HERO ORBS (continuous float) ────────────────────────────────
-      gsap.to("[data-orb='1']", {
-        y: -50, x: 25,
-        duration: 7, repeat: -1, yoyo: true, ease: "sine.inOut",
-      });
-      gsap.to("[data-orb='2']", {
-        y: 35, x: -30,
-        duration: 9, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 2,
-      });
-      gsap.to("[data-orb='3']", {
-        y: -30, x: 40,
-        duration: 8, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 4,
-      });
-
-      // ── HERO TIMELINE ────────────────────────────────────────────────
-      const heroTl = gsap.timeline({ delay: 0.5 });
-
-      heroTl
-        .from("[data-hero='badge']", {
-          y: -25, opacity: 0,
-          duration: 0.7, ease: "back.out(2)",
-        })
-        .from(
-          "[data-hero='word']",
-          {
-            y: 100, opacity: 0, rotationX: -70,
-            transformOrigin: "0% 50% -50",
-            duration: 0.9, stagger: 0.07, ease: "back.out(1.3)",
-          },
-          "-=0.2"
-        )
-        .from(
-          "[data-hero='sub']",
-          { y: 35, opacity: 0, duration: 0.8, ease: "power3.out" },
-          "-=0.4"
-        )
-        .from(
-          "[data-hero='cta']",
-          { y: 25, opacity: 0, duration: 0.7, stagger: 0.12, ease: "power3.out" },
-          "-=0.35"
-        )
-        .from(
-          "[data-hero='stat']",
-          { y: 30, opacity: 0, scale: 0.88, duration: 0.55, stagger: 0.09, ease: "back.out(1.6)" },
-          "-=0.3"
-        )
-        .from(
-          "[data-hero='mockup']",
-          { x: 90, opacity: 0, duration: 1.1, ease: "power3.out" },
-          0.4
-        )
-        .call(() => {
-          // Mockup continuous float — starts after reveal
-          gsap.to("[data-hero='mockup']", {
-            y: -14, duration: 5, repeat: -1, yoyo: true, ease: "sine.inOut",
-          });
-          gsap.to("[data-float='notif']", {
-            y: -8, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut",
-          });
-          gsap.to("[data-float='deploy']", {
-            y: 8, duration: 4.2, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1,
-          });
-        });
-
-      // Scroll arrow pulse
-      gsap.to("[data-hero='scroll']", {
-        y: 12, opacity: 0.15,
-        duration: 1.5, repeat: -1, yoyo: true, ease: "power1.inOut", delay: 3.5,
-      });
-
-      // ── SERVICES ────────────────────────────────────────────────────
-      gsap.from("[data-gsap='services-label']", {
-        scrollTrigger: { trigger: "[data-gsap='services']", start: "top 80%" },
-        x: -40, opacity: 0, duration: 0.7, ease: "power3.out",
-      });
-      gsap.from("[data-gsap='services-heading']", {
-        scrollTrigger: { trigger: "[data-gsap='services']", start: "top 78%" },
-        y: 50, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
-      gsap.from("[data-gsap='service-card']", {
-        scrollTrigger: { trigger: "[data-gsap='services']", start: "top 70%" },
-        y: 80, opacity: 0, scale: 0.9,
-        duration: 0.85, stagger: 0.15, ease: "back.out(1.2)",
-      });
-
-      // ── STATS ────────────────────────────────────────────────────────
-      gsap.from("[data-gsap='stat-card']", {
-        scrollTrigger: { trigger: "[data-gsap='stats']", start: "top 82%" },
-        y: 50, opacity: 0, scale: 0.92,
-        duration: 0.7, stagger: 0.1, ease: "back.out(1.4)",
-      });
-
-      // Counter animation
-      document.querySelectorAll<HTMLElement>("[data-count-to]").forEach((el) => {
-        const target = parseInt(el.getAttribute("data-count-to") ?? "0");
-        const obj = { val: 0 };
-        gsap.to(obj, {
-          val: target,
-          duration: 2.4,
-          ease: "power2.out",
-          scrollTrigger: { trigger: el, start: "top 85%", once: true },
-          onUpdate() {
-            el.textContent = Math.round(obj.val).toString();
-          },
-        });
-      });
-
-      // ── HOW IT WORKS ────────────────────────────────────────────────
-      gsap.from("[data-gsap='steps-heading']", {
-        scrollTrigger: { trigger: "[data-gsap='steps']", start: "top 80%" },
-        y: 50, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
-      gsap.from("[data-gsap='step']", {
-        scrollTrigger: { trigger: "[data-gsap='steps']", start: "top 74%" },
-        x: -70, opacity: 0,
-        duration: 0.75, stagger: 0.22, ease: "power3.out",
-      });
-
-      // ── PORTFOLIO ───────────────────────────────────────────────────
-      gsap.from("[data-gsap='portfolio-heading']", {
-        scrollTrigger: { trigger: "[data-gsap='portfolio']", start: "top 80%" },
-        y: 50, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
-      gsap.from("[data-gsap='project']", {
-        scrollTrigger: { trigger: "[data-gsap='portfolio']", start: "top 74%" },
-        y: 90, opacity: 0, scale: 0.88, rotationY: 8,
-        transformOrigin: "center center",
-        duration: 0.9, stagger: 0.18, ease: "back.out(1.1)",
-      });
-
-      // ── CTA ──────────────────────────────────────────────────────────
-      gsap.from("[data-gsap='cta-inner'] > *", {
-        scrollTrigger: { trigger: "[data-gsap='cta']", start: "top 80%" },
-        y: 55, opacity: 0,
-        duration: 0.85, stagger: 0.15, ease: "power3.out",
-      });
-
-      // ── LEAD FORM SECTION ────────────────────────────────────────────
-      gsap.from("[data-gsap='lead-left'] > *", {
-        scrollTrigger: { trigger: "[data-gsap='lead']", start: "top 80%" },
-        x: -50, opacity: 0,
-        duration: 0.75, stagger: 0.12, ease: "power3.out",
-      });
-      gsap.from("[data-gsap='lead-form']", {
-        scrollTrigger: { trigger: "[data-gsap='lead']", start: "top 78%" },
-        x: 60, opacity: 0,
-        duration: 0.85, ease: "power3.out",
-      });
-
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <div ref={rootRef} className="overflow-x-hidden">
+    <div className="overflow-x-hidden">
+      <GsapAnimations />
 
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
       <header
         data-gsap="nav"
-        className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#050816]/85 backdrop-blur-xl"
+        className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#050816]/90 backdrop-blur-md"
       >
-        <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <nav aria-label="Navegação principal" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <span className="text-lg font-bold tracking-tight text-white">
             Apex<span className="text-cyan-400">Dev</span>
           </span>
@@ -299,9 +126,9 @@ export default function HomeClient() {
         />
 
         {/* Radial glow orbs */}
-        <div data-orb="1" className="pointer-events-none absolute left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[140px]" />
-        <div data-orb="2" className="pointer-events-none absolute right-[8%] top-[28%] h-[450px] w-[450px] rounded-full bg-violet-500/10 blur-[120px]" />
-        <div data-orb="3" className="pointer-events-none absolute bottom-[15%] left-[40%] h-[380px] w-[380px] rounded-full bg-indigo-600/10 blur-[100px]" />
+        <div data-orb="1" className="pointer-events-none absolute left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[80px]" style={{ willChange: "transform" }} />
+        <div data-orb="2" className="pointer-events-none absolute right-[8%] top-[28%] h-[450px] w-[450px] rounded-full bg-violet-500/10 blur-[70px]" style={{ willChange: "transform" }} />
+        <div data-orb="3" className="pointer-events-none absolute bottom-[15%] left-[40%] h-[380px] w-[380px] rounded-full bg-indigo-600/10 blur-[60px]" style={{ willChange: "transform" }} />
 
         {/* Hero Content */}
         <div className="relative mx-auto grid min-h-screen max-w-6xl grid-cols-1 gap-14 px-6 pb-20 pt-28 md:grid-cols-2 md:items-center">
@@ -361,7 +188,7 @@ export default function HomeClient() {
                 className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition-all hover:border-white/30 hover:bg-white/10"
               >
                 WhatsApp
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden={true}>
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
               </a>
@@ -387,7 +214,7 @@ export default function HomeClient() {
             {/* Notification badge */}
             <div
               data-float="notif"
-              className="absolute -right-4 -top-6 z-20 rounded-2xl border border-emerald-500/30 bg-[#050816]/90 px-4 py-3 shadow-xl backdrop-blur-xl"
+              className="absolute -right-4 -top-6 z-20 rounded-2xl border border-emerald-500/30 bg-[#050816] px-4 py-3 shadow-xl"
             >
               <p className="text-xs font-semibold text-emerald-300">✓ Lead qualificado</p>
               <p className="mt-0.5 text-[10px] text-emerald-400/60">via n8n · agora mesmo</p>
@@ -396,14 +223,14 @@ export default function HomeClient() {
             {/* Deploy badge */}
             <div
               data-float="deploy"
-              className="absolute -bottom-4 -left-4 z-20 rounded-2xl border border-violet-500/30 bg-[#050816]/90 px-4 py-3 shadow-xl backdrop-blur-xl"
+              className="absolute -bottom-4 -left-4 z-20 rounded-2xl border border-violet-500/30 bg-[#050816] px-4 py-3 shadow-xl"
             >
               <p className="text-xs font-semibold text-violet-300">⚡ Deploy concluído</p>
               <p className="mt-0.5 text-[10px] text-violet-400/60">v2.4.1 · produção</p>
             </div>
 
             {/* Main card */}
-            <div className="relative z-10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+            <div className="relative z-10 overflow-hidden rounded-2xl border border-white/10 bg-[#0a1628]/80 p-6 shadow-2xl">
               {/* Titlebar */}
               <div className="mb-5 flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
@@ -470,6 +297,7 @@ export default function HomeClient() {
         {/* Scroll indicator */}
         <div
           data-hero="scroll"
+          aria-hidden={true}
           className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-35"
         >
           <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-slate-500">scroll</span>
@@ -478,7 +306,7 @@ export default function HomeClient() {
       </section>
 
       {/* ── MARQUEE ──────────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden border-y border-white/[0.06] bg-white/[0.015] py-5">
+      <div aria-hidden={true} className="relative overflow-hidden border-y border-white/[0.06] bg-white/[0.015] py-5">
         <div className="flex animate-marquee whitespace-nowrap">
           {[...TECHS, ...TECHS].map((t, i) => (
             <span
@@ -511,6 +339,7 @@ export default function HomeClient() {
             <article
               data-gsap="service-card"
               key={svc.title}
+              aria-label={svc.title}
               className={`group relative cursor-default overflow-hidden rounded-2xl border border-white/8 bg-gradient-to-br ${svc.gradient} p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-white/20 hover:shadow-2xl`}
             >
               {/* Glow on hover */}
@@ -529,7 +358,7 @@ export default function HomeClient() {
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────── */}
-      <section data-gsap="stats" className="border-y border-white/[0.06] bg-white/[0.02] py-20">
+      <section aria-label="Estatísticas" data-gsap="stats" className="border-y border-white/[0.06] bg-white/[0.02] py-20">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 md:grid-cols-4">
           {STATS.map((s) => (
             <div
