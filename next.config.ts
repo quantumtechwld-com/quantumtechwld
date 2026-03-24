@@ -28,6 +28,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Remove source maps do bundle de produção — impede que o código original
+  // seja exibido no DevTools do browser mesmo após minificação
+  productionBrowserSourceMaps: false,
+
   async headers() {
     return [
       {

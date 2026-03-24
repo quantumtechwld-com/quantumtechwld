@@ -69,7 +69,7 @@ echo ">>> [7/8] Configurando Nginx como reverse proxy..."
 cat > /etc/nginx/sites-available/quantum-agency << 'NGINX'
 server {
     listen 80;
-    server_name _;   # Aceita qualquer domínio/IP — trocar pelo domínio real quando tiver
+    server_name quantumtechwld.com www.quantumtechwld.com;
 
     # Segurança básica
     add_header X-Frame-Options "SAMEORIGIN";

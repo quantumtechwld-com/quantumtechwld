@@ -1,5 +1,6 @@
 import GsapAnimations from "./GsapAnimations";
 import LogoAnimated from "./LogoAnimated";
+import LogoTextAnimated from "./LogoTextAnimated";
 import LeadForm from "@/components/lead-form";
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
@@ -95,9 +96,7 @@ export default function HomeClient() {
         <nav aria-label="Navegação principal" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-2.5">
             <LogoAnimated size={34} />
-            <span className="text-lg font-bold tracking-tight text-white">
-              Quantum<span className="text-cyan-400">Tech</span>
-            </span>
+            <LogoTextAnimated />
           </div>
           <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
             <a href="#services" className="transition-colors hover:text-white">Serviços</a>

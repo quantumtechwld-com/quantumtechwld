@@ -12,7 +12,8 @@ Deploy automático via GitHub Actions para AWS EC2 a cada push na branch `main`.
 | **IP público** | `15.228.226.69` |
 | **Banco de dados** | AWS RDS PostgreSQL 16.6, `db.t3.micro`, `sa-east-1` |
 | **Runtime** | Node.js 20, PM2 (cluster mode), Nginx (reverse proxy) |
-| **URL de produção** | `http://15.228.226.69` (HTTP) |
+| **URL de produção** | `https://quantumtechwld.com` (HTTPS) |
+| **Certificado SSL** | Let's Encrypt, válido até 22/Jun/2026, renovação automática |
 
 ---
 
@@ -71,7 +72,7 @@ ssh -i quantum-agency-key.pem ubuntu@<IP_EC2>
 curl -fsSL https://raw.githubusercontent.com/quantumtechwld-com/quantumtechwld/main/infra/ec2-setup.sh | bash
 ```
 
-O script instala: Node.js 20, PM2, Nginx, UFW (portas 22, 80, 443).
+O script instala: Node.js 20, PM2, Nginx, UFW (portas 80 e 443 apenas).
 
 ### 3. ecosystem.config.cjs na EC2
 
@@ -79,6 +80,55 @@ O PM2 precisa do arquivo de configuração em `/home/ubuntu/quantum-agency/ecosy
 
 ```bash
 scp -i quantum-agency-key.pem ecosystem.config.cjs ubuntu@<IP_EC2>:/home/ubuntu/quantum-agency/
+```
+
+---
+
+## Configurar domínio real + HTTPS
+
+### 1. DNS no cPanel HostGator
+
+O domínio `quantumtechwld.com` usa `dns3.hostgator.com.br` / `dns4.hostgator.com.br`.
+Acesse o cPanel da HostGator → **Zone Editor** → **Manage** (domínio) e adicione:
+
+| Tipo | Nome | Valor | TTL |
+|------|------|-------|-----|
+| A | `quantumtechwld.com` | `15.228.226.69` | 14400 |
+| A | `www` | `15.228.226.69` | 14400 |
+
+> Propagação: 5 min a 4h. Verificar com `nslookup quantumtechwld.com`
+
+### 2. Nginx + SSL na EC2
+
+Após o DNS propagar, execute na EC2:
+
+```bash
+ssh -i quantum-agency-key.pem ubuntu@15.228.226.69
+sudo bash ~/quantum-agency/infra/domain-setup.sh
+```
+
+Ou envie e execute diretamente:
+
+```bash
+scp -i quantum-agency-key.pem infra/domain-setup.sh ubuntu@15.228.226.69:~/
+ssh -i quantum-agency-key.pem ubuntu@15.228.226.69 "sudo bash ~/domain-setup.sh"
+```
+
+O script instala Certbot, configura HTTPS gratuito (Let's Encrypt) e renova automaticamente.
+
+### 3. Atualizar GitHub Secret AUTH_URL
+
+Após o SSL emitido, vá em `Settings → Secrets → Actions` do repositório e atualize:
+
+| Secret | Novo valor |
+|--------|------------|
+| `AUTH_URL` | `https://quantumtechwld.com` |
+
+Depois dispare um deploy:
+
+```bash
+git commit --allow-empty -m "chore: activate production domain"
+git push origin main
 ```
 
 ---
@@ -136,16 +186,40 @@ pm2 start ecosystem.config.cjs
 
 ---
 
-## Acesso SSH à EC2
+## Acesso à EC2 (Session Manager — sem SSH)
+
+> A porta 22 está **fechada** no Security Group. O acesso é feito via AWS Systems Manager Session Manager, sem necessidade de chave PEM.
 
 ```bash
-# Chave .pem local (nunca commitada)
+# Via AWS CLI (requer aws-session-manager-plugin instalado)
+aws ssm start-session --target i-0551c166546ff66e7 --region sa-east-1
+```
+
+Ou pelo console AWS:
+`EC2 → Instâncias → i-0551c166546ff66e7 → Conectar → Session Manager`
+
+### Acesso de emergência temporário via SSH
+
+Se necessário, abra a porta 22 apenas para seu IP e feche logo após:
+
+```powershell
+# Descobrir seu IP público
+nslookup -type=A myip.opendns.com 208.67.222.222
+
+# Abrir para seu IP
+aws ec2 authorize-security-group-ingress --group-id sg-09b8f87ce9293ff71 `
+  --protocol tcp --port 22 --cidr <SEU_IP>/32 --region sa-east-1
+
+# Conectar
 ssh -i quantum-agency-key.pem ubuntu@15.228.226.69
+
+# FECHAR IMEDIATAMENTE após uso
+aws ec2 revoke-security-group-ingress --group-id sg-09b8f87ce9293ff71 `
+  --protocol tcp --port 22 --cidr <SEU_IP>/32 --region sa-east-1
 ```
 
 A chave `.pem` está salva em:
 - Local: `./quantum-agency-key.pem` (gitignored)
-- Backup: `$env:TEMP\qa-key2.pem` (Windows)
 
 ---
 
@@ -158,3 +232,40 @@ A chave `.pem` está salva em:
 | GitHub Secrets | CI/CD (GitHub Actions) | Build + escrita do `.env.production.local` |
 
 > O `prisma.config.ts` carrega automaticamente `.env.production.local` na EC2 e `.env.local` localmente.
+
+---
+
+## Segurança da infraestrutura
+
+Estado atual das camadas de segurança (aplicadas em 24/Mar/2026):
+
+### Security Group — `sg-09b8f87ce9293ff71`
+
+| Porta | Protocolo | Fonte | Status |
+|-------|-----------|-------|--------|
+| 80 | TCP | `0.0.0.0/0` | ✅ Aberta (redirect HTTP→HTTPS) |
+| 443 | TCP | `0.0.0.0/0` | ✅ Aberta (HTTPS) |
+| 22 | TCP | — | ✅ **Fechada** (acesso via SSM) |
+
+### Acesso à instância
+
+- **Modo padrão:** AWS SSM Session Manager (sem porta 22, sem chave PEM)
+- **IAM Role:** `QuantumEC2SSMRole` com `AmazonSSMManagedInstanceCore`
+- **Instance Profile:** `QuantumEC2SSMProfile` (associado à instância `i-0551c166546ff66e7`)
+
+### Banco de dados — RDS
+
+- `PubliclyAccessible: false` — sem acesso externo à internet
+- Acessível apenas via Security Group interno da VPC
+
+### SSL/TLS
+
+- Certificado Let's Encrypt (ECDSA, CN=`quantumtechwld.com`)
+- Validade: 24/Mar/2026 → 22/Jun/2026
+- Renovação automática via `certbot.timer` (systemd)
+
+### GuardDuty
+
+- **Pendente:** ativar pelo console AWS (credenciais root não permitem via CLI)
+- Caminho: `AWS Console → GuardDuty → Get started → Enable GuardDuty`
+- Trial gratuito de 30 dias; monitoramento de VPC Flow Logs, DNS e CloudTrail
