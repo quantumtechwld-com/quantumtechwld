@@ -82,6 +82,7 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
               "set -e",
+              "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
               "APP_DIR=/home/ubuntu/quantum-agency",
               "mkdir -p $APP_DIR /home/ubuntu/app-deploy",
               "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz /home/ubuntu/app-deploy/deploy.tar.gz",
