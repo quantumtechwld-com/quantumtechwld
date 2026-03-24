@@ -82,7 +82,12 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
               "set -e",
-              "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+              "export HOME=/home/ubuntu",
+              "export PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+              "[ -f /home/ubuntu/.nvm/nvm.sh ] && . /home/ubuntu/.nvm/nvm.sh",
+              "[ -f /home/ubuntu/.bashrc ] && . /home/ubuntu/.bashrc 2>/dev/null || true",
+              "command -v aws  || { echo FATAL: aws not found at $(find /usr /home/ubuntu /snap -name aws -type f 2>/dev/null | tr '\\n' ' '); exit 1; }",
+              "command -v npm  || { echo FATAL: npm not found; exit 1; }",
               "APP_DIR=/home/ubuntu/quantum-agency",
               "mkdir -p $APP_DIR /home/ubuntu/app-deploy",
               "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz /home/ubuntu/app-deploy/deploy.tar.gz",
