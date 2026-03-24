@@ -106,17 +106,31 @@ jobs:
           aws s3 cp env.production.local      s3://${{ secrets.DEPLOY_BUCKET }}/env.production.local
           aws s3 cp scripts/deploy-remote.sh  s3://${{ secrets.DEPLOY_BUCKET }}/deploy-remote.sh
 
+          # Gera pre-signed URLs (válidas 1h) para que a EC2 baixe sem precisar de aws CLI
+          SCRIPT_URL=$(aws s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/deploy-remote.sh"   --expires-in 3600)
+          DEPLOY_URL=$(aws s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz"       --expires-in 3600)
+          ENV_URL=$(aws    s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/env.production.local" --expires-in 3600)
+
+          # Exporta para o próximo step
+          echo "SCRIPT_URL=$SCRIPT_URL" >> "$GITHUB_ENV"
+          echo "DEPLOY_URL=$DEPLOY_URL" >> "$GITHUB_ENV"
+          echo "ENV_URL=$ENV_URL"       >> "$GITHUB_ENV"
+
       # Executa o deploy via SSM — parâmetros em arquivo JSON (sem escaping inline)
       - name: Deploy via SSM
         run: |
           INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '[:space:]')
-          BUCKET="${{ secrets.DEPLOY_BUCKET }}"
           echo "Instance ID: $INSTANCE_ID"
 
-          # Usa jq para gerar JSON seguro (evita qualquer problema de escaping/quoting)
-          # su - ubuntu (com hífen) garante HOME=/home/ubuntu e carrega o profile completo
-          CMD="su - ubuntu -c 'aws s3 cp s3://${BUCKET}/deploy-remote.sh /tmp/deploy-remote.sh && chmod +x /tmp/deploy-remote.sh && bash /tmp/deploy-remote.sh ${BUCKET} 2>&1'"
-          printf '{"commands":[%s]}' "$(echo "$CMD" | jq -Rs '.')" > /tmp/ssm-params.json
+          # Monta o comando interno que roda como ubuntu (su - carrega nvm/pm2/npm)
+          # curl baixa os artefatos via pre-signed URL — sem precisar de aws CLI na EC2
+          INNER="curl -fsSL '${SCRIPT_URL}' -o /tmp/deploy-remote.sh \
+            && chmod +x /tmp/deploy-remote.sh \
+            && bash /tmp/deploy-remote.sh '${DEPLOY_URL}' '${ENV_URL}' 2>&1"
+
+          # jq constrói o JSON corretamente escapado (sem aspas manuais)
+          jq -n --arg cmd "su - ubuntu -c ${INNER@Q}" \
+            '{"commands": [$cmd]}' > /tmp/ssm-params.json
           echo "SSM params:"; cat /tmp/ssm-params.json
 
           COMMAND_ID=$(aws ssm send-command \

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # deploy-remote.sh — executado na EC2 via SSM como usuário ubuntu (su - ubuntu)
-# Uso: bash /tmp/deploy-remote.sh <S3_BUCKET>
+# Uso: bash /tmp/deploy-remote.sh <DEPLOY_URL> <ENV_URL>
+# Os URLs são pre-signed S3 URLs gerados pelo GitHub runner (sem precisar de aws CLI aqui)
 set -euo pipefail
 
 # Garante que nvm/npm/pm2 estejam acessíveis mesmo sem shell interativo
@@ -8,22 +9,23 @@ export NVM_DIR="${HOME:-/home/ubuntu}/.nvm"
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-BUCKET="$1"
+DEPLOY_URL="$1"
+ENV_URL="$2"
 APP_DIR="${HOME:-/home/ubuntu}/quantum-agency"
 STAGING="${HOME:-/home/ubuntu}/app-deploy"
 
 echo "==> Ambiente: HOME=$HOME, PATH=$PATH"
 echo "==> Verificando ferramentas..."
-command -v aws  || { echo "ERRO: aws CLI não encontrado em PATH=$PATH"; exit 1; }
-command -v npm  || { echo "ERRO: npm não encontrado"; exit 1; }
+command -v curl || { echo "ERRO: curl não encontrado"; exit 1; }
+command -v npm  || { echo "ERRO: npm não encontrado (nvm: $NVM_DIR)"; exit 1; }
 command -v pm2  || { echo "ERRO: pm2 não encontrado"; exit 1; }
 
 echo "==> Preparando diretórios..."
 mkdir -p "$APP_DIR" "$STAGING"
 
-echo "==> Baixando artefatos do S3..."
-aws s3 cp "s3://$BUCKET/deploy.tar.gz"          "$STAGING/deploy.tar.gz"
-aws s3 cp "s3://$BUCKET/env.production.local"   "$APP_DIR/.env.production.local"
+echo "==> Baixando artefatos via pre-signed URL..."
+curl -fsSL "$DEPLOY_URL" -o "$STAGING/deploy.tar.gz"
+curl -fsSL "$ENV_URL"    -o "$APP_DIR/.env.production.local"
 chmod 600 "$APP_DIR/.env.production.local"
 
 echo "==> Extraindo aplicação..."
