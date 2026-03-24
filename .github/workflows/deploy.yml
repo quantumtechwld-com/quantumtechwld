@@ -113,10 +113,11 @@ jobs:
           BUCKET="${{ secrets.DEPLOY_BUCKET }}"
           echo "Instance ID: $INSTANCE_ID"
 
-          # Grava parâmetros SSM em arquivo para evitar qualquer problema de escaping
-          cat > /tmp/ssm-params.json << EOF
-          {"commands":["sudo -u ubuntu bash -l -c 'aws s3 cp s3://${BUCKET}/deploy-remote.sh /tmp/deploy-remote.sh && chmod +x /tmp/deploy-remote.sh && bash /tmp/deploy-remote.sh ${BUCKET} 2>&1'"]}
-          EOF
+          # Usa jq para gerar JSON seguro (evita qualquer problema de escaping/quoting)
+          # su - ubuntu (com hífen) garante HOME=/home/ubuntu e carrega o profile completo
+          CMD="su - ubuntu -c 'aws s3 cp s3://${BUCKET}/deploy-remote.sh /tmp/deploy-remote.sh && chmod +x /tmp/deploy-remote.sh && bash /tmp/deploy-remote.sh ${BUCKET} 2>&1'"
+          printf '{"commands":[%s]}' "$(echo "$CMD" | jq -Rs '.')" > /tmp/ssm-params.json
+          echo "SSM params:"; cat /tmp/ssm-params.json
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \

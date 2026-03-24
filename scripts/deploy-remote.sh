@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
-# deploy-remote.sh — executado na EC2 via SSM (como usuário ubuntu)
+# deploy-remote.sh — executado na EC2 via SSM como usuário ubuntu (su - ubuntu)
 # Uso: bash /tmp/deploy-remote.sh <S3_BUCKET>
 set -euo pipefail
 
-BUCKET="$1"
-APP_DIR="$HOME/quantum-agency"
-STAGING="$HOME/app-deploy"
+# Garante que nvm/npm/pm2 estejam acessíveis mesmo sem shell interativo
+export NVM_DIR="${HOME:-/home/ubuntu}/.nvm"
+# shellcheck source=/dev/null
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
+BUCKET="$1"
+APP_DIR="${HOME:-/home/ubuntu}/quantum-agency"
+STAGING="${HOME:-/home/ubuntu}/app-deploy"
+
+echo "==> Ambiente: HOME=$HOME, PATH=$PATH"
 echo "==> Verificando ferramentas..."
 command -v aws  || { echo "ERRO: aws CLI não encontrado em PATH=$PATH"; exit 1; }
 command -v npm  || { echo "ERRO: npm não encontrado"; exit 1; }
