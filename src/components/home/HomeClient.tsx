@@ -1,4 +1,5 @@
 import GsapAnimations from "./GsapAnimations";
+import LogoAnimated from "./LogoAnimated";
 import LeadForm from "@/components/lead-form";
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
@@ -92,9 +93,12 @@ export default function HomeClient() {
         className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#050816]/90 backdrop-blur-md"
       >
         <nav aria-label="Navegação principal" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <span className="text-lg font-bold tracking-tight text-white">
-            Apex<span className="text-cyan-400">Dev</span>
-          </span>
+          <div className="flex items-center gap-2.5">
+            <LogoAnimated size={34} />
+            <span className="text-lg font-bold tracking-tight text-white">
+              Quantum<span className="text-cyan-400">Tech</span>
+            </span>
+          </div>
           <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
             <a href="#services" className="transition-colors hover:text-white">Serviços</a>
             <a href="#portfolio" className="transition-colors hover:text-white">Projetos</a>
@@ -516,7 +520,7 @@ export default function HomeClient() {
       {/* ── FOOTER ────────────────────────────────────────────────────────── */}
       <footer className="border-t border-white/[0.06] px-6 py-12 text-center text-sm text-slate-600">
         <p className="mb-1 font-semibold text-slate-400">
-          Apex<span className="text-cyan-400">Dev</span> Studio
+          Quantum<span className="text-cyan-400">Tech</span>
         </p>
         <p>© 2026 Todos os direitos reservados.</p>
       </footer>

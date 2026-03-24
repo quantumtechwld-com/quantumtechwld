@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Apex Dev Studio | Agência de Desenvolvimento de Software",
+  title: "QuantumTech | Agência de Desenvolvimento de Software",
   description:
     "Agência de desenvolvimento de software focada em produtos digitais, automação e crescimento com tecnologia.",
 };
