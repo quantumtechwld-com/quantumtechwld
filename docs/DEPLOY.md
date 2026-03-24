@@ -22,15 +22,24 @@ Deploy automático via GitHub Actions para AWS EC2 a cada push na branch `main`.
 O arquivo `.github/workflows/deploy.yml` é disparado automaticamente a cada push em `main` e executa os seguintes passos:
 
 ```
-1. Checkout do código
-2. Setup Node.js 20
-3. npm ci (instala dependências)
-4. npx prisma generate (gera o Prisma Client com os tipos do schema)
-5. npm run build (build Next.js com variáveis de produção)
-6. tar (empacota .next, public, package.json, prisma, prisma.config.ts)
-7. scp (envia o pacote para a EC2)
-8. ssh → escreve .env.production.local + extrai build + npm ci + prisma migrate deploy + PM2 reload
+1.  Checkout do código
+2.  Setup Node.js 20
+3.  npm ci
+4.  npx prisma generate
+5.  npm run build  (com variáveis de produção injetadas como env)
+6.  tar  →  empacota .next, public, package.json, prisma, ecosystem.config.cjs
+7.  Gera .env.production.local no runner via printf (sem escaping de caracteres especiais)
+8.  aws s3 cp  →  envia deploy.tar.gz, env.production.local e scripts/deploy-remote.sh ao S3
+9.  aws s3 presign  →  gera URLs pré-assinadas HTTPS (válidas por 1h) para os três artefatos
+10. aws ssm send-command  →  envia comando à EC2 via SSM (sem SSH, sem porta 22)
+11. EC2: su - ubuntu -c "curl <script_url> && bash deploy-remote.sh <deploy_url> <env_url>"
+12. deploy-remote.sh: curl baixa os artefatos, npm ci, prisma migrate deploy, pm2 reload
+13. Polling de status a cada 10 s (máx 10 min); StandardErrorContent exibido em caso de falha
 ```
+
+> **Por que pre-signed URLs?** A EC2 não tem `aws` CLI instalado. O runner do GitHub gera URLs HTTPS autenticadas que a EC2 baixa com `curl` (sempre disponível no Ubuntu), eliminando qualquer dependência extra na instância.
+
+> **Por que SSM e não SSH?** A porta 22 está **fechada permanentemente** no Security Group. O SSM Agent (pré-instalado na AMI Ubuntu 24.04) permite execução remota sem abrir portas.
 
 ---
 
@@ -42,45 +51,45 @@ Acesse `Settings → Secrets and variables → Actions` no repositório e config
 
 | Secret | Descrição |
 |---|---|
-| `EC2_HOST` | IP público da EC2 (ex: `15.228.226.69`) |
-| `EC2_SSH_KEY` | Conteúdo completo do arquivo `.pem` da EC2 |
+| `EC2_INSTANCE_ID` | ID da instância EC2 (ex: `i-0551c166546ff66e7`) — **sem espaços** |
+| `AWS_ACCESS_KEY_ID` | Access key do IAM user `quantum-github-actions` |
+| `AWS_SECRET_ACCESS_KEY` | Secret key do IAM user `quantum-github-actions` |
+| `AWS_REGION` | Região AWS (ex: `sa-east-1`) |
+| `DEPLOY_BUCKET` | Nome do bucket S3 de deploy (ex: `quantumtechwld-deploy`) |
 | `DATABASE_URL` | URL completa do PostgreSQL (ex: `postgresql://user:pass@host:5432/db`) |
 | `AUTH_SECRET` | String aleatória ≥ 32 chars (NextAuth v5) |
-| `AUTH_URL` | URL pública do site (ex: `https://seudominio.com`) |
+| `AUTH_URL` | URL pública do site (ex: `https://quantumtechwld.com`) |
 | `ADMIN_EMAIL` | E-mail do administrador |
 | `EMAIL_SERVER_HOST` | Host SMTP (ex: `smtp.gmail.com`) |
 | `EMAIL_SERVER_PORT` | Porta SMTP (ex: `465`) |
 | `EMAIL_SERVER_USER` | Usuário SMTP |
 | `EMAIL_SERVER_PASSWORD` | Senha de app SMTP |
 | `EMAIL_FROM` | Remetente (ex: `Quantum Technology <email@dominio.com>`) |
-| `EMAIL_ADMIN` | E-mail admin para notificações |
+| `EMAIL_ADMIN` | E-mail admin para notificações (opcional) |
 | `STRIPE_SECRET_KEY` | Chave secreta Stripe (`sk_live_...` ou `sk_test_...`) |
 | `STRIPE_WEBHOOK_SECRET` | Webhook secret Stripe (`whsec_...`) |
-| `STRIPE_MOCK` | `true` para ambiente de testes, `false` para produção real |
 | `GEMINI_API_KEY` | Chave da API Google Gemini |
 | `N8N_WEBHOOK_URL` | URL do webhook n8n para notificações |
 
 ### 2. Provisionamento da EC2
 
-A EC2 precisa ter instalado (executar `infra/ec2-setup.sh` uma única vez):
+A EC2 precisa ter instalado (executar `infra/ec2-setup.sh` uma única vez via Session Manager):
 
 ```bash
-# Na máquina local com o .pem disponível:
-ssh -i quantum-agency-key.pem ubuntu@<IP_EC2>
+# Acesso via SSM (sem SSH)
+aws ssm start-session --target i-0551c166546ff66e7 --region sa-east-1
 
-# Na EC2:
+# Na EC2 (como ubuntu):
 curl -fsSL https://raw.githubusercontent.com/quantumtechwld-com/quantumtechwld/main/infra/ec2-setup.sh | bash
 ```
 
-O script instala: Node.js 20, PM2, Nginx, UFW (portas 80 e 443 apenas).
+O script instala: Node.js 20 (via nvm), PM2, Nginx, UFW (portas 80 e 443 apenas).
+
+> O `aws` CLI **não** precisa ser instalado na EC2 — os artefatos são baixados via URLs pré-assinadas com `curl`.
 
 ### 3. ecosystem.config.cjs na EC2
 
-O PM2 precisa do arquivo de configuração em `/home/ubuntu/quantum-agency/ecosystem.config.cjs`. Copie uma única vez:
-
-```bash
-scp -i quantum-agency-key.pem ecosystem.config.cjs ubuntu@<IP_EC2>:/home/ubuntu/quantum-agency/
-```
+O PM2 precisa do arquivo de configuração. O deploy automático já inclui o `ecosystem.config.cjs` dentro do `deploy.tar.gz` — ele é extraído junto com a build a cada deploy.
 
 ---
 
@@ -155,7 +164,11 @@ git push origin main
 ## Verificar estado da aplicação na EC2
 
 ```bash
-ssh -i quantum-agency-key.pem ubuntu@15.228.226.69
+# Acesso via Session Manager (sem SSH, sem porta 22)
+aws ssm start-session --target i-0551c166546ff66e7 --region sa-east-1
+
+# Depois de conectado, trocar para o usuário ubuntu:
+su - ubuntu
 
 # Status dos processos PM2
 pm2 list
