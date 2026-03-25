@@ -39,7 +39,7 @@ const TECHS = [
   "Next.js", "React", "Node.js", "TypeScript", "PostgreSQL",
   "n8n", "OpenAI", "Prisma", "TailwindCSS", "Docker", "AWS", "Redis",
   "WordPress", "Python (Django/FastAPI)", "Java", "Go Lang", "Vue.js", "Angular", "MySQL", "MongoDB",
-  "GSAP", "Kubernetes",
+  "GSAP", "Kubernetes", "Azure", "gRPC", "REST", "GraphQL",
 ];
 
 const STEPS = [
@@ -311,12 +311,12 @@ export default function HomeClient() {
       </section>
 
       {/* ── MARQUEE ──────────────────────────────────────────────────────── */}
-      <div aria-hidden={true} className="relative overflow-hidden border-y border-white/[0.06] bg-white/[0.015] py-5">
-        <div className="flex animate-marquee whitespace-nowrap">
+      <div aria-hidden={true} className="relative overflow-hidden border-y border-white/20 bg-white/5 py-5">
+        <div className="flex w-max animate-marquee">
           {[...TECHS, ...TECHS].map((t, i) => (
             <span
               key={i}
-              className="mx-10 text-xs font-bold uppercase tracking-[0.28em] text-slate-500"
+              className="mx-10 text-xs font-bold uppercase tracking-[0.28em] text-white"
             >
               {t}
             </span>

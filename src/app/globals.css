@@ -10,7 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --animate-marquee: marquee 28s linear infinite;
+  --animate-marquee: marquee 45s linear infinite;
 }
 
 @keyframes marquee {
@@ -19,7 +19,7 @@
 }
 
 .animate-marquee {
-  animation: marquee 28s linear infinite;
+  animation: marquee 45s linear infinite;
 }
 
 body {
