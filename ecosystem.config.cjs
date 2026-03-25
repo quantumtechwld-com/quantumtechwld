@@ -10,8 +10,9 @@ module.exports = {
       args: "start",
       cwd: "/home/ubuntu/quantum-agency",
 
-      // Cluster mode: usa todos os núcleos disponíveis da EC2
-      instances: "max",
+      // Cluster mode: 2 instâncias fixas — equilíbrio entre throughput e uso de RAM
+      // Ajuste conforme o tipo de instância EC2 (t3.small=2, t3.medium=4)
+      instances: 2,
       exec_mode: "cluster",
 
       // Não reiniciar infinitamente se travar logo ao iniciar

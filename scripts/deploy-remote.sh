@@ -34,7 +34,8 @@ rm "$STAGING/deploy.tar.gz"
 
 echo "==> Instalando dependências de produção..."
 cd "$APP_DIR"
-npm ci --omit=dev
+# Limita heap do Node para evitar OOM em instâncias com pouca RAM
+NODE_OPTIONS="--max-old-space-size=384" npm ci --omit=dev --prefer-offline
 
 echo "==> Executando migrações do banco..."
 DATABASE_URL=$(grep '^DATABASE_URL=' "$APP_DIR/.env.production.local" | cut -d= -f2-)
