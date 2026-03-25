@@ -38,6 +38,8 @@ const STATS = [
 const TECHS = [
   "Next.js", "React", "Node.js", "TypeScript", "PostgreSQL",
   "n8n", "OpenAI", "Prisma", "TailwindCSS", "Docker", "AWS", "Redis",
+  "WordPress", "Python (Django/FastAPI)", "Java", "Go Lang", "Vue.js", "Angular", "MySQL", "MongoDB",
+  "GSAP", "Kubernetes",
 ];
 
 const STEPS = [
