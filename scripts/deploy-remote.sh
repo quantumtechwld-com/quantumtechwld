@@ -4,10 +4,7 @@
 # Os URLs são pre-signed S3 URLs gerados pelo GitHub runner (sem precisar de aws CLI aqui)
 set -euo pipefail
 
-# Garante que nvm/npm/pm2 estejam acessíveis mesmo sem shell interativo
-export NVM_DIR="${HOME:-/home/ubuntu}/.nvm"
-# shellcheck source=/dev/null
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+# Node/npm/pm2 instalados globalmente via apt em /usr/bin — sem NVM neste servidor
 
 DEPLOY_URL="$1"
 ENV_URL="$2"
