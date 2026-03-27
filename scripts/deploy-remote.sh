@@ -34,6 +34,11 @@ cd "$APP_DIR"
 # Limita heap do Node para evitar OOM em instâncias com pouca RAM
 NODE_OPTIONS="--max-old-space-size=384" npm ci --omit=dev --prefer-offline
 
+echo "==> Gerando Prisma Client..."
+# Necessário após npm ci --omit=dev porque o prisma CLI fica em devDependencies
+# Sem este passo o PrismaAdapter falha e o magic link não funciona
+npx prisma generate
+
 echo "==> Executando migrações do banco..."
 DATABASE_URL=$(grep '^DATABASE_URL=' "$APP_DIR/.env.production.local" | cut -d= -f2-)
 export DATABASE_URL
