@@ -94,28 +94,32 @@ export async function POST(request: NextRequest) {
       receivedAt: new Date().toISOString(),
     };
 
-    const n8nResponse = await fetch(n8nWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(n8nPayload),
-      signal: controller.signal,
-      cache: "no-store",
-    });
+    try {
+      const n8nResponse = await fetch(n8nWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(n8nPayload),
+        signal: controller.signal,
+        cache: "no-store",
+      });
 
-    clearTimeout(timeout);
+      clearTimeout(timeout);
 
-    if (!n8nResponse.ok) {
-      const responseText = await n8nResponse.text().catch(() => "");
-      return NextResponse.json(
-        {
-          error: "Webhook n8n retornou erro.",
-          detail: responseText || n8nResponse.statusText,
-        },
-        { status: 502 }
+      if (!n8nResponse.ok) {
+        const responseText = await n8nResponse.text().catch(() => "");
+        console.warn(
+          `n8n webhook retornou ${n8nResponse.status}: ${responseText || n8nResponse.statusText}`
+        );
+      }
+    } catch (n8nError) {
+      clearTimeout(timeout);
+      console.warn(
+        "n8n webhook indisponível:",
+        n8nError instanceof Error ? n8nError.message : n8nError
       );
     }
 
-    return NextResponse.json({ ok: true, message: "Lead enviado ao n8n." });
+    return NextResponse.json({ ok: true, message: "Lead recebido com sucesso." });
   } catch (error) {
     return NextResponse.json(
       {
