@@ -282,3 +282,99 @@ Estado atual das camadas de segurança (aplicadas em 24/Mar/2026):
 - **Pendente:** ativar pelo console AWS (credenciais root não permitem via CLI)
 - Caminho: `AWS Console → GuardDuty → Get started → Enable GuardDuty`
 - Trial gratuito de 30 dias; monitoramento de VPC Flow Logs, DNS e CloudTrail
+
+---
+
+## Histórico de operações em produção
+
+### 27/Mar/2026 — Correções pós-deploy inicial
+
+#### 1. SSL rejeitado pelo RDS (`AdapterError`)
+
+**Sintoma:** Logs mostravam `User was denied access on the database 'quantum_devflow'`, depois `no pg_hba.conf entry for host... no encryption`.
+
+**Causa:** O driver `pg` (Node.js) não ativa SSL automaticamente ao conectar ao RDS, ao contrário do `psql` CLI. O RDS exige SSL obrigatoriamente via `pg_hba.conf`.
+
+**Fix — `src/lib/prisma.ts`** (commit `7d3ca93`):
+```typescript
+// ANTES
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+
+// DEPOIS
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL!,
+  ssl: { rejectUnauthorized: false },
+});
+const adapter = new PrismaPg(pool);
+```
+
+> **Nota:** adicionar `?sslmode=no-verify` à `DATABASE_URL` **não funciona** com o driver `pg` Node.js — ele ignora esse parâmetro de URL. A opção `ssl` deve ser passada no objeto de configuração do `Pool`.
+
+---
+
+#### 2. Colunas `phone` e `company` inexistentes na tabela `User`
+
+**Sintoma:** `PrismaClientKnownRequestError: The column '(not available)' does not exist`.
+
+**Causa:** As colunas `phone` e `company` foram adicionadas ao `schema.prisma` no commit `b00b8b5` (M5 — perfil do cliente) sem uma migration correspondente. A última migration aplicada era `20260318000000_add_user_role`.
+
+**Fix — nova migration** (commit `2d764ef`):
+```sql
+-- prisma/migrations/20260327000000_add_phone_company_to_user/migration.sql
+ALTER TABLE "User" ADD COLUMN "phone" TEXT;
+ALTER TABLE "User" ADD COLUMN "company" TEXT;
+```
+
+---
+
+#### 3. Usuário admin sem `role = ADMIN`
+
+**Sintoma:** Após login via magic link, acesso a `/admin` redirecionava para `/portal`.
+
+**Causa:** O primeiro utilizador criado via magic link recebe `role = CLIENT` por padrão (valor do `@default(CLIENT)` no schema). A página `admin/page.tsx` faz `redirect("/portal")` se `session.user.role !== "ADMIN"`.
+
+**Fix — UPDATE direto no RDS** (via SSM `send-command`):
+```sql
+UPDATE "User" SET role = 'ADMIN' WHERE email = 'ricardo8leandro@gmail.com';
+```
+
+> **Importante:** após o UPDATE, o utilizador deve fazer **logout e novo login** para que o JWT seja re-emitido com `role = ADMIN`. A strategy JWT não consulta o banco a cada request — o role fica codificado no token até o próximo login.
+
+---
+
+#### 4. Tabelas de domínio inexistentes (`Order`, `Proposal`, `Payment`, etc.)
+
+**Sintoma:** `Error [PrismaClientKnownRequestError]: The table 'public.Order' does not exist` ao acessar `/admin`.
+
+**Causa:** As tabelas dos módulos M3 (Deal Room), M4 (Portal de Pedidos), M7 (Pagamentos) e M10 (Avaliações) foram adicionadas ao `schema.prisma` sem migrations correspondentes. O banco só tinha as tabelas da migration inicial e as de M2/S6.
+
+**Tabelas ausentes:** `Proposal`, `ProposalComment`, `Order`, `OrderMessage`, `Payment`, `OrderRating`.
+
+**Fix — nova migration** (commit `c67ec81`):
+```
+prisma/migrations/20260327100000_add_orders_proposals_payments/migration.sql
+```
+
+Criou os enums `ProposalStatus`, `OrderStatus`, `PaymentStatus` e as 6 tabelas com todas as FKs e índices únicos.
+
+**Estado final do banco após todas as correções:**
+```
+Account, Briefing, Order, OrderMessage, OrderRating, Payment,
+Proposal, ProposalComment, ReferenceProject, Scope, Session,
+User, VerificationToken, _prisma_migrations  (14 tabelas)
+```
+
+---
+
+### Procedimento geral: quando uma tabela não existe em produção
+
+Se após um deploy aparecer `The table 'public.XYZ' does not exist`:
+
+1. Verificar se existe migration para a tabela:
+   ```powershell
+   Get-ChildItem .\prisma\migrations -Recurse -Filter "*.sql" | Select-String "CREATE TABLE"
+   ```
+2. Se não existir, criar o arquivo da migration manualmente em `prisma/migrations/<timestamp>_<nome>/migration.sql`
+3. Commit + push → pipeline aplica `prisma migrate deploy` automaticamente
+
+> **Não usar `prisma migrate dev` em produção** — ele pode dropar e recriar tabelas. Usar sempre migrations manuais com `ALTER TABLE` / `CREATE TABLE` seguros.
