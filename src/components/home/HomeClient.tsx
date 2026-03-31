@@ -173,8 +173,8 @@ export default function HomeClient() {
             </h1>
 
             <p data-hero="sub" className="mb-10 max-w-[30rem] text-lg leading-relaxed text-slate-300">
-              Da ideia ao lançamento: sites de alta conversão, sistemas sob medida,
-              integrações com IA e automações com n8n para escalar sua operação.
+              Desenvolvimento web, sistemas sob medida, automação com n8n e IA —
+              do primeiro MVP ao produto em produção. Diagnóstico gratuito em 24h.
             </p>
 
             <div className="mb-12 flex flex-wrap gap-4">
