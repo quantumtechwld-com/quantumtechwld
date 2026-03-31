@@ -34,8 +34,9 @@ rm "$STAGING/deploy.tar.gz"
 
 echo "==> Instalando dependências de produção..."
 cd "$APP_DIR"
-# Remove node_modules completamente para evitar EACCES de arquivos criados como root
-# O cache global ~/.npm garante que a reinstalação seja rápida
+# Corrige permissões de arquivos criados como root em deploys anteriores
+sudo chown -R ubuntu:ubuntu "$APP_DIR" 2>/dev/null || true
+# Remove node_modules completamente para instalação limpa
 rm -rf node_modules
 NODE_OPTIONS="--max-old-space-size=384" npm ci --omit=dev --prefer-offline
 
