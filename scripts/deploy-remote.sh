@@ -25,8 +25,11 @@ curl -fsSL "$DEPLOY_URL" -o "$STAGING/deploy.tar.gz"
 curl -fsSL "$ENV_URL"    -o "$APP_DIR/.env.production.local"
 chmod 600 "$APP_DIR/.env.production.local"
 
+echo "==> Limpando build anterior..."
+rm -rf "$APP_DIR/.next" "$APP_DIR/public" "$APP_DIR/prisma"
+
 echo "==> Extraindo aplicação..."
-tar -xzf "$STAGING/deploy.tar.gz" -C "$APP_DIR"
+tar -xzf "$STAGING/deploy.tar.gz" -C "$APP_DIR" --no-same-permissions --no-same-owner
 rm "$STAGING/deploy.tar.gz"
 
 echo "==> Instalando dependências de produção..."
