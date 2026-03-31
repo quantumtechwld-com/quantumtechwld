@@ -34,6 +34,8 @@ rm "$STAGING/deploy.tar.gz"
 
 echo "==> Instalando dependências de produção..."
 cd "$APP_DIR"
+# Limpa cache com permissões corrompidas de deploys anteriores como root
+rm -rf node_modules/.cache
 # Limita heap do Node para evitar OOM em instâncias com pouca RAM
 NODE_OPTIONS="--max-old-space-size=384" npm ci --omit=dev --prefer-offline
 
