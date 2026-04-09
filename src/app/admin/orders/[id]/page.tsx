@@ -85,9 +85,9 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
       <header className="sticky top-0 z-10 border-b border-white/5 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold">
+            <Link href="/admin" className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold hover:opacity-80 transition-opacity">
               A
-            </div>
+            </Link>
             <Link href="/admin/orders" className="text-sm text-white/50 hover:text-white/80 transition-colors">
               ← Pedidos
             </Link>

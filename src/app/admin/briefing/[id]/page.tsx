@@ -70,8 +70,11 @@ export default async function AdminBriefingDetailPage({
       <header className="border-b border-white/5 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Link href="/admin" className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold hover:opacity-80 transition-opacity mr-1">
+              A
+            </Link>
             <Link href="/admin" className="text-white/50 hover:text-white/80 transition-colors text-sm">
-              ← Painel Admin
+              ← Admin Panel
             </Link>
             <span className="text-white/20">/</span>
             <span className="text-white/70 text-sm font-medium">Briefing #{id.slice(-8)}</span>

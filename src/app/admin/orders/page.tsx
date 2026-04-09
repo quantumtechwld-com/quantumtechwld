@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import AdminHeader from "../components/AdminHeader";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -43,23 +44,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-gray-950/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold">
-              A
-            </div>
-            <span className="font-semibold">Admin Panel</span>
-            <span className="text-white/30 text-sm">·</span>
-            <span className="text-white/50 text-sm">Pedidos</span>
-          </div>
-          <div className="flex h-8 gap-2">
-            <Link href="/admin" className="text-sm text-white/50 hover:text-white/80 transition-colors">
-              ← Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         {/* Stats strip */}
