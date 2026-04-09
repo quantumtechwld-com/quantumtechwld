@@ -12,8 +12,46 @@ export const authConfig = {
   },
   session: { strategy: "jwt" as const },
   callbacks: {
-    authorized({ auth }) {
-      return !!auth?.user;
+    // session edge-safe: mapeia claims do JWT → session.user
+    session({ session, token }) {
+      if (token) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const u = session.user as any;
+        u.id     = token.id;
+        u.role   = token.role   ?? "CLIENT";
+        u.status = token.status ?? "PENDING";
+      }
+      return session;
+    },
+    // authorized: protege /admin e /portal no edge runtime (middleware)
+    authorized({ auth, request }) {
+      const pathname = (request as { nextUrl?: { pathname?: string; origin?: string } } | undefined)
+        ?.nextUrl?.pathname ?? "";
+      const origin = (request as { nextUrl?: { origin?: string } } | undefined)
+        ?.nextUrl?.origin ?? "";
+
+      // Páginas públicas do portal — sempre acessíveis
+      const isPublicPortal = ["/portal/login", "/portal/verificar", "/portal/erro"]
+        .some((p) => pathname.startsWith(p));
+      if (isPublicPortal) return true;
+
+      const user = auth?.user as Record<string, unknown> | undefined;
+
+      // /admin — apenas ADMIN
+      if (pathname.startsWith("/admin")) {
+        return user?.role === "ADMIN";
+      }
+
+      // /portal protegido — requer sessão e status ACTIVE
+      if (pathname.startsWith("/portal")) {
+        if (!user) return false;
+        if (user.status === "PENDING" && user.role !== "ADMIN") {
+          return Response.redirect(`${origin}/portal/erro?reason=pending`);
+        }
+        return true;
+      }
+
+      return !!user;
     },
   },
   providers: [],

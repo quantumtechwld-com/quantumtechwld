@@ -13,6 +13,12 @@ export default function AdminHeader() {
         </div>
         <div className="flex items-center gap-4">
           <Link
+            href="/admin/users"
+            className="text-sm text-white/50 hover:text-white/80 transition-colors"
+          >
+            Utilizadores
+          </Link>
+          <Link
             href="/admin/orders"
             className="text-sm text-white/50 hover:text-white/80 transition-colors"
           >

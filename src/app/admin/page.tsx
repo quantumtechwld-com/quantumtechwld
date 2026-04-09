@@ -99,6 +99,27 @@ export default async function AdminDashboardPage() {
     <div className="min-h-screen bg-gray-950 text-white">
       <AdminHeader />
       <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
+
+        {/* Navegação rápida */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <a href="/admin/users" className="flex items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 hover:bg-violet-500/10 transition group">
+            <span className="text-xl">👥</span>
+            <span className="text-sm font-medium text-violet-300 group-hover:text-violet-200">Utilizadores</span>
+          </a>
+          <a href="/admin/orders" className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 hover:bg-cyan-500/10 transition group">
+            <span className="text-xl">📦</span>
+            <span className="text-sm font-medium text-cyan-300 group-hover:text-cyan-200">Pedidos</span>
+          </a>
+          <a href="/admin/briefing" className="flex items-center gap-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3 hover:bg-indigo-500/10 transition group">
+            <span className="text-xl">📋</span>
+            <span className="text-sm font-medium text-indigo-300 group-hover:text-indigo-200">Briefings</span>
+          </a>
+          <a href="/portal" className="flex items-center gap-3 rounded-xl border border-slate-500/20 bg-slate-500/5 px-4 py-3 hover:bg-slate-500/10 transition group">
+            <span className="text-xl">←</span>
+            <span className="text-sm font-medium text-slate-300 group-hover:text-slate-200">Portal Cliente</span>
+          </a>
+        </div>
+
         <StatsGrid
           orderPending={orderPending}
           orderInProd={orderInProd}

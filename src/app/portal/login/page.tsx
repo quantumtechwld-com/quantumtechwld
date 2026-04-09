@@ -20,10 +20,24 @@ export default function LoginPage() {
     } catch (err: unknown) {
       // NEXT_REDIRECT é lançado pelo redirect() do Next.js — não é um erro real
       if (err && typeof err === "object" && "digest" in err) {
-        // Redirect a caminho — não fazer nada, o browser vai redirecionar
         return;
       }
-      setErrorMsg("Erro ao enviar o link. Tente novamente.");
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "NOT_FOUND") {
+        setErrorMsg(
+          "Este email não está registado no portal. Preencha o formulário de contacto para solicitar acesso."
+        );
+      } else if (msg === "PENDING") {
+        setErrorMsg(
+          "A sua conta está a aguardar aprovação pelo administrador. Entraremos em contacto brevemente."
+        );
+      } else if (msg === "SUSPENDED") {
+        setErrorMsg(
+          "O acesso à sua conta foi suspenso. Entre em contacto com o suporte."
+        );
+      } else {
+        setErrorMsg("Erro ao enviar o link. Tente novamente.");
+      }
     } finally {
       setLoading(false);
     }

@@ -24,20 +24,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     // Chamado ao criar/renovar o JWT. `user` só existe no momento do signin.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token.role = (user as any).role ?? "CLIENT";
+        token.id     = user.id;
+        token.role   = (user as Record<string, unknown>).role   ?? "CLIENT";
+        token.status = (user as Record<string, unknown>).status ?? "PENDING";
       }
       return token;
     },
-    // Expõe id e role na sessão client-side.
+    // Expõe id, role e status na sessão client-side.
     session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as "CLIENT" | "ADMIN";
+        session.user.id     = token.id as string;
+        session.user.role   = token.role   as "CLIENT" | "ADMIN";
+        session.user.status = token.status as "PENDING" | "ACTIVE" | "SUSPENDED";
       }
       return session;
     },
