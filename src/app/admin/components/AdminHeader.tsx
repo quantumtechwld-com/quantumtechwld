@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export default function AdminHeader() {
   return (
@@ -24,6 +25,7 @@ export default function AdminHeader() {
           >
             Pedidos
           </Link>
+          <SignOutButton className="text-sm text-white/40 hover:text-red-400 transition-colors" />
         </div>
       </div>
     </header>

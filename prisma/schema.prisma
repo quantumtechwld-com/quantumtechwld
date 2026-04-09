@@ -181,6 +181,7 @@ enum ProposalStatus {
 /// Pedido submetido por um cliente existente.
 model Order {
   id              String      @id @default(cuid())
+  orderRef        String?     @unique  // ex: DAWGF26-A3K7M
   clientId        String
   client          User        @relation(fields: [clientId], references: [id], onDelete: Cascade)
   type            String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other"

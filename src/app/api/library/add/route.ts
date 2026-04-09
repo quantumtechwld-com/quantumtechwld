@@ -47,10 +47,10 @@ function isValid(b: Partial<AddPayload>): b is AddPayload {
 }
 
 export async function POST(request: NextRequest) {
-  // Somente usuários autenticados no portal podem adicionar projetos
+  // Somente ADMINs podem adicionar projetos à biblioteca
   const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
   let body: Partial<AddPayload>;

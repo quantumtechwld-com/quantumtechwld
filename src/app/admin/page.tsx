@@ -114,9 +114,9 @@ export default async function AdminDashboardPage() {
             <span className="text-xl">📋</span>
             <span className="text-sm font-medium text-indigo-300 group-hover:text-indigo-200">Briefings</span>
           </a>
-          <a href="/portal" className="flex items-center gap-3 rounded-xl border border-slate-500/20 bg-slate-500/5 px-4 py-3 hover:bg-slate-500/10 transition group">
-            <span className="text-xl">←</span>
-            <span className="text-sm font-medium text-slate-300 group-hover:text-slate-200">Portal Cliente</span>
+          <a href="/admin/biblioteca" className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 hover:bg-amber-500/10 transition group">
+            <span className="text-xl">📚</span>
+            <span className="text-sm font-medium text-amber-300 group-hover:text-amber-200">Biblioteca</span>
           </a>
         </div>
 

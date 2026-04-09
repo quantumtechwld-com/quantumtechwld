@@ -65,9 +65,16 @@ export default async function OrdersPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="font-semibold text-white group-hover:text-sky-300 transition-colors">
-                    {ORDER_TYPE_LABEL[o.type] ?? o.type}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-white group-hover:text-sky-300 transition-colors">
+                      {ORDER_TYPE_LABEL[o.type] ?? o.type}
+                    </p>
+                    {o.orderRef && (
+                      <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
+                        {o.orderRef}
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-1 text-sm text-slate-400 line-clamp-2">{o.description}</p>
                 </div>
                 <span

@@ -2,12 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail, tplOrderReceived } from "@/lib/email";
+import { generateOrderRefCandidates } from "@/lib/order-ref";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 
 const VALID_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other"] as const;
 const VALID_URGENCIES = ["low", "normal", "high", "critical"] as const;
+
+/** Persiste o primeiro orderRef candidato que não viole a constraint UNIQUE. */
+async function assignOrderRef(orderId: string, description: string): Promise<void> {
+  for (const candidate of generateOrderRefCandidates(description, new Date(), 5)) {
+    try {
+      await db.order.update({ where: { id: orderId }, data: { orderRef: candidate } });
+      return;
+    } catch {
+      // colisão de unique constraint → tenta próximo candidato
+    }
+  }
+}
 
 // ─── GET /api/orders — lista pedidos do cliente autenticado ──────────────────
 export async function GET(_req: NextRequest) {
@@ -85,6 +98,9 @@ export async function POST(request: NextRequest) {
       },
       include: { client: { select: { name: true, email: true } } },
     });
+
+    // Gerar e persistir orderRef único
+    await assignOrderRef(order.id, body.description);
 
     // Notificar admin por email
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";

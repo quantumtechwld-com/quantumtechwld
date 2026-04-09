@@ -117,6 +117,11 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
                     <span className="font-medium text-white group-hover:text-violet-300 transition-colors">
                       {ORDER_TYPE_LABEL[o.type] ?? o.type}
                     </span>
+                    {o.orderRef && (
+                      <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
+                        {o.orderRef}
+                      </span>
+                    )}
                     <span className="text-slate-500 text-sm">·</span>
                     <span className="text-sm text-slate-400">{o.client.name ?? o.client.email}</span>
                   </div>

@@ -60,9 +60,19 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
           ← Pedidos
         </Link>
         <div className="mt-2 flex items-center justify-between gap-4 flex-wrap">
-          <h1 className="text-2xl font-bold text-white">
-            {ORDER_TYPE_LABEL[order.type] ?? order.type}
-          </h1>
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              {ORDER_TYPE_LABEL[order.type] ?? order.type}
+            </h1>
+            {order.orderRef && (
+              <p className="mt-1 font-mono text-sm text-slate-400">
+                Ref.{" "}
+                <span className="text-slate-200 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                  {order.orderRef}
+                </span>
+              </p>
+            )}
+          </div>
           <span
             className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLOR[order.status] ?? "bg-slate-500/20 text-slate-300"}`}
           >

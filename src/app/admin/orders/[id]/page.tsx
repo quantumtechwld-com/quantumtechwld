@@ -106,11 +106,18 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
           <h1 className="text-2xl font-bold text-white">
             {ORDER_TYPE_LABEL[order.type] ?? order.type}
           </h1>
-          <p className="mt-1 text-xs text-slate-500">
-            {new Date(order.createdAt).toLocaleDateString("pt-PT", {
-              day: "2-digit", month: "long", year: "numeric",
-            })}
-          </p>
+          <div className="mt-1.5 flex items-center gap-3 flex-wrap">
+            {order.orderRef && (
+              <span className="font-mono text-sm text-slate-300 bg-white/5 border border-white/15 rounded px-2.5 py-1">
+                {order.orderRef}
+              </span>
+            )}
+            <p className="text-xs text-slate-500">
+              {new Date(order.createdAt).toLocaleDateString("pt-PT", {
+                day: "2-digit", month: "long", year: "numeric",
+              })}
+            </p>
+          </div>
         </div>
 
         {/* Cliente */}
