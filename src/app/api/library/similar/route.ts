@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateEmbedding, buildEmbeddingText, cosineSimilarity } from "@/lib/embeddings";
+import { auth } from "@/auth";
 
 const MIN_SIMILARITY = 0.7;
 
@@ -36,6 +37,11 @@ type RawProject = {
 type ScoredProject = Omit<RawProject, "embedding"> & { similarity: number };
 
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
   let body: {
     projectType?: string;
     description?: string;

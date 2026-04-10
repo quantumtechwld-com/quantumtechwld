@@ -3,6 +3,26 @@ import { prisma } from "@/lib/prisma";
 import { computeComplexity } from "@/lib/complexity";
 import { sendMail } from "@/lib/email";
 
+// ─── Rate limit simples em memória ──────────────────────────────────────────
+// Máximo 5 leads por IP por janela de 10 minutos.
+const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 min
+const RATE_MAX       = 5;
+const rateLimitMap   = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now  = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  if (entry.count >= RATE_MAX) return true;
+  entry.count++;
+  return false;
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 type LeadPayload = {
   // Campos do wizard
   projectType?: string;
@@ -24,6 +44,7 @@ function isValidLead(payload: Partial<LeadPayload>): payload is LeadPayload {
   return Boolean(
     payload.name?.trim() &&
       payload.email?.trim() &&
+      EMAIL_REGEX.test(payload.email.trim()) &&
       payload.service?.trim() &&
       payload.budget?.trim() &&
       payload.message?.trim()
@@ -32,6 +53,17 @@ function isValidLead(payload: Partial<LeadPayload>): payload is LeadPayload {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting por IP
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      ?? request.headers.get("x-real-ip")
+      ?? "unknown";
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: "Muitas tentativas. Tente novamente em alguns minutos." },
+        { status: 429 }
+      );
+    }
+
     const payload = (await request.json()) as Partial<LeadPayload>;
 
     if (!isValidLead(payload)) {

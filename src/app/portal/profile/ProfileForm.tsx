@@ -12,7 +12,6 @@ type User = {
 
 export function ProfileForm({ user }: Readonly<{ user: User }>) {
   const router  = useRouter();
-  const [name,    setName]    = useState(user.name    ?? "");
   const [phone,   setPhone]   = useState(user.phone   ?? "");
   const [company, setCompany] = useState(user.company ?? "");
   const [loading, setLoading] = useState(false);
@@ -28,7 +27,7 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
       const res = await fetch("/api/profile", {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ name, phone, company }),
+        body:    JSON.stringify({ phone, company }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -54,17 +53,13 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
         <p className="mt-1 text-xs text-slate-600">O e-mail não pode ser alterado.</p>
       </div>
 
-      {/* Name */}
+      {/* Name — read only */}
       <div>
-        <label htmlFor="profile-name" className="block text-sm font-medium text-slate-300 mb-1.5">Nome completo</label>
-        <input
-          id="profile-name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="O seu nome"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none"
-        />
+        <p className="block text-sm font-medium text-slate-300 mb-1.5">Nome completo</p>
+        <div className="w-full rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-slate-400 text-sm">
+          {user.name}
+        </div>
+        <p className="mt-1 text-xs text-slate-600">O nome não pode ser alterado.</p>
       </div>
 
       {/* Company */}

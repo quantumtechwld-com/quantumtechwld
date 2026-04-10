@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateEmbedding, buildEmbeddingText, cosineSimilarity } from "@/lib/embeddings";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
 const PROJECT_TYPES = ["website", "webapp", "mobile", "ecommerce", "automation", "system"];
 
@@ -29,6 +30,11 @@ const TIMELINES = [
 ];
 
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
   const body = (await request.json()) as { text?: string };
   const text = body.text?.trim();
 

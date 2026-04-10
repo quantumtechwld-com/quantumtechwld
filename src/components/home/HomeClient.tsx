@@ -105,12 +105,20 @@ export default function HomeClient() {
             <a href="#portfolio" className="transition-colors hover:text-white">Projetos</a>
             <a href="#lead" className="transition-colors hover:text-white">Contato</a>
           </div>
-          <a
-            href="#lead"
-            className="rounded-lg bg-cyan-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
-          >
-            Fale conosco
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href="/portal"
+              className="rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:border-white/30 hover:text-white"
+            >
+              Área do Cliente
+            </a>
+            <a
+              href="#lead"
+              className="rounded-lg bg-cyan-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+            >
+              Fale conosco
+            </a>
+          </div>
         </nav>
       </header>
 
