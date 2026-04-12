@@ -2,19 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const LABELS = ["Muito mau", "Mau", "Razoável", "Bom", "Excelente"];
+import { useTranslations } from "next-intl";
 
 export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
+  const t = useTranslations("portal");
   const router  = useRouter();
   const [hover,   setHover]   = useState(0);
   const [score,   setScore]   = useState(0);
   const [comment, setComment] = useState("");
+
+  const LABELS = [
+    t("ratingLabel1"),
+    t("ratingLabel2"),
+    t("ratingLabel3"),
+    t("ratingLabel4"),
+    t("ratingLabel5"),
+  ];
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
   async function submit() {
-    if (!score) { setError("Selecione uma pontuação."); return; }
+    if (!score) { setError(t("ratingSelectScore")); return; }
     setError("");
     setLoading(true);
     try {
@@ -25,11 +33,11 @@ export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Erro ao guardar avaliação.");
+        throw new Error(data.error ?? t("ratingErrSave"));
       }
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
+      setError(err instanceof Error ? err.message : t("ratingErrUnexpected"));
     } finally {
       setLoading(false);
     }
@@ -39,8 +47,8 @@ export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
 
   return (
     <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5">
-      <h3 className="text-sm font-semibold text-yellow-300 mb-1">Como correu o projeto?</h3>
-      <p className="text-xs text-slate-400 mb-4">A sua avaliação ajuda-nos a melhorar.</p>
+      <h3 className="text-sm font-semibold text-yellow-300 mb-1">{t("ratingTitle")}</h3>
+      <p className="text-xs text-slate-400 mb-4">{t("ratingSubtitle")}</p>
 
       {/* Estrelas */}
       <div role="radiogroup" aria-label="Avaliação" tabIndex={-1} className="flex gap-1 mb-1" onMouseLeave={() => setHover(0)}>
@@ -53,7 +61,7 @@ export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
             className={`text-2xl transition-transform hover:scale-110 focus:outline-none ${
               n <= active ? "text-yellow-400" : "text-slate-600"
             }`}
-            aria-label={`${n} ${n === 1 ? "estrela" : "estrelas"}`}
+            aria-label={`${n} ${n === 1 ? t("ratingStar") : t("ratingStars")}`}
           >
             ★
           </button>
@@ -68,7 +76,7 @@ export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={2}
-        placeholder="Comentário opcional…"
+        placeholder={t("ratingCommentPlaceholder")}
         className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-yellow-500/60 focus:outline-none resize-none mb-3"
       />
 
@@ -83,7 +91,7 @@ export function RatingWidget({ orderId }: Readonly<{ orderId: string }>) {
         disabled={loading || !score}
         className="rounded-xl bg-yellow-500 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-yellow-400 disabled:opacity-50"
       >
-        {loading ? "A enviar…" : "Enviar avaliação"}
+        {loading ? t("ratingSending") : t("ratingSubmit")}
       </button>
     </div>
   );

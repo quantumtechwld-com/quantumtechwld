@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Order = {
   id:             string;
@@ -12,6 +13,7 @@ type Order = {
 };
 
 export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
+  const t = useTranslations("portal");
   const router = useRouter();
   const [revisionNote, setRevisionNote] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
   async function act(action: "approve" | "revision" | "reject") {
     if (action !== "revision" && !confirm) { setConfirm(action); return; }
     if (action === "revision" && !revisionNote.trim()) {
-      setError("Explique o que precisa de ser revisto."); return;
+      setError(t("orderActionsRevisionRequired")); return;
     }
     setError("");
     setLoading(action);
@@ -35,11 +37,11 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Erro ao actualizar pedido.");
+        throw new Error(data.error ?? t("orderActionsErrUpdate"));
       }
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
+      setError(err instanceof Error ? err.message : t("orderActionsErrUnexpected"));
     } finally {
       setLoading(null);
       setConfirm(null);
@@ -48,19 +50,19 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
 
   return (
     <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/5 p-5">
-      <p className="text-sm font-semibold text-accent-light mb-4">Responda à proposta</p>
+      <p className="text-sm font-semibold text-accent-light mb-4">{t("orderActionsTitle")}</p>
 
       {/* Revision note */}
       <div className="mb-4">
         <label htmlFor="revision-note" className="block text-xs text-slate-400 mb-1">
-          Nota de revisão (opcional para aprovar, obrigatória para pedir revisão)
+          {t("orderActionsRevisionLabel")}
         </label>
         <textarea
           id="revision-note"
           value={revisionNote}
           onChange={(e) => setRevisionNote(e.target.value)}
           rows={3}
-          placeholder="O que precisa de ser alterado…"
+          placeholder={t("orderActionsRevisionPlaceholder")}
           className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-accent focus:outline-none resize-none"
         />
       </div>
@@ -74,25 +76,25 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
       {/* Confirm dialogs */}
       {confirm === "approve" && (
         <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
-          Confirma que pretende <strong>aprovar</strong> esta proposta?{" "}
+          {t("orderActionsConfirmText1")} <strong>{t("orderActionsApproveStrong")}</strong> {t("orderActionsConfirmText2")}{" "}
           <button onClick={() => act("approve")} disabled={!!loading} className="underline font-semibold">
-            {loading === "approve" ? "A confirmar…" : "Sim, aprovar"}
+            {loading === "approve" ? t("orderActionsConfirming") : t("orderActionsYesApprove")}
           </button>{" "}
           ·{" "}
           <button onClick={() => setConfirm(null)} className="underline text-slate-400">
-            Cancelar
+            {t("orderActionsCancel")}
           </button>
         </div>
       )}
       {confirm === "reject" && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-          Confirma que pretende <strong>recusar</strong> esta proposta?{" "}
+          {t("orderActionsConfirmText1")} <strong>{t("orderActionsRejectStrong")}</strong> {t("orderActionsConfirmText2")}{" "}
           <button onClick={() => act("reject")} disabled={!!loading} className="underline font-semibold">
-            {loading === "reject" ? "A confirmar…" : "Sim, recusar"}
+            {loading === "reject" ? t("orderActionsConfirming") : t("orderActionsYesReject")}
           </button>{" "}
           ·{" "}
           <button onClick={() => setConfirm(null)} className="underline text-slate-400">
-            Cancelar
+            {t("orderActionsCancel")}
           </button>
         </div>
       )}
@@ -103,21 +105,21 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
           disabled={!!loading}
           className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-60"
         >
-          {loading === "revision" ? "A enviar…" : "Pedir revisão"}
+          {loading === "revision" ? t("orderActionsSending") : t("orderActionsRevisionBtn")}
         </button>
         <button
           onClick={() => { setConfirm(null); act("reject"); }}
           disabled={!!loading}
           className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-60"
         >
-          Recusar
+          {t("orderActionsRejectBtn")}
         </button>
         <button
           onClick={() => act("approve")}
           disabled={!!loading}
           className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:opacity-60"
         >
-          {loading === "approve" ? "A confirmar…" : "Aprovar proposta"}
+          {loading === "approve" ? t("orderActionsConfirming") : t("orderActionsApproveBtn")}
         </button>
       </div>
     </div>

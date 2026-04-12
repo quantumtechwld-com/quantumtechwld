@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 interface MessageAuthor {
   id: string;
@@ -24,6 +25,8 @@ interface MessagesPanelProps {
 }
 
 export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 }: Readonly<MessagesPanelProps>) {
+  const t = useTranslations("portal");
+  const locale = useLocale();
   const [messages, setMessages] = useState<Message[]>([]);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -66,10 +69,10 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
         await fetchMessages();
       } else {
         const data = await res.json() as { error?: string };
-        setError(data.error ?? "Erro ao enviar mensagem");
+        setError(data.error ?? t("messagesErrSend"));
       }
     } catch {
-      setError("Erro de rede. Tente novamente.");
+      setError(t("messagesErrNetwork"));
     } finally {
       setSending(false);
     }
@@ -85,15 +88,15 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
   return (
     <section className="rounded-2xl border border-white/10 bg-white/3 overflow-hidden">
       <div className="border-b border-white/10 px-5 py-3">
-        <h2 className="text-sm font-semibold text-slate-300">Mensagens</h2>
-        <p className="text-xs text-slate-500 mt-0.5">Canal de comunicação do pedido</p>
+        <h2 className="text-sm font-semibold text-slate-300">{t("messagesTitle")}</h2>
+        <p className="text-xs text-slate-500 mt-0.5">{t("messagesSubtitle")}</p>
       </div>
 
       {/* Message list */}
       <div className="flex flex-col gap-3 px-5 py-4 min-h-30 max-h-96 overflow-y-auto">
         {messages.length === 0 ? (
           <p className="text-xs text-slate-600 text-center mt-6">
-            Ainda não há mensagens. Inicie a conversa abaixo.
+            {t("messagesEmpty")}
           </p>
         ) : (
           messages.map((msg) => {
@@ -103,12 +106,12 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
               <div key={msg.id} className={`flex flex-col gap-0.5 ${isMe ? "items-end" : "items-start"}`}>
                 <div className={`flex items-center gap-1.5 mb-0.5 ${isMe ? "flex-row-reverse" : ""}`}>
                   <span className={`text-[10px] font-medium ${isAdmin ? "text-violet-400" : "text-accent-light"}`}>
-                    {isAdmin ? "Admin" : (msg.author.name ?? msg.author.email ?? "Cliente")}
+                    {isAdmin ? "Admin" : (msg.author.name ?? msg.author.email ?? t("messagesClient"))}
                   </span>
                   <span className="text-[10px] text-slate-600">
-                    {new Date(msg.createdAt).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(msg.createdAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
                     {" · "}
-                    {new Date(msg.createdAt).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" })}
+                    {new Date(msg.createdAt).toLocaleDateString(locale, { day: "2-digit", month: "short" })}
                   </span>
                 </div>
                 <div
@@ -137,7 +140,7 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Escreva uma mensagem… (Ctrl+Enter para enviar)"
+            placeholder={t("messagesPlaceholder")}
             maxLength={2000}
             rows={2}
             className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-accent/50 focus:bg-white/8 focus:outline-none transition"
@@ -147,10 +150,10 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
             disabled={sending || body.trim().length === 0}
             className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {sending ? "…" : "Enviar"}
+            {sending ? "…" : t("messagesSend")}
           </button>
         </div>
-        <p className="mt-1.5 text-[10px] text-slate-600">{body.length}/2000 · Ctrl+Enter para enviar</p>
+        <p className="mt-1.5 text-[10px] text-slate-600">{t("messagesCharCount", { count: body.length })}</p>
       </div>
     </section>
   );

@@ -83,7 +83,7 @@ export default async function PortalPage() {
           >
             {t("navProfile")}
           </Link>
-          <SignOutButton className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" />
+          <SignOutButton className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" label={t("profileSignOut")} />
         </div>
       </div>
 

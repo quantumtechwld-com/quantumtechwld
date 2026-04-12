@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { getTranslations, getLocale } from "next-intl/server";
 
 type RefProject = {
   id: string;
@@ -16,12 +17,6 @@ type RefProject = {
   createdAt: Date;
 };
 
-function getComplexityLabel(score: number) {
-  if (score <= 3) return "Baixa";
-  if (score <= 6) return "Média";
-  if (score <= 8) return "Alta";
-  return "Muito Alta";
-}
 
 function getComplexityColor(score: number) {
   if (score <= 3) return "text-emerald-300 bg-emerald-500/10 border-emerald-400/20";
@@ -59,6 +54,16 @@ export default async function BibliotecaDetailPage({
 
   if (!project) notFound();
 
+  const t = await getTranslations("portal");
+  const locale = await getLocale();
+
+  function getComplexityLabel(score: number) {
+    if (score <= 3) return t("complexityLow");
+    if (score <= 6) return t("complexityMedium");
+    if (score <= 8) return t("complexityHigh");
+    return t("complexityVeryHigh");
+  }
+
   const complexityLabel = getComplexityLabel(project.complexityScore);
   const complexityColor = getComplexityColor(project.complexityScore);
 
@@ -67,9 +72,9 @@ export default async function BibliotecaDetailPage({
 
       {/* Breadcrumb */}
       <div className="mb-8 flex items-center gap-2 text-xs text-slate-500">
-        <Link href="/portal" className="hover:text-accent-light transition">Portal</Link>
+        <Link href="/portal" className="hover:text-accent-light transition">{t("bibliotecaPortalLink")}</Link>
         <span>/</span>
-        <Link href="/portal/biblioteca" className="hover:text-accent-light transition">Biblioteca</Link>
+        <Link href="/portal/biblioteca" className="hover:text-accent-light transition">{t("bibliotecaLibraryLink")}</Link>
         <span>/</span>
         <span className="text-slate-400 truncate max-w-50">{project.title}</span>
       </div>
@@ -84,31 +89,32 @@ export default async function BibliotecaDetailPage({
         </div>
         <p className="mt-3 text-sm text-slate-400 leading-relaxed">{project.description}</p>
         <p className="mt-2 text-xs text-slate-600">
-          Adicionado em{" "}
-          {new Date(project.createdAt).toLocaleDateString("pt-PT", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
+          {t("bibliotecaAddedOn", {
+            date: new Date(project.createdAt).toLocaleDateString(locale, {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            }),
           })}
         </p>
       </div>
 
       {/* Métricas */}
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
-        <h2 className="text-xs uppercase tracking-widest text-slate-500 mb-4">Métricas do Projeto</h2>
+        <h2 className="text-xs uppercase tracking-widest text-slate-500 mb-4">{t("bibliotecaDetailMetrics")}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Complexidade</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{t("bibliotecaDetailComplexity")}</p>
             <span className={`inline-block rounded-full border px-3 py-0.5 text-sm font-medium ${complexityColor}`}>
               {complexityLabel} ({project.complexityScore}/10)
             </span>
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Horas reais</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{t("bibliotecaDetailHours")}</p>
             <p className="text-lg font-semibold text-white">{project.hoursActual}h</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Faixa de orçamento</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{t("bibliotecaDetailBudget")}</p>
             <p className="text-sm font-medium text-white">{project.budgetRange}</p>
           </div>
         </div>
@@ -117,7 +123,7 @@ export default async function BibliotecaDetailPage({
       {/* Tecnologias */}
       {project.techStack.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
-          <h2 className="text-xs uppercase tracking-widest text-slate-500 mb-4">Stack Tecnológica</h2>
+          <h2 className="text-xs uppercase tracking-widest text-slate-500 mb-4">{t("bibliotecaDetailStack")}</h2>
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((t: string) => (
               <span
@@ -134,7 +140,7 @@ export default async function BibliotecaDetailPage({
       {/* Funcionalidades */}
       {project.features.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-8">
-          <h2 className="text-xs uppercase tracking-widest text-slate-500 mb-4">Funcionalidades Entregues</h2>
+          <h2 className="text-xs uppercase tracking-widest text-slate-500 mb-4">{t("bibliotecaDetailFeatures")}</h2>
           <ul className="grid sm:grid-cols-2 gap-2">
             {project.features.map((f: string) => (
               <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
@@ -151,7 +157,7 @@ export default async function BibliotecaDetailPage({
         href="/portal/biblioteca"
         className="inline-flex items-center gap-2 text-sm text-accent-light hover:text-accent-light transition"
       >
-        ← Voltar à Biblioteca
+        {t("bibliotecaDetailBack")}
       </Link>
 
     </main>

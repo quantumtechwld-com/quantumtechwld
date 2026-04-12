@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
+import { getTranslations, getLocale } from "next-intl/server";
 
 type RefProject = {
   id: string;
@@ -19,6 +20,9 @@ type RefProject = {
 export default async function BibliotecaPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
+
+  const t = await getTranslations("portal");
+  const locale = await getLocale();
 
   // Importação lazy para evitar erro de edge runtime
   const { prisma } = await import("@/lib/prisma");
@@ -49,11 +53,11 @@ export default async function BibliotecaPage() {
           href="/portal"
           className="text-xs uppercase tracking-widest text-accent-light hover:text-accent-light transition"
         >
-          ← Portal
+          {t("bibliotecaPortal")}
         </Link>
-        <h1 className="mt-2 text-3xl font-bold text-white">Biblioteca de Projetos</h1>
+        <h1 className="mt-2 text-3xl font-bold text-white">{t("bibliotecaTitle")}</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Projetos de referência que inspiram e orientam novos desenvolvimentos.
+          {t("bibliotecaSubtitle")}
         </p>
       </div>
 
@@ -63,15 +67,17 @@ export default async function BibliotecaPage() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
             <BookOpen size={22} className="text-white/30" />
           </div>
-          <p className="text-sm font-medium text-slate-300">Nenhum projeto na biblioteca ainda.</p>
+          <p className="text-sm font-medium text-slate-300">{t("bibliotecaEmptyTitle")}</p>
           <p className="mt-1 text-xs text-slate-500">
-            Em breve terá acesso a projetos de referência entregues pela equipa.
+            {t("bibliotecaEmptyBody")}
           </p>
         </div>
       ) : (
         <section>
           <p className="mb-6 text-xs uppercase tracking-widest text-slate-500">
-            {libraryProjects.length} projeto{libraryProjects.length === 1 ? "" : "s"} disponíve{libraryProjects.length === 1 ? "l" : "is"}
+            {libraryProjects.length === 1
+              ? t("bibliotecaCountSingle", { count: libraryProjects.length })
+              : t("bibliotecaCountPlural", { count: libraryProjects.length })}
           </p>
           <div className="grid gap-4">
             {libraryProjects.map((p) => (
@@ -92,15 +98,15 @@ export default async function BibliotecaPage() {
 
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   <div>
-                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Complexidade</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">{t("bibliotecaComplexity")}</p>
                     <p className="text-sm text-white">{p.complexityScore}/10</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Horas reais</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">{t("bibliotecaHours")}</p>
                     <p className="text-sm text-white">{p.hoursActual}h</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Orçamento</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">{t("bibliotecaBudget")}</p>
                     <p className="text-sm text-white">{p.budgetRange}</p>
                   </div>
                 </div>
@@ -125,12 +131,14 @@ export default async function BibliotecaPage() {
 
                 <p className="mt-3 text-xs text-slate-600 flex items-center justify-between">
                   <span>
-                    Adicionado em {new Date(p.createdAt).toLocaleDateString("pt-PT", {
-                      day: "2-digit", month: "long", year: "numeric",
+                    {t("bibliotecaAddedOn", {
+                      date: new Date(p.createdAt).toLocaleDateString(locale, {
+                        day: "2-digit", month: "long", year: "numeric",
+                      }),
                     })}
                   </span>
                   <span className="text-accent group-hover:text-accent-light transition text-xs">
-                    Ver detalhes →
+                    {t("bibliotecaViewDetails")}
                   </span>
                 </p>
               </Link>

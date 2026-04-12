@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export default async function PaymentSuccessPage({ params }: Readonly<RouteParams>) {
   const { id } = await params;
+  const t = await getTranslations("portal");
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg items-center justify-center px-6 py-16">
@@ -13,19 +15,18 @@ export default async function PaymentSuccessPage({ params }: Readonly<RouteParam
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-white mb-3">Pagamento confirmado!</h1>
+        <h1 className="text-3xl font-bold text-white mb-3">{t("paySuccessTitle")}</h1>
         <p className="text-slate-400 mb-2">
-          O pagamento foi processado com sucesso pelo Stripe.
+          {t("paySuccessBody1")}
         </p>
         <p className="text-slate-400 mb-8">
-          O seu pedido entrou automaticamente em produção.
-          Receberá um e-mail de confirmação em breve.
+          {t("paySuccessBody2")}
         </p>
         <Link
           href={`/portal/orders/${id}`}
           className="inline-flex items-center rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-400"
         >
-          Ver pedido →
+          {t("paySuccessViewOrder")}
         </Link>
       </div>
     </main>

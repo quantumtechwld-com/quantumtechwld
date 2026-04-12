@@ -3,23 +3,27 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { PrintButton } from "./PrintButton";
+import { getTranslations, getLocale } from "next-intl/server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
-
-const ORDER_TYPE_LABEL: Record<string, string> = {
-  new_feature: "Nova funcionalidade",
-  bug_fix:     "Correção de bug",
-  new_project: "Novo projeto",
-  support:     "Suporte técnico",
-  other:       "Outro",
-};
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
+
+  const t = await getTranslations("portal");
+  const locale = await getLocale();
+
+  const ORDER_TYPE_LABEL: Record<string, string> = {
+    new_feature: t("invoiceTypeNewFeature"),
+    bug_fix:     t("invoiceTypeBugFix"),
+    new_project: t("invoiceTypeNewProject"),
+    support:     t("invoiceTypeSupport"),
+    other:       t("invoiceTypeOther"),
+  };
 
   const { id } = await params;
 
@@ -35,13 +39,13 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   if (order.client.email !== session.user.email) notFound();
   if (order.payment?.status !== "PAID") redirect(`/portal/orders/${id}`);
 
-  const amount = (order.payment.amountCents / 100).toLocaleString("pt-PT", {
+  const amount = (order.payment.amountCents / 100).toLocaleString(locale, {
     style: "currency", currency: order.payment.currency?.toUpperCase() ?? "EUR",
   });
 
   const invoiceNumber = `QT-${id.slice(-8).toUpperCase()}`;
   const paidAt = order.payment.paidAt
-    ? new Date(order.payment.paidAt).toLocaleDateString("pt-PT", {
+    ? new Date(order.payment.paidAt).toLocaleDateString(locale, {
         day: "2-digit", month: "long", year: "numeric",
       })
     : "—";
@@ -59,7 +63,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
         {/* Voltar + Imprimir — ocultos na impressão */}
         <div className="no-print mb-8 flex items-center justify-between">
           <Link href={`/portal/orders/${id}`} className="text-sm text-accent hover:text-accent-light transition-colors">
-            ← Voltar ao pedido
+            {t("invoiceBack")}
           </Link>
           <PrintButton />
         </div>
@@ -73,7 +77,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
               <p className="text-sm text-slate-400 print:text-gray-600">quantum.technology.agency</p>
             </div>
             <div className="text-right">
-              <p className="text-xs uppercase tracking-widest text-slate-500 print:text-gray-500">Fatura</p>
+              <p className="text-xs uppercase tracking-widest text-slate-500 print:text-gray-500">{t("invoiceLabel")}</p>
               <p className="text-xl font-bold text-white print:text-black">{invoiceNumber}</p>
               <p className="text-xs text-slate-400 print:text-gray-600 mt-1">{paidAt}</p>
             </div>
@@ -83,7 +87,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
 
           {/* Dados do cliente */}
           <div className="mb-6">
-            <p className="text-xs uppercase tracking-widest text-slate-500 print:text-gray-500 mb-2">Faturado a</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500 print:text-gray-500 mb-2">{t("invoiceBilledTo")}</p>
             <p className="text-sm font-semibold text-white print:text-black">{order.client.name ?? "—"}</p>
             {order.client.company && (
               <p className="text-sm text-slate-300 print:text-gray-700">{order.client.company}</p>
@@ -100,8 +104,8 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
           <table className="w-full text-sm mb-6">
             <thead>
               <tr className="text-xs uppercase tracking-widest text-slate-500 print:text-gray-500">
-                <th className="text-left pb-3 font-medium">Descrição</th>
-                <th className="text-right pb-3 font-medium">Valor</th>
+                <th className="text-left pb-3 font-medium">{t("invoiceDescCol")}</th>
+                <th className="text-right pb-3 font-medium">{t("invoiceAmountCol")}</th>
               </tr>
             </thead>
             <tbody>
@@ -125,7 +129,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
 
           {/* Total */}
           <div className="flex justify-between items-center mb-6">
-            <p className="text-sm text-slate-400 print:text-gray-600">Total</p>
+            <p className="text-sm text-slate-400 print:text-gray-600">{t("invoiceTotal")}</p>
             <p className="text-2xl font-bold text-white print:text-black">{amount}</p>
           </div>
 
@@ -133,7 +137,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-300 print:border-green-300 print:bg-green-50 print:text-green-800 flex items-center gap-2">
             <span>✓</span>
             <span>
-              Pago a {paidAt}
+            {t("invoicePaidAt", { date: paidAt })}
               {order.payment.stripePaymentIntent && (
                 <span className="ml-2 text-xs opacity-60">· {order.payment.stripePaymentIntent}</span>
               )}
@@ -142,7 +146,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
 
           {/* Rodapé */}
           <p className="mt-8 text-xs text-slate-600 print:text-gray-400 text-center">
-            Quantum Technology Agency · Este documento serve como comprovativo de pagamento.
+          {t("invoiceFooter")}
           </p>
         </div>
       </main>
