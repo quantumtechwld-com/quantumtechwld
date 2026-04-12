@@ -104,10 +104,7 @@ Return ONLY a valid JSON with this structure (no markdown, no explanations):
     const errBody = await geminiRes.text().catch(() => "");
     console.error("Gemini error:", geminiRes.status, errBody);
     return NextResponse.json(
-      {
-        errorCode: "errGeminiCall",
-        detail: process.env.NODE_ENV === "production" ? undefined : errBody,
-      },
+      { errorCode: "errGeminiCall", status: geminiRes.status, detail: errBody },
       { status: 502 },
     );
   }
