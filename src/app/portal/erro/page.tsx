@@ -1,24 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-
-const ERROR_MESSAGES: Record<string, { title: string; body: string }> = {
-  Verification: {
-    title: "Link inválido ou expirado",
-    body: "O link de acesso que utilizou já foi usado ou expirou. Os links são válidos por 24 horas e só podem ser usados uma vez.",
-  },
-  AccessDenied: {
-    title: "Acesso negado",
-    body: "Não tem permissão para aceder a esta página.",
-  },
-  Configuration: {
-    title: "Erro de configuração",
-    body: "Ocorreu um erro interno. Por favor contacte o suporte.",
-  },
-  Default: {
-    title: "Erro de autenticação",
-    body: "Não foi possível completar o início de sessão. Por favor tente novamente.",
-  },
-};
+import { getTranslations } from "next-intl/server";
 
 type SearchParams = Promise<Record<string, string | undefined>>;
 
@@ -27,8 +9,16 @@ export default async function AuthErrorPage({
 }: Readonly<{ searchParams: SearchParams }>) {
   const sp = await searchParams;
   const errorKey = sp.error ?? "Default";
-  const { title, body } =
-    ERROR_MESSAGES[errorKey] ?? ERROR_MESSAGES.Default;
+  const t = await getTranslations("portal");
+
+  const errors: Record<string, { title: string; body: string }> = {
+    Verification:  { title: t("erroVerificationTitle"),  body: t("erroVerificationBody") },
+    AccessDenied:  { title: t("erroAccessDeniedTitle"),  body: t("erroAccessDeniedBody") },
+    Configuration: { title: t("erroConfigTitle"),        body: t("erroConfigBody") },
+    Default:       { title: t("erroDefaultTitle"),       body: t("erroDefaultBody") },
+  };
+
+  const { title, body } = errors[errorKey] ?? errors.Default;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
@@ -42,7 +32,7 @@ export default async function AuthErrorPage({
           href="/portal/login"
           className="inline-flex rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
         >
-          Pedir novo link de acesso
+          {t("erroBackBtn")}
         </Link>
       </div>
     </main>

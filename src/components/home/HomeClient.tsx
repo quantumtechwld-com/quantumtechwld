@@ -270,7 +270,7 @@ export default function HomeClient() {
               {[
                 ["70+", t("hero.statProjects")],
                 ["98%", t("hero.statSatisfaction")],
-                ["7 dias", t("hero.statMvp")],
+                [t("hero.statMvpValue"), t("hero.statMvp")],
               ].map(([v, l]) => (
                 <div
                   data-hero="stat"

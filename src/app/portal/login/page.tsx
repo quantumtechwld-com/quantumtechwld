@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { sendMagicLink } from "./actions";
 import { MailCheck } from "lucide-react";
 
 export default function LoginPage() {
+  const t = useTranslations("portal");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -16,28 +18,20 @@ export default function LoginPage() {
     setErrorMsg("");
     try {
       await sendMagicLink(email);
-      // Se a server action não redirecionou (modo dev sem SMTP), mostra feedback
       setSent(true);
     } catch (err: unknown) {
-      // NEXT_REDIRECT é lançado pelo redirect() do Next.js — não é um erro real
       if (err && typeof err === "object" && "digest" in err) {
         return;
       }
       const msg = err instanceof Error ? err.message : "";
       if (msg === "NOT_FOUND") {
-        setErrorMsg(
-          "Este email não está registado no portal. Preencha o formulário de contacto para solicitar acesso."
-        );
+        setErrorMsg(t("loginErrNotFound"));
       } else if (msg === "PENDING") {
-        setErrorMsg(
-          "A sua conta está a aguardar aprovação pelo administrador. Entraremos em contacto brevemente."
-        );
+        setErrorMsg(t("loginErrPending"));
       } else if (msg === "SUSPENDED") {
-        setErrorMsg(
-          "O acesso à sua conta foi suspenso. Entre em contacto com o suporte."
-        );
+        setErrorMsg(t("loginErrSuspended"));
       } else {
-        setErrorMsg("Erro ao enviar o link. Tente novamente.");
+        setErrorMsg(t("loginErrGeneric"));
       }
     } finally {
       setLoading(false);
@@ -52,26 +46,25 @@ export default function LoginPage() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
               <MailCheck size={28} className="text-accent-light" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Verifique o seu e-mail</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">{t("loginSentTitle")}</h1>
             <p className="text-slate-300 text-sm">
-              Enviámos um link de acesso para <span className="text-accent-light font-medium">{email}</span>.
-              Clique no link para entrar no portal.
+              {t("loginSentBodyBefore")}{" "}
+              <span className="text-accent-light font-medium">{email}</span>
+              {t("loginSentBodyAfter")}
             </p>
           </>
         ) : (
           <>
-            <p className="mb-2 text-sm uppercase tracking-widest text-accent-light">Portal do Cliente</p>
-            <h1 className="mb-1 text-2xl font-bold text-white">Aceder ao portal</h1>
-            <p className="mb-6 text-sm text-slate-400">
-              Introduza o seu e-mail e enviaremos um link de acesso instantâneo.
-            </p>
+            <p className="mb-2 text-sm uppercase tracking-widest text-accent-light">{t("loginTagline")}</p>
+            <h1 className="mb-1 text-2xl font-bold text-white">{t("loginTitle")}</h1>
+            <p className="mb-6 text-sm text-slate-400">{t("loginSubtitle")}</p>
             <form onSubmit={handleSubmit} className="grid gap-4">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="O seu e-mail"
+                placeholder={t("loginEmailPlaceholder")}
                 className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-accent w-full"
               />
               {errorMsg && (
@@ -84,7 +77,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="rounded-xl bg-accent py-3 font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
               >
-                {loading ? "A enviar..." : "Enviar link de acesso →"}
+                {loading ? t("loginSending") : t("loginSend")}
               </button>
             </form>
           </>

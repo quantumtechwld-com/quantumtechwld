@@ -1,25 +1,28 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const ORDER_TYPES = [
-  { value: "new_feature",  label: "Nova funcionalidade" },
-  { value: "bug_fix",      label: "Correção de bug" },
-  { value: "new_project",  label: "Novo projeto" },
-  { value: "support",      label: "Suporte técnico" },
-  { value: "other",        label: "Outro" },
-];
-
-const URGENCY_OPTIONS = [
-  { value: "low",      label: "Baixa — sem pressa" },
-  { value: "normal",   label: "Normal" },
-  { value: "high",     label: "Alta — precisamos brevemente" },
-  { value: "critical", label: "Crítica — bloqueante" },
-];
+import { useTranslations } from "next-intl";
 
 export function NewOrderForm() {
+  const t = useTranslations("portal");
   const router = useRouter();
+
+  const ORDER_TYPES = [
+    { value: "new_feature",  label: t("orderTypeNewFeature") },
+    { value: "bug_fix",      label: t("orderTypeBugFix") },
+    { value: "new_project",  label: t("orderTypeNewProject") },
+    { value: "support",      label: t("orderTypeSupport") },
+    { value: "other",        label: t("orderTypeOther") },
+  ];
+
+  const URGENCY_OPTIONS = [
+    { value: "low",      label: t("urgencyLow") },
+    { value: "normal",   label: t("urgencyNormal") },
+    { value: "high",     label: t("urgencyHigh") },
+    { value: "critical", label: t("urgencyCritical") },
+  ];
+
   const [type,        setType]        = useState("new_feature");
   const [description, setDescription] = useState("");
   const [urgency,     setUrgency]     = useState("normal");
@@ -29,7 +32,7 @@ export function NewOrderForm() {
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    if (!description.trim()) { setError("A descrição é obrigatória."); return; }
+    if (!description.trim()) { setError(t("newOrderErrRequired")); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/orders", {
@@ -39,12 +42,12 @@ export function NewOrderForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Erro ao criar pedido.");
+        throw new Error(data.error ?? t("newOrderErrCreate"));
       }
       router.push("/portal/orders");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
+      setError(err instanceof Error ? err.message : t("newOrderErrUnexpected"));
     } finally {
       setLoading(false);
     }
@@ -52,10 +55,9 @@ export function NewOrderForm() {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-6">
-      {/* Tipo */}
       <div>
         <label htmlFor="order-type" className="block text-sm font-medium text-slate-300 mb-2">
-          Tipo de pedido
+          {t("newOrderTypeLabel")}
         </label>
         <select
           id="order-type"
@@ -71,26 +73,22 @@ export function NewOrderForm() {
         </select>
       </div>
 
-      {/* Descrição */}
       <div>
         <label htmlFor="order-description" className="block text-sm font-medium text-slate-300 mb-2">
-          Descrição detalhada <span className="text-red-400">*</span>
+          {t("newOrderDescLabel")} <span className="text-red-400">*</span>
         </label>
         <textarea
           id="order-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={6}
-          placeholder="Descreva o que pretende, o contexto e qualquer detalhe relevante…"
+          placeholder={t("newOrderDescPlaceholder")}
           className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none resize-none"
         />
       </div>
 
-      {/* Urgência */}
       <div>
-        <p className="block text-sm font-medium text-slate-300 mb-2">
-          Urgência
-        </p>
+        <p className="block text-sm font-medium text-slate-300 mb-2">{t("newOrderUrgencyLabel")}</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {URGENCY_OPTIONS.map((u) => (
             <button
@@ -120,16 +118,17 @@ export function NewOrderForm() {
           href="/portal/orders"
           className="rounded-xl border border-white/20 px-5 py-2.5 text-sm text-slate-300 transition hover:bg-white/10"
         >
-          Cancelar
+          {t("newOrderCancel")}
         </a>
         <button
           type="submit"
           disabled={loading}
           className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
         >
-          {loading ? "A enviar…" : "Enviar pedido"}
+          {loading ? t("newOrderSubmitting") : t("newOrderSubmit")}
         </button>
       </div>
     </form>
   );
 }
+

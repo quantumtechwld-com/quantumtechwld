@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type User = {
   name:    string | null;
@@ -11,6 +12,7 @@ type User = {
 };
 
 export function ProfileForm({ user }: Readonly<{ user: User }>) {
+  const t = useTranslations("portal");
   const router  = useRouter();
   const [phone,   setPhone]   = useState(user.phone   ?? "");
   const [company, setCompany] = useState(user.company ?? "");
@@ -31,12 +33,12 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Erro ao guardar perfil.");
+        throw new Error(data.error ?? t("profileErrSave"));
       }
       setSuccess(true);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
+      setError(err instanceof Error ? err.message : t("profileErrUnexpected"));
     } finally {
       setLoading(false);
     }
@@ -44,46 +46,42 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-5">
-      {/* Email — read only */}
       <div>
-        <p className="block text-sm font-medium text-slate-300 mb-1.5">E-mail</p>
+        <p className="block text-sm font-medium text-slate-300 mb-1.5">{t("profileEmail")}</p>
         <div className="w-full rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-slate-400 text-sm">
           {user.email}
         </div>
-        <p className="mt-1 text-xs text-slate-600">O e-mail não pode ser alterado.</p>
+        <p className="mt-1 text-xs text-slate-600">{t("profileEmailReadonly")}</p>
       </div>
 
-      {/* Name — read only */}
       <div>
-        <p className="block text-sm font-medium text-slate-300 mb-1.5">Nome completo</p>
+        <p className="block text-sm font-medium text-slate-300 mb-1.5">{t("profileName")}</p>
         <div className="w-full rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-slate-400 text-sm">
           {user.name}
         </div>
-        <p className="mt-1 text-xs text-slate-600">O nome não pode ser alterado.</p>
+        <p className="mt-1 text-xs text-slate-600">{t("profileNameReadonly")}</p>
       </div>
 
-      {/* Company */}
       <div>
-        <label htmlFor="profile-company" className="block text-sm font-medium text-slate-300 mb-1.5">Empresa</label>
+        <label htmlFor="profile-company" className="block text-sm font-medium text-slate-300 mb-1.5">{t("profileCompany")}</label>
         <input
           id="profile-company"
           type="text"
           value={company}
           onChange={(e) => setCompany(e.target.value)}
-          placeholder="Nome da empresa (opcional)"
+          placeholder={t("profileCompanyPlaceholder")}
           className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none"
         />
       </div>
 
-      {/* Phone */}
       <div>
-        <label htmlFor="profile-phone" className="block text-sm font-medium text-slate-300 mb-1.5">Telefone</label>
+        <label htmlFor="profile-phone" className="block text-sm font-medium text-slate-300 mb-1.5">{t("profilePhone")}</label>
         <input
           id="profile-phone"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+351 912 345 678 (opcional)"
+          placeholder={t("profilePhonePlaceholder")}
           className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none"
         />
       </div>
@@ -95,7 +93,7 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
       )}
       {success && (
         <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          Perfil actualizado com sucesso.
+          {t("profileSaved")}
         </p>
       )}
 
@@ -105,9 +103,10 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
           disabled={loading}
           className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
         >
-          {loading ? "A guardar…" : "Guardar alterações"}
+          {loading ? t("profileSaving") : t("profileSave")}
         </button>
       </div>
     </form>
   );
 }
+

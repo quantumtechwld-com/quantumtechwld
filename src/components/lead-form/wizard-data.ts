@@ -1,50 +1,28 @@
 // ─── Dados do wizard ──────────────────────────────────────────────────────────
 
-export const PROJECT_TYPES = [
-  { value: "website", label: "Website", icon: "🌐", description: "Landing page, institucional ou portfólio" },
-  { value: "webapp", label: "Aplicação Web", icon: "💻", description: "Sistema ou plataforma web completa" },
-  { value: "mobile", label: "App Mobile", icon: "📱", description: "iOS, Android ou híbrido" },
-  { value: "ecommerce", label: "E-commerce", icon: "🛒", description: "Loja virtual com pagamentos" },
-  { value: "automation", label: "Automação / IA", icon: "🤖", description: "Integrações, n8n, bots e IA" },
-  { value: "system", label: "Sistema Interno", icon: "⚙️", description: "ERP, CRM, painel ou backoffice" },
-];
+// Identificadores de tipo de projeto (language-independent keys)
+export const PROJECT_TYPE_VALUES = [
+  "website", "webapp", "mobile", "ecommerce", "automation", "system",
+] as const;
+export type ProjectTypeValue = typeof PROJECT_TYPE_VALUES[number];
 
-export const FEATURES = [
-  "Autenticação de usuários",
-  "Painel administrativo",
-  "Pagamentos online",
-  "E-mails automáticos",
-  "Dashboard com gráficos",
-  "API para integrações",
-  "Chat / Suporte",
-  "Blog / CMS",
-  "Multi-idioma",
-  "Notificações push",
-  "Relatórios exportáveis",
-  "Integração com ERP/CRM",
-];
+// Chaves de funcionalidades (language-independent keys)
+export const FEATURE_KEYS = [
+  "auth", "admin", "payments", "emails", "dashboard", "api",
+  "chat", "blog", "i18n", "push", "reports", "erp",
+] as const;
+export type FeatureKey = typeof FEATURE_KEYS[number];
 
-export const BUDGETS = [
-  { value: "Até €3.000", sub: "Projetos simples" },
-  { value: "€3.000 – €8.000", sub: "Médio porte" },
-  { value: "€8.000 – €20.000", sub: "Alto porte" },
-  { value: "Acima de €20.000", sub: "Enterprise" },
-];
+// Chaves de orçamento (language-independent)
+export const BUDGET_KEYS = ["under3k", "3k-8k", "8k-20k", "over20k"] as const;
+export type BudgetKey = typeof BUDGET_KEYS[number];
 
-export const TIMELINES = [
-  { value: "Urgente (< 30 dias)", sub: "Preciso logo" },
-  { value: "Normal (1–3 meses)", sub: "Prazo padrão" },
-  { value: "Planejado (3–6 meses)", sub: "Sem pressa" },
-  { value: "Flexível", sub: "Sem prazo definido" },
-];
+// Chaves de prazo (language-independent)
+export const TIMELINE_KEYS = ["urgent", "normal", "planned", "flexible"] as const;
+export type TimelineKey = typeof TIMELINE_KEYS[number];
 
-export const STEPS = [
-  { title: "Tipo de projeto", sub: "O que você precisa construir?" },
-  { title: "Desafio & Público", sub: "Qual problema isso resolve?" },
-  { title: "Funcionalidades", sub: "O que o sistema precisa fazer?" },
-  { title: "Orçamento & Prazo", sub: "Qual o escopo esperado?" },
-  { title: "Seus dados", sub: "Como podemos entrar em contato?" },
-];
+// Número de etapas do wizard
+export const STEP_COUNT = 5;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

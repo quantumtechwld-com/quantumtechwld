@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Globe, Monitor, Smartphone, ShoppingCart, Bot, Settings } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
-  PROJECT_TYPES, FEATURES, BUDGETS, TIMELINES,
+  PROJECT_TYPE_VALUES, FEATURE_KEYS, BUDGET_KEYS, TIMELINE_KEYS,
   INPUT_CLS, toggleFeature,
   type WizardState,
 } from "./wizard-data";
@@ -21,24 +22,28 @@ type StepProps = Readonly<{
   set: <K extends keyof WizardState>(key: K, value: WizardState[K]) => void;
 }>;
 
-
 function StepProjectType({ data, set }: StepProps) {
+  const t = useTranslations("lead");
   return (
     <div className="grid grid-cols-2 gap-3">
-      {PROJECT_TYPES.map((pt) => (
+      {PROJECT_TYPE_VALUES.map((value) => (
         <button
-          key={pt.value}
+          key={value}
           type="button"
-          onClick={() => set("projectType", pt.value)}
+          onClick={() => set("projectType", value)}
           className={`rounded-2xl border p-4 text-left transition hover:border-accent ${
-            data.projectType === pt.value
+            data.projectType === value
               ? "border-accent bg-accent/20"
               : "border-white/15 bg-white/5"
           }`}
         >
-          <span className="text-accent">{PROJECT_TYPE_ICONS[pt.value]}</span>
-          <p className="mt-2 font-semibold text-white">{pt.label}</p>
-          <p className="mt-1 text-xs leading-snug text-slate-300">{pt.description}</p>
+          <span className="text-accent">{PROJECT_TYPE_ICONS[value]}</span>
+          <p className="mt-2 font-semibold text-white">
+            {t(`project${value.charAt(0).toUpperCase() + value.slice(1)}` as Parameters<typeof t>[0])}
+          </p>
+          <p className="mt-1 text-xs leading-snug text-slate-300">
+            {t(`project${value.charAt(0).toUpperCase() + value.slice(1)}Desc` as Parameters<typeof t>[0])}
+          </p>
         </button>
       ))}
     </div>
@@ -46,27 +51,28 @@ function StepProjectType({ data, set }: StepProps) {
 }
 
 function StepPainPoints({ data, set }: StepProps) {
+  const t = useTranslations("lead");
   return (
     <div className="grid gap-4">
       <div>
         <label className="mb-1 block text-sm text-slate-300">
-          <span>Qual é o principal problema que o projeto resolve?</span>
+          <span>{t("painPointsLabel")}</span>
           <textarea
             rows={3}
             value={data.painPoints}
             onChange={(e) => set("painPoints", e.target.value)}
-            placeholder="Ex: Perco clientes pois não tenho presença online..."
+            placeholder={t("painPointsPlaceholder")}
             className={INPUT_CLS}
           />
         </label>
       </div>
       <div>
         <label className="mb-1 block text-sm text-slate-300">
-          <span>Quem vai usar o produto?</span>
+          <span>{t("audienceLabel")}</span>
           <input
             value={data.targetAudience}
             onChange={(e) => set("targetAudience", e.target.value)}
-            placeholder="Ex: Pequenos comerciantes, equipe interna, consumidores finais..."
+            placeholder={t("audiencePlaceholder")}
             className={INPUT_CLS}
           />
         </label>
@@ -76,14 +82,15 @@ function StepPainPoints({ data, set }: StepProps) {
 }
 
 function StepFeatures({ data, set }: StepProps) {
+  const t = useTranslations("lead");
   return (
     <div className="grid gap-4">
       <div className="grid grid-cols-2 gap-2">
-        {FEATURES.map((f) => (
+        {FEATURE_KEYS.map((fKey) => (
           <label
-            key={f}
+            key={fKey}
             className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition ${
-              data.features.includes(f)
+              data.features.includes(fKey)
                 ? "border-accent bg-accent/15 text-white"
                 : "border-white/15 bg-white/5 text-slate-300 hover:border-white/30"
             }`}
@@ -91,27 +98,27 @@ function StepFeatures({ data, set }: StepProps) {
             <input
               type="checkbox"
               className="sr-only"
-              checked={data.features.includes(f)}
-              onChange={() => set("features", toggleFeature(data.features, f))}
+              checked={data.features.includes(fKey)}
+              onChange={() => set("features", toggleFeature(data.features, fKey))}
             />
             <span
               className={`h-3.5 w-3.5 shrink-0 rounded border transition ${
-                data.features.includes(f)
+                data.features.includes(fKey)
                   ? "border-accent bg-accent"
                   : "border-white/30"
               }`}
             />
-            {f}
+            {t(`feature${fKey.charAt(0).toUpperCase() + fKey.slice(1)}` as Parameters<typeof t>[0])}
           </label>
         ))}
       </div>
       <div>
         <label className="mb-1 block text-sm text-slate-300">
-          <span>Outras funcionalidades (opcional)</span>
+          <span>{t("featuresOther")}</span>
           <input
             value={data.customFeatures}
             onChange={(e) => set("customFeatures", e.target.value)}
-            placeholder="Descreva livremente..."
+            placeholder={t("featuresOtherPlaceholder")}
             className={INPUT_CLS}
           />
         </label>
@@ -121,46 +128,55 @@ function StepFeatures({ data, set }: StepProps) {
 }
 
 function StepBudgetTimeline({ data, set }: StepProps) {
+  const t = useTranslations("lead");
   return (
     <div className="grid gap-5">
       <div>
-        <p className="mb-2 text-sm text-slate-300">Orçamento disponível</p>
+        <p className="mb-2 text-sm text-slate-300">{t("budgetLabel")}</p>
         <div className="grid grid-cols-2 gap-2">
-          {BUDGETS.map((b) => (
-            <button
-              key={b.value}
-              type="button"
-              onClick={() => set("budget", b.value)}
-              className={`rounded-xl border p-3 text-left transition hover:border-accent ${
-                data.budget === b.value
-                  ? "border-accent bg-accent/20"
-                  : "border-white/15 bg-white/5"
-              }`}
-            >
-              <p className="font-semibold text-white text-sm">{b.value}</p>
-              <p className="text-xs text-slate-400">{b.sub}</p>
-            </button>
-          ))}
+          {BUDGET_KEYS.map((bKey) => {
+            const labelKey = `budget${bKey === "under3k" ? "Under3k" : bKey === "3k-8k" ? "3k8k" : bKey === "8k-20k" ? "8k20k" : "Over20k"}` as Parameters<typeof t>[0];
+            const subKey = `${labelKey}Sub` as Parameters<typeof t>[0];
+            return (
+              <button
+                key={bKey}
+                type="button"
+                onClick={() => set("budget", bKey)}
+                className={`rounded-xl border p-3 text-left transition hover:border-accent ${
+                  data.budget === bKey
+                    ? "border-accent bg-accent/20"
+                    : "border-white/15 bg-white/5"
+                }`}
+              >
+                <p className="font-semibold text-white text-sm">{t(labelKey)}</p>
+                <p className="text-xs text-slate-400">{t(subKey)}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm text-slate-300">Prazo desejado</p>
+        <p className="mb-2 text-sm text-slate-300">{t("timelineLabel")}</p>
         <div className="grid grid-cols-2 gap-2">
-          {TIMELINES.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => set("timeline", t.value)}
-              className={`rounded-xl border p-3 text-left transition hover:border-accent ${
-                data.timeline === t.value
-                  ? "border-accent bg-accent/20"
-                  : "border-white/15 bg-white/5"
-              }`}
-            >
-              <p className="font-semibold text-white text-sm">{t.value}</p>
-              <p className="text-xs text-slate-400">{t.sub}</p>
-            </button>
-          ))}
+          {TIMELINE_KEYS.map((tlKey) => {
+            const labelKey = `timeline${tlKey.charAt(0).toUpperCase() + tlKey.slice(1)}` as Parameters<typeof t>[0];
+            const subKey = `${labelKey}Sub` as Parameters<typeof t>[0];
+            return (
+              <button
+                key={tlKey}
+                type="button"
+                onClick={() => set("timeline", tlKey)}
+                className={`rounded-xl border p-3 text-left transition hover:border-accent ${
+                  data.timeline === tlKey
+                    ? "border-accent bg-accent/20"
+                    : "border-white/15 bg-white/5"
+                }`}
+              >
+                <p className="font-semibold text-white text-sm">{t(labelKey)}</p>
+                <p className="text-xs text-slate-400">{t(subKey)}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -168,25 +184,26 @@ function StepBudgetTimeline({ data, set }: StepProps) {
 }
 
 function StepContact({ data, set }: StepProps) {
+  const t = useTranslations("lead");
   return (
     <div className="grid gap-4">
       <input
         value={data.name}
         onChange={(e) => set("name", e.target.value)}
-        placeholder="Seu nome *"
+        placeholder={t("namePlaceholder")}
         className={INPUT_CLS}
       />
       <input
         type="email"
         value={data.email}
         onChange={(e) => set("email", e.target.value)}
-        placeholder="Seu melhor e-mail *"
+        placeholder={t("emailPlaceholder")}
         className={INPUT_CLS}
       />
       <input
         value={data.company}
         onChange={(e) => set("company", e.target.value)}
-        placeholder="Empresa (opcional)"
+        placeholder={t("companyPlaceholder")}
         className={INPUT_CLS}
       />
     </div>
