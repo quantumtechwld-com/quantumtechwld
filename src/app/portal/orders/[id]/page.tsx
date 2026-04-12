@@ -43,6 +43,15 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
   if (!order) notFound();
   if (order.client.email !== session.user.email) notFound();
 
+  // Marcar mensagens como lidas pelo cliente
+  if (me) {
+    await db.orderMessageRead.upsert({
+      where: { orderId_userId: { orderId: id, userId: me.id } },
+      create: { orderId: id, userId: me.id, lastReadAt: new Date() },
+      update: { lastReadAt: new Date() },
+    });
+  }
+
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
       {paymentCancelled && (

@@ -28,19 +28,38 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
     where.status = statusFilter;
   }
 
-  const orders = await db.order.findMany({
-    where,
-    include: { client: { select: { name: true, email: true } } },
-    orderBy: { createdAt: "desc" },
+  const adminUser = await prisma.user.findUnique({
+    where: { email: session.user.email! },
+    select: { id: true },
   });
 
-  const counts = await db.order.groupBy({
-    by: ["status"],
-    _count: { id: true },
-  }) as { status: string; _count: { id: number } }[];
+  const [orders, countsRaw, reads] = await Promise.all([
+    db.order.findMany({
+      where,
+      include: {
+        client: { select: { name: true, email: true } },
+        messages: { where: { author: { role: "CLIENT" } }, select: { id: true, createdAt: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }) as Promise<unknown>,
+    db.order.groupBy({
+      by: ["status"],
+      _count: { id: true },
+    }) as Promise<unknown>,
+    adminUser
+      ? (db.orderMessageRead.findMany({ where: { userId: adminUser.id }, select: { orderId: true, lastReadAt: true } }) as Promise<unknown>)
+      : Promise.resolve([]),
+  ]);
 
-  const countMap = Object.fromEntries(counts.map((c) => [c.status, c._count.id]));
-  const total = orders.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const countMap = Object.fromEntries((countsRaw as { status: string; _count: { id: number } }[]).map((c) => [c.status, c._count.id]));
+  const total = (orders as unknown[]).length;
+  const readMap = new Map<string, Date>((reads as { orderId: string; lastReadAt: Date }[]).map((r) => [r.orderId, r.lastReadAt]));
+
+  function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
+    const last = readMap.get(orderId);
+    return last ? messages.filter((m) => new Date(m.createdAt) > last).length : messages.length;
+  }
 
   return (
     <>
@@ -105,39 +124,47 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
           <div className="space-y-3">
             <p className="text-sm text-slate-500">{total} pedido{total === 1 ? "" : "s"}</p>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {orders.map((o: any) => (
-              <Link
-                key={o.id}
-                href={`/admin/orders/${o.id}`}
-                className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition hover:bg-white/8 hover:border-accent/30"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-white group-hover:text-violet-300 transition-colors">
-                      {ORDER_TYPE_LABEL[o.type] ?? o.type}
-                    </span>
-                    {o.orderRef && (
-                      <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
-                        {o.orderRef}
+            {orders.map((o: any) => {
+              const unread = unreadCount(o.id, o.messages);
+              return (
+                <Link
+                  key={o.id}
+                  href={`/admin/orders/${o.id}`}
+                  className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition hover:bg-white/8 hover:border-accent/30"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-white group-hover:text-violet-300 transition-colors">
+                        {ORDER_TYPE_LABEL[o.type] ?? o.type}
                       </span>
-                    )}
-                    <span className="text-slate-500 text-sm">·</span>
-                    <span className="text-sm text-slate-400">{o.client.name ?? o.client.email}</span>
+                      {o.orderRef && (
+                        <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
+                          {o.orderRef}
+                        </span>
+                      )}
+                      <span className="text-slate-500 text-sm">·</span>
+                      <span className="text-sm text-slate-400">{o.client.name ?? o.client.email}</span>
+                      {unread > 0 && (
+                        <span className="inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                          {unread} nova{unread > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-slate-500 truncate">{o.description}</p>
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-500 truncate">{o.description}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-3">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"}`}
-                  >
-                    {STATUS_LABEL[o.status] ?? o.status}
-                  </span>
-                  <span className="text-xs text-slate-600">
-                    {new Date(o.createdAt).toLocaleDateString("pt-PT")}
-                  </span>
-                </div>
-              </Link>
-            ))}
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"}`}
+                    >
+                      {STATUS_LABEL[o.status] ?? o.status}
+                    </span>
+                    <span className="text-xs text-slate-600">
+                      {new Date(o.createdAt).toLocaleDateString("pt-PT")}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>

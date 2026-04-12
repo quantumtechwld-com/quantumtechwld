@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OrderAdminActions } from "./OrderAdminActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
+import LogoAnimated from "@/components/home/LogoAnimated";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -75,6 +76,15 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
 
   if (!order) notFound();
 
+  // Marcar mensagens como lidas pelo admin
+  if (me) {
+    await db.orderMessageRead.upsert({
+      where: { orderId_userId: { orderId: id, userId: me.id } },
+      create: { orderId: id, userId: me.id, lastReadAt: new Date() },
+      update: { lastReadAt: new Date() },
+    });
+  }
+
   if (order.status === "PENDING") {
     await db.order.update({ where: { id }, data: { status: "EVALUATING" } });
     order.status = "EVALUATING";
@@ -85,8 +95,8 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
       <header className="sticky top-0 z-10 border-b border-white/5 bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold hover:opacity-80 transition-opacity">
-              A
+            <Link href="/admin" className="hover:opacity-80 transition-opacity">
+              <LogoAnimated size={28} />
             </Link>
             <Link href="/admin/orders" className="text-sm text-white/50 hover:text-white/80 transition-colors">
               ← Pedidos

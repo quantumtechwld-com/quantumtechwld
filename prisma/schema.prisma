@@ -245,6 +245,15 @@ model OrderMessage {
   createdAt DateTime @default(now())
 }
 
+/// Registo de qual foi a última mensagem lida por utilizador num pedido.
+model OrderMessageRead {
+  orderId    String
+  userId     String
+  lastReadAt DateTime @default(now())
+
+  @@id([orderId, userId])
+}
+
 // ─── M7: Pagamentos Stripe ──────────────────────────────────────────────────
 
 /// Registo de pagamento associado a um pedido.

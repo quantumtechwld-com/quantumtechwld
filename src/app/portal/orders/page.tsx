@@ -16,10 +16,26 @@ export default async function OrdersPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
-  const orders = await db.order.findMany({
-    where: { client: { email: session.user.email } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [me, orders] = await Promise.all([
+    prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
+    db.order.findMany({
+      where: { client: { email: session.user.email } },
+      include: {
+        messages: { where: { author: { role: "ADMIN" } }, select: { id: true, createdAt: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }) as Promise<unknown>,
+  ]);
+
+  const reads = me
+    ? (await db.orderMessageRead.findMany({ where: { userId: me.id }, select: { orderId: true, lastReadAt: true } }) as { orderId: string; lastReadAt: Date }[])
+    : [];
+  const readMap = new Map<string, Date>(reads.map((r) => [r.orderId, r.lastReadAt]));
+
+  function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
+    const last = readMap.get(orderId);
+    return last ? messages.filter((m) => new Date(m.createdAt) > last).length : messages.length;
+  }
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
@@ -60,7 +76,9 @@ export default async function OrdersPage() {
       ) : (
         <div className="grid gap-4">
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {orders.map((o: any) => (
+          {(orders as any[]).map((o: any) => {
+            const unread = unreadCount(o.id, o.messages);
+            return (
             <Link
               key={o.id}
               href={`/portal/orders/${o.id}`}
@@ -75,6 +93,11 @@ export default async function OrdersPage() {
                     {o.orderRef && (
                       <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
                         {o.orderRef}
+                      </span>
+                    )}
+                    {unread > 0 && (
+                      <span className="inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                        {unread} nova{unread > 1 ? "s" : ""}
                       </span>
                     )}
                   </div>
@@ -94,7 +117,8 @@ export default async function OrdersPage() {
                 })}
               </p>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </main>
