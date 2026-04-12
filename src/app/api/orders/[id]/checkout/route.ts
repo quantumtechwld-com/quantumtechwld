@@ -49,6 +49,11 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   const amountCents = Math.round(order.estimatedValue * 100);
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
+  // SENSIVEL: cobranca real nao pode seguir idioma do usuario.
+  // O valor persistido em estimatedValue e interpretado neste fluxo como EUR.
+  // Para suportar multi-currency real, e obrigatorio persistir a moeda da proposta
+  // e aplicar conversao cambial explicita antes de criar a sessao Stripe.
+
   // ── MODO MOCK: sem chave Stripe real ─────────────────────────────────────
   if (isMock) {
     const mockSessionId = `mock_${Date.now()}_${id}`;

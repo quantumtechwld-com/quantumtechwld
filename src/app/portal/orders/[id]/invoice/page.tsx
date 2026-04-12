@@ -39,6 +39,8 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   if (order.client.email !== session.user.email) notFound();
   if (order.payment?.status !== "PAID") redirect(`/portal/orders/${id}`);
 
+  // SENSIVEL: invoice deve sempre refletir a moeda gravada na transacao,
+  // nunca a moeda derivada do locale da interface.
   const amount = (order.payment.amountCents / 100).toLocaleString(locale, {
     style: "currency", currency: order.payment.currency?.toUpperCase() ?? "EUR",
   });

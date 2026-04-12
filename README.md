@@ -89,6 +89,44 @@ npm run build
 npm run start
 ```
 
+## Política de moeda
+
+Este item é sensível e influencia diretamente percepção de preço, proposta e cobrança.
+
+- Exibição por idioma: estimativas e propostas do portal podem ser formatadas por locale.
+  `en -> USD`, `es -> EUR`, `pt -> BRL`.
+- Cobrança real: checkout Stripe e invoice devem usar a moeda da transação gravada,
+  nunca a moeda inferida do idioma.
+- Estado atual do projeto: o checkout de pedidos cobra em `EUR`.
+- Regra obrigatória: não usar helpers baseados em locale em fluxos de pagamento,
+  fatura, webhook ou persistência financeira.
+- Para suportar multi-currency real no futuro: persistir `proposalCurrency`/`paymentCurrency`
+  no banco e aplicar conversão cambial explícita antes de criar a sessão Stripe.
+
+Resumo:
+- `locale` controla exibição.
+- `currency` persistida controla cobrança.
+
+### Próxima implementação recomendada: multi-currency real
+
+Para evoluir de exibição por idioma para cobrança real por moeda, seguir esta ordem:
+
+1. Banco de dados:
+  adicionar campos persistidos como `proposalCurrency`, `paymentCurrency`, `fxRate`, `fxBaseCurrency`.
+2. Proposta:
+  gerar e salvar a moeda comercial da proposta no momento da emissão, sem depender do locale depois.
+3. Conversão:
+  aplicar conversão cambial explícita a partir de uma fonte definida e versionar a taxa usada.
+4. Checkout Stripe:
+  criar a sessão com `currency` derivada da proposta/pagamento persistido, nunca da interface.
+5. Invoice e e-mails:
+  renderizar sempre a moeda persistida na transação.
+6. Auditoria:
+  registrar no pedido a moeda original, taxa aplicada e valor final cobrado para rastreabilidade.
+
+Regra de segurança:
+qualquer mudança em cobrança deve preservar consistência entre proposta, checkout, webhook, invoice e portal.
+
 ## Banco de dados
 
 - **Produção:** AWS RDS PostgreSQL 16.6 (`db.t3.micro`, `sa-east-1`)

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProposalActions from "./ProposalActions";
 import ProposalComments from "./ProposalComments";
 import { getTranslations, getLocale } from "next-intl/server";
+import { formatCurrencyRangeByLocale } from "@/lib/currency";
 
 type PageProps = Readonly<{ params: Promise<{ id: string }> }>;
 
@@ -113,7 +114,7 @@ export default async function ProposalPage({ params }: PageProps) {
         <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
           <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldInvestment")}</p>
           <p className="text-lg font-bold text-white">
-            €{proposal.costMin.toLocaleString("pt-PT")}–{proposal.costMax.toLocaleString("pt-PT")}
+            {formatCurrencyRangeByLocale(proposal.costMin, proposal.costMax, locale)}
           </p>
         </div>
         <div className="rounded-2xl border border-white/15 bg-white/5 p-5">

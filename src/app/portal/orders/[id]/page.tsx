@@ -7,6 +7,7 @@ import { OrderClientActions } from "./OrderClientActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import { PayOrderButton } from "./PayOrderButton";
 import { RatingWidget } from "./RatingWidget";
+import { formatCurrencyByLocale } from "@/lib/currency";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -158,9 +159,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
                 <p className="mb-2 text-sm text-slate-300">
                   <span className="text-slate-500">{t("orderEstValue")} </span>
                   <span className="font-semibold text-white">
-                    {Number(order.estimatedValue).toLocaleString(locale, {
-                      style: "currency", currency: "EUR",
-                    })}
+                    {formatCurrencyByLocale(Number(order.estimatedValue), locale)}
                   </span>
                 </p>
               )}

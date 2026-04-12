@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { formatCurrency } from "@/lib/currency";
 
 interface PayOrderButtonProps {
   orderId: string;
@@ -32,7 +33,9 @@ export function PayOrderButton({ orderId, estimatedValue }: Readonly<PayOrderBut
     }
   }
 
-  const amount = estimatedValue.toLocaleString(locale, { style: "currency", currency: "EUR" });
+  // Sensivel: o CTA de pagamento deve mostrar a moeda real de cobranca.
+  // Hoje o checkout Stripe deste fluxo cobra em EUR; nao usar locale aqui.
+  const amount = formatCurrency(estimatedValue, locale, "EUR");
 
   return (
     <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
