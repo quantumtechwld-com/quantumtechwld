@@ -40,12 +40,24 @@ export default function LeadForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: aiText }),
       });
-      const json = (await res.json()) as Partial<WizardState> & { error?: string };
-      if (!res.ok) throw new Error(json.error ?? t("btnAnalyze"));
+      const json = (await res.json()) as Partial<WizardState> & { error?: string; errorCode?: string };
+      if (!res.ok) {
+        const errKey = json.errorCode ?? "errGeneric";
+        const knownCodes: Record<string, string> = {
+          errEmptyText: t("errEmptyText"),
+          errGeminiKey: t("errGeminiKey"),
+          errGeminiCall: t("errGeminiCall"),
+          errInvalidAiResponse: t("errInvalidAiResponse"),
+          errInvalidAiJson: t("errInvalidAiJson"),
+          errGeneric: t("errGeneric"),
+        };
+        setAiError(knownCodes[errKey] ?? t("errGeneric"));
+        return;
+      }
       setData((prev) => ({ ...prev, ...json }));
       setShowWizard(true);
-    } catch (err) {
-      setAiError(err instanceof Error ? err.message : t("btnAnalyze"));
+    } catch {
+      setAiError(t("errGeneric"));
     } finally {
       setAiLoading(false);
     }

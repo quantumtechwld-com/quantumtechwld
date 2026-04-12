@@ -151,7 +151,13 @@
     "timelinePlanned": "Planned (3–6 months)",
     "timelinePlannedSub": "No rush",
     "timelineFlexible": "Flexible",
-    "timelineFlexibleSub": "No set deadline"
+    "timelineFlexibleSub": "No set deadline",
+    "errEmptyText": "Please describe your project before analyzing.",
+    "errGeminiKey": "AI service temporarily unavailable.",
+    "errGeminiCall": "Error calling AI service. Please try again.",
+    "errInvalidAiResponse": "Invalid AI response. Please try again.",
+    "errInvalidAiJson": "Could not process AI response.",
+    "errGeneric": "Something went wrong. Please try again."
   },
   "footer": {
     "rights": "© 2026 All rights reserved.",

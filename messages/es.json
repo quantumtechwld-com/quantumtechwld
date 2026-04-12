@@ -151,7 +151,13 @@
     "timelinePlanned": "Planeado (3–6 meses)",
     "timelinePlannedSub": "Sin prisa",
     "timelineFlexible": "Flexible",
-    "timelineFlexibleSub": "Sin plazo definido"
+    "timelineFlexibleSub": "Sin plazo definido",
+    "errEmptyText": "Por favor, describa su proyecto antes de analizar.",
+    "errGeminiKey": "Servicio de IA temporalmente no disponible.",
+    "errGeminiCall": "Error al llamar al servicio de IA. Inténtelo de nuevo.",
+    "errInvalidAiResponse": "Respuesta inválida de la IA. Inténtelo de nuevo.",
+    "errInvalidAiJson": "No se pudo procesar la respuesta de la IA.",
+    "errGeneric": "Algo salió mal. Inténtelo de nuevo."
   },
   "footer": {
     "rights": "© 2026 Todos los derechos reservados.",
