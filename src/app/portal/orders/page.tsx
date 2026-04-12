@@ -6,7 +6,6 @@ import { getTranslations, getLocale } from "next-intl/server";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
-  ORDER_TYPE_LABEL,
 } from "@/lib/constants";
 import { ClipboardList } from "lucide-react";
 
@@ -42,6 +41,32 @@ export default async function OrdersPage() {
 
   const t = await getTranslations("portal");
   const locale = await getLocale();
+  const orderTypeLabel = (type: string) => {
+    const keyMap: Record<string, string> = {
+      new_feature: "orderTypeNewFeature",
+      bug_fix: "orderTypeBugFix",
+      new_project: "orderTypeNewProject",
+      support: "orderTypeSupport",
+      other: "orderTypeOther",
+    };
+    const key = keyMap[type];
+    return key ? t(key) : type;
+  };
+  const orderStatusLabel = (status: string) => {
+    const keyMap: Record<string, string> = {
+      DRAFT: "orderStatusDraft",
+      PENDING: "orderStatusPending",
+      EVALUATING: "orderStatusEvaluating",
+      PROPOSAL_SENT: "orderStatusProposalSent",
+      APPROVED: "orderStatusApproved",
+      REVISION: "orderStatusRevision",
+      REJECTED: "orderStatusRejected",
+      IN_PRODUCTION: "orderStatusInProduction",
+      COMPLETED: "orderStatusCompleted",
+    };
+    const key = keyMap[status];
+    return key ? t(key) : (STATUS_LABEL[status] ?? status);
+  };
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
@@ -89,7 +114,7 @@ export default async function OrdersPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold text-white group-hover:text-accent-light transition-colors">
-                      {ORDER_TYPE_LABEL[o.type] ?? o.type}
+                      {orderTypeLabel(o.type)}
                     </p>
                     {o.orderRef && (
                       <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
@@ -107,7 +132,7 @@ export default async function OrdersPage() {
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"}`}
                 >
-                  {STATUS_LABEL[o.status] ?? o.status}
+                  {orderStatusLabel(o.status)}
                 </span>
               </div>
               <p className="mt-3 text-xs text-slate-500">

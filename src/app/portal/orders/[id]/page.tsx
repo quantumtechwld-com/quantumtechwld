@@ -10,8 +10,6 @@ import { RatingWidget } from "./RatingWidget";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
-  ORDER_TYPE_LABEL,
-  URGENCY_LABEL,
 } from "@/lib/constants";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,6 +44,42 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   const t = await getTranslations("portal");
   const locale = await getLocale();
+  const orderTypeLabel = (type: string) => {
+    const keyMap: Record<string, string> = {
+      new_feature: "orderTypeNewFeature",
+      bug_fix: "orderTypeBugFix",
+      new_project: "orderTypeNewProject",
+      support: "orderTypeSupport",
+      other: "orderTypeOther",
+    };
+    const key = keyMap[type];
+    return key ? t(key) : type;
+  };
+  const orderStatusLabel = (status: string) => {
+    const keyMap: Record<string, string> = {
+      DRAFT: "orderStatusDraft",
+      PENDING: "orderStatusPending",
+      EVALUATING: "orderStatusEvaluating",
+      PROPOSAL_SENT: "orderStatusProposalSent",
+      APPROVED: "orderStatusApproved",
+      REVISION: "orderStatusRevision",
+      REJECTED: "orderStatusRejected",
+      IN_PRODUCTION: "orderStatusInProduction",
+      COMPLETED: "orderStatusCompleted",
+    };
+    const key = keyMap[status];
+    return key ? t(key) : (STATUS_LABEL[status] ?? status);
+  };
+  const urgencyLabel = (urgency: string) => {
+    const keyMap: Record<string, string> = {
+      low: "urgencyLow",
+      normal: "urgencyNormal",
+      high: "urgencyHigh",
+      critical: "urgencyCritical",
+    };
+    const key = keyMap[urgency];
+    return key ? t(key) : urgency;
+  };
 
   // Marcar mensagens como lidas pelo cliente
   if (me) {
@@ -75,7 +109,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         <div className="mt-2 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-white">
-              {ORDER_TYPE_LABEL[order.type] ?? order.type}
+              {orderTypeLabel(order.type)}
             </h1>
             {order.orderRef && (
               <p className="mt-1 font-mono text-sm text-slate-400">
@@ -89,7 +123,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
           <span
             className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLOR[order.status] ?? "bg-slate-500/20 text-slate-300"}`}
           >
-            {STATUS_LABEL[order.status] ?? order.status}
+            {orderStatusLabel(order.status)}
           </span>
         </div>
         <p className="mt-1 text-xs text-slate-500">
@@ -108,7 +142,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
           <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
             <span>
               {t("orderUrgency")}{" "}
-              <span className="text-slate-300">{URGENCY_LABEL[order.urgency] ?? order.urgency}</span>
+              <span className="text-slate-300">{urgencyLabel(order.urgency)}</span>
             </span>
           </div>
         </section>
