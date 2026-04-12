@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { sendMagicLink } from "./actions";
+import { MailCheck } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -48,16 +49,18 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 p-8 backdrop-blur text-center">
         {sent ? (
           <>
-            <p className="text-4xl mb-4">📬</p>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
+              <MailCheck size={28} className="text-accent-light" />
+            </div>
             <h1 className="text-2xl font-bold text-white mb-2">Verifique o seu e-mail</h1>
             <p className="text-slate-300 text-sm">
-              Enviámos um link de acesso para <span className="text-sky-300 font-medium">{email}</span>.
+              Enviámos um link de acesso para <span className="text-accent-light font-medium">{email}</span>.
               Clique no link para entrar no portal.
             </p>
           </>
         ) : (
           <>
-            <p className="mb-2 text-sm uppercase tracking-widest text-sky-300">Portal do Cliente</p>
+            <p className="mb-2 text-sm uppercase tracking-widest text-accent-light">Portal do Cliente</p>
             <h1 className="mb-1 text-2xl font-bold text-white">Aceder ao portal</h1>
             <p className="mb-6 text-sm text-slate-400">
               Introduza o seu e-mail e enviaremos um link de acesso instantâneo.
@@ -69,7 +72,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="O seu e-mail"
-                className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-sky-400 w-full"
+                className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-accent w-full"
               />
               {errorMsg && (
                 <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
@@ -79,7 +82,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-xl bg-sky-500 py-3 font-semibold text-white transition hover:bg-sky-400 disabled:opacity-60"
+                className="rounded-xl bg-accent py-3 font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
               >
                 {loading ? "A enviar..." : "Enviar link de acesso →"}
               </button>

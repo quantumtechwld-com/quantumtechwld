@@ -1,0 +1,8 @@
+{
+  "commands": [
+    "ls /home/ubuntu/quantum-agency/ 2>&1 | head -20",
+    "ls /home/ubuntu/quantum-agency/.env* 2>&1",
+    "which psql 2>&1 || echo 'psql-nao-encontrado'",
+    "ls /home/ubuntu/quantum-agency/node_modules/.prisma 2>&1 | head -5"
+  ]
+}

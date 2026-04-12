@@ -1,0 +1,9 @@
+{
+  "commands": [
+    "set -e",
+    "mkdir -p /home/ubuntu/quantum-agency/prisma/migrations/20260329000000_add_user_status",
+    "printf '%s\\n' '-- CreateEnum' 'CREATE TYPE \"UserStatus\" AS ENUM (''PENDING'', ''ACTIVE'', ''SUSPENDED'');' '-- AlterTable' 'ALTER TABLE \"User\" ADD COLUMN \"status\" \"UserStatus\";' 'UPDATE \"User\" SET \"status\" = ''ACTIVE'';' 'ALTER TABLE \"User\" ALTER COLUMN \"status\" SET NOT NULL;' 'ALTER TABLE \"User\" ALTER COLUMN \"status\" SET DEFAULT ''PENDING'';' > /home/ubuntu/quantum-agency/prisma/migrations/20260329000000_add_user_status/migration.sql",
+    "echo '[migration.sql criado]'",
+    "cat /home/ubuntu/quantum-agency/prisma/migrations/20260329000000_add_user_status/migration.sql"
+  ]
+}

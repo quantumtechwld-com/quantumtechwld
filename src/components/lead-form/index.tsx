@@ -91,14 +91,14 @@ export default function LeadForm() {
       {/* Cabeçalho + progresso */}
       <div className="mb-6">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-widest text-sky-300">
+          <span className="text-xs font-medium uppercase tracking-widest text-accent-light">
             Etapa {step + 1} de {STEPS.length}
           </span>
           <span className="text-xs text-slate-400">{STEPS[step].title}</span>
         </div>
         <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-sky-500 transition-all duration-500"
+            className="h-full rounded-full bg-accent transition-all duration-500"
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
           />
         </div>
@@ -125,7 +125,7 @@ export default function LeadForm() {
             type="button"
             onClick={next}
             disabled={!canAdvance(step, data)}
-            className="flex-1 rounded-xl bg-sky-500 py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-50"
           >
             Próximo →
           </button>
@@ -134,7 +134,7 @@ export default function LeadForm() {
             type="button"
             onClick={submit}
             disabled={isLoading || !canAdvance(step, data)}
-            className="flex-1 rounded-xl bg-sky-500 py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Enviando..." : "Enviar briefing →"}
           </button>

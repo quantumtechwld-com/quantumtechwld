@@ -18,7 +18,7 @@ export const ORDER_STATUS_COLOR: Record<string, string> = {
   DRAFT:          "bg-slate-500/20 text-slate-300 border border-slate-500/30",
   PENDING:        "bg-blue-500/20 text-blue-300 border border-blue-500/30",
   EVALUATING:     "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-  PROPOSAL_SENT:  "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+  PROPOSAL_SENT:  "bg-accent/20 text-accent-light border border-accent/30",
   APPROVED:       "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
   REVISION:       "bg-orange-500/20 text-orange-300 border border-orange-500/30",
   REJECTED:       "bg-red-500/20 text-red-300 border border-red-500/30",
@@ -49,7 +49,7 @@ export const BRIEFING_STATUS_COLOR: Record<BriefingStatus, string> = {
   PROPOSAL_SENT:  "bg-purple-500/20 text-purple-300 border border-purple-500/30",
   IN_NEGOTIATION: "bg-orange-500/20 text-orange-300 border border-orange-500/30",
   APPROVED:       "bg-green-500/20 text-green-300 border border-green-500/30",
-  IN_PROGRESS:    "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30",
+  IN_PROGRESS:    "bg-accent/20 text-accent-light border border-accent/30",
   DELIVERED:      "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
 };
 

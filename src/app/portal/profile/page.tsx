@@ -25,7 +25,7 @@ export default async function ProfilePage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
       <div className="mb-8">
-        <Link href="/portal" className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+        <Link href="/portal" className="text-sm text-accent hover:text-accent-light transition-colors">
           ← Portal
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-white">O meu perfil</h1>

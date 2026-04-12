@@ -129,14 +129,14 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
               }`}
             >
               {c.excerpt && (
-                <blockquote className="border-l-2 border-sky-500/40 pl-3 text-xs text-sky-200/50 italic line-clamp-2">
+                <blockquote className="border-l-2 border-accent/40 pl-3 text-xs text-accent-light/50 italic line-clamp-2">
                   {c.excerpt}
                 </blockquote>
               )}
               <p className="text-sm text-white/75">{c.body}</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium ${c.author.role === "ADMIN" ? "text-sky-400" : "text-slate-400"}`}>
+                  <span className={`text-xs font-medium ${c.author.role === "ADMIN" ? "text-accent" : "text-slate-400"}`}>
                     {c.author.name ?? c.author.email}
                   </span>
                   <span className="text-xs text-white/20">
@@ -169,7 +169,7 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
             placeholder="Citar um trecho (opcional)"
             value={excerpt}
             onChange={e => setExcerpt(e.target.value)}
-            className="w-full rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-xs text-white/60 placeholder:text-white/20 focus:outline-none focus:border-sky-500/40"
+            className="w-full rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-xs text-white/60 placeholder:text-white/20 focus:outline-none focus:border-accent/40"
           />
         </div>
         <div className="flex gap-2">
@@ -178,7 +178,7 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
             placeholder="Adicionar comentário…"
             value={body}
             onChange={e => setBody(e.target.value)}
-            className="flex-1 rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-sky-500/40 resize-none"
+            className="flex-1 rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/40 resize-none"
           />
           <button
             type="submit"

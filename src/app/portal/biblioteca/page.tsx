@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import Link from "next/link";
+import { BookOpen } from "lucide-react";
 
 type RefProject = {
   id: string;
@@ -46,7 +47,7 @@ export default async function BibliotecaPage() {
       <div className="mb-10">
         <Link
           href="/portal"
-          className="text-xs uppercase tracking-widest text-sky-300 hover:text-sky-200 transition"
+          className="text-xs uppercase tracking-widest text-accent-light hover:text-accent-light transition"
         >
           ← Portal
         </Link>
@@ -59,7 +60,9 @@ export default async function BibliotecaPage() {
       {/* Lista de projetos */}
       {libraryProjects.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/3 py-16 text-center">
-          <p className="text-2xl mb-3">📚</p>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+            <BookOpen size={22} className="text-white/30" />
+          </div>
           <p className="text-sm font-medium text-slate-300">Nenhum projeto na biblioteca ainda.</p>
           <p className="mt-1 text-xs text-slate-500">
             Em breve terá acesso a projetos de referência entregues pela equipa.
@@ -75,11 +78,11 @@ export default async function BibliotecaPage() {
               <Link
                 key={p.id}
                 href={`/portal/biblioteca/${p.id}`}
-                className="group block rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-sky-500/40 hover:bg-white/8 transition-all"
+                className="group block rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-accent/40 hover:bg-white/8 transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="font-semibold text-white group-hover:text-sky-300 transition">{p.title}</p>
+                    <p className="font-semibold text-white group-hover:text-accent-light transition">{p.title}</p>
                     <p className="mt-1 text-sm text-slate-400 line-clamp-2">{p.description}</p>
                   </div>
                   <span className="shrink-0 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-300">
@@ -126,7 +129,7 @@ export default async function BibliotecaPage() {
                       day: "2-digit", month: "long", year: "numeric",
                     })}
                   </span>
-                  <span className="text-sky-400 group-hover:text-sky-300 transition text-xs">
+                  <span className="text-accent group-hover:text-accent-light transition text-xs">
                     Ver detalhes →
                   </span>
                 </p>

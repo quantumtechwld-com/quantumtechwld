@@ -2,11 +2,12 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
-import AdminHeader from "./components/AdminHeader";
 import StatsGrid from "./components/StatsGrid";
+import AdminHeader from "./components/AdminHeader";
 import BriefingStats from "./components/BriefingStats";
 import RecentOrdersTable from "./components/RecentOrdersTable";
 import AllBriefingsTable from "./components/AllBriefingsTable";
+import { Users, Package, FileText, BookOpen } from "lucide-react";
 import {
   BRIEFING_STATUS_LABEL as STATUS_LABEL,
   BRIEFING_STATUS_COLOR as STATUS_COLOR,
@@ -96,27 +97,27 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <>
       <AdminHeader />
       <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
 
         {/* Navegação rápida */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <a href="/admin/users" className="flex items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 hover:bg-violet-500/10 transition group">
-            <span className="text-xl">👥</span>
-            <span className="text-sm font-medium text-violet-300 group-hover:text-violet-200">Utilizadores</span>
+          <a href="/admin/users" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+            <Users size={18} className="text-accent-light group-hover:text-accent shrink-0" />
+            <span className="text-sm font-medium text-accent-light group-hover:text-accent">Utilizadores</span>
           </a>
-          <a href="/admin/orders" className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 hover:bg-cyan-500/10 transition group">
-            <span className="text-xl">📦</span>
-            <span className="text-sm font-medium text-cyan-300 group-hover:text-cyan-200">Pedidos</span>
+          <a href="/admin/orders" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+            <Package size={18} className="text-accent-light group-hover:text-accent shrink-0" />
+            <span className="text-sm font-medium text-accent-light group-hover:text-accent">Pedidos</span>
           </a>
-          <a href="/admin/briefing" className="flex items-center gap-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3 hover:bg-indigo-500/10 transition group">
-            <span className="text-xl">📋</span>
-            <span className="text-sm font-medium text-indigo-300 group-hover:text-indigo-200">Briefings</span>
+          <a href="/admin/briefing" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+            <FileText size={18} className="text-accent-light group-hover:text-accent shrink-0" />
+            <span className="text-sm font-medium text-accent-light group-hover:text-accent">Briefings</span>
           </a>
-          <a href="/admin/biblioteca" className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 hover:bg-amber-500/10 transition group">
-            <span className="text-xl">📚</span>
-            <span className="text-sm font-medium text-amber-300 group-hover:text-amber-200">Biblioteca</span>
+          <a href="/admin/biblioteca" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+            <BookOpen size={18} className="text-accent-light group-hover:text-accent shrink-0" />
+            <span className="text-sm font-medium text-accent-light group-hover:text-accent">Biblioteca</span>
           </a>
         </div>
 
@@ -149,6 +150,6 @@ export default async function AdminDashboardPage() {
           />
         </div>
       </main>
-    </div>
+    </>
   );
 }

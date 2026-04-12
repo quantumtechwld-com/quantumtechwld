@@ -45,7 +45,7 @@ export default async function AdminBibliotecaPage() {
   })) as RefProject[];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <>
       <AdminHeader />
       <main className="mx-auto max-w-4xl px-6 py-10 space-y-10">
 
@@ -53,7 +53,7 @@ export default async function AdminBibliotecaPage() {
         <div>
           <Link
             href="/admin"
-            className="text-xs uppercase tracking-widest text-sky-300 hover:text-sky-200 transition"
+            className="text-xs uppercase tracking-widest text-accent-light hover:text-accent-light transition"
           >
             ← Admin Panel
           </Link>
@@ -120,6 +120,6 @@ export default async function AdminBibliotecaPage() {
         </section>
 
       </main>
-    </div>
+    </>
   );
 }

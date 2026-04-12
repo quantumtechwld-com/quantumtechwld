@@ -10,7 +10,7 @@ const STATUS_COLORS: Record<string, string> = {
   REJECTED:   'bg-red-200 text-red-800',
   COMPLETED:  'bg-blue-200 text-blue-800',
   IN_PRODUCTION: 'bg-purple-200 text-purple-800',
-  PROPOSAL_SENT: 'bg-sky-200 text-sky-800',
+  PROPOSAL_SENT: 'bg-accent/15 text-accent-light border border-accent/30',
   REVISION:   'bg-orange-200 text-orange-800',
   // fallback
   DEFAULT:    'bg-gray-200 text-gray-800',

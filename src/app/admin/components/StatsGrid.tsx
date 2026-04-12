@@ -1,3 +1,5 @@
+import { Clock } from "lucide-react";
+
 type StatsGridProps = Readonly<{
   orderPending: number;
   orderInProd: number;
@@ -16,11 +18,11 @@ export default function StatsGrid({ orderPending, orderInProd, orderCompleted, t
           href="/admin/orders?status=PENDING"
           className="flex items-center gap-3 rounded-xl border border-orange-500/30 bg-orange-500/10 px-5 py-3 text-sm text-orange-300 hover:bg-orange-500/15 transition"
         >
-          <span className="text-lg">⏳</span>
+          <Clock size={16} className="shrink-0" />
           <span>
             <strong>{orderPending}</strong> pedido{orderPending === 1 ? "" : "s"} a aguardar resposta
             {orderInProd > 0 && (
-              <span className="ml-3 text-purple-300">
+              <span className="ml-3 text-accent-light">
                 · <strong>{orderInProd}</strong> em produção
               </span>
             )}
@@ -35,16 +37,16 @@ export default function StatsGrid({ orderPending, orderInProd, orderCompleted, t
           <p className="text-3xl font-bold text-emerald-300">{fmtEur(totalRevenueCents)}</p>
           <p className="text-xs text-slate-500 mt-1">pagamentos confirmados</p>
         </div>
-        <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-          <p className="text-xs text-cyan-400/70 uppercase tracking-wider mb-1">
+        <div className="rounded-xl border border-accent/20 bg-accent/5 p-5">
+          <p className="text-xs text-accent/70 uppercase tracking-wider mb-1">
             {new Date().toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}
           </p>
-          <p className="text-3xl font-bold text-cyan-300">{fmtEur(monthRevenueCents)}</p>
+          <p className="text-3xl font-bold text-accent-light">{fmtEur(monthRevenueCents)}</p>
           <p className="text-xs text-slate-500 mt-1">receita este mês</p>
         </div>
-        <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-5">
-          <p className="text-xs text-purple-400/70 uppercase tracking-wider mb-1">Em produção</p>
-          <p className="text-3xl font-bold text-purple-300">{orderInProd}</p>
+        <div className="rounded-xl border border-accent/20 bg-accent/5 p-5">
+          <p className="text-xs text-accent/70 uppercase tracking-wider mb-1">Em produção</p>
+          <p className="text-3xl font-bold text-accent-light">{orderInProd}</p>
           <p className="text-xs text-slate-500 mt-1">
             {orderCompleted === 1 ? "1 concluído" : `${orderCompleted} concluídos`}
           </p>

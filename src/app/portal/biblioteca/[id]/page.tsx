@@ -67,9 +67,9 @@ export default async function BibliotecaDetailPage({
 
       {/* Breadcrumb */}
       <div className="mb-8 flex items-center gap-2 text-xs text-slate-500">
-        <Link href="/portal" className="hover:text-sky-300 transition">Portal</Link>
+        <Link href="/portal" className="hover:text-accent-light transition">Portal</Link>
         <span>/</span>
-        <Link href="/portal/biblioteca" className="hover:text-sky-300 transition">Biblioteca</Link>
+        <Link href="/portal/biblioteca" className="hover:text-accent-light transition">Biblioteca</Link>
         <span>/</span>
         <span className="text-slate-400 truncate max-w-50">{project.title}</span>
       </div>
@@ -138,7 +138,7 @@ export default async function BibliotecaDetailPage({
           <ul className="grid sm:grid-cols-2 gap-2">
             {project.features.map((f: string) => (
               <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                 {f}
               </li>
             ))}
@@ -149,7 +149,7 @@ export default async function BibliotecaDetailPage({
       {/* Back */}
       <Link
         href="/portal/biblioteca"
-        className="inline-flex items-center gap-2 text-sm text-sky-300 hover:text-sky-200 transition"
+        className="inline-flex items-center gap-2 text-sm text-accent-light hover:text-accent-light transition"
       >
         ← Voltar à Biblioteca
       </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Clock } from "lucide-react";
 
 type UserStatus = "PENDING" | "ACTIVE" | "SUSPENDED";
 type UserRole   = "CLIENT"  | "ADMIN";
@@ -29,7 +30,7 @@ const STATUS_COLOR: Record<UserStatus, string> = {
 
 const ROLE_COLOR: Record<UserRole, string> = {
   ADMIN:  "bg-violet-500/15 text-violet-300 border-violet-500/30",
-  CLIENT: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+  CLIENT: "bg-accent/15 text-accent-light border-accent/30",
 };
 
 export default function UsersClient({ users: initial }: Readonly<{ users: UserRow[] }>) {
@@ -116,7 +117,7 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
       {pending.length > 0 && (
         <section>
           <h2 className="text-sm font-semibold uppercase tracking-widest text-amber-400 mb-3">
-            ⏳ Aguardam Aprovação ({pending.length})
+            <span className="inline-flex items-center gap-1.5"><Clock size={13} />Aguardam Aprovação ({pending.length})</span>
           </h2>
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 overflow-hidden">
             <UserTable
@@ -163,19 +164,19 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
               placeholder="Nome (opcional)"
               value={inviteName}
               onChange={(e) => setInviteName(e.target.value)}
-              className="flex-1 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-sky-500"
+              className="flex-1 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-accent"
             />
             <input
               type="email"
               placeholder="email@cliente.com"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-sky-500"
+              className="flex-1 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-accent"
             />
             <button
               onClick={handleInvite}
               disabled={inviteLoading || !inviteEmail.trim()}
-              className="rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 px-5 py-2.5 text-sm font-semibold text-white transition-colors whitespace-nowrap"
+              className="rounded-lg bg-accent-dim hover:bg-accent disabled:opacity-50 px-5 py-2.5 text-sm font-semibold text-white transition-colors whitespace-nowrap"
             >
               {inviteLoading ? "A enviar…" : "Enviar Convite →"}
             </button>
@@ -335,7 +336,7 @@ function ActionBtn({
     amber:   "border-amber-500/30   text-amber-300   hover:bg-amber-500/15",
     red:     "border-red-500/30     text-red-300     hover:bg-red-500/15",
     violet:  "border-violet-500/30  text-violet-300  hover:bg-violet-500/15",
-    sky:     "border-sky-500/30     text-sky-300     hover:bg-sky-500/15",
+    sky:     "border-accent/30     text-accent-light     hover:bg-accent/15",
   };
   return (
     <button

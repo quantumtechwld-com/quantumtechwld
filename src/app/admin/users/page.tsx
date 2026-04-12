@@ -25,11 +25,11 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <>
       <AdminHeader />
       <main className="max-w-7xl mx-auto px-6 py-10">
         <UsersClient users={users} />
       </main>
-    </div>
+    </>
   );
 }

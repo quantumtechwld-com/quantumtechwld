@@ -102,7 +102,7 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
             return (
               <div key={msg.id} className={`flex flex-col gap-0.5 ${isMe ? "items-end" : "items-start"}`}>
                 <div className={`flex items-center gap-1.5 mb-0.5 ${isMe ? "flex-row-reverse" : ""}`}>
-                  <span className={`text-[10px] font-medium ${isAdmin ? "text-violet-400" : "text-sky-400"}`}>
+                  <span className={`text-[10px] font-medium ${isAdmin ? "text-violet-400" : "text-accent-light"}`}>
                     {isAdmin ? "Admin" : (msg.author.name ?? msg.author.email ?? "Cliente")}
                   </span>
                   <span className="text-[10px] text-slate-600">
@@ -114,7 +114,7 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
                     isMe
-                      ? "bg-sky-500/20 text-sky-100 rounded-tr-sm"
+                      ? "bg-accent/20 text-accent-light rounded-tr-sm"
                       : "bg-white/7 text-slate-200 rounded-tl-sm"
                   }`}
                 >
@@ -140,12 +140,12 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
             placeholder="Escreva uma mensagem… (Ctrl+Enter para enviar)"
             maxLength={2000}
             rows={2}
-            className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-sky-500/50 focus:bg-white/8 focus:outline-none transition"
+            className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-accent/50 focus:bg-white/8 focus:outline-none transition"
           />
           <button
             onClick={() => { void handleSend(); }}
             disabled={sending || body.trim().length === 0}
-            className="rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {sending ? "…" : "Enviar"}
           </button>

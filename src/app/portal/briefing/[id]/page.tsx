@@ -91,18 +91,7 @@ export default async function BriefingDetailPage({ params }: PageProps) {
             <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">Prazo</p>
             <p className="text-white">{briefing.timeline}</p>
           </div>
-          {briefing.complexityScore && (
-            <>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">Complexidade</p>
-                <p className="text-white">{briefing.complexityScore}/10</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">Estimativa inicial</p>
-                <p className="text-white">{briefing.hoursMin}–{briefing.hoursMax}h</p>
-              </div>
-            </>
-          )}
+
         </div>
 
         {briefing.features.length > 0 && (
@@ -123,7 +112,7 @@ export default async function BriefingDetailPage({ params }: PageProps) {
             <p className="text-sm text-slate-400">A sua proposta comercial está disponível.</p>
             <Link
               href={`/portal/briefing/${id}/proposta`}
-              className="rounded-xl bg-sky-500/15 px-4 py-2 text-sm font-medium text-sky-300 hover:bg-sky-500/25 transition"
+              className="rounded-xl bg-accent/15 px-4 py-2 text-sm font-medium text-accent-light hover:bg-accent/25 transition"
             >
               Ver proposta →
             </Link>

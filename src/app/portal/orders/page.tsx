@@ -7,6 +7,7 @@ import {
   ORDER_STATUS_COLOR as STATUS_COLOR,
   ORDER_TYPE_LABEL,
 } from "@/lib/constants";
+import { ClipboardList } from "lucide-react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -24,7 +25,7 @@ export default async function OrdersPage() {
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
       <div className="mb-10 flex items-start justify-between gap-4">
         <div>
-          <Link href="/portal" className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+          <Link href="/portal" className="text-sm text-accent hover:text-accent-light transition-colors">
             ← Portal
           </Link>
           <h1 className="mt-2 text-3xl font-bold text-white">Os seus pedidos</h1>
@@ -34,7 +35,7 @@ export default async function OrdersPage() {
         </div>
         <Link
           href="/portal/orders/new"
-          className="shrink-0 rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400"
+          className="shrink-0 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
         >
           + Novo pedido
         </Link>
@@ -42,14 +43,16 @@ export default async function OrdersPage() {
 
       {orders.length === 0 ? (
         <div className="rounded-2xl border border-white/15 bg-white/5 p-10 text-center">
-          <p className="text-2xl mb-2">📋</p>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+            <ClipboardList size={22} className="text-white/30" />
+          </div>
           <p className="text-slate-300 font-medium">Ainda não tem pedidos</p>
           <p className="mt-1 text-sm text-slate-500">
             Utilize o botão &ldquo;Novo pedido&rdquo; para solicitar algo ao nosso team.
           </p>
           <Link
             href="/portal/orders/new"
-            className="mt-5 inline-flex rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400"
+            className="mt-5 inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
           >
             Criar primeiro pedido →
           </Link>
@@ -61,12 +64,12 @@ export default async function OrdersPage() {
             <Link
               key={o.id}
               href={`/portal/orders/${o.id}`}
-              className="group block rounded-2xl border border-white/15 bg-white/5 p-5 transition hover:bg-white/8 hover:border-sky-500/40"
+              className="group block rounded-2xl border border-white/15 bg-white/5 p-5 transition hover:bg-white/8 hover:border-accent/40"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-white group-hover:text-sky-300 transition-colors">
+                    <p className="font-semibold text-white group-hover:text-accent-light transition-colors">
                       {ORDER_TYPE_LABEL[o.type] ?? o.type}
                     </p>
                     {o.orderRef && (

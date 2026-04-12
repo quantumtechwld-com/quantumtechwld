@@ -1,13 +1,77 @@
 @import "tailwindcss";
 
+/* ============================================================
+   QUANTUM TECH — SISTEMA DE TOKENS DE COR
+   Versão: Plasma Violeta (Abril 2026)
+   
+   Para mudar a paleta de acento no futuro:
+   1. Edite apenas os valores em :root abaixo
+   2. Todos os componentes actualizam automaticamente
+   3. Não edite classes Tailwind directamente nos ficheiros TSX
+   ============================================================ */
+
 :root {
+  /* ── Base ────────────────────────────────────────────────── */
   --background: #050816;
   --foreground: #ecf0ff;
+
+  /* ── ACENTO PRINCIPAL (brand / UI interactivo) ───────────── *
+   * Usado em: botões primários, links activos, badges de acção,
+   *           focus rings, labels de secção, nav CTA, ícones UI
+   * Tailwind: bg-accent  text-accent  border-accent  ring-accent
+   *           + qualquer modificador de opacidade: bg-accent/20
+   * ─────────────────────────────────────────────────────────── */
+  --accent:         #9B59FF;   /* violeta principal — UI primário  */
+  --accent-light:   #C084FC;   /* hover, variante clara            */
+  --accent-dim:     #7C3AED;   /* pressed, variante escura         */
+  --accent-muted:   rgba(155, 89, 255, 0.12);  /* fundos sutis    */
+  --accent-border:  rgba(155, 89, 255, 0.18);  /* bordas subtis   */
+  --accent-glow:    rgba(155, 89, 255, 0.4);   /* glow / sombras  */
+
+  /* ── COMPLEMENTAR TECH ───────────────────────────────────── *
+   * Mantido apenas para: gráficos de barras, métricas de dados,
+   *                       badges de stack técnica, orbs decorativos
+   * NÃO usar para UI interactiva (botões, links, focus)
+   * Tailwind: bg-cyan-tech  text-cyan-tech
+   * ─────────────────────────────────────────────────────────── */
+  --cyan:           #22D4C2;
+  --cyan-muted:     rgba(34, 212, 194, 0.12);
+
+  /* ── ESTADO / STATUS (semântico — NÃO alterar na mudança de marca) ─ *
+   * Estes representam estados de negócio, não identidade visual.
+   * Tailwind: usar as classes nativas (emerald, amber, red, green, etc.)
+   * ─────────────────────────────────────────────────────────────────── */
+  /* --status-success: #22c55e;   → usar emerald-500 nativo             */
+  /* --status-warning: #f59e0b;   → usar amber-500 nativo               */
+  /* --status-danger:  #ef4444;   → usar red-500 nativo                 */
+  /* --status-info:    var(--accent); → IN_PROGRESS / PROPOSAL_SENT = accent */
+
+  /* ── Superfícies ─────────────────────────────────────────── */
+  --bg-base:        #050816;   /* fundo global                     */
+  --bg-surface:     #07050F;   /* cards elevados                   */
+  --bg-card:        #0A0A1A;   /* modais, overlays                 */
 }
 
 @theme inline {
+  /* Base */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Acento — exposto como classes Tailwind completas:
+     bg-accent / text-accent / border-accent / ring-accent
+     + modificadores: bg-accent/20, ring-accent/50, etc. */
+  --color-accent:        var(--accent);
+  --color-accent-light:  var(--accent-light);
+  --color-accent-dim:    var(--accent-dim);
+
+  /* Complementar tech */
+  --color-cyan-tech:     var(--cyan);
+
+  /* Superfícies */
+  --color-bg-surface:    var(--bg-surface);
+  --color-bg-card:       var(--bg-card);
+
+  /* Tipografia e animações */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --animate-marquee: marquee 45s linear infinite;

@@ -58,7 +58,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
       <main className="mx-auto w-full max-w-2xl px-6 py-12">
         {/* Voltar + Imprimir — ocultos na impressão */}
         <div className="no-print mb-8 flex items-center justify-between">
-          <Link href={`/portal/orders/${id}`} className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+          <Link href={`/portal/orders/${id}`} className="text-sm text-accent hover:text-accent-light transition-colors">
             ← Voltar ao pedido
           </Link>
           <PrintButton />

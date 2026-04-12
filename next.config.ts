@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
   // seja exibido no DevTools do browser mesmo após minificação
   productionBrowserSourceMaps: false,
 
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
+  },
+
   async headers() {
     return [
       {

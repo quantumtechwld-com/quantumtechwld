@@ -10,7 +10,7 @@ export default async function NewOrderPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
       <div className="mb-10">
-        <Link href="/portal/orders" className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+        <Link href="/portal/orders" className="text-sm text-accent hover:text-accent-light transition-colors">
           ← Pedidos
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-white">Novo pedido</h1>

@@ -6,6 +6,7 @@ import type { GeneratedScope } from "@/app/api/briefing/scope/route";
 import AdminStatusForm from "./AdminStatusForm";
 import ScopeView from "./ScopeView";
 import ProposalManager from "./ProposalManager";
+import LogoAnimated from "@/components/home/LogoAnimated";
 import {
   BRIEFING_STATUS_LABEL as STATUS_LABEL,
   BRIEFING_STATUS_COLOR as STATUS_COLOR,
@@ -14,12 +15,12 @@ import {
 
 export default async function AdminBriefingDetailPage({
   params,
-}: {
+}: Readonly<{
   params: Promise<{ id: string }>;
-}) {
+}>) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (session?.user?.role !== "ADMIN") {
     redirect("/portal");
   }
 
@@ -65,13 +66,13 @@ export default async function AdminBriefingDetailPage({
   } | null;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <>
       {/* Header */}
-      <header className="border-b border-white/5 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-white/5 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold hover:opacity-80 transition-opacity mr-1">
-              A
+            <Link href="/admin" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <LogoAnimated size={28} />
             </Link>
             <Link href="/admin" className="text-white/50 hover:text-white/80 transition-colors text-sm">
               ← Admin Panel
@@ -162,11 +163,11 @@ export default async function AdminBriefingDetailPage({
           />
         </div>
       </main>
-    </div>
+    </>
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div>
       <p className="text-xs text-white/40 uppercase tracking-wider mb-1">{label}</p>

@@ -1,28 +1,39 @@
+import Image from "next/image";
+import { Zap, BrainCircuit, Bot, Rocket } from "lucide-react";
 import GsapAnimations from "./GsapAnimations";
 import LogoAnimated from "./LogoAnimated";
 import LogoTextAnimated from "./LogoTextAnimated";
 import LeadForm from "@/components/lead-form";
+import type { LucideIcon } from "lucide-react";
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
-const SERVICES = [
+type Service = {
+  Icon: LucideIcon;
+  title: string;
+  desc: string;
+  gradient: string;
+  accent: string;
+};
+
+const SERVICES: Service[] = [
   {
-    icon: "⚡",
+    Icon: Zap,
     title: "Websites & Landing Pages",
-    desc: "Páginas com alta performance, SEO técnico e foco em conversão. Do design ao deploy em dias.",
-    gradient: "from-cyan-500/15 to-blue-600/10",
-    accent: "text-cyan-400",
+    desc: "Páginas com alta performance, SEO técnico e foco em conversão. Do design ao deploy em dias. Inicie sua visibilidade.",
+    gradient: "from-blue-500/15 to-indigo-600/10",
+    accent: "text-accent",
   },
   {
-    icon: "🧠",
+    Icon: BrainCircuit,
     title: "Sistemas sob Medida",
     desc: "CRMs, ERPs, portais e plataformas alinhadas ao processo de negócio, com UX premium.",
     gradient: "from-violet-500/15 to-purple-600/10",
     accent: "text-violet-400",
   },
   {
-    icon: "🤖",
-    title: "IA & Automação n8n",
-    desc: "Agentes inteligentes, fluxos automatizados e integrações que eliminam trabalho manual.",
+    Icon: Bot,
+    title: "IA & Automação",
+    desc: "Agentes inteligentes, fluxos automatizados e integrações que eliminam trabalho manual. Escalabilidade de negócio com inteligência eficiente.",
     gradient: "from-emerald-500/15 to-teal-600/10",
     accent: "text-emerald-400",
   },
@@ -40,6 +51,12 @@ const TECHS = [
   "n8n", "OpenAI", "Prisma", "TailwindCSS", "Docker", "AWS", "Redis",
   "WordPress", "Python (Django/FastAPI)", "Java", "Go Lang", "Vue.js", "Angular", "MySQL", "MongoDB",
   "Laravel", ".NET", "GSAP", "Kubernetes", "Azure", "gRPC", "REST", "GraphQL",
+  "Flutter", "React Native",
+];
+
+const MARQUEE_ITEMS = [
+  ...TECHS.map((t) => ({ id: `a-${t}`, t })),
+  ...TECHS.map((t) => ({ id: `b-${t}`, t })),
 ];
 
 const STEPS = [
@@ -65,8 +82,10 @@ const PROJECTS = [
     label: "SaaS B2B",
     title: "Portal de Gestão Empresarial",
     tag: "React · Node · PostgreSQL",
-    gradient: "from-cyan-600 via-blue-700 to-indigo-800",
+    gradient: "from-blue-600 via-indigo-700 to-violet-800",
     bars: [40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100],
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    imgPosition: "50% 20%",
   },
   {
     label: "E-commerce",
@@ -74,13 +93,17 @@ const PROJECTS = [
     tag: "Next.js · Stripe · Redis",
     gradient: "from-violet-600 via-purple-700 to-fuchsia-800",
     bars: [70, 45, 80, 55, 95, 60, 85, 40, 100, 75, 65, 90],
+    image: "/images/dashboard-ecommerce.png",
+    imgPosition: "0% 40%",
   },
   {
     label: "IA + Automação",
     title: "Agente de Atendimento Inteligente",
     tag: "OpenAI · n8n · WhatsApp",
-    gradient: "from-emerald-600 via-teal-700 to-cyan-800",
+    gradient: "from-emerald-600 via-teal-700 to-teal-900",
     bars: [55, 80, 40, 95, 65, 75, 50, 85, 45, 90, 60, 100],
+    image: "/images/n8n-screenshot-readme.png",
+    imgPosition: "50% 30%",
   },
 ];
 
@@ -100,7 +123,7 @@ export default function HomeClient() {
             <LogoAnimated size={34} />
             <LogoTextAnimated />
           </div>
-          <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+          <div className="hidden items-center gap-8 text-sm font-bold text-slate-300 md:flex">
             <a href="#services" className="transition-colors hover:text-white">Serviços</a>
             <a href="#portfolio" className="transition-colors hover:text-white">Projetos</a>
             <a href="#lead" className="transition-colors hover:text-white">Contato</a>
@@ -108,13 +131,13 @@ export default function HomeClient() {
           <div className="flex items-center gap-3">
             <a
               href="/portal"
-              className="rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:border-white/30 hover:text-white"
+              className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-slate-300 transition-all hover:border-white/30 hover:text-white"
             >
               Área do Cliente
             </a>
             <a
               href="#lead"
-              className="rounded-lg bg-cyan-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+              className="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-accent-light hover:shadow-[0_0_20px_var(--accent-glow)]"
             >
               Fale conosco
             </a>
@@ -139,9 +162,9 @@ export default function HomeClient() {
         />
 
         {/* Radial glow orbs */}
-        <div data-orb="1" className="pointer-events-none absolute left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[80px]" style={{ willChange: "transform" }} />
-        <div data-orb="2" className="pointer-events-none absolute right-[8%] top-[28%] h-[450px] w-[450px] rounded-full bg-violet-500/10 blur-[70px]" style={{ willChange: "transform" }} />
-        <div data-orb="3" className="pointer-events-none absolute bottom-[15%] left-[40%] h-[380px] w-[380px] rounded-full bg-indigo-600/10 blur-[60px]" style={{ willChange: "transform" }} />
+        <div data-orb="1" className="pointer-events-none absolute left-[10%] top-[20%] h-125 w-125 rounded-full bg-violet-600/12 blur-[80px]" style={{ willChange: "transform" }} />
+        <div data-orb="2" className="pointer-events-none absolute right-[8%] top-[28%] h-112.5 w-112.5 rounded-full bg-violet-600/12 blur-[70px]" style={{ willChange: "transform" }} />
+        <div data-orb="3" className="pointer-events-none absolute bottom-[15%] left-[40%] h-95 w-95 rounded-full bg-violet-600/12 blur-[60px]" style={{ willChange: "transform" }} />
 
         {/* Hero Content */}
         <div className="relative mx-auto grid min-h-screen max-w-6xl grid-cols-1 gap-14 px-6 pb-20 pt-28 md:grid-cols-2 md:items-center">
@@ -151,13 +174,9 @@ export default function HomeClient() {
             {/* Badge */}
             <div
               data-hero="badge"
-              className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-4 py-2 text-sm font-medium text-cyan-300"
+              className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 text-sm font-medium text-violet-300"
             >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
-              </span>
-              Agência de software para negócios que crescem
+              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-violet-400" /></span><span>Agência de software para negócios que crescem</span>
             </div>
 
             {/* Title — split by words for GSAP */}
@@ -171,7 +190,7 @@ export default function HomeClient() {
                   data-hero="word"
                   className={`mr-[0.22em] inline-block last:mr-0 ${
                     i === 4
-                      ? "bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-400 bg-clip-text text-transparent"
+                      ? "bg-linear-to-r from-violet-400 via-violet-500 to-purple-600 bg-clip-text text-transparent"
                       : ""
                   }`}
                 >
@@ -180,16 +199,16 @@ export default function HomeClient() {
               ))}
             </h1>
 
-            <p data-hero="sub" className="mb-10 max-w-[30rem] text-lg leading-relaxed text-slate-300">
-              Desenvolvimento web, sistemas sob medida, automação com n8n e IA —
-              do primeiro MVP ao produto em produção. Diagnóstico gratuito em 24h.
+            <p data-hero="sub" className="mb-10 max-w-120 text-lg leading-relaxed text-slate-300">
+              Sistemas sob medida, web e automação com IA. Diagnóstico rápido e criterioso, do MVP à produção.
+              Conte com nossa análise completa, alinhada às suas diretrizes.
             </p>
 
             <div className="mb-12 flex flex-wrap gap-4">
               <a
                 data-hero="cta"
                 href="#lead"
-                className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-7 py-3.5 font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all hover:-translate-y-0.5 hover:shadow-cyan-500/40"
+                className="rounded-xl bg-linear-to-r from-violet-600 to-violet-500 px-7 py-3.5 font-semibold text-white shadow-lg shadow-violet-500/20 transition-all hover:-translate-y-0.5 hover:shadow-violet-500/40"
               >
                 Solicitar proposta
               </a>
@@ -213,7 +232,7 @@ export default function HomeClient() {
                 <div
                   data-hero="stat"
                   key={l}
-                  className="rounded-xl border border-white/8 bg-white/[0.04] p-4 text-center backdrop-blur"
+                  className="rounded-xl border border-white/8 bg-white/4 p-4 text-center backdrop-blur"
                 >
                   <p className="text-2xl font-bold text-white">{v}</p>
                   <p className="mt-0.5 text-xs text-slate-400">{l}</p>
@@ -238,7 +257,10 @@ export default function HomeClient() {
               data-float="deploy"
               className="absolute -bottom-4 -left-4 z-20 rounded-2xl border border-violet-500/30 bg-[#050816] px-4 py-3 shadow-xl"
             >
-              <p className="text-xs font-semibold text-violet-300">⚡ Deploy concluído</p>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
+                <Rocket size={12} aria-hidden="true" />
+                Deploy concluído
+              </p>
               <p className="mt-0.5 text-[10px] text-violet-400/60">v2.4.1 · produção</p>
             </div>
 
@@ -253,13 +275,13 @@ export default function HomeClient() {
               </div>
 
               {/* Chart */}
-              <div className="mb-5 overflow-hidden rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/8 p-4">
-                <p className="mb-3 text-[10px] font-medium uppercase tracking-widest text-cyan-400/60">Receita mensal</p>
+              <div className="mb-5 overflow-hidden rounded-xl bg-linear-to-br from-violet-500/15 to-violet-500/8 p-4">
+                <p className="mb-3 text-[10px] font-medium uppercase tracking-widest text-violet-400/60">Receita mensal</p>
                 <div className="flex h-28 items-end gap-1.5">
                   {[40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100].map((h, i) => (
                     <div
-                      key={i}
-                      className="flex-1 rounded-t-sm bg-gradient-to-t from-cyan-500 to-blue-400"
+                      key={h}
+                      className="flex-1 rounded-t-sm bg-linear-to-t from-violet-500 to-violet-400"
                       style={{ height: `${h}%`, opacity: 0.7 + i * 0.025 }}
                     />
                   ))}
@@ -296,7 +318,7 @@ export default function HomeClient() {
                     </div>
                     <div className="h-1.5 rounded-full bg-white/8">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                        className="h-full rounded-full bg-linear-to-r from-violet-500 to-violet-400"
                         style={{ width: `${r.pct}%` }}
                       />
                     </div>
@@ -314,16 +336,16 @@ export default function HomeClient() {
           className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-35"
         >
           <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-slate-500">scroll</span>
-          <div className="h-8 w-px bg-gradient-to-b from-slate-500 to-transparent" />
+          <div className="h-8 w-px bg-linear-to-b from-slate-500 to-transparent" />
         </div>
       </section>
 
       {/* ── MARQUEE ──────────────────────────────────────────────────────── */}
       <div aria-hidden={true} className="relative overflow-hidden border-y border-white/20 bg-white/5 py-5">
         <div className="flex w-max animate-marquee">
-          {[...TECHS, ...TECHS].map((t, i) => (
+          {MARQUEE_ITEMS.map(({ id, t }) => (
             <span
-              key={i}
+              key={id}
               className="mx-10 text-xs font-bold uppercase tracking-[0.28em] text-white"
             >
               {t}
@@ -334,17 +356,17 @@ export default function HomeClient() {
 
       {/* ── SERVICES ─────────────────────────────────────────────────────── */}
       <section id="services" data-gsap="services" className="mx-auto w-full max-w-6xl px-6 py-28">
-        <p data-gsap="services-label" className="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-cyan-400">
+        <p data-gsap="services-label" className="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-accent">
           O que fazemos
         </p>
         <h2 data-gsap="services-heading" className="mb-4 max-w-2xl text-4xl font-extrabold text-white md:text-5xl">
           Serviços que{" "}
-          <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-violet-400 via-violet-500 to-purple-600 bg-clip-text text-transparent">
             transformam negócios
           </span>
         </h2>
         <p data-gsap="services-heading" className="mb-16 max-w-md text-slate-400">
-          Da estratégia ao código: entregamos tecnologia com visão de negócio.
+          Da estratégia ao código: tecnologia que nasce da sua visão de negócio e gera resultado com agilidade e critério
         </p>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -353,17 +375,19 @@ export default function HomeClient() {
               data-gsap="service-card"
               key={svc.title}
               aria-label={svc.title}
-              className={`group relative cursor-default overflow-hidden rounded-2xl border border-white/8 bg-gradient-to-br ${svc.gradient} p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-white/20 hover:shadow-2xl`}
+              className={`group relative cursor-default overflow-hidden rounded-2xl border border-white/8 bg-linear-to-br ${svc.gradient} p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-white/20 hover:shadow-2xl`}
             >
               {/* Glow on hover */}
               <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 style={{ background: "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 60%)" }} />
 
-              <div className="mb-5 text-4xl">{svc.icon}</div>
+              <div className="mb-5">
+                <svc.Icon size={40} className={svc.accent} aria-hidden="true" />
+              </div>
               <h3 className="mb-3 text-xl font-bold text-white">{svc.title}</h3>
               <p className="text-sm leading-relaxed text-slate-300/90">{svc.desc}</p>
               <div className={`mt-6 flex items-center gap-1.5 text-xs font-bold ${svc.accent} opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100`}>
-                Ver detalhes <span>→</span>
+                <a href="#lead" className="flex items-center gap-1.5">Fale conosco <span>→</span></a>
               </div>
             </article>
           ))}
@@ -371,17 +395,17 @@ export default function HomeClient() {
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────── */}
-      <section aria-label="Estatísticas" data-gsap="stats" className="border-y border-white/[0.06] bg-white/[0.02] py-20">
+      <section aria-label="Estatísticas" data-gsap="stats" className="border-y border-white/6 bg-white/2 py-20">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 md:grid-cols-4">
           {STATS.map((s) => (
             <div
               data-gsap="stat-card"
               key={s.label}
-              className="rounded-2xl border border-white/8 bg-white/[0.03] p-8 text-center"
+              className="rounded-2xl border border-white/8 bg-white/3 p-8 text-center"
             >
               <p className="text-5xl font-black text-white">
                 <span data-count-to={s.value}>0</span>
-                <span className="text-cyan-400">{s.suffix}</span>
+                <span className="text-accent">{s.suffix}</span>
               </p>
               <p className="mt-2 text-sm text-slate-400">{s.label}</p>
             </div>
@@ -400,8 +424,8 @@ export default function HomeClient() {
         <div className="grid gap-10 md:grid-cols-3">
           {STEPS.map((step) => (
             <div data-gsap="step" key={step.num} className="relative pl-8">
-              <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-violet-500/50 via-violet-500/20 to-transparent" />
-              <span className="mb-4 block select-none text-7xl font-black leading-none text-white/[0.05]">
+              <div className="absolute left-0 top-0 h-full w-px bg-linear-to-b from-violet-500/50 via-violet-500/20 to-transparent" />
+              <span className="mb-4 block select-none text-7xl font-black leading-none text-white/15">
                 {step.num}
               </span>
               <h3 className="mb-3 text-xl font-bold text-white">{step.title}</h3>
@@ -424,42 +448,51 @@ export default function HomeClient() {
             <div
               data-gsap="project"
               key={p.title}
-              className="group cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-white/[0.02] transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl"
+              className="group cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-white/2 transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl"
             >
-              {/* Mock screenshot */}
-              <div className={`relative h-52 overflow-hidden bg-gradient-to-br ${p.gradient}`}>
+              {/* Screenshot / Mock */}
+              <div className={`relative h-48 overflow-hidden sm:h-52 md:h-48 lg:h-56 ${p.image ? "bg-black" : "bg-linear-to-br " + p.gradient}`}>
                 {/* Titlebar */}
-                <div className="absolute inset-x-0 top-0 flex h-8 items-center gap-1.5 bg-black/25 px-4 backdrop-blur-sm">
+                <div className="absolute inset-x-0 top-0 z-10 flex h-8 items-center gap-1.5 bg-black/25 px-4 backdrop-blur-sm">
                   <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
                   <div className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
                   <div className="mx-auto h-4 w-32 rounded-full bg-white/15" />
                 </div>
-                {/* UI mock content */}
-                <div className="absolute inset-x-4 bottom-4 top-12 space-y-2.5 overflow-hidden rounded-xl bg-black/20 p-4 backdrop-blur-sm">
-                  <div className="h-2 w-3/4 rounded-full bg-white/30" />
-                  <div className="h-2 w-1/2 rounded-full bg-white/20" />
-                  {/* Mini chart */}
-                  <div className="flex h-10 items-end gap-0.5 rounded-lg bg-white/5 px-2 py-1.5">
-                    {p.bars.map((h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-t-[2px] bg-white/40"
-                        style={{ height: `${h}%` }}
-                      />
-                    ))}
+                {p.image ? (
+                  <Image
+                    src={p.image}
+                    alt={p.title}
+                    fill
+                    className="object-cover"
+                    style={{ objectPosition: p.imgPosition ?? "50% 0%" }}
+                    sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 768px) calc(100vw - 48px), (max-width: 1200px) calc(33vw - 32px), 368px"
+                  />
+                ) : (
+                  <div className="absolute inset-x-4 bottom-4 top-12 space-y-2.5 overflow-hidden rounded-xl bg-black/20 p-4 backdrop-blur-sm">
+                    <div className="h-2 w-3/4 rounded-full bg-white/30" />
+                    <div className="h-2 w-1/2 rounded-full bg-white/20" />
+                    <div className="flex h-10 items-end gap-0.5 rounded-lg bg-white/5 px-2 py-1.5">
+                      {p.bars.map((h) => (
+                        <div
+                          key={h}
+                          className="flex-1 rounded-t-xs bg-white/40"
+                          style={{ height: `${h}%` }}
+                        />
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="h-9 rounded-lg bg-white/20" />
+                      <div className="h-9 rounded-lg bg-white/12" />
+                      <div className="h-9 rounded-lg bg-white/20" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="h-9 rounded-lg bg-white/20" />
-                    <div className="h-9 rounded-lg bg-white/12" />
-                    <div className="h-9 rounded-lg bg-white/20" />
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="p-6">
                 <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-slate-500">{p.label}</p>
-                <h3 className="mb-2 text-lg font-bold text-white transition-colors group-hover:text-cyan-300">
+                <h3 className="mb-2 text-lg font-bold text-white transition-colors group-hover:text-violet-300">
                   {p.title}
                 </h3>
                 <p className="text-xs text-slate-500">{p.tag}</p>
@@ -471,13 +504,13 @@ export default function HomeClient() {
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
       <section data-gsap="cta" className="mx-auto w-full max-w-6xl px-6 pb-28">
-        <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-gradient-to-br from-cyan-500/8 via-violet-500/8 to-blue-600/8 p-14 text-center md:p-24">
+        <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-linear-to-br from-violet-500/8 via-violet-600/8 to-purple-600/8 p-14 text-center md:p-24">
           {/* Background radial */}
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(6,182,212,0.18),transparent_65%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(155,89,255,0.18),transparent_65%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(139,92,246,0.12),transparent_60%)]" />
 
           <div data-gsap="cta-inner" className="relative space-y-6">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-400">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-accent">
               Pronto para começar?
             </p>
             <h2 className="mx-auto max-w-2xl text-4xl font-extrabold text-white md:text-5xl lg:text-6xl">
@@ -489,7 +522,7 @@ export default function HomeClient() {
             <div>
               <a
                 href="#lead"
-                className="inline-block rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 px-10 py-4 text-lg font-bold text-white shadow-lg shadow-cyan-500/20 transition-all hover:scale-105 hover:shadow-[0_0_50px_rgba(6,182,212,0.4)]"
+                className="inline-block rounded-xl bg-linear-to-r from-violet-600 to-violet-500 px-10 py-4 text-lg font-bold text-white shadow-lg shadow-violet-500/20 transition-all hover:scale-105 hover:shadow-[0_0_50px_var(--accent-glow)]"
               >
                 Solicitar diagnóstico gratuito
               </a>
@@ -503,16 +536,15 @@ export default function HomeClient() {
         <div className="grid gap-14 md:grid-cols-2 md:items-start">
           <div data-gsap="lead-left">
             <h2 className="mb-4 text-3xl font-extrabold text-white md:text-4xl">
-              Fale com nosso agente e receba uma proposta
+              Envie seu briefing para o nosso time técnico e receba uma proposta
             </h2>
             <p className="mb-8 text-slate-300">
-              Preencha em menos de 2 minutos. Qualificamos automaticamente via n8n
-              e você recebe retorno rápido.
+              Preencha em menos de 2 minutos. Qualificamos automaticamente via n8n, filtramos com os engenheiros da equipe e você recebe retorno rápido.
             </p>
             <ul className="space-y-3 text-sm text-slate-300">
-              {["Resposta em até 1 hora útil", "Escopo com stack e prazo sugeridos", "Sem compromisso"].map((item) => (
+              {["Resposta no próximo dia útil", "Escopo com stack e prazo sugeridos", "Sem compromisso"].map((item) => (
                 <li key={item} className="flex items-center gap-3">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold text-cyan-400">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-[10px] font-bold text-violet-400">
                     ✓
                   </span>
                   {item}
@@ -527,11 +559,32 @@ export default function HomeClient() {
       </section>
 
       {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/[0.06] px-6 py-12 text-center text-sm text-slate-600">
+      <footer className="border-t border-white/6 px-6 py-12 text-center text-sm text-slate-600">
         <p className="mb-1 font-semibold text-slate-400">
-          Quantum<span className="text-cyan-400">Tech</span>
+          Quantum<span className="text-accent">Tech</span>
         </p>
+        <div className="mt-4 mb-4 flex items-center justify-center gap-5">
+          {/* LinkedIn */}
+          <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-slate-500 transition-colors hover:text-[#0A66C2]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          </a>
+          {/* Facebook */}
+          <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-slate-500 transition-colors hover:text-[#1877F2]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+            </svg>
+          </a>
+          {/* Instagram */}
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-slate-500 transition-colors hover:text-[#E1306C]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+            </svg>
+          </a>
+        </div>
         <p>© 2026 Todos os direitos reservados.</p>
+        <p className="mt-2 text-slate-700">EUA&nbsp;|&nbsp;América Latina&nbsp;|&nbsp;Europa</p>
       </footer>
 
     </div>

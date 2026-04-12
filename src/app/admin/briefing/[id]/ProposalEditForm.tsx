@@ -17,7 +17,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
           rows={3}
           value={editForm.summary}
           onChange={e => onChange(f => ({ ...f, summary: e.target.value }))}
-          className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-sky-500/50 resize-none"
+          className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 resize-none"
         />
       </div>
       <div className="grid grid-cols-3 gap-3">
@@ -28,7 +28,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
             type="number"
             value={editForm.hoursTotal}
             onChange={e => onChange(f => ({ ...f, hoursTotal: Number(e.target.value) }))}
-            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500/50"
+            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-accent/50"
           />
         </div>
         <div>
@@ -38,7 +38,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
             type="number"
             value={editForm.costMin}
             onChange={e => onChange(f => ({ ...f, costMin: Number(e.target.value) }))}
-            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500/50"
+            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-accent/50"
           />
         </div>
         <div>
@@ -48,7 +48,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
             type="number"
             value={editForm.costMax}
             onChange={e => onChange(f => ({ ...f, costMax: Number(e.target.value) }))}
-            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500/50"
+            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-accent/50"
           />
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
           rows={16}
           value={editForm.content}
           onChange={e => onChange(f => ({ ...f, content: e.target.value }))}
-          className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white/80 font-mono placeholder:text-white/20 focus:outline-none focus:border-sky-500/50 resize-y"
+          className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white/80 font-mono placeholder:text-white/20 focus:outline-none focus:border-accent/50 resize-y"
         />
       </div>
     </div>

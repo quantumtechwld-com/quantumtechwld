@@ -40,7 +40,7 @@ export default function ProposalManager({ briefingId, initialProposal, hasScope 
             type="button"
             onClick={() => generate(false)}
             disabled={loading}
-            className="rounded-xl bg-sky-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-sky-400 transition disabled:opacity-50"
+            className="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-accent-light transition disabled:opacity-50"
           >
             {loading ? "A gerar…" : "Gerar rascunho"}
           </button>
@@ -94,7 +94,7 @@ export default function ProposalManager({ briefingId, initialProposal, hasScope 
                 type="button"
                 onClick={sendProposal}
                 disabled={loading}
-                className="rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-400 transition disabled:opacity-50"
+                className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-accent-light transition disabled:opacity-50"
               >
                 {loading ? "…" : "Enviar ao cliente →"}
               </button>

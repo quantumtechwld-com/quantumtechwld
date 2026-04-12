@@ -74,7 +74,7 @@ export default function AllBriefingsTable({ briefings, PROJECT_LABEL, STATUS_LAB
               <td className="px-6 py-4">
                 <Link
                   href={`/admin/briefing/${b.id}`}
-                  className="text-violet-400 hover:text-violet-300 text-xs font-medium transition-colors"
+                  className="text-accent hover:text-accent-light text-xs font-medium transition-colors"
                 >
                   Ver detalhes →
                 </Link>

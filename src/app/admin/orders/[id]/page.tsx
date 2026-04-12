@@ -24,7 +24,7 @@ const STATUS_COLOR: Record<string, string> = {
   DRAFT:          "bg-slate-500/20 text-slate-300 border border-slate-500/30",
   PENDING:        "bg-blue-500/20 text-blue-300 border border-blue-500/30",
   EVALUATING:     "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-  PROPOSAL_SENT:  "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+  PROPOSAL_SENT:  "bg-accent/20 text-accent-light border border-accent/30",
   APPROVED:       "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
   REVISION:       "bg-orange-500/20 text-orange-300 border border-orange-500/30",
   REJECTED:       "bg-red-500/20 text-red-300 border border-red-500/30",
@@ -81,8 +81,8 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-gray-950/80 backdrop-blur-sm">
+    <>
+      <header className="sticky top-0 z-10 border-b border-white/5 bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <Link href="/admin" className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-cyan-500 text-sm font-bold hover:opacity-80 transition-opacity">
@@ -160,8 +160,8 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
 
         {/* Proposta enviada (se existir) */}
         {order.productionInfo && (
-          <section className="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-sky-400 mb-3">
+          <section className="rounded-2xl border border-accent/30 bg-accent/5 p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-accent mb-3">
               Proposta enviada
             </h2>
             <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.productionInfo}</p>
@@ -268,6 +268,6 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
         {/* Canal de mensagens */}
         <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
       </main>
-    </div>
+    </>
   );
 }

@@ -1,0 +1,3427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Validação da Plataforma — Quantum Technology Agency</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222635;
+      --border: #2e3348;
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --gray: #64748b;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 24px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border-radius: 16px;
+      padding: 32px 40px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header h1 { font-size: 26px; font-weight: 700; color: #fff; }
+    .header p  { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; }
+    .meta { text-align: right; }
+    .meta .date { font-size: 12px; color: rgba(255,255,255,0.65); }
+    .meta .env  { font-size: 11px; background: rgba(0,0,0,0.25); padding: 3px 10px; border-radius: 20px; color: #fff; display: inline-block; margin-top: 4px; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { background: var(--surface); border-radius: 12px; padding: 20px 28px; margin-bottom: 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .progress-label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+    .progress-bar-outer { flex: 1; min-width: 200px; background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; }
+    .progress-bar-inner { height: 10px; border-radius: 99px; background: linear-gradient(90deg, var(--green), #16a34a); transition: width 0.4s; }
+    .progress-count { font-size: 22px; font-weight: 700; color: var(--green); white-space: nowrap; }
+    .stat-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: 12px; color: var(--text2); }
+    .stat-pill span { font-weight: 700; color: var(--text); }
+
+    /* ── TOC ── */
+    .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; margin-bottom: 32px; }
+    .toc h2 { font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+    .toc a { color: var(--text2); text-decoration: none; font-size: 13px; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
+    .toc a:hover { color: var(--accent); }
+    .toc a::before { content: '→'; font-size: 11px; opacity: 0.5; }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 36px; }
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      padding: 14px 20px;
+    }
+    .section-icon { font-size: 20px; }
+    .section-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .section-count { margin-left: auto; font-size: 12px; color: var(--text2); background: var(--surface2); padding: 2px 10px; border-radius: 99px; }
+    .section-body { background: var(--surface); border: 1px solid var(--border); border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; overflow: hidden; }
+
+    /* ── SUBSECTION ── */
+    .subsection { border-bottom: 1px solid var(--border); }
+    .subsection:last-child { border-bottom: none; }
+    .subsec-title { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 20px 4px; background: rgba(99,102,241,0.05); border-bottom: 1px solid var(--border); }
+
+    /* ── CHECK ITEM ── */
+    .check-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 13px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: rgba(255,255,255,0.03); }
+    .check-item.checked { opacity: 0.6; }
+    .check-item.checked .check-text { text-decoration: line-through; color: var(--gray); }
+
+    /* checkbox custom */
+    .checkbox {
+      width: 18px; height: 18px; min-width: 18px;
+      border: 2px solid var(--border);
+      border-radius: 5px;
+      margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      background: var(--bg);
+    }
+    .check-item.checked .checkbox {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .check-item.checked .checkbox::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+
+    /* ── PRIORITY ── */
+    .priority-btn {
+      background: transparent; border: none; cursor: pointer;
+      font-size: 15px; line-height: 1;
+      flex-shrink: 0; padding: 0 2px;
+      opacity: 0.2; transition: opacity 0.15s;
+      align-self: flex-start; margin-top: 0px;
+    }
+    .check-item:hover .priority-btn { opacity: 0.55; }
+    .check-item.priority .priority-btn { opacity: 1; filter: drop-shadow(0 0 4px #f59e0b); }
+    .check-item.priority {
+      border-left: 3px solid #f59e0b;
+      background: rgba(245,158,11,0.04);
+    }
+    .check-item.priority .check-text { color: #fcd34d; }
+
+    .check-content { flex: 1; }
+    .check-text { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+    .check-sub  { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+    /* badges */
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 99px;
+      flex-shrink: 0; margin-top: 1px;
+      white-space: nowrap;
+    }
+    .badge-admin  { background: rgba(139,92,246,0.2); color: #a78bfa; border: 1px solid rgba(139,92,246,0.35); }
+    .badge-client { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.35); }
+    .badge-public { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.35); }
+    .badge-stripe { background: rgba(99,91,255,0.2);  color: #818cf8; border: 1px solid rgba(99,91,255,0.35); }
+    .badge-email  { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.35); }
+    .badge-ai     { background: rgba(245,158,11,0.15);color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
+    .badge-crit   { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
+
+    /* result column */
+    .result-input {
+      min-width: 160px; max-width: 200px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .result-input:focus { border-color: var(--accent); }
+    .result-input::placeholder { color: var(--gray); }
+
+    /* ── NOTES ── */
+    .global-notes { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; margin-bottom: 36px; }
+    .global-notes h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--accent); }
+    .global-notes textarea {
+      width: 100%; min-height: 100px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+    }
+    .global-notes textarea:focus { border-color: var(--accent); }
+
+    /* ── ACTIONS BAR ── */
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+    .btn-danger { background: var(--red); }
+
+    /* ── LEGEND ── */
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+
+    /* ── STICKY SUMMARY ── */
+    .sticky-bar {
+      position: fixed; bottom: 20px; right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 13px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sticky-bar .pct { font-size: 20px; font-weight: 700; color: var(--green); }
+
+    @media print {
+      .sticky-bar { display: none; }
+      body { background: #fff; color: #111; padding: 16px; }
+      .header { background: #4f46e5; }
+      .section-header, .section-body, .global-notes, .toc, .progress-wrap { background: #f8f9fa; border-color: #ddd; }
+      .btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>✅ Validação da Plataforma</h1>
+    <p>Quantum Technology Agency — DevFlow Platform &nbsp;|&nbsp; Checklist completo de QA pré/pós-deploy</p>
+  </div>
+  <div class="meta">
+    <div class="date" id="dateDisplay"></div>
+    <div class="env">https://quantumtechwld.com</div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-label">Progresso geral</div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:0%"></div></div>
+  <div class="progress-count" id="progressCount">0 / 0</div>
+  <div class="stat-pill">Pendentes: <span id="statPending">0</span></div>
+  <div class="stat-pill">OK: <span id="statOk">0</span></div>
+  <div class="stat-pill" style="border-color:rgba(245,158,11,0.4);color:#f59e0b">⭐ Prioritários: <span id="statPriority">0</span></div>
+</div>
+
+<!-- ACTIONS -->
+<div class="actions">
+  <button class="btn" onclick="saveState()">💾 Salvar</button>
+  <button class="btn btn-outline" onclick="loadState()">📂 Carregar</button>
+  <button class="btn btn-outline" onclick="exportPDF()">🖨 Imprimir / PDF</button>
+  <button class="btn btn-danger btn-outline" onclick="resetAll()">🔄 Resetar tudo</button>
+  <button class="btn btn-outline" onclick="checkAll()">✅ Marcar todos</button>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><span class="badge badge-admin">ADMIN</span> Acesso restrito a admins</div>
+  <div class="legend-item"><span class="badge badge-client">CLIENTE</span> Requer autenticação</div>
+  <div class="legend-item"><span class="badge badge-public">PÚBLICO</span> Sem autenticação</div>
+  <div class="legend-item"><span class="badge badge-stripe">STRIPE</span> Integração Stripe</div>
+  <div class="legend-item"><span class="badge badge-email">EMAIL</span> Envia email</div>
+  <div class="legend-item"><span class="badge badge-ai">IA</span> Gemini AI</div>
+  <div class="legend-item"><span class="badge badge-crit">CRÍTICO</span> Fluxo essencial</div>
+  <div class="legend-item"><span style="color:#f59e0b;font-size:14px">⭐</span> Prioritário (clique na estrela)</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>Índice</h2>
+  <div class="toc-grid">
+    <a href="#sec-public">Páginas Públicas</a>
+    <a href="#sec-identity">Conteúdo — Textos & Imagens</a>
+    <a href="#sec-auth">Autenticação (Magic Link)</a>
+    <a href="#sec-portal">Portal do Cliente</a>
+    <a href="#sec-ux-client">UX — Onboarding & Navegação do Cliente</a>
+    <a href="#sec-briefing-client">Briefing — Fluxo Cliente</a>
+    <a href="#sec-orders-client">Pedidos — Fluxo Cliente</a>
+    <a href="#sec-payment-client">Pagamento Stripe</a>
+    <a href="#sec-admin-dash">Admin — Dashboard</a>
+    <a href="#sec-admin-briefing">Admin — Gestão de Briefings</a>
+    <a href="#sec-admin-orders">Admin — Gestão de Pedidos</a>
+    <a href="#sec-admin-users">Admin — Gestão de Utilizadores</a>
+    <a href="#sec-tickets">Tickets de Suporte Pós-entrega</a>
+    <a href="#sec-proposal">Propostas Comerciais</a>
+    <a href="#sec-messages">Canal de Mensagens</a>
+    <a href="#sec-library">Biblioteca de Referências</a>
+    <a href="#sec-email">Emails & Notificações</a>
+    <a href="#sec-stripe-webhook">Webhook Stripe</a>
+    <a href="#sec-n8n">Integração n8n</a>
+    <a href="#sec-security">Segurança & Acesso</a>
+    <a href="#sec-infra">Infra & Performance</a>
+    <a href="#sec-identity">Identidade Visual</a>
+    <a href="#sec-social">Redes Sociais</a>
+    <a href="#sec-company">Abertura de Empresa</a>
+    <a href="#sec-mobile">Mobile / PWA</a>
+    <a href="#sec-i18n">Internacionalização (i18n)</a>
+    <a href="#sec-invoice">Faturação &amp; Invoices</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     1. PÁGINAS PÚBLICAS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-public">
+  <div class="section-header">
+    <span class="section-icon">🌐</span>
+    <span class="section-title">1. Páginas Públicas</span>
+    <span class="section-count" data-section="sec-public">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Landing Page — /</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página carrega sem erros de console <span class="badge badge-public">PÚBLICO</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Abrir DevTools → Console; verificar se há erros JS ou erros de hidratação Next.js</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Animações GSAP carregam corretamente (logo, textos, partículas)</div>
+          <div class="check-sub">Verificar se GsapAnimations e LogoAnimated renderizam sem travar</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Wizard de lead exibe os passos corretamente (WizardSteps)</div>
+          <div class="check-sub">Navegar por todos os passos do wizard: tipo de projeto, funcionalidades, orçamento, prazo, dados de contato</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Campo de IA (AIBriefingInput) processa e retorna análise <span class="badge badge-ai">IA</span></div>
+          <div class="check-sub">Digitar descrição livre → aguardar resposta Gemini → verificar preenchimento automático dos campos</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Submissão do formulário de lead redireciona para /obrigado <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Preencher todos os campos obrigatórios → submeter → verificar redirecionamento e ausência de erro 500</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Lead é criado no banco de dados (User + Briefing) <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">POST /api/lead → verificar no admin se o briefing aparece na AllBriefingsTable</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de notificação chega ao admin após submissão do wizard <span class="badge badge-email">EMAIL</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Após submeter o wizard, verificar <code>ricardo8leandro@gmail.com</code> — deve receber email com nome, email, serviço, budget, complexidade e mensagem do lead. Enviado via Resend SMTP directo (independente do n8n). <strong>✅ Validado em 30/03/2026.</strong></div>
+        </div>
+        <input class="result-input" placeholder="✅ Confirmado 30/03/2026" onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Página /obrigado</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página /obrigado exibe mensagem de sucesso corretamente <span class="badge badge-public">PÚBLICO</span></div>
+          <div class="check-sub">Verificar layout, ícone de confirmação e CTA para o portal</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     2. AUTENTICAÇÃO
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-auth">
+  <div class="section-header">
+    <span class="section-icon">🔐</span>
+    <span class="section-title">2. Autenticação — Magic Link</span>
+    <span class="section-count" data-section="sec-auth">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Página /portal/login carrega e exibe o campo de email <span class="badge badge-public">PÚBLICO</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar o campo de email e botão de envio do magic link</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Envio de magic link: email chega na caixa de entrada <span class="badge badge-email">EMAIL</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Inserir email válido → clicar enviar → aguardar email → verificar remetente e conteúdo</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Redirecionamento para /portal/verificar após envio do link</div>
+        <div class="check-sub">Após submissão do email, deve exibir instruções de verificação</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Clicar no link do email autentica e redireciona para /portal <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">O token no link deve ser validado pelo NextAuth e criar sessão JWT válida</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Link expirado ou inválido redireciona para /portal/erro com mensagem adequada</div>
+        <div class="check-sub">Testar com token manipulado ou link usado duas vezes</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Sign out funciona e invalida a sessão</div>
+        <div class="check-sub">Clicar em "Sair" → verificar redirecionamento para /portal/login → tentar acessar /portal diretamente (deve redirecionar para login)</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Role ADMIN: após login, acesso a /admin liberado</div>
+        <div class="check-sub">Usuario com role=ADMIN deve acessar /admin sem redirect para /portal</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Role CLIENT: tentativa de acesso a /admin redireciona para /portal</div>
+        <div class="check-sub">Testar com conta de cliente — não deve conseguir acessar nenhuma rota /admin</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email não registado: mensagem de erro clara em /portal/login <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Inserir email que não existe na BD → deve exibir "Este email não está registado no portal. Preencha o formulário de contacto..."</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Conta com status PENDING: bloqueada no login com mensagem de aprovação pendente <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Inserir email de utilizador com status=PENDING → deve exibir "A sua conta está a aguardar aprovação pelo administrador..." — magic link NÃO deve ser enviado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Conta com status SUSPENDED: bloqueada com mensagem de acesso suspenso</div>
+        <div class="check-sub">Inserir email de utilizador com status=SUSPENDED → deve exibir "O acesso à sua conta foi suspenso..." — magic link NÃO deve ser enviado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Após aprovação pelo admin (PENDING → ACTIVE), utilizador consegue receber magic link <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">1. Criar utilizador via formulário de contacto → status=PENDING; 2. Admin aprova em /admin/users; 3. Utilizador tenta login → magic link enviado com sucesso</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Utilizador PENDING não acessa /portal mesmo com token JWT válido</div>
+        <div class="check-sub">Se sessão JWT existir para PENDING (edge case), middleware deve redirecionar para /portal/erro?reason=pending</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     3. PORTAL DO CLIENTE
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-portal">
+  <div class="section-header">
+    <span class="section-icon">🖥</span>
+    <span class="section-title">3. Portal do Cliente — Dashboard</span>
+    <span class="section-count" data-section="sec-portal">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal carrega e exibe os briefings do utilizador autenticado <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar a lista de briefings, status de cada um, links para detalhe e pedidos pendentes</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/profile exibe e permite editar nome, telefone e empresa <span class="badge badge-client">CLIENTE</span></div>
+        <div class="check-sub">Editar campos → salvar via PATCH /api/profile → verificar persistência ao recarregar</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/profile exibe estatísticas (briefings e pedidos) corretamente</div>
+        <div class="check-sub">Verificar contadores de briefings e pedidos do utilizador</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/guide exibe o guia de utilização completo <span class="badge badge-client">CLIENTE</span></div>
+        <div class="check-sub">Verificar se o conteúdo dos passos está correto e legível</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     UX — ONBOARDING & NAVEGAÇÃO DO CLIENTE
+══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-ux-client">
+  <div class="section-header">
+    <span class="section-icon">🦭</span>
+    <span class="section-title">3b. UX — Onboarding & Navegação do Cliente</span>
+    <span class="section-count" data-section="sec-ux-client">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Onboarding & Orientação Inicial</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Primeiro acesso: boas-vindas com explicação do fluxo da plataforma <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Após login inicial, cliente deve ver mensagem ou card de boas-vindas explicando o ciclo completo: Briefing → Escopo → Proposta → Pagamento → Produção → Entrega</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Link para /portal/guide acessível e em destaque no dashboard</div>
+          <div class="check-sub">Botão ou link "Como funciona" / "Guia de utilização" deve estar visível sem necessidade de procurar no menu</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">/portal/guide descreve cada passo do fluxo com linguagem simples e não técnica</div>
+          <div class="check-sub">Verificar que cada etapa (Briefing, Escopo, Proposta, Pagamento, Produção, Entrega, Ticket) está explicada com texto claro para cliente sem background técnico</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Icons e Identificação Visual de Ações</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Cada ação primária tem ícone + rótulo descritivo (nunca apenas ícone isolado) <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Percorrer: "Novo Briefing", "Ver Proposta", "Pagar", "Avaliar", "Abrir Ticket", "Enviar Mensagem" — todos devem ter ícone visível + texto legível ao lado ou abaixo</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Badges de status têm ícone + cor + texto legível em todos os estados</div>
+          <div class="check-sub">Verificar: PENDING, EVALUATING, PROPOSAL_SENT, APPROVED, IN_PRODUCTION, COMPLETED, REJECTED — nenhum estado deve ser identificável apenas por cor</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Tooltip ou descrição breve ao passar o rato sobre cada ícone de ação</div>
+          <div class="check-sub">Hover em botões de ação (aprovar proposta, pagar, avaliar, ticket) deve exibir `title` ou tooltip com explicação do que acontece ao clicar</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Explicações Contextuais por Passo</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página de detalhe do briefing explica o que é um escopo e porque é gerado</div>
+          <div class="check-sub">Em /portal/briefing/[id], antes ou após o ScopeGenerator deve haver texto de orientação: "O escopo é a lista técnica das funcionalidades do seu projeto..." etc.</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página de proposta explica o que o cliente está a aprovar antes das ações</div>
+          <div class="check-sub">Em /portal/briefing/[id]/proposta, texto introdutório deve descrever: "Esta é a proposta comercial da Quantum para o seu projeto. Ao aprovar..." com enumeração das consequências</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página de pagamento explica o que está a ser cobrado e o que acontece a seguir</div>
+          <div class="check-sub">Em /portal/orders/[id] com status=APPROVED, antes do botão Stripe deve haver texto: "Ao confirmar o pagamento, a produção do seu projeto será iniciada..."</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Estado vazio (sem briefings) exibe orientação clara de como começar</div>
+          <div class="check-sub">Cliente sem nenhum briefing vê o dashboard com texto/card de "Como começar" e botão "Criar primeiro briefing" em destaque</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página /portal/erro exibe mensagens de erro human-friendly com orientação</div>
+          <div class="check-sub">Erros de acesso, conta pendente ou suspensa devem ter mensagem clara com próximo passo sugerido (ex: "Entre em contacto pelo email...") e não apenas código de erro</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Navegação & Estrutura</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Menu de navegação do portal tem rótulos compreensíveis com ícones</div>
+          <div class="check-sub">Verificar links: Dashboard, Meus Projetos, Pedidos/Tickets, Perfil, Guia — cada um com ícone e rótulo. Não deve haver entradas órfãs ou sem label</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Breadcrumb ou botão "Voltar" presente em páginas de detalhe</div>
+          <div class="check-sub">Em /portal/briefing/[id], /portal/orders/[id] e /portal/briefing/[id]/proposta deve existir navegação de retorno clara sem depender do botão do browser</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Indicação de progresso do projecto visível no dashboard (stepper ou timeline)</div>
+          <div class="check-sub">Cliente vê onde o seu projecto está no ciclo de vida (ex: Passo 2 de 6: Aguarda Proposta) sem precisar interpretar códigos de status internos</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Notificações ou alertas in-app para ações que requerem atenção do cliente</div>
+          <div class="check-sub">Quando há proposta por aceitar, pagamento pendente ou ticket respondido, o dashboard deve destacar visualmente a ação pendente (badge, banner ou card destacado)</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     4. BRIEFING — FLUXO CLIENTE
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-briefing-client">
+  <div class="section-header">
+    <span class="section-icon">📋</span>
+    <span class="section-title">4. Briefing — Fluxo Cliente</span>
+    <span class="section-count" data-section="sec-briefing-client">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/briefing/[id] carrega dados do briefing correto <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar nome do projeto, status, tipo, orçamento, prazo e informações do escopo</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Acesso a briefing de outro utilizador retorna 403/redirect <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Testar com ID de briefing que não pertence ao utilizador logado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ScopeGenerator (M2) gera escopo técnico via Gemini <span class="badge badge-ai">IA</span></div>
+        <div class="check-sub">Clicar em "Gerar Escopo" → POST /api/briefing/scope → verificar features, userStories, estimativas de horas e custo</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Cliente não pode gerar novo escopo/orçamento após o primeiro já ter sido gerado <span class="badge badge-crit">CRÍTICO</span> <span class="badge badge-ai">IA</span></div>
+        <div class="check-sub">Com escopo já existente, o botão "Gerar Escopo" deve estar desativado ou ausente para o cliente; API /api/briefing/scope deve retornar 403 se chamada diretamente</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Limite de requisições IA por cliente: segundo briefing do mesmo cliente também respeita o bloqueio <span class="badge badge-ai">IA</span></div>
+        <div class="check-sub">Criar segundo briefing com o mesmo cliente → tentar gerar escopo → deve ser bloqueado se já existir orçamento em algum briefing ativo do cliente, ou pelo menos no briefing atual</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Escopo gerado é persistido e exibido ao recarregar a página</div>
+        <div class="check-sub">Recarregar /portal/briefing/[id] após geração → escopo deve permanecer visível</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Se proposta enviada, exibe link para /portal/briefing/[id]/proposta</div>
+        <div class="check-sub">Quando status=PROPOSAL_SENT, botão "Ver Proposta" deve estar visível e funcional</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     5. PEDIDOS — FLUXO CLIENTE
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-orders-client">
+  <div class="section-header">
+    <span class="section-icon">📦</span>
+    <span class="section-title">5. Pedidos — Fluxo Cliente</span>
+    <span class="section-count" data-section="sec-orders-client">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Listagem</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">/portal/orders lista apenas os pedidos do utilizador autenticado <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Verificar que não há pedidos de outros clientes visíveis</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Status dos pedidos exibido com badge visual correto (OrderStatusBadge)</div>
+          <div class="check-sub">Verificar cores/labels: DRAFT, PENDING, EVALUATING, PROPOSAL_SENT, APPROVED, IN_PRODUCTION, COMPLETED</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Criação de Pedido</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">/portal/orders/new: formulário de criação funciona <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Preencher tipo, descrição, urgência → submeter → verificar criação via POST /api/orders</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de notificação ao admin é disparado ao criar pedido <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Verificar na caixa do admin se chegou email de notificação de novo pedido</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Detalhe do Pedido</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">/portal/orders/[id] exibe todos os detalhes do pedido <span class="badge badge-client">CLIENTE</span></div>
+          <div class="check-sub">Status, descrição, anexos, valor proposto, data de criação</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ações do cliente: Aprovar proposta de produção funciona</div>
+          <div class="check-sub">PATCH /api/orders/[id] com action=approve → status deve mudar para APPROVED</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ações do cliente: Solicitar revisão funciona</div>
+          <div class="check-sub">PATCH /api/orders/[id] com action=revision → status muda para REVISION</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ações do cliente: Rejeitar pedido funciona</div>
+          <div class="check-sub">PATCH /api/orders/[id] com action=reject → status muda para REJECTED</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Widget de avaliação (OrderRating) aparece quando status=COMPLETED</div>
+          <div class="check-sub">Verificar formulário de 1-5 estrelas + comentário após pedido concluído</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Submissão da avaliação persiste e não pode ser submetida duas vezes</div>
+          <div class="check-sub">POST /api/orders/[id]/rating → verificar que tentativa duplicada gera erro 409</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Tickets Pós-entrega</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Botão "Abrir Ticket" aparece em pedido com status=COMPLETED <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Em /portal/orders/[id] quando status=COMPLETED, deve existir acção visível para abrir ticket de suporte/bug/nova funcionalidade</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Formulário de ticket: tipos disponíveis — Bug, Nova Funcionalidade, Suporte Técnico <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">POST /api/orders com type ∈ ["bug_fix", "new_feature", "support"] e urgência → pedido criado vinculado ao projeto original</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ticket criado aparece na listagem de pedidos com badge de tipo correcto</div>
+          <div class="check-sub">Em /portal/orders, o ticket deve ser identificável (badge "Bug", "Funcionalidade" ou "Suporte") e diferenciado visualmente dos pedidos normais</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Urgência do ticket é respeitada: Crítica bloqueia e deve ser visível ao admin imediatamente</div>
+          <div class="check-sub">Criar ticket com urgência=critical → verificar destaque visual na listagem admin e email de notificação com indicação de urgência</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Cliente recebe email de confirmação ao abrir ticket <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Verificar email com número/ID do ticket, tipo, urgência e prazo estimado de resposta</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Cliente pode acompanhar status do ticket em /portal/orders/[id]</div>
+          <div class="check-sub">Ciclo de vida esperado: PENDING → EVALUATING → IN_PRODUCTION → COMPLETED; cliente vê actualizações em tempo real</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Cliente só pode abrir tickets em projectos que lhe pertencem (COMPLETED)</div>
+          <div class="check-sub">Testar POST /api/orders com relatedOrderId de pedido de outro cliente → deve retornar 403</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     6. PAGAMENTO STRIPE
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-payment-client">
+  <div class="section-header">
+    <span class="section-icon">💳</span>
+    <span class="section-title">6. Pagamento Stripe</span>
+    <span class="section-count" data-section="sec-payment-client">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Botão de pagamento aparece no pedido com status=APPROVED <span class="badge badge-stripe">STRIPE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar OrderPayment component visível em /portal/orders/[id] quando aprovado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">POST /api/orders/[id]/checkout cria Stripe Checkout Session <span class="badge badge-stripe">STRIPE</span></div>
+        <div class="check-sub">Clicar "Pagar" → verificar redirecionamento para Stripe hosted page com o valor correto</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Pagamento de teste (cartão 4242...) é processado com sucesso</div>
+        <div class="check-sub">Usar cartão de teste Stripe 4242 4242 4242 4242 → data futura → CVC qualquer</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Redirecionamento para /portal/orders/[id]/payment/success após pagamento</div>
+        <div class="check-sub">Verificar a página de confirmação de pagamento bem-sucedido</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Webhook Stripe processa checkout.session.completed → Payment=PAID + Order=IN_PRODUCTION <span class="badge badge-stripe">STRIPE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar no DB se Payment.status=PAID e Order.status=IN_PRODUCTION após webhook processado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de confirmação de pagamento chega ao cliente <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">Verificar recebimento de email com número de pedido e valor pago</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de notificação de pagamento chega ao admin <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">Admin deve receber email indicando pagamento recebido no pedido</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/orders/[id]/invoice exibe fatura/recibo do pagamento</div>
+        <div class="check-sub">Verificar dados da fatura: valor, data, ID da transação Stripe, PrintButton</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     7. ADMIN — DASHBOARD
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-admin-dash">
+  <div class="section-header">
+    <span class="section-icon">🛡</span>
+    <span class="section-title">7. Admin — Dashboard</span>
+    <span class="section-count" data-section="sec-admin-dash">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/admin carrega sem erros com dados reais <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar que a página carrega e não há Application error (Digest)</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">StatsGrid exibe KPIs corretos: total de briefings, pedidos, receita mensal e total</div>
+        <div class="check-sub">Verificar os 4 cards de KPI com valores numéricos corretos</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">AllBriefingsTable lista todos os briefings com status, cliente e data</div>
+        <div class="check-sub">Verificar paginação ou scroll, coluna de status, links para detalhe</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">RecentOrdersTable exibe pedidos recentes com status</div>
+        <div class="check-sub">Verificar os pedidos mais recentes e link para /admin/orders</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">AdminHeader renderiza com link funcional para /admin</div>
+        <div class="check-sub">Verificar logo, links de navegação e botão de sign out</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     8. ADMIN — GESTÃO DE BRIEFINGS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-admin-briefing">
+  <div class="section-header">
+    <span class="section-icon">📝</span>
+    <span class="section-title">8. Admin — Gestão de Briefings</span>
+    <span class="section-count" data-section="sec-admin-briefing">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/admin/briefing/[id] carrega dados completos do briefing <span class="badge badge-admin">ADMIN</span></div>
+        <div class="check-sub">Verificar nome, email do cliente, tipo, orçamento, prazo, status atual</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">AdminStatusForm: alterar status do briefing via PATCH /api/admin/briefing/[id] <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Testar transições: RECEIVED → ANALYZING → SCOPE_DONE → PROPOSAL_SENT → DELIVERED</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ScopeView exibe o escopo gerado pelo M2 de forma estruturada</div>
+        <div class="check-sub">Verificar features list, userStories, tech stack recomendada, estimativas</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ProposalManager: gerar proposta via POST /api/proposal/generate <span class="badge badge-ai">IA</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Clicar "Gerar Proposta" → Gemini compõe proposta comercial baseada no Scope → verificar conteúdo gerado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ProposalManager: enviar proposta ao cliente via PATCH /api/proposal/[id] send <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">Clicar "Enviar ao Cliente" → status muda para SENT → email disparado ao cliente</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ProposalManager: reescrever trecho da proposta via /api/proposal/[id]/rewrite <span class="badge badge-ai">IA</span></div>
+        <div class="check-sub">Selecionar trecho → inserir instrução → verificar novo texto gerado pelo Gemini</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Admin pode forçar regeneração de escopo em briefing já orçamentado <span class="badge badge-admin">ADMIN</span> <span class="badge badge-ai">IA</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">No /admin/briefing/[id], admin tem botão "Regenerar Escopo" mesmo com escopo existente → POST /api/briefing/scope com flag de reset → novo escopo substitui o anterior</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Admin pode gerar novo orçamento do mesmo briefing após proposta anterior já enviada <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Com proposta já em estado SENT/APPROVED, admin acede /admin/briefing/[id] → "Nova Proposta" → POST /api/proposal/generate → nova proposta criada sem bloquear; cliente NÃO deve conseguir acionar este fluxo</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Cliente não consegue acionar geração de proposta diretamente via API <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">POST /api/proposal/generate chamado com token de sessão CLIENT → deve retornar 403 Forbidden</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     9. ADMIN — GESTÃO DE PEDIDOS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-admin-orders">
+  <div class="section-header">
+    <span class="section-icon">🗂</span>
+    <span class="section-title">9. Admin — Gestão de Pedidos</span>
+    <span class="section-count" data-section="sec-admin-orders">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/admin/orders lista todos os pedidos com filtro por status <span class="badge badge-admin">ADMIN</span></div>
+        <div class="check-sub">Via GET /api/admin/orders — testar filtros STATUS e clientId se disponíveis</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/admin/orders/[id] exibe detalhes completos do pedido do cliente <span class="badge badge-admin">ADMIN</span></div>
+        <div class="check-sub">Verificar todos os dados: tipo, descrição, urgência, status, cliente, valor</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">OrderAdminActions: propor produção (propose) <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">PATCH /api/orders/[id] action=propose → define valor + muda status para PROPOSAL_SENT</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">OrderAdminActions: iniciar produção (start_production)</div>
+        <div class="check-sub">PATCH /api/orders/[id] action=start_production → status muda para IN_PRODUCTION</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">OrderAdminActions: marcar como concluído (complete)</div>
+        <div class="check-sub">PATCH /api/orders/[id] action=complete → status muda para COMPLETED + email ao cliente</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">OrderAdminActions: rejeitar pedido (admin_reject)</div>
+        <div class="check-sub">PATCH /api/orders/[id] action=admin_reject → status muda para REJECTED</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Gestão de Tickets Pós-entrega</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Tickets aparecem na listagem /admin/orders com tipo identificado (Bug / Funcionalidade / Suporte) <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Verificar filtro por tipo: bug_fix, new_feature, support — tickets devem ser distinguíveis de pedidos normais (badge, cor ou ícone diferenciado)</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin recebe notificação de novo ticket por email <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Ao criar ticket, email chega ao admin com tipo, urgência, cliente e descrição; urgência Crítica deve ter destaque visual no email</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin pode alterar status do ticket (EVALUATING → IN_PRODUCTION → COMPLETED) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">PATCH /api/orders/[id] action=start_production / action=complete → status actualizado; cliente é notificado por email em cada transição</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Canal de mensagens funciona no contexto do ticket (Client ↔ Admin)</div>
+          <div class="check-sub">Em /portal/orders/[id] (ticket), o canal de mensagens deve estar disponível para comunicação sobre o ticket; admin vê e responde em /admin/orders/[id]</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ticket de nova funcionalidade pode gerar nova proposta comercial <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Para type=new_feature, admin deve conseguir iniciar fluxo de orçamento normal (escopo → proposta → pagamento) a partir do ticket</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin pode fechar/rejeitar ticket com justificativa</div>
+          <div class="check-sub">PATCH /api/orders/[id] action=admin_reject → status REJECTED; cliente recebe email com motivo da rejeição do ticket</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     10. ADMIN — GESTÃO DE UTILIZADORES
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-admin-users">
+  <div class="section-header">
+    <span class="section-icon">👥</span>
+    <span class="section-title">10. Admin — Gestão de Utilizadores</span>
+    <span class="section-count" data-section="sec-admin-users">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/admin/users carrega com a lista completa de utilizadores <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar que todos os utilizadores aparecem com nome, email, role, status e contagem de briefings/pedidos</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Utilizadores com status PENDING aparecem na secção destacada "Aguardam Aprovação" <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Fundo âmbar/amarelo diferencia visualmente os PENDING. Se não houver PENDING, a secção não aparece</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Botão "Aprovar": muda status de PENDING para ACTIVE via PATCH /api/admin/users/[id] <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Clicar "Aprovar" → PATCH com body { status: "ACTIVE" } → utilizador desaparece da secção PENDING → aparece em "Todos os Utilizadores" com badge ACTIVE</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Botão "Suspender": muda status para SUSPENDED</div>
+        <div class="check-sub">PATCH /api/admin/users/[id] body { status: "SUSPENDED" } → badge muda para SUSPENDED; tentativa de login deste utilizador deve ser bloqueada</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Botão "Pendente": repõe status para PENDING</div>
+        <div class="check-sub">PATCH /api/admin/users/[id] body { status: "PENDING" } → utilizador volta para a secção de aprovação</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Botão "→ ADMIN": promove role de CLIENT para ADMIN</div>
+        <div class="check-sub">PATCH /api/admin/users/[id] body { role: "ADMIN" } → badge de role muda para ADMIN; utilizador passa a aceder /admin</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Botão "→ CLIENT": rebaixa role de ADMIN para CLIENT</div>
+        <div class="check-sub">PATCH /api/admin/users/[id] body { role: "CLIENT" } → badge muda; acesso a /admin revogado no próximo login</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Admin não pode revogar o próprio role ADMIN <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Na linha do próprio utilizador autenticado, o botão "→ CLIENT" deve estar desativado ou ausente; API deve retornar erro 403 se tentado diretamente</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Formulário de convite: nome + email → POST /api/admin/users/invite envia magic link <span class="badge badge-email">EMAIL</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Preencher nome e email → submeter → utilizador criado com status=ACTIVE → email de convite enviado com magic link válido</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de convite chega formatado corretamente com link funcional <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">Verificar remetente, assunto, conteúdo branded e que o link /api/auth/callback/nodemailer?token=...&email=... autentica diretamente o utilizador</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Utilizador convidado consegue aceder /portal após click no link do email de convite</div>
+        <div class="check-sub">Clicar no link do email → autenticação automática → redirecionamento para /portal (sem "aguardar aprovação" pois status=ACTIVE)</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Convite para email já existente: upsert não duplica o utilizador</div>
+        <div class="check-sub">Enviar convite para email já registado → utilizador existente tem status atualizado para ACTIVE + novo token de convite enviado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     11. PROPOSTAS COMERCIAIS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-proposal">
+  <div class="section-header">
+    <span class="section-icon">📄</span>
+    <span class="section-title">11. Propostas Comerciais (M3)</span>
+    <span class="section-count" data-section="sec-proposal">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/briefing/[id]/proposta exibe proposta enviada pelo admin <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar conteúdo completo da proposta: escopo, valor, prazo, termos</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ProposalActions: cliente aprova proposta via PATCH /api/proposal/[id] approve</div>
+        <div class="check-sub">Status muda para APPROVED → email de notificação ao admin</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ProposalActions: cliente solicita revisão da proposta</div>
+        <div class="check-sub">PATCH action=request_revision → status muda para REVISION</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">ProposalComments: comentários inline funcionam (GET + POST)</div>
+        <div class="check-sub">Adicionar comentário com excerpt + body → verificar persistência na lista</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Acesso à proposta de outro utilizador retorna 403 <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Testar GET /api/proposal/[id] com proposalId de outro briefing</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     11. CANAL DE MENSAGENS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-messages">
+  <div class="section-header">
+    <span class="section-icon">💬</span>
+    <span class="section-title">11. Canal de Mensagens (Client ↔ Admin)</span>
+    <span class="section-count" data-section="sec-messages">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">MessagesPanel renderiza no /portal/orders/[id] e /admin/orders/[id] <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Verificar lista de mensagens carregada via GET /api/orders/[id]/messages</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Cliente envia mensagem → admin recebe email de notificação <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">POST /api/orders/[id]/messages (cliente) → verificar email no admin</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Admin envia mensagem → cliente recebe email de notificação <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">POST /api/orders/[id]/messages (admin) → verificar email no cliente</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Mensagens são ordenadas ASC (mais antigas primeiro)</div>
+        <div class="check-sub">Verificar a ordem cronológica das mensagens no painel</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Cliente não consegue ver mensagens de pedido de outro utilizador <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">GET /api/orders/[id]/messages com orderId de outro cliente → deve retornar 403</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     12. BIBLIOTECA DE REFERÊNCIAS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-library">
+  <div class="section-header">
+    <span class="section-icon">📚</span>
+    <span class="section-title">12. Biblioteca de Projetos de Referência (S6)</span>
+    <span class="section-count" data-section="sec-library">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">/portal/biblioteca lista projetos de referência disponíveis <span class="badge badge-client">CLIENTE</span></div>
+        <div class="check-sub">Verificar cards com nome, descrição e tecnologias dos projetos</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">AddToLibraryForm: adicionar novo projeto gera embedding e persiste <span class="badge badge-ai">IA</span></div>
+        <div class="check-sub">POST /api/library/add → Gemini gera embedding → ReferenceProject salvo no DB</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Busca de projetos similares retorna resultados por similaridade semântica <span class="badge badge-ai">IA</span></div>
+        <div class="check-sub">POST /api/library/similar com descrição → verificar projetos com score ≥ 0.7</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Análise de briefing usa biblioteca para enriquecer sugestões (S6)</div>
+        <div class="check-sub">POST /api/briefing/analyze com texto → verificar projetos similares retornados junto ao resultado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     13. EMAILS & NOTIFICAÇÕES
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-email">
+  <div class="section-header">
+    <span class="section-icon">📧</span>
+    <span class="section-title">13. Emails & Notificações</span>
+    <span class="section-count" data-section="sec-email">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Notificações de Lead</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de notificação de novo lead chega ao admin (SMTP Resend directo) <span class="badge badge-email">EMAIL</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Mecanismo primário: <code>sendMail()</code> via SMTP Resend após salvar briefing; não depende do n8n. Remetente: <code>noreply@quantumtechwld.com</code>, destinatário: <code>ADMIN_EMAIL</code>. <strong>✅ Validado em 30/03/2026.</strong></div>
+        </div>
+        <input class="result-input" placeholder="✅ Confirmado 30/03/2026" onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de lead inclui todos os dados: nome, email, empresa, serviço, budget, timeline, funcionalidades, complexidade <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Verificar template HTML gerado em <code>/api/lead/route.ts</code> — tabela com todos os campos do wizard + score de complexidade (horas mín/máx).</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Outros Emails Transacionais</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Magic link chega corretamente (remetente, assunto, link clicável) <span class="badge badge-email">EMAIL</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Verificar From: campo, Subject, link funcional com token válido</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de notificação: novo pedido criado pelo cliente → admin <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">templates/orders.ts — verificar conteúdo e formatação HTML</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de notificação: proposta enviada ao cliente <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">templates/proposal.ts — verificar link para /portal/briefing/[id]/proposta</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de notificação: pedido concluído → cliente <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">templates/orders.ts — verificar conteúdo e link para /portal/orders/[id]</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Email de confirmação: pagamento recebido → cliente <span class="badge badge-email">EMAIL</span></div>
+        <div class="check-sub">templates/payments.ts — verificar valor, link para fatura /invoice</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Emails não caem em spam (verificar SPF/DKIM do domínio com Resend)</div>
+        <div class="check-sub">Verificar header de email recebido; usar mail-tester.com se necessário</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    </div>
+
+    <span class="section-title">14. Webhook Stripe</span>
+    <span class="section-count" data-section="sec-stripe-webhook">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">POST /api/webhooks/stripe valida assinatura STRIPE_WEBHOOK_SECRET <span class="badge badge-stripe">STRIPE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Request sem assinatura ou com assinatura inválida deve retornar 400</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Evento checkout.session.completed: Payment.status = PAID no DB</div>
+        <div class="check-sub">Verificar via console RDS: SELECT status FROM "Payment" WHERE id = ?</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Evento checkout.session.completed: Order.status = IN_PRODUCTION no DB</div>
+        <div class="check-sub">Verificar via console RDS: SELECT status FROM "Order" WHERE id = ?</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Webhook Stripe aparece como 200 no painel Stripe → Webhooks</div>
+        <div class="check-sub">Em https://dashboard.stripe.com → Developers → Webhooks → verificar tentativas recentes</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     15. INTEGRAÇÃO N8N
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-n8n">
+  <div class="section-header">
+    <span class="section-icon">🔗</span>
+    <span class="section-title">15. Integração n8n</span>
+    <span class="section-count" data-section="sec-n8n">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Estado Actual — 30/03/2026</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Variável <code>N8N_WEBHOOK_URL</code> configurada no ambiente de produção <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">✅ Confirmado: <code>https://quantumtechnology.app.n8n.cloud/webhook/lead-capture</code> definida em <code>/home/ubuntu/quantum-agency/.env.production.local</code>. A variável está presente mas o workflow retorna 404 (workspace não publicado).</div>
+        </div>
+        <input class="result-input" placeholder="✅ Variável presente, workflow 404" onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Workflow n8n publicado e a responder em <code>/webhook/lead-capture</code> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">⚠️ Pendente: POST para <code>quantumtechnology.app.n8n.cloud/webhook/lead-capture</code> retorna <strong>404</strong> — workspace n8n.cloud não existe ou workflow não está activado. Criar e publicar o workflow no painel n8n.cloud.</div>
+        </div>
+        <input class="result-input" placeholder="⚠️ Pendente — workflow 404" onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Notificação de Lead (Fallback Activo)</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Lead submetido via <code>/api/lead</code> aciona SMTP directo ao admin como mecanismo primário <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">✅ Implementado em 30/03/2026: <code>sendMail()</code> chama SMTP Resend logo após salvar o briefing. O n8n é chamado em seguida como mecanismo secundário; falha no n8n não bloqueia o fluxo.</div>
+        </div>
+        <input class="result-input" placeholder="✅ SMTP directo activo" onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Lead submetido via <code>/api/lead</code> aciona webhook n8n (mecanismo secundário)</div>
+          <div class="check-sub">⚠️ Pendente activação do workflow n8n. Quando publicado, receberá payload completo: dados do wizard + complexityScore + hoursMin/Max. O envio é não-bloqueante (timeout 12s, falha silenciosa).</div>
+        </div>
+        <input class="result-input" placeholder="⚠️ Aguarda workflow n8n" onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Envio de proposta ao cliente aciona webhook n8n (PATCH proposal send)</div>
+          <div class="check-sub">⚠️ Pendente activação do workflow n8n. Verificar em <code>/api/proposal/[id]/route.ts</code> — usa mesma URL <code>N8N_WEBHOOK_URL</code>.</div>
+        </div>
+        <input class="result-input" placeholder="⚠️ Aguarda workflow n8n" onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     16. SEGURANÇA & CONTROLE DE ACESSO
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-security">
+  <div class="section-header">
+    <span class="section-icon">🔒</span>
+    <span class="section-title">16. Segurança & Controle de Acesso</span>
+    <span class="section-count" data-section="sec-security">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Acesso não autenticado a /portal redireciona para /portal/login <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Abrir aba anônima → tentar /portal/orders, /portal/profile → deve redirecionar</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Acesso não autenticado a /admin redireciona para login <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Aba anônima → tentar /admin diretamente → deve redirecionar para /portal/login</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">IDOR: Cliente não acessa recurso de outro cliente via manipulação de ID <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Testar orders, briefings, mensagens, propostas com IDs que não pertencem ao utilizador logado</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">API de admin (/api/proposal/generate, /api/admin/briefing/[id]) rejeita CLIENT <span class="badge badge-crit">CRÍTICO</span></div>
+        <div class="check-sub">Chamar endpoints admin com token de cliente → deve retornar 401 ou 403</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">HTTPS ativo em toda a plataforma, sem mixed content</div>
+        <div class="check-sub">Verificar cadeado SSL no browser; DevTools → Security → certificado válido</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Headers de segurança presentes (X-Frame-Options, CSP, etc.)</div>
+        <div class="check-sub">Verificar no DevTools → Network → resposta da página inicial → cabeçalhos de segurança</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Variáveis de ambiente sensíveis não expostas no client bundle</div>
+        <div class="check-sub">DevTools → Sources → buscar STRIPE_SECRET_KEY, DATABASE_URL, N8N_WEBHOOK_URL nos bundles JS</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     17. INFRA & PERFORMANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-infra">
+  <div class="section-header">
+    <span class="section-icon">⚙️</span>
+    <span class="section-title">17. Infra & Performance</span>
+    <span class="section-count" data-section="sec-infra">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">PM2 running: 2 instâncias cluster em status=online no servidor EC2</div>
+        <div class="check-sub">SSH → pm2 list → verificar app "quantum-agency" em cluster mode, sem restart loop</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">RDS acessível: 14 tabelas presentes no banco de produção</div>
+        <div class="check-sub">Confirmar: Account, Briefing, Order, OrderMessage, OrderRating, Payment, Proposal, ProposalComment, ReferenceProject, Scope, Session, User, VerificationToken, _prisma_migrations</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Tempo de carregamento inicial da landing page &lt; 3s em 4G simulado</div>
+        <div class="check-sub">DevTools → Lighthouse ou Network → verificar LCP e FID; desativar cache para medir</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Nginx reverse proxy respondendo e com SSL configurado</div>
+        <div class="check-sub">curl -I https://quantumtechwld.com → HTTP/2 200 com headers Nginx</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Logs PM2: sem erros críticos recentes (pm2 logs)</div>
+        <div class="check-sub">SSH → pm2 logs --lines 100 → verificar ausência de unhandled rejections e Application errors</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">GitHub Actions: último deploy bem-sucedido (green check)</div>
+        <div class="check-sub">https://github.com/quantumtechwld-com/quantumtechwld/actions → verificar último workflow run</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"></div>
+      <div class="check-content">
+        <div class="check-text">Responsividade: plataforma utilizável em mobile (375px)</div>
+        <div class="check-sub">DevTools → mobile view 375px → testar landing, portal, admin</div>
+      </div>
+      <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     18. IDENTIDADE VISUAL
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-identity">
+  <div class="section-header">
+    <span class="section-icon">🎨</span>
+    <span class="section-title">18. Identidade Visual</span>
+    <span class="section-count" data-section="sec-identity">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Logo</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Logo principal definido e aprovado (versão horizontal, vertical e ícone)</div>
+          <div class="check-sub">Verificar se existem variações: cor, branco, preto — em SVG e PNG (2x/3x)</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Logo aplicado corretamente na landing page, admin e portal</div>
+          <div class="check-sub">Verificar proporções, espaçamento e sem distorção em diferentes tamanhos de tela</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Favicon configurado corretamente (16×16, 32×32, 180×180 apple-touch)</div>
+          <div class="check-sub">Verificar no browser tab se o favicon aparece; inspecionar <code>/public/</code> para os arquivos</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Paleta de Cores</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Paleta de cores da marca definida e documentada (primária, secundária, neutros, estados)</div>
+          <div class="check-sub">Ex.: cor principal #6366f1 (indigo), accent #8b5cf6 (violet), fundo dark #0f1117 — confirmar tokens no globals.css</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Consistência de cores em toda a plataforma (landing, portal, admin)</div>
+          <div class="check-sub">Verificar se as mesmas variáveis CSS são usadas em todos os componentes; sem cores hardcoded divergentes</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Contraste de acessibilidade adequado (WCAG AA mínimo — 4.5:1 para texto normal)</div>
+          <div class="check-sub">Usar https://webaim.org/resources/contrastchecker/ para verificar texto sobre fundos principais</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Tipografia & Layout</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Fonte principal definida e carregando corretamente em todas as páginas</div>
+          <div class="check-sub">Verificar font-family no body; checar no DevTools → Network se fontes carregam sem 404</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Hierarquia tipográfica consistente (H1 → H2 → H3, body, caption, label)</div>
+          <div class="check-sub">Verificar tamanhos, pesos e espaçamentos em landing, portal e admin</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Layout responsivo: breakpoints mobile (375px), tablet (768px), desktop (1280px)</div>
+          <div class="check-sub">Testar cada breakpoint no DevTools → Device Toolbar nas páginas principais</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Componentes UI (botões, badges, cards, inputs) com estilo unificado</div>
+          <div class="check-sub">Verificar border-radius, padding, sombras e hover states consistentes em toda a plataforma</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Templates de Email</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Template de email de magic link com identidade visual da marca</div>
+          <div class="check-sub">Logo, cores e tipografia alinhados; verificar em Gmail, Outlook e Apple Mail</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Templates de notificação (novo pedido, proposta, pagamento) com design consistente</div>
+          <div class="check-sub">Verificar src/lib/email-templates/ — todos os templates com header, logo, CTA button e footer padronizados</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Emails renderizam corretamente em cliente de email mobile</div>
+          <div class="check-sub">Testar no Gmail mobile e Apple Mail iOS — layout não deve quebrar em tela pequena</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Remetente exibido corretamente: "Quantum Technology" &lt;contato@quantumtechwld.com&gt;</div>
+          <div class="check-sub">Verificar campo From em todos os tipos de email enviados pela plataforma</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Conteúdo Editorial — Textos do Portal e Admin</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Todos os textos do portal do cliente revisados e aprovados (labels, descrições, mensagens de estado)</div>
+          <div class="check-sub">Percorrer: dashboard, briefing, pedidos, proposta, pagamento, perfil, guia — sem textos de placeholder ("Lorem ipsum", "TODO", "Coming soon")</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Mensagens de erro e estado vazio com texto definitivo e orientador</div>
+          <div class="check-sub">Verificar: "Sem briefings", "Sem pedidos", "Nenhuma proposta ainda" — cada estado vazio deve ter texto claro + sugestão de ação</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ortografia e gramática revisadas em todo o portal e admin (PT-BR ou PT-PT uniforme)</div>
+          <div class="check-sub">Definir e manter um único padrão de português em toda a plataforma; verificar incoerências de tratamento ("você" vs "o senhor" vs "tu")</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Conteúdo Editorial — Imagens e Assets Visuais</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Todas as imagens da plataforma definidas, aprovadas e sem placeholders <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Inspecionar /public/ e src/ — nenhum arquivo com nome genérico (image.png, photo1.jpg, placeholder.svg) deve estar em produção</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Imágen OG (Open Graph) para partilha em redes sociais definida e correcta</div>
+          <div class="check-sub">Verificar &lt;meta property="og:image"&gt; em layout.tsx — dimensões mínimas 1200×630px, sem texto cortado; testar com https://cards-dev.twitter.com/validator ou ogp.me</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Imagens e ícones SVG inline não expondo informação sensível ou assets desnecessariamente grandes</div>
+          <div class="check-sub">Verificar SVGs inline: não devem conter comentários de software ou metadados de design; optimizar via SVGO se necessário</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ícones de acção consistentes em toda a plataforma (mesma biblioteca)</div>
+          <div class="check-sub">Verificar que não há mistura de bibliotecas de ícones (ex: Lucide + Heroicons + Font Awesome juntos) — definir e usar apenas uma</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Imagens com texto alternativo (alt) descritivo em toda a plataforma</div>
+          <div class="check-sub">Executar Lighthouse → Accessibility — score deve ser ≥90; sem imagens com alt vazio ou genérico</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     19. REDES SOCIAIS
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-social">
+  <div class="section-header">
+    <span class="section-icon">📱</span>
+    <span class="section-title">19. Redes Sociais — Criação de Contas</span>
+    <span class="section-count" data-section="sec-social">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">LinkedIn</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página empresarial criada: Quantum Technology Agency</div>
+          <div class="check-sub">https://linkedin.com/company/ — verificar URL personalizada, logo, banner e descrição</div>
+        </div>
+        <input class="result-input" placeholder="URL / Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Informações completas: website, setor (Technology/Software), localização, nº de funcionários</div>
+          <div class="check-sub">Preencher todos os campos do perfil para melhorar SEO e credibilidade</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Imagens: logo (300×300px) e banner (1128×191px) com identidade visual da marca</div>
+          <div class="check-sub">Verificar proporções e qualidade das imagens na página publicada</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Instagram</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Conta Business criada: @quantumtechwld (ou nome definido)</div>
+          <div class="check-sub">Conta deve ser Business (não pessoal) para acesso a métricas e anúncios</div>
+        </div>
+        <input class="result-input" placeholder="@ / Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Bio configurada: descrição, link para quantumtechwld.com, email de contato</div>
+          <div class="check-sub">160 caracteres máximo — incluir CTA e link do site</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Foto de perfil com logo da marca (1:1, mínimo 320×320px)</div>
+          <div class="check-sub">Verificar se o logo fica visível e bem enquadrado no formato circular</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Conta vinculada à Página do Facebook (Meta Business Suite)</div>
+          <div class="check-sub">Necessário para gerir anúncios e publicações cruzadas</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Facebook</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página de negócios criada no Facebook (categoria: Software/Tecnologia)</div>
+          <div class="check-sub">https://facebook.com/ — URL personalizada configurada (ex: /quantumtechwld)</div>
+        </div>
+        <input class="result-input" placeholder="URL / Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Foto de capa e perfil com identidade visual; botão CTA configurado ("Visitar Site")</div>
+          <div class="check-sub">Capa: 1640×924px; Perfil: 170×170px; CTA apontando para quantumtechwld.com</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Meta Business Suite configurado com acesso a Facebook + Instagram</div>
+          <div class="check-sub">https://business.facebook.com — conta de anúncios criada e pixel instalado no site se aplicável</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Configurações Gerais</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de gestão das redes: quantumtechwld@gmail.com como conta principal</div>
+          <div class="check-sub">Centralizar acesso numa única conta de email para facilitar recuperação</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">2FA ativado em todas as contas de redes sociais</div>
+          <div class="check-sub">Autenticação de dois fatores via app autenticador (não SMS)</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Open Graph tags configuradas no site (preview ao compartilhar links)</div>
+          <div class="check-sub">Verificar og:title, og:description, og:image no &lt;head&gt; do layout.tsx — testar em https://opengraph.xyz</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     20. ABERTURA DE EMPRESA
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-company">
+  <div class="section-header">
+    <span class="section-icon">🏢</span>
+    <span class="section-title">20. Abertura de Empresa</span>
+    <span class="section-count" data-section="sec-company">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Decisão de Localidade</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Definir localidade de constituição: Irlanda ou Portugal</div>
+          <div class="check-sub">Irlanda: Corporation Tax 12.5%, ambiente startup favorável, acesso mercado EU. Portugal: NHR/IFICI para não-residentes, custo menor, fuso GMT+0/+1</div>
+        </div>
+        <input class="result-input" placeholder="Decisão tomada..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Consulta a contabilista/advogado local sobre requisitos de constituição</div>
+          <div class="check-sub">Verificar necessidade de sócio local, capital mínimo, modalidade (LTD/LDA/Unipessoal)</div>
+        </div>
+        <input class="result-input" placeholder="Agendado / Concluído..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Irlanda — Private Limited Company (LTD)</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Reserva do nome da empresa no Companies Registration Office (CRO)</div>
+          <div class="check-sub">https://cro.ie — verificar disponibilidade de "Quantum Technology Agency Ltd" ou variação</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Registro da empresa: A1 (Constitution) + B1 (Annual Return) — via CRO online ou agente</div>
+          <div class="check-sub">Capital mínimo: €1. Necessário endereço registado na Irlanda e mínimo 1 diretor residente EEA</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Obtenção do Tax Registration Number (TRN) e VAT number junto à Revenue</div>
+          <div class="check-sub">https://revenue.ie — necessário para emitir faturas e operar legalmente</div>
+        </div>
+        <input class="result-input" placeholder="Número obtido..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Portugal — Sociedade por Quotas (Lda.)</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Reserva de firma no IRN (Instituto dos Registos e do Notariado)</div>
+          <div class="check-sub">https://irn.mj.pt — verificar disponibilidade; prazo 3 meses após aprovação</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Constituição online "Empresa na Hora" ou escritura notarial</div>
+          <div class="check-sub">Capital mínimo: €1 (unipessoal) | €2 (pluripessoal). Empresa na Hora: ~€360 com NIE + NIPC</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Inscrição na Segurança Social e início de atividade na Autoridade Tributária (AT)</div>
+          <div class="check-sub">Portal das Finanças: declarar início de atividade, escolher CAE (código 62010 — Software) e regime de IVA</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Conta Bancária Empresarial</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Abertura de conta bancária em banco local ou fintech (Wise Business / Revolut Business)</div>
+          <div class="check-sub">Wise e Revolut aceitam empresas irlandesas e portuguesas com abertura 100% online</div>
+        </div>
+        <input class="result-input" placeholder="Banco / Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">IBAN e BIC configurados no Stripe para receber pagamentos internacionais</div>
+          <div class="check-sub">Stripe Dashboard → Settings → Bank accounts — adicionar conta bancária da empresa</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Conta Stripe atualizada para entidade empresarial (não pessoal)</div>
+          <div class="check-sub">Stripe Dashboard → Account details — alterar de individual para business com NIF/Tax ID da empresa</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Dados fiscais da empresa atualizados nos templates de email e faturas da plataforma</div>
+          <div class="check-sub">Nome legal, NIF/Tax ID, morada registada devem constar nas faturas geradas em /portal/orders/[id]/invoice</div>
+        </div>
+        <input class="result-input" placeholder="Status..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     21. MOBILE — VERSÃO PWA
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-mobile">
+  <div class="section-header">
+    <span class="section-icon">📲</span>
+    <span class="section-title">21. Mobile — Versão PWA</span>
+    <span class="section-count" data-section="sec-mobile">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Manifest & Instalação</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Arquivo manifest.json (ou site.webmanifest) presente e válido em /public/</div>
+          <div class="check-sub">Verificar: name, short_name, start_url, display:standalone, background_color, theme_color, icons</div>
+        </div>
+        <input class="result-input" placeholder="Presente / Ausente..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">&lt;link rel="manifest"&gt; referenciado no &lt;head&gt; do layout.tsx</div>
+          <div class="check-sub">Verificar src/app/layout.tsx — tag manifest e meta theme-color presentes</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ícones PWA em todos os tamanhos exigidos (192×192, 512×512, maskable)</div>
+          <div class="check-sub">Verificar /public/icons/ — sem ícones o browser não oferece opção de instalar</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Banner "Adicionar à tela inicial" aparece no Chrome Android e Safari iOS</div>
+          <div class="check-sub">Testar em Chrome Android: aparece prompt de instalação; iOS: "Compartilhar → Adicionar à tela de início"</div>
+        </div>
+        <input class="result-input" placeholder="iOS / Android..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Service Worker & Offline</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Service Worker registrado (next-pwa ou custom) — verificar no DevTools → Application → Service Workers</div>
+          <div class="check-sub">Status deve ser "activated and running"; verificar se next-pwa está instalado no package.json</div>
+        </div>
+        <input class="result-input" placeholder="Ativo / Ausente..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página offline (fallback) exibe mensagem amigável quando sem conexão</div>
+          <div class="check-sub">DevTools → Network → offline → recarregar — deve exibir página de fallback e não erro de browser</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Assets estáticos (CSS, JS, fontes) cacheados pelo SW para carregamento rápido</div>
+          <div class="check-sub">DevTools → Application → Cache Storage — verificar entradas; segunda visita deve carregar sem rede</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">UX Mobile</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Viewport configurado: &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</div>
+          <div class="check-sub">Verificar no layout.tsx — sem este meta o zoom padrão quebra o layout em mobile</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Formulários funcionam corretamente em mobile (wizard de lead, login, pedidos)</div>
+          <div class="check-sub">Testar inputs em dispositivo real ou emulador — teclado não deve cobrir campos; sem zoom indesejado em inputs</div>
+        </div>
+        <input class="result-input" placeholder="iOS / Android..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Áreas de toque têm tamanho mínimo de 44×44px (recomendação Apple/Google)</div>
+          <div class="check-sub">Verificar botões, links de navegação e ações principais em mobile — sem alvos de toque muito pequenos</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Lighthouse PWA score ≥ 80 (idealmente 100)</div>
+          <div class="check-sub">DevTools → Lighthouse → selecionar "Progressive Web App" → Run audit — verificar pontuação e itens falhando</div>
+        </div>
+        <input class="result-input" placeholder="Score obtido..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">App instalado como PWA: barra de status com theme-color da marca, sem chrome do browser</div>
+          <div class="check-sub">Instalar via Chrome Android → abrir app standalone → verificar ausência da barra de URL e cor da status bar</div>
+        </div>
+        <input class="result-input" placeholder="iOS / Android..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     22. INTERNACIONALIZAÇÃO (i18n) — MULTILÍNGUE
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-i18n">
+  <div class="section-header">
+    <span class="section-icon">🌐</span>
+    <span class="section-title">22. Internacionalização (i18n) — Multilíngue</span>
+    <span class="section-count" data-section="sec-i18n">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Configuração de Locales</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text"><code>next.config</code> com <code>locales: ['pt-BR', 'pt-PT', 'en', 'es']</code>, <code>defaultLocale: 'pt-BR'</code> e <code>localeDetection: true</code> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Verificar next.config.ts — array deve conter os 4 locales e defaultLocale deve ser 'pt-BR'; localeDetection activa o redirect automático.</div>
+        </div>
+        <input class="result-input" placeholder="Verificado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Rotas de idioma correctas: <code>/</code> (pt-BR default), <code>/pt-PT/</code>, <code>/en/</code>, <code>/es/</code></div>
+          <div class="check-sub">Navegar manualmente cada prefixo de URL — página deve carregar no idioma correcto sem 404 ou redirect loop.</div>
+        </div>
+        <input class="result-input" placeholder="/ OK, /pt-PT OK, /en OK, /es OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Middleware/next.config detecta locale do browser e redireciona automaticamente <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Testar com Accept-Language: pt-PT, en-US, es-ES no browser ou via curl — deve redirecionar para a rota do locale correspondente.</div>
+        </div>
+        <input class="result-input" placeholder="Redirect automático OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Fallback para <code>pt-BR</code> quando locale não reconhecido</div>
+          <div class="check-sub">Testar Accept-Language: fr-FR, zh-CN — deve cair no locale padrão pt-BR sem erro.</div>
+        </div>
+        <input class="result-input" placeholder="Fallback pt-BR OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Detecção por Localização (Geo + Browser)</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Detecção automática pelo header <code>Accept-Language</code> do browser <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Primeira visita sem cookie de preferência — browser em pt-PT deve abrir /pt-PT/, browser em en deve abrir /en/ automaticamente.</div>
+        </div>
+        <input class="result-input" placeholder="Accept-Language OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Detecção geo-IP (opcional): Portugal → pt-PT, Brasil → pt-BR, EUA/outros → en, LATAM → es</div>
+          <div class="check-sub">Se implementado via middleware com header CF-IPCountry ou similar — verificar mapeamento país→locale; fallback seguro se geo-IP indisponível.</div>
+        </div>
+        <input class="result-input" placeholder="Geo-IP N/A ou OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Seletor manual de idioma visível no header/footer para override do utilizador</div>
+          <div class="check-sub">Bandeiras ou siglas (PT-BR, PT-PT, EN, ES) clicáveis — ao selecionar, navega para o prefixo correcto e guarda preferência.</div>
+        </div>
+        <input class="result-input" placeholder="Seletor OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Preferência de idioma guardada (cookie ou localStorage) para visitas futuras</div>
+          <div class="check-sub">Após selecionar idioma manualmente, fechar e reabrir browser — deve manter o idioma escolhido pelo utilizador.</div>
+        </div>
+        <input class="result-input" placeholder="Cookie/localStorage OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Traduções — Conteúdo da Landing Page</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Ficheiros <code>locales/pt-BR.json</code>, <code>locales/pt-PT.json</code>, <code>locales/en.json</code>, <code>locales/es.json</code> criados e completos <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Verificar que todos os 4 ficheiros existem, não têm chaves em falta e não contêm strings vazias.</div>
+        </div>
+        <input class="result-input" placeholder="4 ficheiros OK, sem chaves em falta..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Todos os textos da landing page traduzidos nos 4 idiomas (sem strings hardcoded) <span class="badge badge-public">PÚBLICO</span></div>
+          <div class="check-sub">Inspecionar página em cada locale — nenhum texto deve aparecer em PT quando a página está em EN ou ES.</div>
+        </div>
+        <input class="result-input" placeholder="Sem strings hardcoded..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Textos do wizard de lead traduzidos nos 4 idiomas <span class="badge badge-public">PÚBLICO</span></div>
+          <div class="check-sub">Abrir formulário de lead em /en/, /pt-PT/, /es/ — labels, placeholders, mensagens de erro e botões devem estar no idioma correcto.</div>
+        </div>
+        <input class="result-input" placeholder="Wizard OK nos 4 idiomas..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Página <code>/obrigado</code> traduzida nos 4 idiomas <span class="badge badge-public">PÚBLICO</span></div>
+          <div class="check-sub">Após submissão do lead em cada idioma, a página de obrigado deve aparecer no mesmo idioma do formulário.</div>
+        </div>
+        <input class="result-input" placeholder="/obrigado OK nos 4 idiomas..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Traduções — Portal do Cliente</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Todos os labels, mensagens de estado e textos do portal traduzidos nos 4 idiomas <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Navegar briefing, pedidos, pagamento e mensagens em cada locale — nenhuma string deve aparecer no idioma errado.</div>
+        </div>
+        <input class="result-input" placeholder="Portal OK nos 4 idiomas..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Mensagens de erro (NOT_FOUND, PENDING, SUSPENDED) traduzidas nos 4 idiomas</div>
+          <div class="check-sub">Testar login com conta PENDING em browser em ES — mensagem de erro deve aparecer em espanhol.</div>
+        </div>
+        <input class="result-input" placeholder="Mensagens de erro OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Emails transacionais (magic link, notificações) enviados no idioma do utilizador <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Utilizador com locale en recebe email em inglês; utilizador pt-PT recebe em português de Portugal. Locale do utilizador guardado no registo.</div>
+        </div>
+        <input class="result-input" placeholder="Emails multilingue OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Formato de datas e valores monetários conforme locale (pt-BR: R$, pt-PT: €, en: $, es: $)</div>
+          <div class="check-sub">Verificar valores de propostas e datas de pedidos em cada idioma — separadores decimais, símbolo de moeda e ordem dia/mês devem seguir convenção local.</div>
+        </div>
+        <input class="result-input" placeholder="Formatos OK por locale..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">SEO Multilíngue</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Tags <code>hreflang</code> presentes para todos os locales + <code>x-default</code> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Inspecionar o <code>&lt;head&gt;</code> de cada página — deve conter link hreflang para pt-BR, pt-PT, en, es e x-default apontando para / (pt-BR).</div>
+        </div>
+        <input class="result-input" placeholder="hreflang OK em todas as páginas..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text"><code>&lt;title&gt;</code> e <code>&lt;meta description&gt;</code> únicos por idioma em cada página</div>
+          <div class="check-sub">Verificar via View Source ou browser dev tools — title e description devem estar no idioma da página e não ser cópias umas das outras.</div>
+        </div>
+        <input class="result-input" placeholder="Title/description únicos OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Sitemap.xml com URLs por locale</div>
+          <div class="check-sub">Aceder /sitemap.xml — deve incluir URLs de cada versão de idioma; idealmente com atributo xhtml:link alternativo conforme spec Google.</div>
+        </div>
+        <input class="result-input" placeholder="Sitemap multilíngue OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Google Search Console configurado para cada versão de idioma</div>
+          <div class="check-sub">Adicionar propriedades para /pt-PT/, /en/, /es/ no GSC ou usar propriedade de domínio que cubra todos os prefixos.</div>
+        </div>
+        <input class="result-input" placeholder="GSC configurado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Qualidade das Traduções</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">pt-PT diferenciado de pt-BR — vocabulário correcto: "utilizador" vs "usuário", "telemóvel" vs "celular", "palavra-passe" vs "senha"</div>
+          <div class="check-sub">Rever ficheiro pt-PT.json — não deve ser uma simples cópia de pt-BR com substituições mínimas; deve usar vocabulário e ortografia de Portugal.</div>
+        </div>
+        <input class="result-input" placeholder="pt-PT diferenciado OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Revisão humana das traduções (não apenas tradução automática) nos 4 idiomas</div>
+          <div class="check-sub">Especialmente para en e es — rever textos de marketing, CTAs e mensagens de estado para garantir tom profissional e correcto.</div>
+        </div>
+        <input class="result-input" placeholder="Revisão humana OK..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Nenhuma string não-traduzida visível ao utilizador (sem fallback em inglês no meio de conteúdo PT)</div>
+          <div class="check-sub">Testar cenários edge: página em pt-PT com chave em falta no ficheiro pt-PT.json — deve usar pt-BR como fallback, nunca exibir chave raw ou código.</div>
+        </div>
+        <input class="result-input" placeholder="Sem strings cruas visíveis..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Alinhamentos e layout sem quebras em todos os idiomas (textos em ES/EN tendem a ser mais longos)</div>
+          <div class="check-sub">Verificar botões, badges e cards em /en/ e /es/ — textos mais longos não devem causar overflow, quebra de layout ou truncamento indevido.</div>
+        </div>
+        <input class="result-input" placeholder="Layout OK em todos os idiomas..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     23. FATURAÇÃO & INVOICES
+═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-invoice">
+  <div class="section-header">
+    <span class="section-icon">🧾</span>
+    <span class="section-title">23. Faturação &amp; Invoices</span>
+    <span class="section-count" data-section="sec-invoice">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <div class="subsec-title">Dados do Cliente para Faturação</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Formulário de cadastro de dados de faturação disponível no perfil do cliente <span class="badge badge-client">CLIENTE</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Portal → Perfil → separador "Faturação" — campos: Nome completo/Razão social, NIF/CNPJ/Tax ID, Endereço, Cidade, Código postal, País, Email de faturação</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin pode visualizar e editar dados de faturação de qualquer cliente <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Admin → Utilizadores → selecionar cliente → aba "Faturação" — campos editáveis e salvos corretamente no banco</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Campos de faturação validados: NIF/CNPJ com formato correto conforme país selecionado <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Testar: Portugal (NIF — 9 dígitos), Brasil (CNPJ — 14 dígitos / CPF — 11 dígitos), Irlanda (TRN — 8 dígitos + 1 letra) — validação frontend e backend</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Campos de endereço completos: Linha 1, Linha 2 (opcional), Cidade, Estado/Região, Código Postal, País (dropdown ISO)</div>
+          <div class="check-sub">Dropdown de País com lista ISO 3166-1 — garantir que o país selecionado ajusta automaticamente o formato do código postal e identificador fiscal</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de faturação separado do email de acesso (opcional, mas recomendado)</div>
+          <div class="check-sub">Campo "Email para envio de invoice" — pode ser diferente do email de login; útil para empresas com email contabilístico dedicado (ex: financeiro@empresa.com)</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Dados de faturação do cliente pré-preenchidos automaticamente ao criar nova invoice <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Ao criar invoice para um cliente com dados cadastrados, formulário deve puxar automaticamente Nome, NIF, Endereço e Email de faturação</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Criação de Invoice pelo Admin</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin pode criar nova invoice a partir do painel de pedidos ou utilizadores <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Admin → Pedidos → [pedido] → botão "Criar Invoice" — ou Admin → Utilizadores → [cliente] → "Emitir Invoice"</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin define valor total da invoice manualmente (valor não necessariamente ligado ao pedido) <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Campo de valor monetário com seleção de moeda (EUR, BRL, USD) — admin insere valor livremente, sem restrição ao valor do Stripe</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Linhas de item na invoice: descrição do serviço, quantidade, valor unitário, total por linha <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Formulário de criação permite adicionar múltiplos itens (ex: "Desenvolvimento do portal", "Setup AWS", "Suporte mensal") — total calculado automaticamente</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Número de invoice gerado automaticamente com sequência (ex: QT-2026-0001) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Numeração sequencial por ano — garantir que não há duplicação nem saltos na sequência; admin pode sobrepor manualmente se necessário</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Data de emissão e data de vencimento configuráveis <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Data de emissão: padrão hoje; Data de vencimento: padrão +30 dias — ambas editáveis pelo admin antes de enviar</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Campo de notas/observações na invoice (ex: condições de pagamento, referência bancária) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Textarea livre para notas específicas da invoice — aparece no PDF gerado na secção inferior da invoice</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Dados da empresa emissora (Quantum Technology) pré-configurados na invoice (nome legal, NIF, morada) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Invoice gerada com dados da empresa: nome legal, NIF/Tax ID, endereço, website — configuráveis em Admin → Configurações → Dados da Empresa</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Envio da Invoice ao Cliente</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin envia invoice por email ao cliente com um clique <span class="badge badge-admin">ADMIN</span> <span class="badge badge-email">EMAIL</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Botão "Enviar por Email" na página da invoice — dispara email ao endereço de faturação do cliente com PDF ou link para visualizar a invoice</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Email de invoice com template visual profissional (HTML) apresentando resumo dos itens <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Template de email com: logo da empresa, número e data da invoice, itens, total, data de vencimento, botão "Ver Invoice" — testar em Gmail e Outlook</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Invoice acessível pelo cliente no portal como página web visualizável/imprimível <span class="badge badge-client">CLIENTE</span></div>
+          <div class="check-sub">Portal → Pedidos → [pedido] → separador "Invoice" — ou link direto no email; cliente pode ver e imprimir sem fazer download de PDF</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Download de PDF da invoice disponível para o cliente e admin <span class="badge badge-client">CLIENTE</span> <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Botão "Baixar PDF" — PDF gerado server-side (ex: puppeteer, react-pdf ou @react-pdf/renderer) com layout profissional; verificar que não há elementos cortados</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin pode reenviar invoice já emitida (ex: cliente não recebeu) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Botão "Reenviar Email" na página da invoice — regista também data/hora do último envio no histórico da invoice</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Link da invoice no email é autenticado (não expõe invoice de outro cliente) <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">URL da invoice deve conter token ou ID opaco — verificar que GET /api/invoice/[id] valida que o invoice pertence ao cliente autenticado (sem IDOR)</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Controle de Status da Invoice</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Estados de invoice implementados: RASCUNHO → ENVIADA → PAGA / VENCIDA / CANCELADA <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Rascunho: criada mas não enviada; Enviada: email enviado aguardando pagamento; Paga: marcada manualmente pelo admin ou via webhook Stripe; Vencida: data de vencimento ultrapassada; Cancelada: anulada</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin pode marcar invoice como PAGA manualmente (ex: pagamento por transferência bancária) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Botão "Marcar como Paga" com campo de referência do pagamento (ex: ref. transferência, data do pagamento) — altera status e notifica cliente por email</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Invoices vencidas destacadas com badge visual no painel admin <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Admin → Invoices — invoices com data_vencimento &lt; hoje e status ≠ PAGA exibem badge "VENCIDA" em vermelho; opcionalmente enviar lembrete automático ao cliente</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Cliente visualiza status da invoice no portal (badge colorido) <span class="badge badge-client">CLIENTE</span></div>
+          <div class="check-sub">Portal → Invoices: badge verde "PAGA", amarelo "PENDENTE", laranja "ENVIADA", vermelho "VENCIDA" — cliente não pode alterar status</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Notificação por email ao cliente quando status muda para PAGA <span class="badge badge-email">EMAIL</span></div>
+          <div class="check-sub">Ao marcar como paga, sistema envia email de confirmação de pagamento recebido ao cliente — inclui número da invoice e valor</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsec-title">Histórico e Listagem de Invoices</div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Admin tem listagem completa de todas as invoices com filtros (status, cliente, data) <span class="badge badge-admin">ADMIN</span> <span class="badge badge-crit">CRÍTICO</span></div>
+          <div class="check-sub">Admin → Invoices — tabela com: nº invoice, cliente, valor, moeda, data emissão, data vencimento, status — ordenável por data; filtros por status e cliente</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Cliente tem histórico das suas invoices no portal <span class="badge badge-client">CLIENTE</span></div>
+          <div class="check-sub">Portal → Faturação — listagem das invoices do cliente com número, valor, data, status e botão de download PDF; ordenadas da mais recente para a mais antiga</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Invoice associada ao pedido correspondente (link bidirecional) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Na página do pedido deve aparecer link "Ver Invoice" se existir; na invoice deve constar o número do pedido referenciado — para rastreabilidade</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Resumo financeiro no dashboard admin: total faturado no mês, invoices pendentes, invoices vencidas <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Widgets no Admin Dashboard: "Faturado este mês" (soma de PAGAS), "Em aberto" (soma de ENVIADAS), "Vencidas" (count) — com comparativo ao mês anterior</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"></div>
+        <div class="check-content">
+          <div class="check-text">Exportação CSV das invoices do período (para contabilidade) <span class="badge badge-admin">ADMIN</span></div>
+          <div class="check-sub">Botão "Exportar CSV" na listagem com filtro de período — arquivo com: nº invoice, cliente, NIF, valor, moeda, status, data emissão, data pagamento</div>
+        </div>
+        <input class="result-input" placeholder="Resultado..." onclick="e=>e.stopPropagation()" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NOTAS GERAIS -->
+<div class="global-notes">
+  <h2>📝 Notas & Observações Gerais</h2>
+  <textarea id="globalNotes" placeholder="Registre aqui bugs encontrados, comportamentos inesperados, melhorias e observações gerais durante a validação..."></textarea>
+</div>
+
+<!-- STICKY BAR -->
+<div class="sticky-bar">
+  <span>Progresso</span>
+  <span class="pct" id="stickyPct">0%</span>
+  <span id="stickyCount" style="font-size:12px;color:var(--text2)">0/0</span>
+</div>
+
+<script>
+  // ── Date display ──
+  document.getElementById('dateDisplay').textContent =
+    new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+  // ── Toggle check item ──
+  function toggle(el) {
+    // prevent toggle when clicking on the input
+    if (event && event.target.tagName === 'INPUT') return;
+    el.classList.toggle('checked');
+    updateStats();
+    _save();
+  }
+
+  // ── Count all items ──
+  function getAllItems() {
+    return document.querySelectorAll('.check-item');
+  }
+
+  function getChecked() {
+    return document.querySelectorAll('.check-item.checked');
+  }
+
+  // ── Update stats ──
+  function updateStats() {
+    const all      = getAllItems().length;
+    const checked  = getChecked().length;
+    const priority = document.querySelectorAll('.check-item.priority').length;
+    const pct      = all ? Math.round((checked / all) * 100) : 0;
+
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = checked + ' / ' + all;
+    document.getElementById('statPending').textContent = all - checked;
+    document.getElementById('statOk').textContent = checked;
+    document.getElementById('statPriority').textContent = priority;
+    document.getElementById('stickyPct').textContent = pct + '%';
+    document.getElementById('stickyCount').textContent = checked + '/' + all;
+
+    // section counts
+    document.querySelectorAll('[data-section]').forEach(badge => {
+      const sectionId = badge.dataset.section;
+      const section   = document.getElementById(sectionId);
+      if (!section) return;
+      const items   = section.querySelectorAll('.check-item');
+      const done    = section.querySelectorAll('.check-item.checked');
+      badge.textContent = done.length + '/' + items.length;
+      badge.style.color = done.length === items.length && items.length > 0 ? 'var(--green)' : '';
+    });
+  }
+
+  // ── Save / Load ──
+  function getState() {
+    const state = { checked: [], priority: [], notes: {} };
+    getAllItems().forEach((el, i) => {
+      if (el.classList.contains('checked'))  state.checked.push(i);
+      if (el.classList.contains('priority')) state.priority.push(i);
+      const inp = el.querySelector('.result-input');
+      if (inp && inp.value) state.notes[i] = inp.value;
+    });
+    state.globalNotes = document.getElementById('globalNotes').value;
+    return state;
+  }
+
+  function applyState(state) {
+    getAllItems().forEach((el, i) => {
+      el.classList.toggle('checked',  state.checked.includes(i));
+      el.classList.toggle('priority', (state.priority || []).includes(i));
+      const inp = el.querySelector('.result-input');
+      if (inp) inp.value = state.notes[i] || '';
+    });
+    document.getElementById('globalNotes').value = state.globalNotes || '';
+    updateStats();
+  }
+
+  // Salva silenciosamente (sem toast) — usado em auto-saves
+  function _save() {
+    try {
+      localStorage.setItem('qt_validation_state', JSON.stringify(getState()));
+    } catch(e) { /* silent */ }
+  }
+
+  // Salva com feedback visual — usado no botão manual
+  function saveState() {
+    try {
+      localStorage.setItem('qt_validation_state', JSON.stringify(getState()));
+      showToast('Estado salvo!');
+    } catch(e) {
+      alert('Erro ao salvar: ' + e.message);
+    }
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem('qt_validation_state');
+      if (!raw) { showToast('Nenhum estado salvo encontrado'); return; }
+      applyState(JSON.parse(raw));
+      showToast('Estado carregado!');
+    } catch(e) {
+      alert('Erro ao carregar: ' + e.message);
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Resetar todos os checks e notas? Esta ação não pode ser desfeita.')) return;
+    getAllItems().forEach(el => {
+      el.classList.remove('checked', 'priority');
+      const inp = el.querySelector('.result-input');
+      if (inp) inp.value = '';
+    });
+    document.getElementById('globalNotes').value = '';
+    localStorage.removeItem('qt_validation_state');
+    updateStats();
+    showToast('Resetado!');
+  }
+
+  function checkAll() {
+    getAllItems().forEach(el => el.classList.add('checked'));
+    updateStats();
+  }
+
+  function exportPDF() {
+    saveState();
+    window.print();
+  }
+
+  // ── Toast notification ──
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    Object.assign(t.style, {
+      position: 'fixed', bottom: '80px', right: '24px',
+      background: '#22c55e', color: '#fff', padding: '10px 18px',
+      borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+      zIndex: '999', boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+      transition: 'opacity 0.4s'
+    });
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2000);
+  }
+
+  // ── Inject priority buttons ──
+  getAllItems().forEach(el => {
+    const btn = document.createElement('button');
+    btn.className = 'priority-btn';
+    btn.title = 'Marcar como prioritário';
+    btn.textContent = '⭐';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      el.classList.toggle('priority');
+      updateStats();
+      _save();
+    };
+    const inp = el.querySelector('.result-input');
+    el.insertBefore(btn, inp);
+  });
+
+  // ── Init ──
+  updateStats();
+  // Auto-load on open
+  const saved = localStorage.getItem('qt_validation_state');
+  if (saved) {
+    try { applyState(JSON.parse(saved)); } catch(e) {}
+  }
+
+  // Auto-save on any input change (silencioso)
+  document.addEventListener('change', () => _save());
+  document.getElementById('globalNotes').addEventListener('input', () => _save());
+
+  // Garante que o estado é salvo ao fechar/navegar para fora
+  window.addEventListener('beforeunload', () => _save());
+</script>
+</body>
+</html>

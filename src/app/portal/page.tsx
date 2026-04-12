@@ -20,7 +20,7 @@ const STATUS_COLOR: Record<string, string> = {
   PROPOSAL_SENT:   "bg-blue-500/20 text-blue-300",
   IN_NEGOTIATION:  "bg-purple-500/20 text-purple-300",
   APPROVED:        "bg-emerald-500/20 text-emerald-300",
-  IN_PROGRESS:     "bg-sky-500/20 text-sky-300",
+  IN_PROGRESS:     "bg-accent/20 text-accent-light",
   DELIVERED:       "bg-green-500/20 text-green-300",
 };
 
@@ -50,7 +50,7 @@ export default async function PortalPage() {
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
       <div className="mb-10 flex items-center justify-between">
         <div>
-          <p className="text-sm uppercase tracking-widest text-sky-300">Portal do Cliente</p>
+          <p className="text-sm uppercase tracking-widest text-accent-light">Portal do Cliente</p>
           <h1 className="mt-1 text-3xl font-bold text-white">Os seus projetos</h1>
           <p className="mt-1 text-sm text-slate-400">{session.user.email}</p>
         </div>
@@ -85,10 +85,10 @@ export default async function PortalPage() {
 
       {/* Alertas de pedidos activos */}
       {pendingOrders.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-4">
+        <div className="mb-6 rounded-2xl border border-accent/30 bg-accent/5 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-sky-300">Pedidos com ação pendente</p>
-            <Link href="/portal/orders" className="text-xs text-sky-400 hover:text-sky-300">
+            <p className="text-sm font-semibold text-accent-light">Pedidos com ação pendente</p>
+            <Link href="/portal/orders" className="text-xs text-accent hover:text-accent-light">
               Ver todos →
             </Link>
           </div>
@@ -96,7 +96,7 @@ export default async function PortalPage() {
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {pendingOrders.map((o: any) => {
               const alertColor: Record<string, string> = {
-                PROPOSAL_SENT: "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+                PROPOSAL_SENT: "bg-accent/20 text-accent-light border border-accent/30",
                 IN_PRODUCTION: "bg-purple-500/20 text-purple-300 border border-purple-500/30",
               };
               const alertLabel: Record<string, string> = {
@@ -127,7 +127,7 @@ export default async function PortalPage() {
           <p className="text-slate-400">Nenhum briefing encontrado.</p>
           <Link
             href="/#lead"
-            className="mt-4 inline-flex rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400"
+            className="mt-4 inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
           >
             Submeter briefing →
           </Link>
@@ -189,7 +189,7 @@ export default async function PortalPage() {
                 </p>
                 <Link
                   href={`/portal/briefing/${b.id}`}
-                  className="rounded-xl bg-sky-500/15 px-3 py-1.5 text-xs font-medium text-sky-300 transition hover:bg-sky-500/25"
+                  className="rounded-xl bg-accent/15 px-3 py-1.5 text-xs font-medium text-accent-light transition hover:bg-accent/25"
                 >
                   Ver escopo →
                 </Link>

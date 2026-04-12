@@ -1,0 +1,6 @@
+{
+  "commands": [
+    "ps aux | grep -E 'next|node' | grep -v grep | head -10",
+    "sudo -u ubuntu pm2 list 2>&1 || true"
+  ]
+}

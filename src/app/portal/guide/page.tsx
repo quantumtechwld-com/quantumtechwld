@@ -9,7 +9,7 @@ export default async function GuidePage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
       <div className="mb-10">
-        <Link href="/portal" className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+        <Link href="/portal" className="text-sm text-accent hover:text-accent-light transition-colors">
           ← Portal
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-white">Guia do Portal</h1>
@@ -23,7 +23,7 @@ export default async function GuidePage() {
         {/* 1. Briefing */}
         <section className="rounded-2xl border border-white/15 bg-white/5 p-6">
           <div className="flex items-center gap-3 mb-3">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/20 text-sm font-bold text-sky-300">1</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent-light">1</span>
             <h2 className="text-base font-semibold text-white">Briefing inicial</h2>
           </div>
           <p className="text-sm text-slate-300 leading-relaxed">
@@ -33,9 +33,9 @@ export default async function GuidePage() {
             já entregues pela equipa.
           </p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-300">Análise por IA</span>
-            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-300">Projetos similares</span>
-            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-300">Escopo técnico</span>
+            <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent-light">Análise por IA</span>
+            <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent-light">Projetos similares</span>
+            <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent-light">Escopo técnico</span>
           </div>
         </section>
 
@@ -118,7 +118,7 @@ export default async function GuidePage() {
             {[
               { status: "Pendente",          color: "bg-blue-500/20 text-blue-300",    desc: "Aguarda avaliação da equipa." },
               { status: "Em análise",         color: "bg-yellow-500/20 text-yellow-300", desc: "A equipa está a analisar o pedido." },
-              { status: "Proposta enviada",   color: "bg-sky-500/20 text-sky-300",      desc: "Tem uma proposta para rever e aprovar." },
+              { status: "Proposta enviada",   color: "bg-accent/20 text-accent-light",      desc: "Tem uma proposta para rever e aprovar." },
               { status: "Aprovado",           color: "bg-emerald-500/20 text-emerald-300", desc: "Proposta aprovada — aguarda pagamento." },
               { status: "Revisão solicitada", color: "bg-orange-500/20 text-orange-300", desc: "Pediu alterações à proposta." },
               { status: "Recusado",           color: "bg-red-500/20 text-red-300",       desc: "Pedido recusado pela equipa ou por si." },
@@ -140,7 +140,7 @@ export default async function GuidePage() {
           </p>
           <Link
             href="/portal/orders/new"
-            className="inline-flex rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400"
+            className="inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
           >
             Novo pedido →
           </Link>

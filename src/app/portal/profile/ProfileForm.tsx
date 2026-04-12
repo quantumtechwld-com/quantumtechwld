@@ -71,7 +71,7 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
           value={company}
           onChange={(e) => setCompany(e.target.value)}
           placeholder="Nome da empresa (opcional)"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none"
         />
       </div>
 
@@ -84,7 +84,7 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+351 912 345 678 (opcional)"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none"
         />
       </div>
 
@@ -103,7 +103,7 @@ export function ProfileForm({ user }: Readonly<{ user: User }>) {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:opacity-60"
+          className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
         >
           {loading ? "A guardar…" : "Guardar alterações"}
         </button>

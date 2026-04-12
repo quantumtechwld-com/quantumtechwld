@@ -18,7 +18,7 @@ function animateTravelingLight(gsap: any, svg: SVGSVGElement) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function animateColorShift(gsap: any, svg: SVGSVGElement) {
-  const palette = ["#22d3ee", "#a78bfa", "#34d399", "#60a5fa", "#f472b6"];
+  const palette = ["#9B59FF", "#C084FC", "#22D4C2", "#A78BFA", "#7C3AED"];
   svg.querySelectorAll<SVGPathElement>("[data-draw]").forEach((path, i) => {
     gsap.to(path, {
       stroke: palette[(i + 2) % palette.length],
@@ -33,8 +33,8 @@ function animateCornerNodes(gsap: any, svg: SVGSVGElement) {
   svg.querySelectorAll<SVGCircleElement>("[data-node='corner']").forEach((node, i) => {
     gsap.fromTo(
       node,
-      { attr: { r: 1.5 }, opacity: 0.7 },
-      { attr: { r: 2.8 }, opacity: 0.2, duration: 1.1 + i * 0.2, repeat: -1, yoyo: true, ease: "sine.inOut", delay: i * 0.28 }
+      { attr: { r: 1.8 }, opacity: 0.9 },
+      { attr: { r: 3.5 }, opacity: 0.15, duration: 1.1 + i * 0.2, repeat: -1, yoyo: true, ease: "sine.inOut", delay: i * 0.28 }
     );
   });
 }
@@ -131,43 +131,43 @@ export default function LogoAnimated({ size = 36 }: Readonly<{ size?: number }>)
         </filter>
       </defs>
 
-      {/* ─ Glow blobs de fundo ─ */}
-      <circle data-glow="cyan"   cx="20" cy="20" r="11" fill="#22d3ee" opacity="0.07" filter="url(#ald-glow-lg)" />
-      <circle data-glow="violet" cx="20" cy="20" r="8"  fill="#818cf8" opacity="0.09" filter="url(#ald-glow-lg)" />
-      <circle data-glow="green"  cx="20" cy="20" r="5"  fill="#34d399" opacity="0.00" filter="url(#ald-glow-lg)" />
+      {/* ─ Glow blobs de fundo — Superposição ─ */}
+      <circle data-glow="cyan"   cx="14" cy="20" r="9"  fill="#9B59FF" opacity="0.08" filter="url(#ald-glow-lg)" />
+      <circle data-glow="violet" cx="26" cy="20" r="9"  fill="#C084FC" opacity="0.09" filter="url(#ald-glow-lg)" />
+      <circle data-glow="green"  cx="20" cy="20" r="5"  fill="#22D4C2" opacity="0.00" filter="url(#ald-glow-lg)" />
 
-      {/* ─ Colchetes de canto (circuit brackets) ─ */}
-      <path data-draw="1" d="M3,14 L3,3 L14,3"   stroke="#22d3ee" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" filter="url(#ald-glow-sm)" />
-      <path data-draw="2" d="M26,3 L37,3 L37,14"  stroke="#22d3ee" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" filter="url(#ald-glow-sm)" />
-      <path data-draw="3" d="M37,26 L37,37 L26,37" stroke="#22d3ee" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" filter="url(#ald-glow-sm)" />
-      <path data-draw="4" d="M14,37 L3,37 L3,26"  stroke="#22d3ee" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" filter="url(#ald-glow-sm)" />
+      {/* ─ Loop esquerdo — estado |0⟩ ─ */}
+      <path data-draw="1"
+        d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20"
+        stroke="#9B59FF" strokeWidth="1.8" strokeLinecap="round" fill="none"
+        filter="url(#ald-glow-sm)" />
 
-      {/* ─ Diagonais internas (X central) ─ */}
-      <path data-draw="5" d="M7,7 L20,20 L33,7"  stroke="#a78bfa" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" filter="url(#ald-glow-sm)" />
-      <path data-draw="6" d="M7,33 L20,20 L33,33" stroke="#a78bfa" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" filter="url(#ald-glow-sm)" />
+      {/* ─ Loop direito — estado |1⟩ ─ */}
+      <path data-draw="2"
+        d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20"
+        stroke="#C084FC" strokeWidth="1.8" strokeLinecap="round" fill="none"
+        filter="url(#ald-glow-sm)" />
 
-      {/* ─ Cruz central ─ */}
-      <path data-draw="7" d="M20,5 L20,35" stroke="#34d399" strokeWidth="0.7" strokeLinecap="round" opacity="0.55" />
-      <path data-draw="8" d="M5,20 L35,20" stroke="#34d399" strokeWidth="0.7" strokeLinecap="round" opacity="0.55" />
+      {/* ─ Linha de superposição (eixo quântico) ─ */}
+      <path data-draw="3" d="M5,20 L35,20"
+        stroke="#22D4C2" strokeWidth="0.6" strokeLinecap="round" opacity="0.35" />
 
-      {/* ─ Ring rotativo ao redor do centro ─ */}
+      {/* ─ Ring rotativo no ponto de intersecção ─ */}
       <circle
         data-ring
-        cx="20" cy="20" r="4.5"
-        stroke="#22d3ee"
-        strokeWidth="0.6"
-        strokeDasharray="4 3"
-        opacity="0.45"
+        cx="20" cy="20" r="5.5"
+        stroke="#9B59FF"
+        strokeWidth="0.5"
+        strokeDasharray="2 5"
+        opacity="0.35"
       />
 
-      {/* ─ Nós dos cantos ─ */}
-      <circle data-node="corner" cx="3"  cy="3"  r="1.5" fill="#22d3ee" filter="url(#ald-glow-sm)" />
-      <circle data-node="corner" cx="37" cy="3"  r="1.5" fill="#22d3ee" filter="url(#ald-glow-sm)" />
-      <circle data-node="corner" cx="37" cy="37" r="1.5" fill="#22d3ee" filter="url(#ald-glow-sm)" />
-      <circle data-node="corner" cx="3"  cy="37" r="1.5" fill="#22d3ee" filter="url(#ald-glow-sm)" />
+      {/* ─ Nós extremos ─ */}
+      <circle data-node="corner" cx="5"  cy="20" r="1.8" fill="#9B59FF" filter="url(#ald-glow-sm)" />
+      <circle data-node="corner" cx="35" cy="20" r="1.8" fill="#C084FC" filter="url(#ald-glow-sm)" />
 
-      {/* ─ Nó central ─ */}
-      <circle data-node="center" cx="20" cy="20" r="2.5" fill="#a78bfa" opacity="0.9" filter="url(#ald-glow-lg)" />
+      {/* ─ Nó central — ponto de intersecção ─ */}
+      <circle data-node="center" cx="20" cy="20" r="2.5" fill="#ffffff" opacity="0.92" filter="url(#ald-glow-lg)" />
     </svg>
   );
 }

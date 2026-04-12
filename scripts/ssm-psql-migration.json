@@ -1,0 +1,8 @@
+{
+  "commands": [
+    "set -e",
+    "DB_URL=$(grep -m1 'DATABASE_URL' /home/ubuntu/quantum-agency/.env.production.local | sed 's/DATABASE_URL=//')",
+    "echo 'Aplicando migration UserStatus...'",
+    "psql \"$DB_URL\" <<'SQLEOF'\nDO $$ BEGIN\n  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'UserStatus') THEN\n    CREATE TYPE \"UserStatus\" AS ENUM ('PENDING', 'ACTIVE', 'SUSPENDED');\n    RAISE NOTICE 'Enum UserStatus criado';\n  ELSE\n    RAISE NOTICE 'Enum UserStatus ja existe';\n  END IF;\nEND $$;\n\nDO $$ BEGIN\n  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='User' AND column_name='status') THEN\n    ALTER TABLE \"User\" ADD COLUMN status \"UserStatus\";\n    UPDATE \"User\" SET status = 'ACTIVE';\n    ALTER TABLE \"User\" ALTER COLUMN status SET NOT NULL;\n    ALTER TABLE \"User\" ALTER COLUMN status SET DEFAULT 'PENDING';\n    RAISE NOTICE 'Coluna status adicionada';\n  ELSE\n    RAISE NOTICE 'Coluna status ja existe';\n  END IF;\nEND $$;\n\nINSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)\nSELECT gen_random_uuid()::text, 'manual-2026-03-29', NOW(), '20260329000000_add_user_status', NULL, NULL, NOW(), 1\nWHERE NOT EXISTS (SELECT 1 FROM _prisma_migrations WHERE migration_name = '20260329000000_add_user_status');\n\nSELECT id, name, email, role, status FROM \"User\" ORDER BY id;\nSQLEOF"
+  ]
+}

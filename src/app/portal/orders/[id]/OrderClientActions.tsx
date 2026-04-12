@@ -47,8 +47,8 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
-      <p className="text-sm font-semibold text-sky-300 mb-4">Responda à proposta</p>
+    <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/5 p-5">
+      <p className="text-sm font-semibold text-accent-light mb-4">Responda à proposta</p>
 
       {/* Revision note */}
       <div className="mb-4">
@@ -61,7 +61,7 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
           onChange={(e) => setRevisionNote(e.target.value)}
           rows={3}
           placeholder="O que precisa de ser alterado…"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-accent focus:outline-none resize-none"
         />
       </div>
 

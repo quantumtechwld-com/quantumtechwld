@@ -25,7 +25,7 @@ export default function RecentOrdersTable({ recentOrders, ORDER_TYPE_LABEL, ORDE
         <h2 className="font-semibold text-white">Últimos pedidos</h2>
         <Link
           href="/admin/orders"
-          className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+          className="text-xs text-accent hover:text-accent-light transition-colors"
         >
           Ver todos →
         </Link>
@@ -86,7 +86,7 @@ export default function RecentOrdersTable({ recentOrders, ORDER_TYPE_LABEL, ORDE
                 <td className="px-6 py-4">
                   <Link
                     href={`/admin/orders/${o.id}`}
-                    className="text-violet-400 hover:text-violet-300 text-xs font-medium transition-colors"
+                    className="text-accent hover:text-accent-light text-xs font-medium transition-colors"
                   >
                     Ver →
                   </Link>

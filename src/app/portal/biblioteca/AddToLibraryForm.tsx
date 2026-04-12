@@ -162,7 +162,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Ex: Plataforma de gestão de frotas"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-accent"
         />
       </div>
 
@@ -177,7 +177,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder="Descreva o projeto, o problema resolvido e as principais funcionalidades entregues..."
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 resize-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-accent resize-none"
         />
       </div>
 
@@ -191,7 +191,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
             id="lib-type"
             value={projectType}
             onChange={(e) => setProjectType(e.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-slate-800 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="w-full rounded-xl border border-white/15 bg-slate-800 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {PROJECT_TYPES.map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -207,7 +207,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
             id="lib-budget"
             value={budgetRange}
             onChange={(e) => setBudgetRange(e.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-slate-800 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="w-full rounded-xl border border-white/15 bg-slate-800 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {BUDGET_RANGES.map((b) => (
               <option key={b} value={b}>{b}</option>
@@ -229,7 +229,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
             max={10}
             value={complexityScore}
             onChange={(e) => setComplexityScore(Number(e.target.value))}
-            className="w-full accent-sky-500"
+            className="w-full accent-[var(--accent)]"
           />
         </div>
 
@@ -243,7 +243,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
             min={1}
             value={hoursActual}
             onChange={(e) => setHoursActual(Number(e.target.value))}
-            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
       </div>
@@ -262,7 +262,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
               onClick={handleFeatureClick}
               className={`rounded-full border px-3 py-1 text-xs transition ${
                 features.includes(f)
-                  ? "border-sky-400 bg-sky-500/20 text-sky-300"
+                  ? "border-accent bg-accent/20 text-accent-light"
                   : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20"
               }`}
             >
@@ -301,7 +301,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
             onChange={(e) => setCustomTech(e.target.value)}
             onKeyDown={handleTechKeyDown}
             placeholder="Outra tecnologia..."
-            className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-accent"
           />
           <button
             type="button"
@@ -343,7 +343,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
             id="lib-briefing"
             value={briefingId}
             onChange={(e) => setBriefingId(e.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-slate-800 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="w-full rounded-xl border border-white/15 bg-slate-800 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-accent"
           >
             <option value="">— Nenhum —</option>
             {deliveredBriefings.map((b) => (
@@ -370,7 +370,7 @@ export default function AddToLibraryForm({ deliveredBriefings }: Readonly<{
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-xl bg-sky-500 px-6 py-3 font-semibold text-white transition hover:bg-sky-400 disabled:opacity-50"
+        className="w-full rounded-xl bg-accent px-6 py-3 font-semibold text-white transition hover:bg-accent-light disabled:opacity-50"
       >
         {status === "loading" ? "Gerando embedding e salvando…" : "Adicionar à Biblioteca"}
       </button>

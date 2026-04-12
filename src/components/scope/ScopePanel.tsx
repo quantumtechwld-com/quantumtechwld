@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { GeneratedScope, ScopeFeature, UserStory } from "@/app/api/briefing/scope/route";
+import type { GeneratedScope } from "@/app/api/briefing/scope/route";
 
 type Variant = "portal" | "admin";
 
@@ -18,7 +18,7 @@ const PRIORITY_COLOR: Record<string, string> = {
 };
 
 const AREA_COLOR: Record<string, string> = {
-  frontend:  "bg-sky-500/15 text-sky-300",
+  frontend:  "bg-accent/15 text-accent-light",
   backend:   "bg-violet-500/15 text-violet-300",
   fullstack: "bg-indigo-500/15 text-indigo-300",
   infra:     "bg-orange-500/15 text-orange-300",
@@ -100,7 +100,7 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
           type="button"
           onClick={() => generate(false)}
           disabled={loading}
-          className="rounded-xl bg-sky-500 px-6 py-3 font-semibold text-white transition hover:bg-sky-400 disabled:opacity-50"
+          className="rounded-xl bg-accent px-6 py-3 font-semibold text-white transition hover:bg-accent-light disabled:opacity-50"
         >
           {loading ? v.loadingText : "Gerar escopo com IA"}
         </button>
@@ -108,8 +108,8 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
     );
   }
 
-  const features = scope.features as ScopeFeature[];
-  const userStories = scope.userStories as UserStory[];
+  const features = scope.features;
+  const userStories = scope.userStories;
   const totalHigh   = features.filter((f) => f.priority === "high").length;
   const totalMedium = features.filter((f) => f.priority === "medium").length;
   const totalLow    = features.filter((f) => f.priority === "low").length;
@@ -141,7 +141,7 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
           <p className={`text-xs uppercase tracking-widest ${v.label} mb-1`}>Confiança</p>
           <p className="text-3xl font-bold text-white">{scope.confidence}%</p>
           <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
-            <div className="h-1.5 rounded-full bg-sky-500" style={{ width: `${scope.confidence}%` }} />
+            <div className="h-1.5 rounded-full bg-accent" style={{ width: `${scope.confidence}%` }} />
           </div>
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
               className={`rounded-xl border border-white/10 bg-white/5 p-4 text-sm ${v.storyText}`}
             >
               <span className={v.storyMuted}>Como </span>
-              <span className="text-sky-300">{s.role}</span>
+              <span className="text-accent-light">{s.role}</span>
               <span className={v.storyMuted}>, quero </span>
               <span className="text-white">{s.action}</span>
               <span className={v.storyMuted}>, para </span>
@@ -198,9 +198,9 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
         <div>
           <Heading className={`text-sm uppercase tracking-widest ${v.muted} mb-3`}>Telas</Heading>
           <ul className="space-y-1.5">
-            {(scope.screens as string[]).map((s) => (
+            {scope.screens.map((s) => (
               <li key={s} className={`text-sm ${v.text} flex items-center gap-2`}>
-                <span className="h-1.5 w-1.5 rounded-full bg-sky-500 shrink-0" />
+                <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
                 {s}
               </li>
             ))}
@@ -209,7 +209,7 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
         <div>
           <Heading className={`text-sm uppercase tracking-widest ${v.muted} mb-3`}>Integrações</Heading>
           <ul className="space-y-1.5">
-            {(scope.integrations as string[]).map((s) => (
+            {scope.integrations.map((s) => (
               <li key={s} className={`text-sm ${v.text} flex items-center gap-2`}>
                 <span className="h-1.5 w-1.5 rounded-full bg-violet-500 shrink-0" />
                 {s}
@@ -220,7 +220,7 @@ export default function ScopePanel({ briefingId, initialScope, variant }: Props)
         <div>
           <Heading className={`text-sm uppercase tracking-widest ${v.muted} mb-3`}>Stack recomendada</Heading>
           <div className="flex flex-wrap gap-1.5">
-            {(scope.techRecommended as string[]).map((t) => (
+            {scope.techRecommended.map((t) => (
               <span
                 key={t}
                 className={`rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs ${v.tagText}`}

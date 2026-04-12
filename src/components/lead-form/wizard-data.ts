@@ -90,6 +90,6 @@ export function canAdvance(step: number, state: WizardState): boolean {
 }
 
 export const INPUT_CLS =
-  "rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-sky-400 w-full";
+  "rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-accent w-full";
 
 export { computeComplexity } from "@/lib/complexity";

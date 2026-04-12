@@ -56,7 +56,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         </div>
       )}
       <div className="mb-8">
-        <Link href="/portal/orders" className="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+        <Link href="/portal/orders" className="text-sm text-accent hover:text-accent-light transition-colors">
           ← Pedidos
         </Link>
         <div className="mt-2 flex items-center justify-between gap-4 flex-wrap">
@@ -103,8 +103,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         {/* Proposta do admin (visible when PROPOSAL_SENT or later) */}
         {["PROPOSAL_SENT", "APPROVED", "REVISION", "IN_PRODUCTION", "COMPLETED"].includes(order.status) &&
           order.productionInfo && (
-            <section className="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-sky-400 mb-3">
+            <section className="rounded-2xl border border-accent/30 bg-accent/5 p-5">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-accent mb-3">
                 Proposta da equipa
               </h2>
               {order.estimatedValue != null && (

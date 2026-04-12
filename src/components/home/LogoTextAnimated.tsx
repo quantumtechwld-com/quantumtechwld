@@ -7,7 +7,7 @@ const TECH_START = 7;
 const CHARS = TEXT.split("");
 const DASH = 500;
 const COLOR_QUANTUM = "#C4C4CC"; // alumínio
-const COLOR_TECH = "#22d3ee";    // cyan-400 (igual ao original)
+const COLOR_TECH = "#9B59FF";    // Plasma Violeta
 
 /** Aplica posições exatas de cada char com base no elemento de medição do browser. */
 function applyCharPositions(svg: SVGSVGElement, measureEl: SVGTextElement) {

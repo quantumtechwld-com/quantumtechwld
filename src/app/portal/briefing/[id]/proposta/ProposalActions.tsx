@@ -60,7 +60,7 @@ export default function ProposalActions({ proposalId }: Props) {
             onChange={(e) => setNote(e.target.value)}
             placeholder="Descreva as alterações que pretende (ex: mudar prazo, remover funcionalidade X…)"
             rows={4}
-            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 resize-none"
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
           />
           <div className="flex gap-3">
             <button

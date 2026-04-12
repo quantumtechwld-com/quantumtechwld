@@ -43,9 +43,8 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
   const total = orders.length;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <>
       <AdminHeader />
-
       <main className="mx-auto max-w-6xl px-6 py-10">
         {/* Stats strip */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -60,7 +59,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
               href={s.filter ? `/admin/orders?status=${s.filter}` : "/admin/orders"}
               className={`rounded-2xl border p-4 text-center transition ${
                 statusFilter === s.filter
-                  ? "border-violet-500/50 bg-violet-500/10"
+                  ? "border-accent/50 bg-accent/10"
                   : "border-white/10 bg-white/5 hover:bg-white/8"
               }`}
             >
@@ -76,7 +75,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
             href="/admin/orders"
             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
               statusFilter === ""
-                ? "border-violet-500/50 bg-violet-500/20 text-violet-300"
+                ? "border-accent/50 bg-accent/20 text-accent-light"
                 : "border-white/15 text-slate-400 hover:bg-white/5"
             }`}
           >
@@ -88,7 +87,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
               href={`/admin/orders?status=${s}`}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                 statusFilter === s
-                  ? "border-violet-500/50 bg-violet-500/20 text-violet-300"
+                  ? "border-accent/50 bg-accent/20 text-accent-light"
                   : "border-white/15 text-slate-400 hover:bg-white/5"
               }`}
             >
@@ -110,7 +109,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
               <Link
                 key={o.id}
                 href={`/admin/orders/${o.id}`}
-                className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition hover:bg-white/8 hover:border-violet-500/30"
+                className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition hover:bg-white/8 hover:border-accent/30"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -142,6 +141,6 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
           </div>
         )}
       </main>
-    </div>
+    </>
   );
 }

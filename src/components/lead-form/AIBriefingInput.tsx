@@ -17,7 +17,7 @@ export default function AIBriefingInput({
   return (
     <div className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur">
       <div className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-widest text-sky-300">
+        <p className="text-xs font-medium uppercase tracking-widest text-violet-300">
           ✨ Briefing Inteligente
         </p>
         <h2 className="mt-1 text-xl font-bold text-white">
@@ -50,7 +50,7 @@ export default function AIBriefingInput({
           type="button"
           disabled={!aiText.trim() || aiLoading}
           onClick={onAnalyze}
-          className="flex-1 rounded-xl bg-sky-500 py-3 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 rounded-xl bg-[var(--accent)] py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-light)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {aiLoading ? "Analisando..." : "✨ Analisar com IA →"}
         </button>

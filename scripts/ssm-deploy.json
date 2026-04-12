@@ -1,0 +1,22 @@
+{
+    "commands":  [
+                     "set -e",
+                     "APP_DIR=/home/ubuntu/quantum-agency",
+                     "STAGING=/home/ubuntu/app-deploy",
+                     "mkdir -p $STAGING",
+                     "echo \u0027==\u003e Baixando novo build...\u0027",
+                     "curl -fsSL 'https://quantumtechwld-deploy.s3.sa-east-1.amazonaws.com/deploy-latest.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAYHI56HJ3M3ZI76O7%2F20260330%2Fsa-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260330T230525Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=098da7736012a927d952c2fede18057f81c82e20bbd21ce99ea44cfc69edae3b' -o $STAGING/deploy.tar.gz",
+                     "ls -lh $STAGING/deploy.tar.gz",
+                     "echo \u0027==\u003e Extraindo...\u0027",
+                     "tar -xzf $STAGING/deploy.tar.gz -C $APP_DIR",
+                     "rm $STAGING/deploy.tar.gz",
+                     "echo \u0027==\u003e Instalando deps...\u0027",
+                     "cd $APP_DIR \u0026\u0026 NODE_OPTIONS=\u0027--max-old-space-size=384\u0027 npm ci --omit=dev --prefer-offline 2\u003e\u00261 | tail -5",
+                     "echo \u0027==\u003e Gerando Prisma Client...\u0027",
+                     "cd $APP_DIR \u0026\u0026 npx prisma generate 2\u003e\u00261 | tail -3",
+                     "echo \u0027==\u003e Recarregando PM2...\u0027",
+                     "sudo -u ubuntu pm2 reload ecosystem.config.cjs --update-env --cwd /home/ubuntu/quantum-agency 2\u003e\u00261 || sudo -u ubuntu pm2 restart ecosystem.config.cjs --cwd /home/ubuntu/quantum-agency 2\u003e\u00261",
+                     "sudo -u ubuntu pm2 list 2\u003e\u00261",
+                     "echo \u0027==\u003e Deploy concluido!\u0027"
+                 ]
+}

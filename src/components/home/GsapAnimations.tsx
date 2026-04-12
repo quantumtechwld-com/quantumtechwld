@@ -33,10 +33,16 @@ export default function GsapAnimations() {
     // Defined here (level 2) so the forEach inside is only level 3 — within SonarQube limit
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ctx: any;
+    let isMounted = true;
 
     (async () => {
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+
+      // Guard: se o componente desmontou enquanto o import async estava em
+      // progresso (navegação rápida), não cria animações em elementos inexistentes.
+      if (!isMounted) return;
+
       gsap.registerPlugin(ScrollTrigger);
 
       // Extracted to avoid nesting > 4 levels inside gsap.context callback
@@ -109,7 +115,10 @@ export default function GsapAnimations() {
       ScrollTrigger.refresh();
     })();
 
-    return () => ctx?.revert();
+    return () => {
+      isMounted = false;
+      ctx?.revert();
+    };
   }, []);
 
   return null;

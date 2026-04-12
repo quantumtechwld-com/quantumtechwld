@@ -61,7 +61,7 @@ export function NewOrderForm() {
           id="order-type"
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white focus:border-sky-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white focus:border-accent focus:outline-none"
         >
           {ORDER_TYPES.map((o) => (
             <option key={o.value} value={o.value} className="bg-gray-900">
@@ -82,7 +82,7 @@ export function NewOrderForm() {
           onChange={(e) => setDescription(e.target.value)}
           rows={6}
           placeholder="Descreva o que pretende, o contexto e qualquer detalhe relevante…"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none resize-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none resize-none"
         />
       </div>
 
@@ -99,7 +99,7 @@ export function NewOrderForm() {
               onClick={() => setUrgency(u.value)}
               className={`rounded-xl border px-3 py-2 text-xs font-medium transition ${
                 urgency === u.value
-                  ? "border-sky-500 bg-sky-500/20 text-sky-300"
+                  ? "border-accent bg-accent/20 text-accent-light"
                   : "border-white/15 bg-white/5 text-slate-400 hover:bg-white/8"
               }`}
             >
@@ -125,7 +125,7 @@ export function NewOrderForm() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:opacity-60"
+          className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
         >
           {loading ? "A enviar…" : "Enviar pedido"}
         </button>
