@@ -7,8 +7,6 @@ import { routing } from "@/i18n/routing";
 const intlMiddleware = createIntlMiddleware(routing);
 const { auth } = NextAuth(authConfig);
 
-const VALID_LOCALES = routing.locales as readonly string[];
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -17,21 +15,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/admin") || pathname.startsWith("/portal");
 
   if (isAuthRoute) {
-    // Injeta o header x-next-intl-locale para que next-intl Server Components
-    // (getTranslations, getLocale, etc.) recebam o locale correto via requestLocale.
-    // O cookie NEXT_LOCALE é definido pelo intlMiddleware quando o utilizador troca idioma.
-    const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
-    const locale = cookieLocale && VALID_LOCALES.includes(cookieLocale) ? cookieLocale : "pt";
-
-    const requestWithLocale = new Request(request, {
-      headers: new Headers({
-        ...Object.fromEntries(request.headers.entries()),
-        "x-next-intl-locale": locale,
-      }),
-    });
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (auth as any)(requestWithLocale as NextRequest);
+    return (auth as any)(request);
   }
 
   // Rotas de API — passam sem transformação
