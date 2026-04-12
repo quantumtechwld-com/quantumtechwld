@@ -1,33 +1,26 @@
 /**
  * Gerador de referência única de pedido.
  *
- * Formato: {5 INICIAIS}{AA}-{5 CHARS HASH}
- * Exemplo: DAWGF26-A3K7M
+ * Formato: {5 CHARS NOME}{AA}-{5 CHARS HASH}
+ * Exemplo: ORANG26-A3K7M  (empresa "orangepmm")
+ *          RICAR26-B9TZ2  (cliente "Ricardo")
  *
- * - 5 INICIAIS → primeiras letras das primeiras palavras significativas da descrição
- * - AA         → 2 últimos dígitos do ano de criação
- * - 5 CHARS    → hash aleatório alfanumérico uppercase (A-Z, 0-9)
+ * - 5 CHARS → primeiros 5 caracteres alfanuméricos do nome da empresa;
+ *              se não houver empresa, usa o nome do cliente.
+ * - AA      → 2 últimos dígitos do ano de criação
+ * - 5 HASH  → hash aleatório alfanumérico uppercase (A-Z, 0-9)
  */
-
-const STOP_WORDS = new Set([
-  // PT
-  "de", "do", "da", "dos", "das", "para", "por", "e", "em", "o", "a",
-  "os", "as", "um", "uma", "com", "que", "no", "na", "ao", "à", "aos",
-  "às", "se", "é", "ou", "mas", "mais", "então", "quando", "como",
-  // EN
-  "is", "to", "the", "in", "of", "and", "or", "for", "an", "at",
-]);
 
 /**
  * Gera uma referência única para um pedido.
- * @param description  Descrição do pedido
+ * @param clientName   Nome da empresa ou, se ausente, nome do cliente
  * @param createdAt    Data de criação (default: agora)
  */
-export function generateOrderRef(description: string, createdAt?: Date): string {
+export function generateOrderRef(clientName: string, createdAt?: Date): string {
   const year = (createdAt ?? new Date()).getFullYear();
   const yy = String(year).slice(-2);
 
-  const prefix = extractInitials(description, 5);
+  const prefix = extractPrefix(clientName, 5);
   const hash = randomAlphanumeric(5);
 
   return `${prefix}${yy}-${hash}`;
@@ -35,38 +28,31 @@ export function generateOrderRef(description: string, createdAt?: Date): string 
 
 /**
  * Tenta gerar um orderRef único com retry em caso de colisão de DB.
- * Retorna até `maxAttempts` candidatos — o chamador deve persistir o primeiro
+ * Retorna até `count` candidatos — o chamador deve persistir o primeiro
  * que não viole a constraint UNIQUE.
  */
 export function generateOrderRefCandidates(
-  description: string,
+  clientName: string,
   createdAt?: Date,
   count = 5,
 ): string[] {
-  return Array.from({ length: count }, () => generateOrderRef(description, createdAt));
+  return Array.from({ length: count }, () => generateOrderRef(clientName, createdAt));
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
-function extractInitials(text: string, size: number): string {
-  const words = text
+/** Primeiros `size` caracteres alfanuméricos do nome, uppercase, sem acentos. */
+function extractPrefix(name: string, size: number): string {
+  const clean = name
     .normalize("NFD")
     .replaceAll(/[\u0300-\u036f]/g, "") // remove acentos
-    .replaceAll(/[^a-zA-Z0-9\s]/g, " ")
-    .trim()
-    .split(/\s+/)
-    .filter((w) => w.length > 0 && !STOP_WORDS.has(w.toLowerCase()));
+    .replaceAll(/[^a-zA-Z0-9]/g, "")    // apenas alfanuméricos
+    .toUpperCase();
 
-  const initials: string[] = [];
-  for (const w of words) {
-    if (initials.length >= size) break;
-    initials.push(w[0].toUpperCase());
-  }
+  const prefix = clean.slice(0, size);
 
-  // Preenche com 'X' se não há palavras suficientes
-  while (initials.length < size) initials.push("X");
-
-  return initials.join("");
+  // Preenche com 'X' se o nome for curto
+  return prefix.padEnd(size, "X");
 }
 
 function randomAlphanumeric(length: number): string {

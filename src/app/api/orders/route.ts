@@ -11,8 +11,8 @@ const VALID_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other"
 const VALID_URGENCIES = ["low", "normal", "high", "critical"] as const;
 
 /** Persiste o primeiro orderRef candidato que não viole a constraint UNIQUE. */
-async function assignOrderRef(orderId: string, description: string): Promise<void> {
-  for (const candidate of generateOrderRefCandidates(description, new Date(), 5)) {
+async function assignOrderRef(orderId: string, clientName: string): Promise<void> {
+  for (const candidate of generateOrderRefCandidates(clientName, new Date(), 5)) {
     try {
       await db.order.update({ where: { id: orderId }, data: { orderRef: candidate } });
       return;
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, company: true },
     });
     if (!user) return NextResponse.json({ error: "Utilizador não encontrado." }, { status: 404 });
 
@@ -99,8 +99,9 @@ export async function POST(request: NextRequest) {
       include: { client: { select: { name: true, email: true } } },
     });
 
-    // Gerar e persistir orderRef único
-    await assignOrderRef(order.id, body.description);
+    // Gerar e persistir orderRef único — baseado na empresa ou nome do cliente
+    const clientName = (user.company?.trim() || user.name?.trim() || user.email) ?? "CLIENT";
+    await assignOrderRef(order.id, clientName);
 
     // Notificar admin por email
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
