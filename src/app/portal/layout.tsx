@@ -2,6 +2,7 @@ import { cookies, headers } from "next/headers";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextIntlClientProvider } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 
 const VALID_LOCALES = ["pt", "en", "es"] as const;
 type Locale = (typeof VALID_LOCALES)[number];
@@ -72,6 +73,10 @@ export default async function PortalLayout({
       }
     }
   }
+
+  // Comunica o locale resolvido ao next-intl para que getTranslations()
+  // nos Server Components do portal também funcione neste locale.
+  setRequestLocale(locale);
 
   const messages = await loadMessages(locale);
 
