@@ -1,17 +1,24 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextIntlClientProvider } from "next-intl";
 
+const VALID_LOCALES = ["pt", "en", "es"] as const;
+type Locale = (typeof VALID_LOCALES)[number];
+
+function isValid(l: string | undefined | null): l is Locale {
+  return VALID_LOCALES.includes(l as Locale);
+}
+
 /** Parse Accept-Language header e retorna "en" | "es" | "pt" */
-function detectLocaleFromHeader(acceptLanguage: string): string {
+function detectLocaleFromHeader(acceptLanguage: string): Locale {
   const lang = acceptLanguage.toLowerCase();
   if (/\ben(-[a-z]{2})?\b/.test(lang)) return "en";
   if (/\bes(-[a-z]{2})?\b/.test(lang)) return "es";
   return "pt";
 }
 
-async function loadMessages(locale: string) {
+async function loadMessages(locale: Locale) {
   switch (locale) {
     case "en": return (await import("../../../messages/en.json")).default;
     case "es": return (await import("../../../messages/es.json")).default;
@@ -26,7 +33,7 @@ export default async function PortalLayout({
 }>) {
   const session = await auth();
 
-  let locale = "pt";
+  let locale: Locale = "pt";
 
   if (session?.user?.email) {
     const user = await prisma.user.findUnique({
@@ -34,16 +41,30 @@ export default async function PortalLayout({
       select: { locale: true },
     });
 
-    locale = user?.locale ?? "pt";
+    const dbLocale = user?.locale;
 
-    // Auto-detecta locale no primeiro acesso (ainda no default "pt")
-    // Se o browser reporta EN ou ES, salva no BD
-    if (locale === "pt") {
+    // 1. Verificar o cookie NEXT_LOCALE definido pelo LangSwitcher
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
+
+    if (isValid(cookieLocale)) {
+      locale = cookieLocale;
+      // Persistir na DB se diferente
+      if (dbLocale !== cookieLocale) {
+        await prisma.user.update({
+          where: { email: session.user.email },
+          data: { locale: cookieLocale },
+        });
+      }
+    } else if (isValid(dbLocale)) {
+      locale = dbLocale;
+    } else {
+      // 2. Sem cookie nem locale na DB — detectar pelo Accept-Language
       const headersList = await headers();
       const acceptLang = headersList.get("accept-language") ?? "";
       const detected = detectLocaleFromHeader(acceptLang);
+      locale = detected;
       if (detected !== "pt") {
-        locale = detected;
         await prisma.user.update({
           where: { email: session.user.email },
           data: { locale: detected },
