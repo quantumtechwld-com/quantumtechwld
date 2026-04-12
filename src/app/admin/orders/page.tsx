@@ -51,9 +51,10 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
       : Promise.resolve([]),
   ]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const countMap = Object.fromEntries((countsRaw as { status: string; _count: { id: number } }[]).map((c) => [c.status, c._count.id]));
-  const total = (orders as unknown[]).length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orderList = orders as any[];
+  const total = orderList.length;
   const readMap = new Map<string, Date>((reads as { orderId: string; lastReadAt: Date }[]).map((r) => [r.orderId, r.lastReadAt]));
 
   function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
@@ -116,15 +117,14 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
         </div>
 
         {/* Orders table */}
-        {orders.length === 0 ? (
+        {orderList.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-slate-400">
             Nenhum pedido encontrado{statusFilter ? ` com estado "${STATUS_LABEL[statusFilter]}"` : ""}.
           </div>
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-slate-500">{total} pedido{total === 1 ? "" : "s"}</p>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {orders.map((o: any) => {
+            {orderList.map((o: any) => {
               const unread = unreadCount(o.id, o.messages);
               return (
                 <Link

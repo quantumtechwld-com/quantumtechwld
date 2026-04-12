@@ -31,6 +31,8 @@ export default async function OrdersPage() {
     ? (await db.orderMessageRead.findMany({ where: { userId: me.id }, select: { orderId: true, lastReadAt: true } }) as { orderId: string; lastReadAt: Date }[])
     : [];
   const readMap = new Map<string, Date>(reads.map((r) => [r.orderId, r.lastReadAt]));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orderList = orders as any[];
 
   function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
     const last = readMap.get(orderId);
@@ -57,7 +59,7 @@ export default async function OrdersPage() {
         </Link>
       </div>
 
-      {orders.length === 0 ? (
+      {orderList.length === 0 ? (
         <div className="rounded-2xl border border-white/15 bg-white/5 p-10 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
             <ClipboardList size={22} className="text-white/30" />
@@ -75,8 +77,7 @@ export default async function OrdersPage() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(orders as any[]).map((o: any) => {
+          {orderList.map((o: any) => {
             const unread = unreadCount(o.id, o.messages);
             return (
             <Link

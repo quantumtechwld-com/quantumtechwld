@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "services": "Servicios",
+    "projects": "Proyectos",
+    "contact": "Contacto",
+    "clientArea": "Área del Cliente",
+    "talkToUs": "Contáctenos"
+  },
+  "hero": {
+    "badge": "Agencia de software para negocios en crecimiento",
+    "titleWords": "Construimos productos digitales que",
+    "titleHighlight": "crecen.",
+    "subtitle": "Sistemas a medida, web y automatización con IA. Diagnóstico rápido y criterioso, del MVP a producción. Cuente con nuestro análisis completo, alineado a sus directrices.",
+    "ctaProposal": "Solicitar propuesta",
+    "ctaWhatsapp": "WhatsApp",
+    "statProjects": "Proyectos",
+    "statSatisfaction": "Satisfacción",
+    "statMvp": "1er MVP",
+    "notifLead": "✓ Lead calificado",
+    "notifLeadSub": "vía n8n · ahora mismo",
+    "notifDeploy": "Deploy completado",
+    "notifDeploySub": "v2.4.1 · producción",
+    "chartRevenue": "Ingresos mensuales",
+    "kpiRevenue": "Ingresos",
+    "kpiConversion": "Conversión",
+    "kpiTickets": "Tickets",
+    "progressCampaigns": "Campañas activas",
+    "progressAutomations": "Automatizaciones activas"
+  },
+  "services": {
+    "label": "Lo que hacemos",
+    "heading": "Servicios que transforman negocios",
+    "subheading": "De la estrategia al código: tecnología nacida de su visión de negocio que genera resultados con agilidad y criterio",
+    "cta": "Contáctenos",
+    "websitesTitle": "Websites & Landing Pages",
+    "websitesDesc": "Páginas de alto rendimiento con SEO técnico y enfoque en conversión. Del diseño al deploy en días. Inicie su visibilidad.",
+    "systemsTitle": "Sistemas a Medida",
+    "systemsDesc": "CRMs, ERPs, portales y plataformas alineadas al proceso de negocio, con UX premium.",
+    "aiTitle": "IA & Automatización",
+    "aiDesc": "Agentes inteligentes, flujos automatizados e integraciones que eliminan trabajo manual. Escalabilidad de negocio con inteligencia eficiente."
+  },
+  "stats": {
+    "projectsDelivered": "Proyectos entregados",
+    "satisfiedClients": "Clientes satisfechos",
+    "firstMvp": "Para el primer MVP",
+    "avgRoi": "ROI promedio en 6 meses"
+  },
+  "process": {
+    "label": "Proceso",
+    "heading": "Cómo trabajamos",
+    "diagnosisTitle": "Diagnóstico",
+    "diagnosisDesc": "Mapeamos objetivos, cuellos de botella y métricas de éxito de su negocio y la competencia.",
+    "architectureTitle": "Arquitectura & Diseño",
+    "architectureDesc": "Definimos el stack, el alcance técnico y el cronograma con wireframes de alta fidelidad.",
+    "deliveryTitle": "Entrega Continua",
+    "deliveryDesc": "Deploys incrementales con feedback constante, monitoreo y soporte dedicado."
+  },
+  "portfolio": {
+    "label": "Casos recientes",
+    "heading": "Proyectos que entregamos",
+    "saasLabel": "SaaS B2B",
+    "saasTitle": "Portal de Gestión Empresarial",
+    "ecommerceLabel": "E-commerce",
+    "ecommerceTitle": "Plataforma de Ventas Omnicanal",
+    "aiLabel": "IA + Automatización",
+    "aiTitle": "Agente de Atención Inteligente"
+  },
+  "cta": {
+    "label": "¿Listo para comenzar?",
+    "heading": "Transforma tu idea\nen un producto real",
+    "subheading": "Hable con nuestro equipo y reciba un diagnóstico técnico gratuito.",
+    "button": "Solicitar diagnóstico gratuito"
+  },
+  "lead": {
+    "heading": "Envíe su briefing a nuestro equipo técnico y reciba una propuesta",
+    "subheading": "Complételo en menos de 2 minutos. Calificamos automáticamente vía n8n, evaluamos con los ingenieros del equipo y usted recibe respuesta rápida.",
+    "benefit1": "Respuesta en el próximo día hábil",
+    "benefit2": "Alcance con stack y plazo sugeridos",
+    "benefit3": "Sin compromiso"
+  },
+  "footer": {
+    "rights": "© 2026 Todos los derechos reservados.",
+    "regions": "EE.UU. | América Latina | Europa"
+  },
+  "portal": {
+    "tagline": "Portal del Cliente",
+    "heading": "Sus proyectos",
+    "navOrders": "Pedidos",
+    "navLibrary": "Biblioteca",
+    "navGuide": "Guía",
+    "navProfile": "Perfil",
+    "pendingTitle": "Pedidos con acción pendiente",
+    "pendingViewAll": "Ver todos →",
+    "alertProposalSent": "Propuesta recibida",
+    "alertInProduction": "En producción",
+    "alertPending": "Pendiente",
+    "emptyState": "No se encontraron briefings.",
+    "submitBriefing": "Enviar briefing →",
+    "fieldBudget": "Presupuesto",
+    "fieldTimeline": "Plazo",
+    "fieldComplexity": "Complejidad",
+    "submittedOn": "Enviado el",
+    "viewScope": "Ver alcance →",
+    "statusReceived": "Recibido",
+    "statusInAnalysis": "En análisis",
+    "statusProposalSent": "Propuesta enviada",
+    "statusInNegotiation": "En negociación",
+    "statusApproved": "Aprobado",
+    "statusInProgress": "En desarrollo",
+    "statusDelivered": "Entregado"
+  }
+}

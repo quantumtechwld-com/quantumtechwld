@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "services": "Serviços",
+    "projects": "Projetos",
+    "contact": "Contato",
+    "clientArea": "Área do Cliente",
+    "talkToUs": "Fale conosco"
+  },
+  "hero": {
+    "badge": "Agência de software para negócios que crescem",
+    "titleWords": "Construímos produtos digitais que",
+    "titleHighlight": "crescem.",
+    "subtitle": "Sistemas sob medida, web e automação com IA. Diagnóstico rápido e criterioso, do MVP à produção. Conte com nossa análise completa, alinhada às suas diretrizes.",
+    "ctaProposal": "Solicitar proposta",
+    "ctaWhatsapp": "WhatsApp",
+    "statProjects": "Projetos",
+    "statSatisfaction": "Satisfação",
+    "statMvp": "1º MVP",
+    "notifLead": "✓ Lead qualificado",
+    "notifLeadSub": "via n8n · agora mesmo",
+    "notifDeploy": "Deploy concluído",
+    "notifDeploySub": "v2.4.1 · produção",
+    "chartRevenue": "Receita mensal",
+    "kpiRevenue": "Receita",
+    "kpiConversion": "Conversão",
+    "kpiTickets": "Tickets",
+    "progressCampaigns": "Campanhas ativas",
+    "progressAutomations": "Automações rodando"
+  },
+  "services": {
+    "label": "O que fazemos",
+    "heading": "Serviços que transformam negócios",
+    "subheading": "Da estratégia ao código: tecnologia que nasce da sua visão de negócio e gera resultado com agilidade e critério",
+    "cta": "Fale conosco",
+    "websitesTitle": "Websites & Landing Pages",
+    "websitesDesc": "Páginas com alta performance, SEO técnico e foco em conversão. Do design ao deploy em dias. Inicie sua visibilidade.",
+    "systemsTitle": "Sistemas sob Medida",
+    "systemsDesc": "CRMs, ERPs, portais e plataformas alinhadas ao processo de negócio, com UX premium.",
+    "aiTitle": "IA & Automação",
+    "aiDesc": "Agentes inteligentes, fluxos automatizados e integrações que eliminam trabalho manual. Escalabilidade de negócio com inteligência eficiente."
+  },
+  "stats": {
+    "projectsDelivered": "Projetos entregues",
+    "satisfiedClients": "Clientes satisfeitos",
+    "firstMvp": "Para o primeiro MVP",
+    "avgRoi": "ROI médio em 6 meses"
+  },
+  "process": {
+    "label": "Processo",
+    "heading": "Como trabalhamos",
+    "diagnosisTitle": "Diagnóstico",
+    "diagnosisDesc": "Mapeamos objetivos, gargalos e métricas de sucesso do seu negócio e da concorrência.",
+    "architectureTitle": "Arquitetura & Design",
+    "architectureDesc": "Definimos stack, escopo técnico e cronograma com wireframes de alta fidelidade.",
+    "deliveryTitle": "Entrega Contínua",
+    "deliveryDesc": "Deploys incrementais com feedback constante, monitoramento e suporte dedicado."
+  },
+  "portfolio": {
+    "label": "Cases recentes",
+    "heading": "Projetos que entregamos",
+    "saasLabel": "SaaS B2B",
+    "saasTitle": "Portal de Gestão Empresarial",
+    "ecommerceLabel": "E-commerce",
+    "ecommerceTitle": "Plataforma de Vendas Omnichannel",
+    "aiLabel": "IA + Automação",
+    "aiTitle": "Agente de Atendimento Inteligente"
+  },
+  "cta": {
+    "label": "Pronto para começar?",
+    "heading": "Transforme sua ideia\nem produto real",
+    "subheading": "Converse com nossa equipe e receba um diagnóstico técnico gratuito.",
+    "button": "Solicitar diagnóstico gratuito"
+  },
+  "lead": {
+    "heading": "Envie seu briefing para o nosso time técnico e receba uma proposta",
+    "subheading": "Preencha em menos de 2 minutos. Qualificamos automaticamente via n8n, filtramos com os engenheiros da equipe e você recebe retorno rápido.",
+    "benefit1": "Resposta no próximo dia útil",
+    "benefit2": "Escopo com stack e prazo sugeridos",
+    "benefit3": "Sem compromisso"
+  },
+  "footer": {
+    "rights": "© 2026 Todos os direitos reservados.",
+    "regions": "EUA | América Latina | Europa"
+  },
+  "portal": {
+    "tagline": "Portal do Cliente",
+    "heading": "Os seus projetos",
+    "navOrders": "Pedidos",
+    "navLibrary": "Biblioteca",
+    "navGuide": "Guia",
+    "navProfile": "Perfil",
+    "pendingTitle": "Pedidos com ação pendente",
+    "pendingViewAll": "Ver todos →",
+    "alertProposalSent": "Proposta recebida",
+    "alertInProduction": "Em produção",
+    "alertPending": "Pendente",
+    "emptyState": "Nenhum briefing encontrado.",
+    "submitBriefing": "Submeter briefing →",
+    "fieldBudget": "Orçamento",
+    "fieldTimeline": "Prazo",
+    "fieldComplexity": "Complexidade",
+    "submittedOn": "Submetido em",
+    "viewScope": "Ver escopo →",
+    "statusReceived": "Recebido",
+    "statusInAnalysis": "Em análise",
+    "statusProposalSent": "Proposta enviada",
+    "statusInNegotiation": "Em negociação",
+    "statusApproved": "Aprovado",
+    "statusInProgress": "Em desenvolvimento",
+    "statusDelivered": "Entregue"
+  }
+}

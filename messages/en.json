@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "services": "Services",
+    "projects": "Projects",
+    "contact": "Contact",
+    "clientArea": "Client Area",
+    "talkToUs": "Talk to us"
+  },
+  "hero": {
+    "badge": "Software agency for growing businesses",
+    "titleWords": "We build digital products that",
+    "titleHighlight": "grow.",
+    "subtitle": "Custom systems, web and AI automation. Fast, rigorous diagnosis, from MVP to production. Count on our full analysis, aligned with your goals.",
+    "ctaProposal": "Request a proposal",
+    "ctaWhatsapp": "WhatsApp",
+    "statProjects": "Projects",
+    "statSatisfaction": "Satisfaction",
+    "statMvp": "1st MVP",
+    "notifLead": "✓ Qualified lead",
+    "notifLeadSub": "via n8n · just now",
+    "notifDeploy": "Deploy complete",
+    "notifDeploySub": "v2.4.1 · production",
+    "chartRevenue": "Monthly Revenue",
+    "kpiRevenue": "Revenue",
+    "kpiConversion": "Conversion",
+    "kpiTickets": "Tickets",
+    "progressCampaigns": "Active campaigns",
+    "progressAutomations": "Running automations"
+  },
+  "services": {
+    "label": "What we do",
+    "heading": "Services that transform businesses",
+    "subheading": "From strategy to code: technology born from your business vision that delivers results with agility and precision",
+    "cta": "Talk to us",
+    "websitesTitle": "Websites & Landing Pages",
+    "websitesDesc": "High-performance pages with technical SEO and conversion focus. From design to deploy in days. Start building your online presence.",
+    "systemsTitle": "Custom Systems",
+    "systemsDesc": "CRMs, ERPs, portals and platforms aligned with your business processes, with premium UX.",
+    "aiTitle": "AI & Automation",
+    "aiDesc": "Intelligent agents, automated workflows and integrations that eliminate manual work. Business scalability with efficient intelligence."
+  },
+  "stats": {
+    "projectsDelivered": "Projects delivered",
+    "satisfiedClients": "Satisfied clients",
+    "firstMvp": "For the first MVP",
+    "avgRoi": "Average ROI in 6 months"
+  },
+  "process": {
+    "label": "Process",
+    "heading": "How we work",
+    "diagnosisTitle": "Diagnosis",
+    "diagnosisDesc": "We map your business objectives, bottlenecks and success metrics alongside competitive analysis.",
+    "architectureTitle": "Architecture & Design",
+    "architectureDesc": "We define the stack, technical scope and timeline with high-fidelity wireframes.",
+    "deliveryTitle": "Continuous Delivery",
+    "deliveryDesc": "Incremental deploys with constant feedback, monitoring and dedicated support."
+  },
+  "portfolio": {
+    "label": "Recent cases",
+    "heading": "Projects we've delivered",
+    "saasLabel": "SaaS B2B",
+    "saasTitle": "Business Management Portal",
+    "ecommerceLabel": "E-commerce",
+    "ecommerceTitle": "Omnichannel Sales Platform",
+    "aiLabel": "AI + Automation",
+    "aiTitle": "Intelligent Customer Service Agent"
+  },
+  "cta": {
+    "label": "Ready to start?",
+    "heading": "Transform your idea\ninto a real product",
+    "subheading": "Talk with our team and receive a free technical diagnosis.",
+    "button": "Request a free diagnosis"
+  },
+  "lead": {
+    "heading": "Send your briefing to our technical team and receive a proposal",
+    "subheading": "Fill it out in less than 2 minutes. We automatically qualify via n8n, review with our engineering team and you get a fast response.",
+    "benefit1": "Response on the next business day",
+    "benefit2": "Scope with suggested stack and timeline",
+    "benefit3": "No commitment"
+  },
+  "footer": {
+    "rights": "© 2026 All rights reserved.",
+    "regions": "USA | Latin America | Europe"
+  },
+  "portal": {
+    "tagline": "Client Portal",
+    "heading": "Your projects",
+    "navOrders": "Orders",
+    "navLibrary": "Library",
+    "navGuide": "Guide",
+    "navProfile": "Profile",
+    "pendingTitle": "Orders pending action",
+    "pendingViewAll": "View all →",
+    "alertProposalSent": "Proposal received",
+    "alertInProduction": "In production",
+    "alertPending": "Pending",
+    "emptyState": "No briefings found.",
+    "submitBriefing": "Submit briefing →",
+    "fieldBudget": "Budget",
+    "fieldTimeline": "Timeline",
+    "fieldComplexity": "Complexity",
+    "submittedOn": "Submitted on",
+    "viewScope": "View scope →",
+    "statusReceived": "Received",
+    "statusInAnalysis": "In analysis",
+    "statusProposalSent": "Proposal sent",
+    "statusInNegotiation": "In negotiation",
+    "statusApproved": "Approved",
+    "statusInProgress": "In development",
+    "statusDelivered": "Delivered"
+  }
+}

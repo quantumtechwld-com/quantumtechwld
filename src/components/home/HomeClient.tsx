@@ -1,51 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import { Zap, BrainCircuit, Bot, Rocket } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import GsapAnimations from "./GsapAnimations";
 import LogoAnimated from "./LogoAnimated";
 import LogoTextAnimated from "./LogoTextAnimated";
 import LeadForm from "@/components/lead-form";
 import type { LucideIcon } from "lucide-react";
 
-// ── DATA ──────────────────────────────────────────────────────────────────────
-type Service = {
-  Icon: LucideIcon;
-  title: string;
-  desc: string;
-  gradient: string;
-  accent: string;
-};
-
-const SERVICES: Service[] = [
-  {
-    Icon: Zap,
-    title: "Websites & Landing Pages",
-    desc: "Páginas com alta performance, SEO técnico e foco em conversão. Do design ao deploy em dias. Inicie sua visibilidade.",
-    gradient: "from-blue-500/15 to-indigo-600/10",
-    accent: "text-accent",
-  },
-  {
-    Icon: BrainCircuit,
-    title: "Sistemas sob Medida",
-    desc: "CRMs, ERPs, portais e plataformas alinhadas ao processo de negócio, com UX premium.",
-    gradient: "from-violet-500/15 to-purple-600/10",
-    accent: "text-violet-400",
-  },
-  {
-    Icon: Bot,
-    title: "IA & Automação",
-    desc: "Agentes inteligentes, fluxos automatizados e integrações que eliminam trabalho manual. Escalabilidade de negócio com inteligência eficiente.",
-    gradient: "from-emerald-500/15 to-teal-600/10",
-    accent: "text-emerald-400",
-  },
-];
-
-const STATS = [
-  { value: 70, suffix: "+", label: "Projetos entregues" },
-  { value: 98, suffix: "%", label: "Clientes satisfeitos" },
-  { value: 7, suffix: "d", label: "Para o primeiro MVP" },
-  { value: 3, suffix: "x", label: "ROI médio em 6 meses" },
-];
-
+// ── Dados não traduzíveis (nomes de tecnologias) ─────────────────────────────
 const TECHS = [
   "Next.js", "React", "Node.js", "TypeScript", "PostgreSQL",
   "n8n", "OpenAI", "Prisma", "TailwindCSS", "Docker", "AWS", "Redis",
@@ -59,56 +24,129 @@ const MARQUEE_ITEMS = [
   ...TECHS.map((t) => ({ id: `b-${t}`, t })),
 ];
 
-const STEPS = [
-  {
-    num: "01",
-    title: "Diagnóstico",
-    desc: "Mapeamos objetivos, gargalos e métricas de sucesso do seu negócio e da concorrência.",
-  },
-  {
-    num: "02",
-    title: "Arquitetura & Design",
-    desc: "Definimos stack, escopo técnico e cronograma com wireframes de alta fidelidade.",
-  },
-  {
-    num: "03",
-    title: "Entrega Contínua",
-    desc: "Deploys incrementais com feedback constante, monitoramento e suporte dedicado.",
-  },
+const SERVICE_ICONS: [LucideIcon, string, string][] = [
+  [Zap,          "from-blue-500/15 to-indigo-600/10", "text-accent"],
+  [BrainCircuit, "from-violet-500/15 to-purple-600/10", "text-violet-400"],
+  [Bot,          "from-emerald-500/15 to-teal-600/10", "text-emerald-400"],
 ];
 
-const PROJECTS = [
-  {
-    label: "SaaS B2B",
-    title: "Portal de Gestão Empresarial",
-    tag: "React · Node · PostgreSQL",
-    gradient: "from-blue-600 via-indigo-700 to-violet-800",
-    bars: [40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-    imgPosition: "50% 20%",
-  },
-  {
-    label: "E-commerce",
-    title: "Plataforma de Vendas Omnichannel",
-    tag: "Next.js · Stripe · Redis",
-    gradient: "from-violet-600 via-purple-700 to-fuchsia-800",
-    bars: [70, 45, 80, 55, 95, 60, 85, 40, 100, 75, 65, 90],
-    image: "/images/dashboard-ecommerce.png",
-    imgPosition: "0% 40%",
-  },
-  {
-    label: "IA + Automação",
-    title: "Agente de Atendimento Inteligente",
-    tag: "OpenAI · n8n · WhatsApp",
-    gradient: "from-emerald-600 via-teal-700 to-teal-900",
-    bars: [55, 80, 40, 95, 65, 75, 50, 85, 45, 90, 60, 100],
-    image: "/images/n8n-screenshot-readme.png",
-    imgPosition: "50% 30%",
-  },
-];
+// ── Seletor de idioma compacto ────────────────────────────────────────────────
+function LangSwitcher({ current }: Readonly<{ current: string }>) {
+  const locales = [
+    { code: "pt", label: "PT" },
+    { code: "en", label: "EN" },
+    { code: "es", label: "ES" },
+  ];
+
+  return (
+    <div className="hidden items-center gap-1 md:flex">
+      {locales.map(({ code, label }) => (
+        <Link
+          key={code}
+          href="/"
+          locale={code}
+          className={`rounded px-2 py-1 text-xs font-bold transition-colors ${
+            current === code
+              ? "bg-white/10 text-white"
+              : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          {label}
+        </Link>
+      ))}
+    </div>
+  );
+}
 
 // ── COMPONENT ─────────────────────────────────────────────────────────────────
 export default function HomeClient() {
+  const t = useTranslations();
+  const locale = useLocale();
+
+  // Dados traduzíveis construídos dentro do componente
+  const SERVICES = [
+    {
+      Icon: SERVICE_ICONS[0][0],
+      title: t("services.websitesTitle"),
+      desc: t("services.websitesDesc"),
+      gradient: SERVICE_ICONS[0][1],
+      accent: SERVICE_ICONS[0][2],
+    },
+    {
+      Icon: SERVICE_ICONS[1][0],
+      title: t("services.systemsTitle"),
+      desc: t("services.systemsDesc"),
+      gradient: SERVICE_ICONS[1][1],
+      accent: SERVICE_ICONS[1][2],
+    },
+    {
+      Icon: SERVICE_ICONS[2][0],
+      title: t("services.aiTitle"),
+      desc: t("services.aiDesc"),
+      gradient: SERVICE_ICONS[2][1],
+      accent: SERVICE_ICONS[2][2],
+    },
+  ];
+
+  const STATS = [
+    { value: 70, suffix: "+", label: t("stats.projectsDelivered") },
+    { value: 98, suffix: "%", label: t("stats.satisfiedClients") },
+    { value: 7,  suffix: "d", label: t("stats.firstMvp") },
+    { value: 3,  suffix: "x", label: t("stats.avgRoi") },
+  ];
+
+  const STEPS = [
+    {
+      num: "01",
+      title: t("process.diagnosisTitle"),
+      desc: t("process.diagnosisDesc"),
+    },
+    {
+      num: "02",
+      title: t("process.architectureTitle"),
+      desc: t("process.architectureDesc"),
+    },
+    {
+      num: "03",
+      title: t("process.deliveryTitle"),
+      desc: t("process.deliveryDesc"),
+    },
+  ];
+
+  const PROJECTS = [
+    {
+      label: t("portfolio.saasLabel"),
+      title: t("portfolio.saasTitle"),
+      tag: "React · Node · PostgreSQL",
+      gradient: "from-blue-600 via-indigo-700 to-violet-800",
+      bars: [40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100],
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+      imgPosition: "50% 20%",
+    },
+    {
+      label: t("portfolio.ecommerceLabel"),
+      title: t("portfolio.ecommerceTitle"),
+      tag: "Next.js · Stripe · Redis",
+      gradient: "from-violet-600 via-purple-700 to-fuchsia-800",
+      bars: [70, 45, 80, 55, 95, 60, 85, 40, 100, 75, 65, 90],
+      image: "/images/dashboard-ecommerce.png",
+      imgPosition: "0% 40%",
+    },
+    {
+      label: t("portfolio.aiLabel"),
+      title: t("portfolio.aiTitle"),
+      tag: "OpenAI · n8n · WhatsApp",
+      gradient: "from-emerald-600 via-teal-700 to-teal-900",
+      bars: [55, 80, 40, 95, 65, 75, 50, 85, 45, 90, 60, 100],
+      image: "/images/n8n-screenshot-readme.png",
+      imgPosition: "50% 30%",
+    },
+  ];
+
+  // Título hero: palavras normais + última palavra destacada
+  const heroWords = t("hero.titleWords").split(" ");
+  const heroHighlight = t("hero.titleHighlight");
+
   return (
     <div className="overflow-x-hidden">
       <GsapAnimations />
@@ -124,22 +162,23 @@ export default function HomeClient() {
             <LogoTextAnimated />
           </div>
           <div className="hidden items-center gap-8 text-sm font-bold text-slate-300 md:flex">
-            <a href="#services" className="transition-colors hover:text-white">Serviços</a>
-            <a href="#portfolio" className="transition-colors hover:text-white">Projetos</a>
-            <a href="#lead" className="transition-colors hover:text-white">Contato</a>
+            <a href="#services" className="transition-colors hover:text-white">{t("nav.services")}</a>
+            <a href="#portfolio" className="transition-colors hover:text-white">{t("nav.projects")}</a>
+            <a href="#lead" className="transition-colors hover:text-white">{t("nav.contact")}</a>
           </div>
           <div className="flex items-center gap-3">
+            <LangSwitcher current={locale} />
             <a
               href="/portal"
               className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-slate-300 transition-all hover:border-white/30 hover:text-white"
             >
-              Área do Cliente
+              {t("nav.clientArea")}
             </a>
             <a
               href="#lead"
               className="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-accent-light hover:shadow-[0_0_20px_var(--accent-glow)]"
             >
-              Fale conosco
+              {t("nav.talkToUs")}
             </a>
           </div>
         </nav>
@@ -176,20 +215,21 @@ export default function HomeClient() {
               data-hero="badge"
               className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 text-sm font-medium text-violet-300"
             >
-              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-violet-400" /></span><span>Agência de software para negócios que crescem</span>
+              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-violet-400" /></span>
+              <span>{t("hero.badge")}</span>
             </div>
 
-            {/* Title — split by words for GSAP */}
+            {/* Title — split por palavras para o GSAP */}
             <h1
               className="mb-7 text-5xl font-extrabold leading-[1.06] tracking-tight text-white md:text-[4.2rem] lg:text-[5rem]"
               style={{ perspective: 800 }}
             >
-              {["Construímos", "produtos", "digitais", "que", "crescem."].map((word, i) => (
+              {[...heroWords, heroHighlight].map((word, i, arr) => (
                 <span
-                  key={word}
+                  key={`${word}-${i}`}
                   data-hero="word"
                   className={`mr-[0.22em] inline-block last:mr-0 ${
-                    i === 4
+                    i === arr.length - 1
                       ? "bg-linear-to-r from-violet-400 via-violet-500 to-purple-600 bg-clip-text text-transparent"
                       : ""
                   }`}
@@ -200,8 +240,7 @@ export default function HomeClient() {
             </h1>
 
             <p data-hero="sub" className="mb-10 max-w-120 text-lg leading-relaxed text-slate-300">
-              Sistemas sob medida, web e automação com IA. Diagnóstico rápido e criterioso, do MVP à produção.
-              Conte com nossa análise completa, alinhada às suas diretrizes.
+              {t("hero.subtitle")}
             </p>
 
             <div className="mb-12 flex flex-wrap gap-4">
@@ -210,7 +249,7 @@ export default function HomeClient() {
                 href="#lead"
                 className="rounded-xl bg-linear-to-r from-violet-600 to-violet-500 px-7 py-3.5 font-semibold text-white shadow-lg shadow-violet-500/20 transition-all hover:-translate-y-0.5 hover:shadow-violet-500/40"
               >
-                Solicitar proposta
+                {t("hero.ctaProposal")}
               </a>
               <a
                 data-hero="cta"
@@ -219,7 +258,7 @@ export default function HomeClient() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition-all hover:border-white/30 hover:bg-white/10"
               >
-                WhatsApp
+                {t("hero.ctaWhatsapp")}
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden={true}>
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
@@ -228,7 +267,11 @@ export default function HomeClient() {
 
             {/* Mini stats */}
             <div className="grid max-w-sm grid-cols-3 gap-3">
-              {[["70+", "Projetos"], ["98%", "Satisfação"], ["7 dias", "1º MVP"]].map(([v, l]) => (
+              {[
+                ["70+", t("hero.statProjects")],
+                ["98%", t("hero.statSatisfaction")],
+                ["7 dias", t("hero.statMvp")],
+              ].map(([v, l]) => (
                 <div
                   data-hero="stat"
                   key={l}
@@ -248,8 +291,8 @@ export default function HomeClient() {
               data-float="notif"
               className="absolute -right-4 -top-6 z-20 rounded-2xl border border-emerald-500/30 bg-[#050816] px-4 py-3 shadow-xl"
             >
-              <p className="text-xs font-semibold text-emerald-300">✓ Lead qualificado</p>
-              <p className="mt-0.5 text-[10px] text-emerald-400/60">via n8n · agora mesmo</p>
+              <p className="text-xs font-semibold text-emerald-300">{t("hero.notifLead")}</p>
+              <p className="mt-0.5 text-[10px] text-emerald-400/60">{t("hero.notifLeadSub")}</p>
             </div>
 
             {/* Deploy badge */}
@@ -259,9 +302,9 @@ export default function HomeClient() {
             >
               <p className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
                 <Rocket size={12} aria-hidden="true" />
-                Deploy concluído
+                {t("hero.notifDeploy")}
               </p>
-              <p className="mt-0.5 text-[10px] text-violet-400/60">v2.4.1 · produção</p>
+              <p className="mt-0.5 text-[10px] text-violet-400/60">{t("hero.notifDeploySub")}</p>
             </div>
 
             {/* Main card */}
@@ -276,7 +319,7 @@ export default function HomeClient() {
 
               {/* Chart */}
               <div className="mb-5 overflow-hidden rounded-xl bg-linear-to-br from-violet-500/15 to-violet-500/8 p-4">
-                <p className="mb-3 text-[10px] font-medium uppercase tracking-widest text-violet-400/60">Receita mensal</p>
+                <p className="mb-3 text-[10px] font-medium uppercase tracking-widest text-violet-400/60">{t("hero.chartRevenue")}</p>
                 <div className="flex h-28 items-end gap-1.5">
                   {[40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100].map((h, i) => (
                     <div
@@ -291,9 +334,9 @@ export default function HomeClient() {
               {/* KPI row */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: "Receita", val: "R$ 84k", trend: "+8.2%", up: true },
-                  { label: "Conversão", val: "12.4%", trend: "+3.1%", up: true },
-                  { label: "Tickets", val: "231", trend: "-1.4%", up: false },
+                  { label: t("hero.kpiRevenue"),    val: "R$ 84k", trend: "+8.2%", up: true },
+                  { label: t("hero.kpiConversion"),  val: "12.4%",  trend: "+3.1%", up: true },
+                  { label: t("hero.kpiTickets"),     val: "231",    trend: "-1.4%", up: false },
                 ].map((item) => (
                   <div key={item.label} className="rounded-xl bg-white/5 p-3">
                     <p className="text-[9px] font-medium uppercase tracking-wider text-slate-500">{item.label}</p>
@@ -308,8 +351,8 @@ export default function HomeClient() {
               {/* Progress row */}
               <div className="mt-5 space-y-2.5">
                 {[
-                  { label: "Campanhas ativas", pct: 78 },
-                  { label: "Automações rodando", pct: 92 },
+                  { label: t("hero.progressCampaigns"),   pct: 78 },
+                  { label: t("hero.progressAutomations"), pct: 92 },
                 ].map((r) => (
                   <div key={r.label}>
                     <div className="mb-1 flex justify-between text-[10px] text-slate-400">
@@ -343,12 +386,12 @@ export default function HomeClient() {
       {/* ── MARQUEE ──────────────────────────────────────────────────────── */}
       <div aria-hidden={true} className="relative overflow-hidden border-y border-white/20 bg-white/5 py-5">
         <div className="flex w-max animate-marquee">
-          {MARQUEE_ITEMS.map(({ id, t }) => (
+          {MARQUEE_ITEMS.map(({ id, t: tech }) => (
             <span
               key={id}
               className="mx-10 text-xs font-bold uppercase tracking-[0.28em] text-white"
             >
-              {t}
+              {tech}
             </span>
           ))}
         </div>
@@ -357,16 +400,16 @@ export default function HomeClient() {
       {/* ── SERVICES ─────────────────────────────────────────────────────── */}
       <section id="services" data-gsap="services" className="mx-auto w-full max-w-6xl px-6 py-28">
         <p data-gsap="services-label" className="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-accent">
-          O que fazemos
+          {t("services.label")}
         </p>
         <h2 data-gsap="services-heading" className="mb-4 max-w-2xl text-4xl font-extrabold text-white md:text-5xl">
-          Serviços que{" "}
+          {t("services.heading").split(" ").slice(0, -1).join(" ")}{" "}
           <span className="bg-linear-to-r from-violet-400 via-violet-500 to-purple-600 bg-clip-text text-transparent">
-            transformam negócios
+            {t("services.heading").split(" ").at(-1)}
           </span>
         </h2>
         <p data-gsap="services-heading" className="mb-16 max-w-md text-slate-400">
-          Da estratégia ao código: tecnologia que nasce da sua visão de negócio e gera resultado com agilidade e critério
+          {t("services.subheading")}
         </p>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -377,7 +420,6 @@ export default function HomeClient() {
               aria-label={svc.title}
               className={`group relative cursor-default overflow-hidden rounded-2xl border border-white/8 bg-linear-to-br ${svc.gradient} p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-white/20 hover:shadow-2xl`}
             >
-              {/* Glow on hover */}
               <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 style={{ background: "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 60%)" }} />
 
@@ -387,7 +429,7 @@ export default function HomeClient() {
               <h3 className="mb-3 text-xl font-bold text-white">{svc.title}</h3>
               <p className="text-sm leading-relaxed text-slate-300/90">{svc.desc}</p>
               <div className={`mt-6 flex items-center gap-1.5 text-xs font-bold ${svc.accent} opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100`}>
-                <a href="#lead" className="flex items-center gap-1.5">Fale conosco <span>→</span></a>
+                <a href="#lead" className="flex items-center gap-1.5">{t("services.cta")} <span>→</span></a>
               </div>
             </article>
           ))}
@@ -416,10 +458,10 @@ export default function HomeClient() {
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
       <section data-gsap="steps" className="mx-auto w-full max-w-6xl px-6 py-28">
         <p className="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-violet-400">
-          Processo
+          {t("process.label")}
         </p>
         <h2 data-gsap="steps-heading" className="mb-16 text-4xl font-extrabold text-white md:text-5xl">
-          Como trabalhamos
+          {t("process.heading")}
         </h2>
         <div className="grid gap-10 md:grid-cols-3">
           {STEPS.map((step) => (
@@ -438,10 +480,10 @@ export default function HomeClient() {
       {/* ── PORTFOLIO ─────────────────────────────────────────────────────── */}
       <section id="portfolio" data-gsap="portfolio" className="mx-auto w-full max-w-6xl px-6 py-28">
         <p className="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-emerald-400">
-          Cases recentes
+          {t("portfolio.label")}
         </p>
         <h2 data-gsap="portfolio-heading" className="mb-16 text-4xl font-extrabold text-white md:text-5xl">
-          Projetos que entregamos
+          {t("portfolio.heading")}
         </h2>
         <div className="grid gap-6 md:grid-cols-3">
           {PROJECTS.map((p) => (
@@ -450,9 +492,7 @@ export default function HomeClient() {
               key={p.title}
               className="group cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-white/2 transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl"
             >
-              {/* Screenshot / Mock */}
               <div className={`relative h-48 overflow-hidden sm:h-52 md:h-48 lg:h-56 ${p.image ? "bg-black" : "bg-linear-to-br " + p.gradient}`}>
-                {/* Titlebar */}
                 <div className="absolute inset-x-0 top-0 z-10 flex h-8 items-center gap-1.5 bg-black/25 px-4 backdrop-blur-sm">
                   <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
@@ -505,26 +545,27 @@ export default function HomeClient() {
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
       <section data-gsap="cta" className="mx-auto w-full max-w-6xl px-6 pb-28">
         <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-linear-to-br from-violet-500/8 via-violet-600/8 to-purple-600/8 p-14 text-center md:p-24">
-          {/* Background radial */}
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(155,89,255,0.18),transparent_65%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(139,92,246,0.12),transparent_60%)]" />
 
           <div data-gsap="cta-inner" className="relative space-y-6">
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-accent">
-              Pronto para começar?
+              {t("cta.label")}
             </p>
             <h2 className="mx-auto max-w-2xl text-4xl font-extrabold text-white md:text-5xl lg:text-6xl">
-              Transforme sua ideia<br />em produto real
+              {t("cta.heading").split("\n").map((line, i) => (
+                <span key={line}>{line}{i === 0 && <br />}</span>
+              ))}
             </h2>
             <p className="mx-auto max-w-xl text-lg text-slate-300">
-              Converse com nossa equipe e receba um diagnóstico técnico gratuito.
+              {t("cta.subheading")}
             </p>
             <div>
               <a
                 href="#lead"
                 className="inline-block rounded-xl bg-linear-to-r from-violet-600 to-violet-500 px-10 py-4 text-lg font-bold text-white shadow-lg shadow-violet-500/20 transition-all hover:scale-105 hover:shadow-[0_0_50px_var(--accent-glow)]"
               >
-                Solicitar diagnóstico gratuito
+                {t("cta.button")}
               </a>
             </div>
           </div>
@@ -536,13 +577,13 @@ export default function HomeClient() {
         <div className="grid gap-14 md:grid-cols-2 md:items-start">
           <div data-gsap="lead-left">
             <h2 className="mb-4 text-3xl font-extrabold text-white md:text-4xl">
-              Envie seu briefing para o nosso time técnico e receba uma proposta
+              {t("lead.heading")}
             </h2>
             <p className="mb-8 text-slate-300">
-              Preencha em menos de 2 minutos. Qualificamos automaticamente via n8n, filtramos com os engenheiros da equipe e você recebe retorno rápido.
+              {t("lead.subheading")}
             </p>
             <ul className="space-y-3 text-sm text-slate-300">
-              {["Resposta no próximo dia útil", "Escopo com stack e prazo sugeridos", "Sem compromisso"].map((item) => (
+              {[t("lead.benefit1"), t("lead.benefit2"), t("lead.benefit3")].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-[10px] font-bold text-violet-400">
                     ✓
@@ -583,8 +624,8 @@ export default function HomeClient() {
             </svg>
           </a>
         </div>
-        <p>© 2026 Todos os direitos reservados.</p>
-        <p className="mt-2 text-slate-700">EUA&nbsp;|&nbsp;América Latina&nbsp;|&nbsp;Europa</p>
+        <p>{t("footer.rights")}</p>
+        <p className="mt-2 text-slate-700">{t("footer.regions")}</p>
       </footer>
 
     </div>
