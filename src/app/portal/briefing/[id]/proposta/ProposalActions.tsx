@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Props = Readonly<{
   proposalId: string;
@@ -14,10 +15,11 @@ export default function ProposalActions({ proposalId }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const t = useTranslations("briefing");
 
   async function act(action: "approve" | "request_revision") {
     if (action === "request_revision" && !note.trim()) {
-      setError("Por favor descreva as alterações que pretende.");
+      setError(t("revisionRequired"));
       return;
     }
     setLoading(true);
@@ -29,10 +31,10 @@ export default function ProposalActions({ proposalId }: Props) {
         body: JSON.stringify({ action, note }),
       });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) { setError(data.error ?? "Erro ao processar."); return; }
+      if (!res.ok) { setError(data.error ?? t("serverError")); return; }
       router.refresh();
     } catch {
-      setError("Erro de rede. Tente novamente.");
+      setError(t("networkError"));
     } finally {
       setLoading(false);
     }
@@ -41,9 +43,9 @@ export default function ProposalActions({ proposalId }: Props) {
   return (
     <div className="rounded-2xl border border-white/15 bg-white/5 p-6 space-y-5">
       <div>
-        <h2 className="text-base font-semibold text-white mb-1">A sua decisão</h2>
+        <h2 className="text-base font-semibold text-white mb-1">{t("decisionTitle")}</h2>
         <p className="text-sm text-slate-400">
-          Reveja a proposta com atenção. Pode aprovar para avançarmos ou pedir alterações.
+          {t("decisionDesc")}
         </p>
       </div>
 
@@ -58,7 +60,7 @@ export default function ProposalActions({ proposalId }: Props) {
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Descreva as alterações que pretende (ex: mudar prazo, remover funcionalidade X…)"
+            placeholder={t("revisionPlaceholder")}
             rows={4}
             className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
           />
@@ -69,7 +71,7 @@ export default function ProposalActions({ proposalId }: Props) {
               disabled={loading}
               className="flex-1 rounded-xl bg-orange-500 py-3 text-sm font-semibold text-white hover:bg-orange-400 transition disabled:opacity-50"
             >
-              {loading ? "A enviar…" : "Enviar pedido de revisão"}
+              {loading ? t("sending") : t("sendRevision")}
             </button>
             <button
               type="button"
@@ -77,7 +79,7 @@ export default function ProposalActions({ proposalId }: Props) {
               disabled={loading}
               className="rounded-xl border border-white/15 px-4 py-3 text-sm text-slate-400 hover:text-white transition"
             >
-              Cancelar
+              {t("cancel")}
             </button>
           </div>
         </div>
@@ -89,7 +91,7 @@ export default function ProposalActions({ proposalId }: Props) {
             disabled={loading}
             className="flex-1 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white hover:bg-emerald-400 transition disabled:opacity-50"
           >
-            {loading ? "…" : "✓ Aprovar proposta"}
+            {loading ? "…" : `✓ ${t("approve")}`}
           </button>
           <button
             type="button"
@@ -97,7 +99,7 @@ export default function ProposalActions({ proposalId }: Props) {
             disabled={loading}
             className="flex-1 rounded-xl border border-white/15 py-3 text-sm text-slate-300 hover:bg-white/10 transition disabled:opacity-50"
           >
-            Pedir alterações
+            {t("requestRevision")}
           </button>
         </div>
       )}

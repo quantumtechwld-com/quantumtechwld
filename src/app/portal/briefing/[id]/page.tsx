@@ -5,9 +5,9 @@ import Link from "next/link";
 import ScopeGenerator from "./ScopeGenerator";
 import type { GeneratedScope } from "@/app/api/briefing/scope/route";
 import {
-  BRIEFING_STATUS_LABEL as STATUS_LABEL,
   BRIEFING_STATUS_COLOR as STATUS_COLOR,
 } from "@/lib/constants";
+import { getTranslations } from "next-intl/server";
 
 type PageProps = Readonly<{ params: Promise<{ id: string }> }>;
 
@@ -32,6 +32,19 @@ export default async function BriefingDetailPage({ params }: PageProps) {
   }) as { status: string } | null;
   const proposalVisible = proposalRow && proposalRow.status !== "DRAFT";
 
+  const t = await getTranslations("briefing");
+  const tp = await getTranslations("portal");
+
+  const STATUS_LABEL: Record<string, string> = {
+    RECEIVED:       tp("statusReceived"),
+    IN_ANALYSIS:    tp("statusInAnalysis"),
+    PROPOSAL_SENT:  tp("statusProposalSent"),
+    IN_NEGOTIATION: tp("statusInNegotiation"),
+    APPROVED:       tp("statusApproved"),
+    IN_PROGRESS:    tp("statusInProgress"),
+    DELIVERED:      tp("statusDelivered"),
+  };
+
   const initialScope: GeneratedScope | null = scopeRow
     ? {
         features:        scopeRow.features,
@@ -51,17 +64,17 @@ export default async function BriefingDetailPage({ params }: PageProps) {
       {/* Navegação */}
       <div className="mb-8 flex items-center gap-3 text-sm text-slate-400">
         <Link href="/portal" className="hover:text-white transition">
-          Portal
+          {t("navPortal")}
         </Link>
         <span>/</span>
-        <span className="text-white">Briefing</span>
+        <span className="text-white">{t("navBriefing")}</span>
       </div>
 
       {/* Cabeçalho do briefing */}
       <div className="mb-8 rounded-2xl border border-white/15 bg-white/5 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Tipo de projeto</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldProjectType")}</p>
             <h1 className="text-2xl font-bold text-white">{briefing.projectType}</h1>
           </div>
           <span
@@ -73,22 +86,22 @@ export default async function BriefingDetailPage({ params }: PageProps) {
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Problema principal</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldPainPoints")}</p>
             <p className="text-sm text-slate-300">{briefing.painPoints}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Público-alvo</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldAudience")}</p>
             <p className="text-sm text-slate-300">{briefing.targetAudience}</p>
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4 text-sm">
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">Orçamento</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">{t("fieldBudget")}</p>
             <p className="text-white">{briefing.budget}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">Prazo</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">{t("fieldTimeline")}</p>
             <p className="text-white">{briefing.timeline}</p>
           </div>
 
@@ -109,12 +122,12 @@ export default async function BriefingDetailPage({ params }: PageProps) {
 
         {proposalVisible && (
           <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
-            <p className="text-sm text-slate-400">A sua proposta comercial está disponível.</p>
+            <p className="text-sm text-slate-400">{t("proposalAvailable")}</p>
             <Link
               href={`/portal/briefing/${id}/proposta`}
               className="rounded-xl bg-accent/15 px-4 py-2 text-sm font-medium text-accent-light hover:bg-accent/25 transition"
             >
-              Ver proposta →
+              {t("viewProposal")}
             </Link>
           </div>
         )}
@@ -124,9 +137,9 @@ export default async function BriefingDetailPage({ params }: PageProps) {
       <div>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-white">Escopo Técnico</h2>
+            <h2 className="text-xl font-semibold text-white">{t("scopeTitle")}</h2>
             <p className="text-sm text-slate-400 mt-0.5">
-              Gerado pelo Cérebro de Arquitetura (M2)
+              {t("scopeSubtitle")}
             </p>
           </div>
         </div>

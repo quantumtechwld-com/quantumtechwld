@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import ProposalActions from "./ProposalActions";
 import ProposalComments from "./ProposalComments";
+import { getTranslations, getLocale } from "next-intl/server";
 
 type PageProps = Readonly<{ params: Promise<{ id: string }> }>;
 
@@ -37,24 +38,25 @@ export default async function ProposalPage({ params }: PageProps) {
   } | null;
 
   if (!proposal || proposal.status === "DRAFT") {
+    const t = await getTranslations("briefing");
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-16">
         <div className="mb-8 flex items-center gap-3 text-sm text-slate-400">
-          <Link href="/portal" className="hover:text-white transition">Portal</Link>
+          <Link href="/portal" className="hover:text-white transition">{t("navPortal")}</Link>
           <span>/</span>
-          <Link href={`/portal/briefing/${id}`} className="hover:text-white transition">Briefing</Link>
+          <Link href={`/portal/briefing/${id}`} className="hover:text-white transition">{t("navBriefing")}</Link>
           <span>/</span>
-          <span className="text-white">Proposta</span>
+          <span className="text-white">{t("navProposal")}</span>
         </div>
         <div className="rounded-2xl border border-white/15 bg-white/5 p-10 text-center">
           <p className="text-slate-400">
-            A proposta ainda não está disponível. A nossa equipa irá preparar e enviar em breve.
+            {t("proposalNotAvailable")}
           </p>
           <Link
             href={`/portal/briefing/${id}`}
             className="mt-6 inline-flex rounded-xl border border-white/20 px-5 py-2.5 text-sm text-slate-300 hover:bg-white/10 transition"
           >
-            ← Voltar ao briefing
+            {t("backToBriefing")}
           </Link>
         </div>
       </main>
@@ -65,35 +67,38 @@ export default async function ProposalPage({ params }: PageProps) {
   const isRevision   = proposal.status === "REVISION";
   const canAct       = proposal.status === "SENT";
 
+  const t = await getTranslations("briefing");
+  const locale = await getLocale();
+
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
       {/* Breadcrumb */}
       <div className="mb-8 flex items-center gap-3 text-sm text-slate-400">
-        <Link href="/portal" className="hover:text-white transition">Portal</Link>
+        <Link href="/portal" className="hover:text-white transition">{t("navPortal")}</Link>
         <span>/</span>
         <Link href={`/portal/briefing/${id}`} className="hover:text-white transition">
           {briefing.projectType}
         </Link>
         <span>/</span>
-        <span className="text-white">Proposta</span>
+        <span className="text-white">{t("navProposal")}</span>
       </div>
 
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-bold text-white">Proposta Comercial</h1>
+          <h1 className="text-2xl font-bold text-white">{t("proposalTitle")}</h1>
           <span className="text-xs text-slate-500">v{proposal.version}</span>
         </div>
         {isApproved && (
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-300">
-            ✓ Proposta aprovada — a nossa equipa irá entrar em contacto para iniciar o projeto.
+          {t("proposalApproved")}
           </div>
         )}
         {isRevision && (
           <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-2.5 text-sm text-orange-300">
-            A sua revisão foi recebida. Estamos a preparar uma versão atualizada.
+            {t("proposalRevision")}
             {proposal.clientNote && (
-              <p className="mt-1 text-xs text-orange-200/70">Nota enviada: &ldquo;{proposal.clientNote}&rdquo;</p>
+              <p className="mt-1 text-xs text-orange-200/70">{t("proposalRevisionNote")} &ldquo;{proposal.clientNote}&rdquo;</p>
             )}
           </div>
         )}
@@ -102,32 +107,32 @@ export default async function ProposalPage({ params }: PageProps) {
       {/* Métricas */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
-          <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Horas</p>
+          <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldHours")}</p>
           <p className="text-2xl font-bold text-white">{proposal.hoursTotal}h</p>
         </div>
         <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
-          <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Investimento</p>
+          <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldInvestment")}</p>
           <p className="text-lg font-bold text-white">
             €{proposal.costMin.toLocaleString("pt-PT")}–{proposal.costMax.toLocaleString("pt-PT")}
           </p>
         </div>
         <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
-          <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Data</p>
+          <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">{t("fieldDate")}</p>
           <p className="text-sm text-white">
-            {new Date(proposal.createdAt).toLocaleDateString("pt-PT", { day: "2-digit", month: "long" })}
+            {new Date(proposal.createdAt).toLocaleDateString(locale, { day: "2-digit", month: "long" })}
           </p>
         </div>
       </div>
 
       {/* Sumário */}
       <div className="mb-8 rounded-2xl border border-white/15 bg-white/5 p-6">
-        <p className="text-xs uppercase tracking-widest text-slate-500 mb-2">Sumário executivo</p>
+        <p className="text-xs uppercase tracking-widest text-slate-500 mb-2">{t("fieldSummary")}</p>
         <p className="text-slate-200 leading-relaxed">{proposal.summary}</p>
       </div>
 
       {/* Conteúdo completo */}
       <div className="mb-8 rounded-2xl border border-white/15 bg-white/5 p-6">
-        <p className="text-xs uppercase tracking-widest text-slate-500 mb-4">Proposta completa</p>
+        <p className="text-xs uppercase tracking-widest text-slate-500 mb-4">{t("fieldFullProposal")}</p>
         <div className="prose prose-invert prose-sm max-w-none">
           <pre className="text-sm text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
             {proposal.content}

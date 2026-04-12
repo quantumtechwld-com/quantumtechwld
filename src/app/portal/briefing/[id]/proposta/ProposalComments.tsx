@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 type CommentAuthor = {
   name: string | null;
@@ -30,6 +31,8 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showResolved, setShowResolved] = useState(false);
+  const t = useTranslations("briefing");
+  const locale = useLocale();
 
   const load = useCallback(async () => {
     try {
@@ -58,18 +61,18 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
       try {
         data = (await res.json()) as { comment?: Comment; error?: string };
       } catch {
-        setError(`Erro do servidor (${res.status}). Tente novamente.`);
+        setError(t("serverError", { status: res.status }));
         return;
       }
-      if (!res.ok) { setError((data.detail ?? data.error) ?? "Erro ao enviar comentário."); return; }
-      if (!data.comment) { setError("Resposta inesperada do servidor."); return; }
+      if (!res.ok) { setError((data.detail ?? data.error) ?? t("commentError")); return; }
+      if (!data.comment) { setError(t("unexpectedResponse")); return; }
       const newComment = data.comment;
       setComments(prev => [...prev, newComment]);
       setBody("");
       setExcerpt("");
     } catch (err) {
       console.error("[ProposalComments submit]", err);
-      setError("Erro de rede. Verifique a ligação e tente novamente.");
+      setError(t("networkError"));
     } finally {
       setSubmitting(false);
     }
@@ -92,10 +95,10 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-          Comentários
+          {t("commentsTitle")}
           {comments.length > 0 && (
             <span className="ml-2 rounded-full bg-white/10 px-1.5 py-0.5 text-xs font-normal">
-              {comments.filter(c => !c.resolved).length} abertos
+              {comments.filter(c => !c.resolved).length} {t("commentsOpen")}
             </span>
           )}
         </h3>
@@ -105,18 +108,18 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
             onClick={() => setShowResolved(!showResolved)}
             className="text-xs text-white/30 hover:text-white/60 transition"
           >
-            {showResolved ? "Ocultar resolvidos" : "Ver resolvidos"}
+            {showResolved ? t("hideResolved") : t("showResolved")}
           </button>
         )}
       </div>
 
       {loading ? (
-        <p className="text-xs text-white/30">A carregar…</p>
+        <p className="text-xs text-white/30">{t("loading")}</p>
       ) : (
         <div className="space-y-2">
           {visible.length === 0 && (
             <p className="text-xs text-white/25 text-center py-4">
-              Nenhum comentário ainda.
+              {t("noComments")}
             </p>
           )}
           {visible.map(c => (
@@ -140,7 +143,7 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
                     {c.author.name ?? c.author.email}
                   </span>
                   <span className="text-xs text-white/20">
-                    {new Date(c.createdAt).toLocaleDateString("pt-PT")}
+                    {new Date(c.createdAt).toLocaleDateString(locale)}
                   </span>
                 </div>
                 {isAdmin && !c.resolved && (
@@ -149,11 +152,11 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
                     onClick={() => void resolve(c.id)}
                     className="text-xs text-white/30 hover:text-emerald-400 transition"
                   >
-                    ✓ Resolver
+                    ✓ {t("resolve")}
                   </button>
                 )}
                 {c.resolved && (
-                  <span className="text-xs text-emerald-500/50">Resolvido</span>
+                  <span className="text-xs text-emerald-500/50">{t("resolved")}</span>
                 )}
               </div>
             </div>
@@ -166,7 +169,7 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
         <div>
           <input
             type="text"
-            placeholder="Citar um trecho (opcional)"
+            placeholder={t("commentExcerptPlaceholder")}
             value={excerpt}
             onChange={e => setExcerpt(e.target.value)}
             className="w-full rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-xs text-white/60 placeholder:text-white/20 focus:outline-none focus:border-accent/40"
@@ -175,7 +178,7 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
         <div className="flex gap-2">
           <textarea
             rows={2}
-            placeholder="Adicionar comentário…"
+            placeholder={t("commentBodyPlaceholder")}
             value={body}
             onChange={e => setBody(e.target.value)}
             className="flex-1 rounded-lg bg-white/5 border border-white/8 px-3 py-1.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/40 resize-none"
@@ -185,7 +188,7 @@ export default function ProposalComments({ proposalId, isAdmin }: Props) {
             disabled={submitting || !body.trim()}
             className="self-end rounded-lg bg-white/10 px-3 py-2 text-xs text-white/60 hover:bg-white/15 hover:text-white transition disabled:opacity-40"
           >
-            {submitting ? "…" : "Enviar"}
+            {submitting ? t("commentSubmitting") : t("commentSubmit")}
           </button>
         </div>
         {error && <p className="text-xs text-red-400">{error}</p>}
