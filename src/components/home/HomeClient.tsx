@@ -156,27 +156,29 @@ export default function HomeClient() {
         data-gsap="nav"
         className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#050816]/90 backdrop-blur-md"
       >
-        <nav aria-label="Navegação principal" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5">
+        <nav aria-label="Navegação principal" className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 md:h-16 md:py-0">
+          <div className="flex min-w-0 items-center gap-2.5">
             <LogoAnimated size={34} />
-            <LogoTextAnimated />
+            <div className="min-w-0 max-[380px]:hidden">
+              <LogoTextAnimated />
+            </div>
           </div>
           <div className="hidden items-center gap-8 text-sm font-bold text-slate-300 md:flex">
             <a href="#services" className="transition-colors hover:text-white">{t("nav.services")}</a>
             <a href="#portfolio" className="transition-colors hover:text-white">{t("nav.projects")}</a>
             <a href="#lead" className="transition-colors hover:text-white">{t("nav.contact")}</a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <LangSwitcher current={locale} />
             <a
               href="/portal"
-              className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-slate-300 transition-all hover:border-white/30 hover:text-white"
+              className="rounded-lg border border-white/15 px-3 py-2 text-xs font-bold text-slate-300 transition-all hover:border-white/30 hover:text-white sm:px-4 sm:text-sm"
             >
               {t("nav.clientArea")}
             </a>
             <a
               href="#lead"
-              className="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-accent-light hover:shadow-[0_0_20px_var(--accent-glow)]"
+              className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-light hover:shadow-[0_0_20px_var(--accent-glow)] sm:px-5 sm:text-sm"
             >
               {t("nav.talkToUs")}
             </a>

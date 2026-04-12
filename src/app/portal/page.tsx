@@ -52,38 +52,40 @@ export default async function PortalPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <div className="mb-10 flex items-center justify-between">
-        <div>
+      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <p className="text-sm uppercase tracking-widest text-accent-light">{t("tagline")}</p>
           <h1 className="mt-1 text-3xl font-bold text-white">{t("heading")}</h1>
-          <p className="mt-1 text-sm text-slate-400">{session.user.email}</p>
+          <p className="mt-1 truncate text-sm text-slate-400">{session.user.email}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/portal/orders"
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-          >
-            {t("navOrders")}
-          </Link>
-          <Link
-            href="/portal/biblioteca"
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-          >
-            {t("navLibrary")}
-          </Link>
-          <Link
-            href="/portal/guide"
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-          >
-            {t("navGuide")}
-          </Link>
-          <Link
-            href="/portal/profile"
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-          >
-            {t("navProfile")}
-          </Link>
-          <SignOutButton className="rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" label={t("profileSignOut")} />
+        <div className="-mx-1 overflow-x-auto pb-1 sm:mx-0 sm:overflow-visible sm:pb-0">
+          <div className="flex min-w-max items-center gap-2 px-1 sm:min-w-0 sm:flex-wrap sm:justify-end sm:px-0">
+            <Link
+              href="/portal/orders"
+              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+            >
+              {t("navOrders")}
+            </Link>
+            <Link
+              href="/portal/biblioteca"
+              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+            >
+              {t("navLibrary")}
+            </Link>
+            <Link
+              href="/portal/guide"
+              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+            >
+              {t("navGuide")}
+            </Link>
+            <Link
+              href="/portal/profile"
+              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+            >
+              {t("navProfile")}
+            </Link>
+            <SignOutButton className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" label={t("profileSignOut")} />
+          </div>
         </div>
       </div>
 
