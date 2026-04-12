@@ -111,7 +111,7 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem explicaçõ
 }`;
 
   const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -119,8 +119,7 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem explicaçõ
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 8192,
-          thinkingConfig: { thinkingBudget: 0 },
+          maxOutputTokens: 2048,
         },
       }),
     }
@@ -129,7 +128,13 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem explicaçõ
   if (!geminiRes.ok) {
     const errBody = await geminiRes.text().catch(() => "");
     console.error("Gemini error:", geminiRes.status, errBody);
-    return NextResponse.json({ error: "Erro ao chamar Gemini." }, { status: 502 });
+    return NextResponse.json(
+      {
+        error: "Erro ao chamar Gemini.",
+        detail: process.env.NODE_ENV === "production" ? undefined : errBody,
+      },
+      { status: 502 },
+    );
   }
 
   const geminiJson = await geminiRes.json() as {
