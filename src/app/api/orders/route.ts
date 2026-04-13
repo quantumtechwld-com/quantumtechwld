@@ -7,7 +7,7 @@ import { generateOrderRefCandidates } from "@/lib/order-ref";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 
-const VALID_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other"] as const;
+const VALID_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other", "contact"] as const;
 const VALID_URGENCIES = ["low", "normal", "high", "critical"] as const;
 
 /** Persiste o primeiro orderRef candidato que não viole a constraint UNIQUE. */

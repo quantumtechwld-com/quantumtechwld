@@ -8,8 +8,15 @@ export default async function AuthErrorPage({
   searchParams,
 }: Readonly<{ searchParams: SearchParams }>) {
   const sp = await searchParams;
+  const reason = sp.reason;
   const errorKey = sp.error ?? "Default";
   const t = await getTranslations("portal");
+
+  const reasonErrors: Record<string, { title: string; body: string }> = {
+    pending: { title: t("erroPendingTitle"), body: t("erroPendingBody") },
+    suspended: { title: t("erroSuspendedTitle"), body: t("erroSuspendedBody") },
+    "access-denied": { title: t("erroAccessDeniedTitle"), body: t("erroAccessDeniedBody") },
+  };
 
   const errors: Record<string, { title: string; body: string }> = {
     Verification:  { title: t("erroVerificationTitle"),  body: t("erroVerificationBody") },
@@ -18,7 +25,7 @@ export default async function AuthErrorPage({
     Default:       { title: t("erroDefaultTitle"),       body: t("erroDefaultBody") },
   };
 
-  const { title, body } = errors[errorKey] ?? errors.Default;
+  const { title, body } = (reason ? reasonErrors[reason] : undefined) ?? errors[errorKey] ?? errors.Default;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
@@ -28,12 +35,22 @@ export default async function AuthErrorPage({
         </div>
         <h1 className="text-2xl font-bold text-white mb-2">{title}</h1>
         <p className="text-slate-300 text-sm mb-6">{body}</p>
-        <Link
-          href="/portal/login"
-          className="inline-flex rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
-        >
-          {t("erroBackBtn")}
-        </Link>
+        <div className="flex flex-col items-center gap-3">
+          <Link
+            href="/portal/login"
+            className="inline-flex rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+          >
+            {t("erroBackBtn")}
+          </Link>
+          {(reason === "pending" || reason === "suspended") && (
+            <Link
+              href="/portal/contato"
+              className="text-sm text-slate-400 hover:text-accent transition-colors"
+            >
+              {t("navContact")}
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   );

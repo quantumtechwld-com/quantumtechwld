@@ -1,5 +1,20 @@
 import type { NextAuthConfig } from "next-auth";
 
+function getStatusRedirect(
+  user: Record<string, unknown> | undefined,
+  origin: string,
+  allowPendingAdmin = false,
+) {
+  if (!user) return null;
+  if (user.status === "PENDING" && !(allowPendingAdmin && user.role === "ADMIN")) {
+    return Response.redirect(`${origin}/portal/erro?reason=pending`);
+  }
+  if (user.status === "SUSPENDED") {
+    return Response.redirect(`${origin}/portal/erro?reason=suspended`);
+  }
+  return null;
+}
+
 /**
  * Configuração edge-safe para uso no middleware (sem PrismaAdapter).
  * Usa JWT strategy para que o middleware possa ler o cookie de sessão.
@@ -31,7 +46,7 @@ export const authConfig = {
         ?.nextUrl?.origin ?? "";
 
       // Páginas públicas do portal — sempre acessíveis
-      const isPublicPortal = ["/portal/login", "/portal/verificar", "/portal/erro"]
+      const isPublicPortal = ["/portal/login", "/portal/verificar", "/portal/erro", "/portal/contato"]
         .some((p) => pathname.startsWith(p));
       if (isPublicPortal) return true;
 
@@ -39,15 +54,17 @@ export const authConfig = {
 
       // /admin — apenas ADMIN
       if (pathname.startsWith("/admin")) {
+        if (!user) return false;
+        const statusRedirect = getStatusRedirect(user, origin);
+        if (statusRedirect) return statusRedirect;
         return user?.role === "ADMIN";
       }
 
       // /portal protegido — requer sessão e status ACTIVE
       if (pathname.startsWith("/portal")) {
         if (!user) return false;
-        if (user.status === "PENDING" && user.role !== "ADMIN") {
-          return Response.redirect(`${origin}/portal/erro?reason=pending`);
-        }
+        const statusRedirect = getStatusRedirect(user, origin, true);
+        if (statusRedirect) return statusRedirect;
         return true;
       }
 

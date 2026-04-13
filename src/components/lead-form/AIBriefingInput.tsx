@@ -52,7 +52,7 @@ export default function AIBriefingInput({
           type="button"
           disabled={!aiText.trim() || aiLoading}
           onClick={onAnalyze}
-          className="flex-1 rounded-xl bg-[var(--accent)] py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-light)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-50"
         >
           {aiLoading ? t("btnAnalyzing") : t("btnAnalyze")}
         </button>

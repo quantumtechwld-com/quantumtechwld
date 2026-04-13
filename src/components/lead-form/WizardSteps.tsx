@@ -39,10 +39,10 @@ function StepProjectType({ data, set }: StepProps) {
         >
           <span className="text-accent">{PROJECT_TYPE_ICONS[value]}</span>
           <p className="mt-2 font-semibold text-white">
-            {t(`project${value.charAt(0).toUpperCase() + value.slice(1)}` as Parameters<typeof t>[0])}
+            {t(`project${value.charAt(0).toUpperCase() + value.slice(1)}`)}
           </p>
           <p className="mt-1 text-xs leading-snug text-slate-300">
-            {t(`project${value.charAt(0).toUpperCase() + value.slice(1)}Desc` as Parameters<typeof t>[0])}
+            {t(`project${value.charAt(0).toUpperCase() + value.slice(1)}Desc`)}
           </p>
         </button>
       ))}
@@ -108,7 +108,7 @@ function StepFeatures({ data, set }: StepProps) {
                   : "border-white/30"
               }`}
             />
-            {t(`feature${fKey.charAt(0).toUpperCase() + fKey.slice(1)}` as Parameters<typeof t>[0])}
+            {t(`feature${fKey.charAt(0).toUpperCase() + fKey.slice(1)}`)}
           </label>
         ))}
       </div>
@@ -135,8 +135,14 @@ function StepBudgetTimeline({ data, set }: StepProps) {
         <p className="mb-2 text-sm text-slate-300">{t("budgetLabel")}</p>
         <div className="grid grid-cols-2 gap-2">
           {BUDGET_KEYS.map((bKey) => {
-            const labelKey = `budget${bKey === "under3k" ? "Under3k" : bKey === "3k-8k" ? "3k8k" : bKey === "8k-20k" ? "8k20k" : "Over20k"}` as Parameters<typeof t>[0];
-            const subKey = `${labelKey}Sub` as Parameters<typeof t>[0];
+            const BUDGET_SUFFIX: Record<string, string> = {
+              "under3k": "Under3k",
+              "3k-8k":   "3k8k",
+              "8k-20k":  "8k20k",
+              "over20k": "Over20k",
+            };
+            const labelKey = `budget${BUDGET_SUFFIX[bKey] ?? "Over20k"}`;
+            const subKey = `${labelKey}Sub`;
             return (
               <button
                 key={bKey}
@@ -159,8 +165,8 @@ function StepBudgetTimeline({ data, set }: StepProps) {
         <p className="mb-2 text-sm text-slate-300">{t("timelineLabel")}</p>
         <div className="grid grid-cols-2 gap-2">
           {TIMELINE_KEYS.map((tlKey) => {
-            const labelKey = `timeline${tlKey.charAt(0).toUpperCase() + tlKey.slice(1)}` as Parameters<typeof t>[0];
-            const subKey = `${labelKey}Sub` as Parameters<typeof t>[0];
+            const labelKey = `timeline${tlKey.charAt(0).toUpperCase() + tlKey.slice(1)}`;
+            const subKey = `${labelKey}Sub`;
             return (
               <button
                 key={tlKey}

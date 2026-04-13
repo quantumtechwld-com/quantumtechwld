@@ -26,6 +26,12 @@ export default function AdminHeader() {
           >
             Pedidos
           </Link>
+          <Link
+            href="/admin/contacts"
+            className="text-sm text-white/50 hover:text-white/80 transition-colors"
+          >
+            Contatos
+          </Link>
           <SignOutButton className="text-sm text-white/40 hover:text-red-400 transition-colors" />
         </div>
       </div>

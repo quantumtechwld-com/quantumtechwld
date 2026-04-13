@@ -84,6 +84,12 @@ export default async function PortalPage() {
             >
               {t("navProfile")}
             </Link>
+            <Link
+              href="/portal/contato"
+              className="whitespace-nowrap rounded-xl border border-accent/40 bg-accent/10 px-4 py-2 text-sm text-accent-light transition hover:bg-accent/20"
+            >
+              {t("navContact")}
+            </Link>
             <SignOutButton className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" label={t("profileSignOut")} />
           </div>
         </div>
@@ -131,12 +137,20 @@ export default async function PortalPage() {
       {briefings.length === 0 ? (
         <div className="rounded-2xl border border-white/15 bg-white/5 p-8 text-center">
           <p className="text-slate-400">{t("emptyState")}</p>
-          <Link
-            href="/#lead"
-            className="mt-4 inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
-          >
-            {t("submitBriefing")}
-          </Link>
+          <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/#lead"
+              className="inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+            >
+              {t("submitBriefing")}
+            </Link>
+            <Link
+              href="/portal/contato"
+              className="inline-flex rounded-xl border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm font-semibold text-accent-light transition hover:bg-accent/20"
+            >
+              {t("navContact")}
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid gap-4">

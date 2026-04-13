@@ -23,6 +23,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      const candidateEmail = user.email?.toLowerCase().trim();
+
+      if (!candidateEmail) return true;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { email: candidateEmail },
+        select: { status: true },
+      });
+
+      if (!dbUser) {
+        return "/portal/erro?reason=access-denied";
+      }
+
+      if (dbUser.status === "PENDING") {
+        return "/portal/erro?reason=pending";
+      }
+
+      if (dbUser.status === "SUSPENDED") {
+        return "/portal/erro?reason=suspended";
+      }
+
+      return true;
+    },
     // Chamado ao criar/renovar o JWT. `user` só existe no momento do signin.
     async jwt({ token, user }) {
       if (user) {

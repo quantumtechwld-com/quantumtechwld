@@ -290,3 +290,16 @@ model OrderRating {
   comment   String?  @db.Text
   createdAt DateTime @default(now())
 }
+
+// ─── Mensagens públicas (sem login) ─────────────────────────────────────────
+
+/// Mensagem de contato enviada pelo formulário público (sem autenticação).
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

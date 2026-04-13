@@ -17,22 +17,19 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMsg("");
     try {
-      await sendMagicLink(email);
-      setSent(true);
-    } catch (err: unknown) {
-      if (err && typeof err === "object" && "digest" in err) {
-        return;
-      }
-      const msg = err instanceof Error ? err.message : "";
-      if (msg === "NOT_FOUND") {
-        setErrorMsg(t("loginErrNotFound"));
-      } else if (msg === "PENDING") {
-        setErrorMsg(t("loginErrPending"));
-      } else if (msg === "SUSPENDED") {
-        setErrorMsg(t("loginErrSuspended"));
+      const result = await sendMagicLink(email);
+      if (result.ok) {
+        setSent(true);
       } else {
-        setErrorMsg(t("loginErrGeneric"));
+        const codeMap: Record<string, string> = {
+          NOT_FOUND: t("loginErrNotFound"),
+          PENDING:   t("loginErrPending"),
+          SUSPENDED: t("loginErrSuspended"),
+        };
+        setErrorMsg(codeMap[result.code] ?? t("loginErrGeneric"));
       }
+    } catch {
+      setErrorMsg(t("loginErrGeneric"));
     } finally {
       setLoading(false);
     }
@@ -68,9 +65,17 @@ export default function LoginPage() {
                 className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white placeholder:text-slate-400 outline-none focus:border-accent w-full"
               />
               {errorMsg && (
-                <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-                  {errorMsg}
-                </p>
+                <div>
+                  <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                    {errorMsg}
+                  </p>
+                  <a
+                    href="/portal/contato"
+                    className="mt-2 block text-center text-xs text-accent hover:text-accent-light transition-colors"
+                  >
+                    {t("loginContactLink")}
+                  </a>
+                </div>
               )}
               <button
                 type="submit"
