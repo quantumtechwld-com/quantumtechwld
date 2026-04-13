@@ -30,6 +30,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Exclui arquivos estáticos e internos do Next.js
+  // NOTA: String.raw não pode ser usado aqui — o matcher exige literal de string
+  // para análise estática do Turbopack (String.raw causaria "Invalid segment configuration")
   matcher: [
     "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
   ],

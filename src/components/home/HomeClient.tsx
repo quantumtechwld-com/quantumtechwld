@@ -599,12 +599,6 @@ export default function HomeClient() {
                 </li>
               ))}
             </ul>
-            <a
-              href="/portal/contato"
-              className="mt-6 inline-block text-sm text-slate-400 hover:text-accent transition-colors"
-            >
-              {t("lead.quickContact")}
-            </a>
           </div>
           <div data-gsap="lead-form">
             <LeadForm />
