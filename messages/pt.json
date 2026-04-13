@@ -54,7 +54,8 @@
     "architectureTitle": "Arquitetura & Design",
     "architectureDesc": "Definimos stack, escopo técnico e cronograma com wireframes de alta fidelidade.",
     "deliveryTitle": "Entrega Contínua",
-    "deliveryDesc": "Deploys incrementais com feedback constante, monitoramento e suporte dedicado."
+    "deliveryDesc": "Deploys incrementais com feedback constante, monitoramento e suporte dedicado.",
+    "dashboardNote": "Após sua aprovação de proposta, acompanhe todo o desenvolvimento do projeto em tempo real pelo dashboard."
   },
   "portfolio": {
     "label": "Cases recentes",

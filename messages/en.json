@@ -54,7 +54,8 @@
     "architectureTitle": "Architecture & Design",
     "architectureDesc": "We define the stack, technical scope and timeline with high-fidelity wireframes.",
     "deliveryTitle": "Continuous Delivery",
-    "deliveryDesc": "Incremental deploys with constant feedback, monitoring and dedicated support."
+    "deliveryDesc": "Incremental deploys with constant feedback, monitoring and dedicated support.",
+    "dashboardNote": "After your proposal is approved, track the entire project development in real time through the dashboard."
   },
   "portfolio": {
     "label": "Recent cases",

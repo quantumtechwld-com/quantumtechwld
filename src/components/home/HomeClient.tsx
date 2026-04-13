@@ -477,6 +477,11 @@ export default function HomeClient() {
             </div>
           ))}
         </div>
+        <div className="mt-10 rounded-2xl border border-accent/20 bg-accent/5 px-5 py-4 text-center">
+          <p className="text-sm font-medium leading-relaxed text-slate-200 md:text-base">
+            {t("process.dashboardNote")}
+          </p>
+        </div>
       </section>
 
       {/* ── PORTFOLIO ─────────────────────────────────────────────────────── */}
