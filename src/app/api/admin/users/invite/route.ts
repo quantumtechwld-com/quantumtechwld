@@ -99,15 +99,24 @@ export async function POST(request: NextRequest) {
     create: { email, name, status: "ACTIVE", role: "CLIENT" },
   });
 
-  // Gera token de verificação compatível com NextAuth (token raw na URL e no DB)
+  // Gera token de verificação compatível com NextAuth v5
+  // NextAuth v5 armazena SHA-256(rawToken + AUTH_SECRET) no DB mas envia o rawToken na URL.
+  // Se armazenarmos o rawToken diretamente, o callback faz hash e não encontra → "token expirado".
   const rawToken = randomBytes(32).toString("hex");
   const expires  = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+  // Hash idêntico ao que o Auth.js v5 produz internamente
+  const msgData    = new TextEncoder().encode(`${rawToken}${process.env.AUTH_SECRET ?? ""}`);
+  const hashBuffer = await globalThis.crypto.subtle.digest("SHA-256", msgData);
+  const hashedToken = Buffer.from(hashBuffer).toString("hex");
 
   // Remove tokens anteriores para este email (evitar conflito de unique constraint)
   await prisma.verificationToken.deleteMany({ where: { identifier: email } });
 
+  // Armazena o hash (não o rawToken) — NextAuth v5 faz SHA-256(token+secret) no callback
+  // e compara com o que está no DB. Se guardássemos o rawToken, o lookup falharia.
   await prisma.verificationToken.create({
-    data: { identifier: email, token: rawToken, expires },
+    data: { identifier: email, token: hashedToken, expires },
   });
 
   const baseUrl   = process.env.NEXTAUTH_URL ?? "https://quantumtechwld.com";
