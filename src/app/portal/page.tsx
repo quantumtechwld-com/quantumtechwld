@@ -84,12 +84,6 @@ export default async function PortalPage() {
             >
               {t("navProfile")}
             </Link>
-            <Link
-              href="/portal/contato"
-              className="whitespace-nowrap rounded-xl border border-accent/40 bg-accent/10 px-4 py-2 text-sm text-accent-light transition hover:bg-accent/20"
-            >
-              {t("navContact")}
-            </Link>
             <SignOutButton className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" label={t("profileSignOut")} />
           </div>
         </div>
@@ -143,12 +137,6 @@ export default async function PortalPage() {
               className="inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
             >
               {t("submitBriefing")}
-            </Link>
-            <Link
-              href="/portal/contato"
-              className="inline-flex rounded-xl border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm font-semibold text-accent-light transition hover:bg-accent/20"
-            >
-              {t("navContact")}
             </Link>
           </div>
         </div>
