@@ -2,6 +2,8 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Nodemailer from "next-auth/providers/nodemailer";
 import { prisma } from "@/lib/prisma";
+import { sendMail } from "@/lib/email";
+import { buildInviteEmail, type InviteLocale } from "@/lib/email-templates/invite";
 import { authConfig } from "@/auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -20,6 +22,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
       },
       from: process.env.EMAIL_FROM,
+      sendVerificationRequest: async ({ identifier, url }) => {
+        // Extrai o locale do parâmetro invite_locale embutido no callbackUrl do magic link.
+        // Convites do admin: callbackUrl = /portal?invite_locale=pt|en|es
+        // Login normal: callbackUrl = /portal ou /admin (sem invite_locale)
+        let locale: InviteLocale | null = null;
+        try {
+          const urlObj = new URL(url);
+          const cb = decodeURIComponent(urlObj.searchParams.get("callbackUrl") ?? "");
+          const cbUrl = new URL(cb, url);
+          const l = cbUrl.searchParams.get("invite_locale");
+          if (l === "pt" || l === "en" || l === "es") locale = l;
+        } catch {
+          // fallback: login simples
+        }
+
+        if (locale === null) {
+          // Fluxo de login normal: e-mail simples de acesso
+          const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#0a0a0f">
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:32px auto;background:#0f0f14;color:#e2e8f0;padding:40px;border-radius:16px;border:1px solid #ffffff15">
+  <p style="color:#0ea5e9;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0 0 16px">Quantum Tech</p>
+  <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0 0 16px">Seu link de acesso</h1>
+  <p style="color:#e2e8f0;margin:0 0 8px;font-size:14px">Clique no botão abaixo para acessar o portal. O link expira em <strong>24 horas</strong>.</p>
+  <a href="${url}" style="display:inline-block;background:#0ea5e9;color:#ffffff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px;margin-top:20px">
+    Acessar o Portal →
+  </a>
+  <hr style="border:none;border-top:1px solid #ffffff10;margin:32px 0">
+  <p style="color:#475569;font-size:12px;margin:0">Se não solicitou este acesso, pode ignorar este e-mail.</p>
+</div>
+</body></html>`;
+          const text = `Seu link de acesso ao Portal Quantum Tech:\n\n${url}\n\nO link expira em 24 horas.\n\nSe não solicitou este acesso, ignore este e-mail.`;
+          await sendMail({ to: identifier, subject: "Seu link de acesso — Portal Quantum Tech", html, text });
+        } else {
+          // Fluxo de convite: e-mail personalizado com nome e idioma
+          const dbUser = await prisma.user.findUnique({
+            where: { email: identifier },
+            select: { name: true },
+          });
+          const { html, text, subject } = buildInviteEmail(dbUser?.name ?? null, url, locale);
+          await sendMail({ to: identifier, subject, html, text });
+        }
+      },
     }),
   ],
   callbacks: {
