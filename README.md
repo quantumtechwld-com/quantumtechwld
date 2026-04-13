@@ -11,6 +11,9 @@ Landing page + sistema DevFlow para agência de desenvolvimento de software.
 | S4 | Portal do cliente com magic-link auth | ✅ |
 | S5 | Briefing Intelligence — análise de texto livre com Gemini | ✅ |
 | S6 | Similar Projects Library — embeddings + busca semântica | ✅ |
+| S7 | Conversão cambial real (EUR→BRL/USD) via frankfurter.app | ✅ |
+| S8 | E-mails de convite multilíngues (PT/EN/ES) com seletor de idioma no admin | ✅ |
+| S9 | Magic link reescrito com Auth.js nativo — sem hash manual | ✅ |
 
 ## Executar localmente
 
@@ -136,3 +139,23 @@ qualquer mudança em cobrança deve preservar consistência entre proposta, chec
 - Schema em: `prisma/schema.prisma`
 
 > **Segurança:** Credenciais e chaves de API NUNCA devem ser commitadas. Use `.env.local` localmente e GitHub Secrets em produção.
+
+## Fluxo de convite de clientes
+
+O admin acessa `/admin/users`, preenche nome, e-mail e idioma (🇧🇷/🇺🇸/🇪🇸) e clica em **Convidar**.
+
+1. `POST /api/admin/users/invite` cria ou reativa o usuário como `ACTIVE`.
+2. Auth.js (`signIn("nodemailer", { redirect: false })`) gera o token, faz hash, persiste no DB e chama `sendVerificationRequest`.
+3. `sendVerificationRequest` (em `src/auth.ts`) detecta o parâmetro `invite_locale` no `callbackUrl`, busca o nome do usuário no banco e envia o e-mail personalizado no idioma correto.
+4. Login normal (página `/portal/login`) também usa `sendVerificationRequest`, mas recebe um e-mail simples (sem `invite_locale` → template diferente).
+
+> **Por que Auth.js nativo?** Qualquer implementação manual de token cria risco de incompatibilidade de hash entre geração e validação. O Auth.js internamente usa `SHA256(rawToken + AUTH_SECRET)` — ao delegar para `signIn()`, esse detalhe fica encapsulado e imune a mudanças de versão.
+
+## Templates de e-mail
+
+| Arquivo | Finalidade |
+|---|---|
+| `src/lib/email-templates/invite.ts` | Templates multilíngues de convite (PT/EN/ES) |
+| `src/lib/email-templates/orders.ts` | Notificações de pedido |
+| `src/lib/email-templates/payments.ts` | Notificações de pagamento |
+| `src/lib/email-templates/proposal.ts` | Envio de proposta |
