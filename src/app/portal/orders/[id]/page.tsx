@@ -7,7 +7,7 @@ import { OrderClientActions } from "./OrderClientActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import { PayOrderButton } from "./PayOrderButton";
 import { RatingWidget } from "./RatingWidget";
-import { formatCurrencyByLocale } from "@/lib/currency";
+import { convertAndFormatByLocale, getCurrencyForLocale } from "@/lib/currency";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -45,6 +45,12 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   const t = await getTranslations("portal");
   const locale = await getLocale();
+
+  // Valor estimado convertido para a moeda do locale (câmbio em tempo real, cache 1 h)
+  const estimatedFormatted = order.estimatedValue == null
+    ? null
+    : await convertAndFormatByLocale(Number(order.estimatedValue), "EUR", locale);
+  const isConverted = getCurrencyForLocale(locale) !== "EUR";
   const orderTypeLabel = (type: string) => {
     const keyMap: Record<string, string> = {
       new_feature: "orderTypeNewFeature",
@@ -155,12 +161,13 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
               <h2 className="text-xs font-semibold uppercase tracking-widest text-accent mb-3">
                 {t("orderProposalTitle")}
               </h2>
-              {order.estimatedValue != null && (
+              {estimatedFormatted && (
                 <p className="mb-2 text-sm text-slate-300">
                   <span className="text-slate-500">{t("orderEstValue")} </span>
-                  <span className="font-semibold text-white">
-                    {formatCurrencyByLocale(Number(order.estimatedValue), locale)}
-                  </span>
+                  <span className="font-semibold text-white">{estimatedFormatted}</span>
+                  {isConverted && (
+                    <span className="ml-1 text-xs text-slate-500">(aprox.)</span>
+                  )}
                 </p>
               )}
               <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.productionInfo}</p>

@@ -4,24 +4,76 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail } from "@/lib/email";
 
-function buildInviteEmail(name: string | null, magicLink: string) {
-  const displayName = name ? `Olá ${name}` : "Olá";
-  return `
-<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
-  <h1 style="color:#ffffff;margin-bottom:8px">Bem-vindo ao Portal Quantum</h1>
-  <p style="color:#94a3b8;margin-bottom:24px">${displayName}, a sua conta foi criada e está pronta para acesso.</p>
-  <p style="color:#e2e8f0;margin-bottom:24px">
-    Clique no botão abaixo para entrar no portal. O link expira em <strong>24 horas</strong>.
-  </p>
+type InviteLocale = "pt" | "en" | "es";
+
+const INVITE_COPY: Record<InviteLocale, {
+  subject:  string;
+  title:    string;
+  greeting: (name: string | null) => string;
+  body:     string;
+  expiry:   string;
+  cta:      string;
+  footer:   string;
+  team:     string;
+}> = {
+  pt: {
+    subject:  "Convite de acesso — Portal Quantum Tech",
+    title:    "Bem-vindo ao Portal Quantum Tech",
+    greeting: (n) => n ? `Olá ${n},` : "Olá,",
+    body:     "Sua conta foi criada e está pronta para acesso. Clique no botão abaixo para entrar no portal.",
+    expiry:   "O link expira em <strong>24 horas</strong>.",
+    cta:      "Acesse o Portal",
+    footer:   "Se não solicitou este acesso, pode ignorar este e-mail.",
+    team:     "— Equipe Quantum Tech",
+  },
+  en: {
+    subject:  "Access Invitation — Quantum Tech Portal",
+    title:    "Welcome to the Quantum Tech Portal",
+    greeting: (n) => n ? `Hello ${n},` : "Hello,",
+    body:     "Your account has been created and is ready to use. Click the button below to access the portal.",
+    expiry:   "The link expires in <strong>24 hours</strong>.",
+    cta:      "Access the Portal",
+    footer:   "If you didn't request this, you can safely ignore this email.",
+    team:     "— Quantum Tech Team",
+  },
+  es: {
+    subject:  "Invitación de acceso — Portal Quantum Tech",
+    title:    "Bienvenido al Portal Quantum Tech",
+    greeting: (n) => n ? `Hola ${n},` : "Hola,",
+    body:     "Tu cuenta ha sido creada y está lista para usar. Haz clic en el botón para acceder al portal.",
+    expiry:   "El enlace expira en <strong>24 horas</strong>.",
+    cta:      "Acceder al Portal",
+    footer:   "Si no solicitaste este acceso, puedes ignorar este correo.",
+    team:     "— Equipo Quantum Tech",
+  },
+};
+
+function buildInviteEmail(name: string | null, magicLink: string, locale: InviteLocale = "pt") {
+  const c = INVITE_COPY[locale];
+  const html = `<!DOCTYPE html>
+<html lang="${locale}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0f">
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:32px auto;background:#0f0f14;color:#e2e8f0;padding:40px;border-radius:16px;border:1px solid #ffffff15">
+  <p style="color:#0ea5e9;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0 0 16px">Quantum Tech</p>
+  <h1 style="color:#ffffff;font-size:24px;font-weight:700;margin:0 0 8px">${c.title}</h1>
+  <p style="color:#94a3b8;margin:0 0 24px;font-size:15px">${c.greeting(name)}</p>
+  <p style="color:#e2e8f0;margin:0 0 8px;font-size:14px">${c.body}</p>
+  <p style="color:#94a3b8;margin:0 0 28px;font-size:13px">${c.expiry}</p>
   <a href="${magicLink}"
-     style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-    Aceder ao Portal →
+     style="display:inline-block;background:#0ea5e9;color:#ffffff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
+    ${c.cta} →
   </a>
-  <p style="color:#475569;font-size:12px;margin-top:32px">
-    Se não solicitou este acesso, pode ignorar este email.<br/>
-    — Equipa Quantum Technology
-  </p>
-</div>`;
+  <hr style="border:none;border-top:1px solid #ffffff10;margin:32px 0">
+  <p style="color:#475569;font-size:12px;margin:0 0 4px">${c.footer}</p>
+  <p style="color:#475569;font-size:12px;margin:0">${c.team}</p>
+</div>
+</body>
+</html>`;
+  const bodyText = c.body.split(/(<[^>]*>)/).filter((s) => !s.startsWith("<")).join("");
+  const text = `${c.title}\n\n${c.greeting(name)}\n\n${bodyText}\n\n${c.cta}: ${magicLink}\n\n${c.footer}\n${c.team}`;
+  // replaceAll usage note: regex with /g flag is intentional for HTML tag stripping
+  return { html, text, subject: c.subject };
 }
 
 // POST /api/admin/users/invite — cria utilizador como ACTIVE e envia magic link
@@ -31,9 +83,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
-  const body = (await request.json()) as { email?: string; name?: string };
-  const email = body.email?.toLowerCase().trim();
-  const name  = body.name?.trim() || null;
+  const body = (await request.json()) as { email?: string; name?: string; locale?: string };
+  const email  = body.email?.toLowerCase().trim();
+  const name   = body.name?.trim() || null;
+  const locale: InviteLocale = ["pt", "en", "es"].includes(body.locale ?? "") ? (body.locale as InviteLocale) : "pt";
 
   if (!email) {
     return NextResponse.json({ error: "Email obrigatório." }, { status: 400 });
@@ -60,11 +113,9 @@ export async function POST(request: NextRequest) {
   const baseUrl   = process.env.NEXTAUTH_URL ?? "https://quantumtechwld.com";
   const magicLink = `${baseUrl}/api/auth/callback/nodemailer?callbackUrl=${encodeURIComponent("/portal")}&token=${rawToken}&email=${encodeURIComponent(email)}`;
 
-  await sendMail({
-    to:      email,
-    subject: "Convite de acesso — Portal Quantum Technology",
-    html:    buildInviteEmail(name, magicLink),
-  });
+  const { html, text, subject } = buildInviteEmail(name, magicLink, locale);
+
+  await sendMail({ to: email, subject, html, text });
 
   return NextResponse.json({ ok: true, message: "Convite enviado com sucesso." });
 }

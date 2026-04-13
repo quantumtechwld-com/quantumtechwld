@@ -39,6 +39,7 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
   const [resendingId, setResendingId]   = useState<string | null>(null);
   const [inviteEmail, setInviteEmail]   = useState("");
   const [inviteName, setInviteName]     = useState("");
+  const [inviteLocale, setInviteLocale] = useState<"pt" | "en" | "es">("pt");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteMsg, setInviteMsg]       = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -88,11 +89,11 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
       const res  = await fetch("/api/admin/users/invite", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ email: inviteEmail.trim(), name: inviteName.trim() || undefined }),
+        body:    JSON.stringify({ email: inviteEmail.trim(), name: inviteName.trim() || undefined, locale: inviteLocale }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Falha no envio.");
-      setInviteMsg({ type: "ok", text: `Convite enviado para ${inviteEmail.trim()}` });
+      setInviteMsg({ type: "ok", text: `Convite enviado para ${inviteEmail.trim()} (${inviteLocale.toUpperCase()})` });
       setInviteEmail("");
       setInviteName("");
     } catch (err) {
@@ -173,6 +174,16 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
               onChange={(e) => setInviteEmail(e.target.value)}
               className="flex-1 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-accent"
             />
+            <select
+              value={inviteLocale}
+              onChange={(e) => setInviteLocale(e.target.value as "pt" | "en" | "es")}
+              aria-label="Idioma do convite"
+              className="rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-accent"
+            >
+              <option value="pt">🇧🇷 Português</option>
+              <option value="en">🇺🇸 English</option>
+              <option value="es">🇪🇸 Español</option>
+            </select>
             <button
               onClick={handleInvite}
               disabled={inviteLoading || !inviteEmail.trim()}

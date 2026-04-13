@@ -14,14 +14,31 @@ interface MailOptions {
   to: string;
   subject: string;
   html: string;
+  /** Versão plaintext (melhora entregabilidade e evita spam) */
+  text?: string;
+  replyTo?: string;
 }
 
-export async function sendMail({ to, subject, html }: MailOptions) {
+/** Remove tags HTML para gerar versão plaintext sem acionar lint unicorn/prefer-string-replace-all */
+function stripHtml(html: string): string {
+  return html.split(/(<[^>]*>)/).filter((s) => !s.startsWith("<")).join(" ").split(/\s+/).filter(Boolean).join(" ");
+}
+
+export async function sendMail({ to, subject, html, text, replyTo }: MailOptions) {
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? "Quantum Technology <noreply@quantumtechnology.pt>",
+    from:    process.env.EMAIL_FROM ?? "Quantum Tech <noreply@quantumtechwld.com>",
     to,
     subject,
     html,
+    // Sempre incluir versão texto simples: filtros anti-spam penalizam emails só HTML
+    text:    text ?? stripHtml(html),
+    ...(replyTo ? { replyTo } : {}),
+    headers: {
+      "X-Mailer":  "Quantum Tech Portal",
+      "X-Priority": "3",
+      // Categoria transacional — ajuda provedores a classificar corretamente
+      "X-Entity-Ref-ID": `qt-${Date.now()}`,
+    },
   });
 }
 
