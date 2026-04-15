@@ -1,0 +1,25 @@
+<svg viewBox="0 0 40 40" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="10" fill="#0a0a0f"/>
+
+  <!-- Glow blobs -->
+  <circle cx="14" cy="20" r="10" fill="#9B59FF" opacity="0.18"/>
+  <circle cx="26" cy="20" r="10" fill="#C084FC" opacity="0.14"/>
+
+  <!-- Loop esquerdo |0⟩ -->
+  <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20"
+        stroke="#9B59FF" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+
+  <!-- Loop direito |1⟩ -->
+  <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20"
+        stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+
+  <!-- Eixo de superposição -->
+  <line x1="5" y1="20" x2="35" y2="20"
+        stroke="#22D4C2" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Nó central -->
+  <circle cx="20" cy="20" r="2.5" fill="#22D4C2" opacity="0.9"/>
+
+  <!-- Ring -->
+  <circle cx="20" cy="20" r="5.5" stroke="#9B59FF" stroke-width="0.7" fill="none" opacity="0.5"/>
+</svg>

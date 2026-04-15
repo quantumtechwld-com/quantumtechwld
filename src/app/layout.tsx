@@ -26,6 +26,12 @@ export const metadata: Metadata = {
   },
   authors: [{ name: "QuantumTech", url: BASE_URL }],
   creator: "QuantumTech",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default async function RootLayout({
