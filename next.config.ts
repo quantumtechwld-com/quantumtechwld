@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -21,7 +22,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data:",
       "font-src 'self'",
-      "connect-src 'self' https://api.stripe.com",
+      "connect-src 'self' https://api.stripe.com https://o4511237754978304.ingest.us.sentry.io",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -51,4 +52,22 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withSentryConfig(
+  withNextIntl(nextConfig),
+  {
+    org: "quantumtechwld-com",
+    project: "quantum-agency",
+    // Upload source maps somente quando SENTRY_AUTH_TOKEN estiver presente (CI)
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    // Não adicionar source maps ao bundle do browser (já bloqueado acima)
+    sourcemaps: {
+      deleteSourcemapsAfterUpload: true,
+    },
+    // Silencia o output do Sentry no build local
+    silent: !process.env.CI,
+    // Não bloqueia o build se o upload do Sentry falhar
+    errorHandler(err: Error) {
+      console.warn(`Sentry upload falhou (não crítico): ${err.message}`);
+    },
+  }
+);
