@@ -10,6 +10,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   trustHost: true,
   adapter: PrismaAdapter(prisma),
+  // Sessão expira em 8 horas — re-autenticação via magic link
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  // Cookies explícitos — HttpOnly + SameSite=Lax + Secure em produção
+  // NextAuth v5 já aplica __Secure- prefix automaticamente quando secure:true
+  cookies: {
+    sessionToken: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax" as const,
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   providers: [
     Nodemailer({
       server: {
