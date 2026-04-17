@@ -70,14 +70,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const me = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { id: true, name: true },
-  });
-  if (!me) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
+  // id está no JWT — sem necessidade de query extra ao banco
   const message = await db.orderMessage.create({
-    data: { orderId: id, authorId: me.id, body: text },
+    data: { orderId: id, authorId: session.user.id, body: text },
     include: { author: { select: { id: true, name: true, email: true, role: true } } },
   });
 

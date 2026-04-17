@@ -15,6 +15,10 @@ module.exports = {
       instances: 2,
       exec_mode: "cluster",
 
+      // Limita o heap V8 por worker: 2 workers × 350 MB = 700 MB max heap.
+      // Previne que o Node.js aloque heap ilimitado e esgote os 2 GB do t3.small.
+      node_args: "--max-old-space-size=350",
+
       // Não reiniciar infinitamente se travar logo ao iniciar
       max_restarts: 5,
       min_uptime: "10s",

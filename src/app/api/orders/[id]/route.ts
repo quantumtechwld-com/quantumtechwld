@@ -99,6 +99,46 @@ function isApiError(v: Record<string, unknown>): v is ApiError {
   return typeof v.error === "string" && typeof v.status === "number";
 }
 
+const ADMIN_ACTIONS = new Set(["propose", "start_production", "complete", "admin_reject"]);
+
+/**
+ * Valida autorização e devolve os dados a persistir (ou um ApiError).
+ * Centraliza os 3 checks de role/ownership fora do handler principal.
+ */
+function resolveActionData(
+  body: PatchBody,
+  order: { status: string },
+  isAdmin: boolean,
+  isOwner: boolean,
+): Record<string, unknown> | ApiError {
+  if (!isAdmin && !isOwner) return { error: "Acesso negado.", status: 403 };
+  const isAdminAction = ADMIN_ACTIONS.has(body.action);
+  if (isAdminAction && !isAdmin)  return { error: "Apenas admin.", status: 403 };
+  if (!isAdminAction && !isOwner) return { error: "Apenas o dono do pedido.", status: 403 };
+  return isAdminAction ? buildAdminUpdateData(body) : buildClientUpdateData(body, order);
+}
+
+/**
+ * Executa o update com optimistic lock (WHERE inclui status atual).
+ * Retorna null se o estado mudou entretanto (race condition detectada).
+ */
+async function updateOrderWithLock(
+  id: string,
+  currentStatus: string,
+  data: Record<string, unknown>,
+) {
+  try {
+    return await db.order.update({
+      where: { id, status: currentStatus },
+      data,
+      include: { client: { select: { name: true, email: true } } },
+    });
+  } catch (e: unknown) {
+    if ((e as { code?: string })?.code === "P2025") return null; // race condition
+    throw e;
+  }
+}
+
 type EmailContext = {
   action: string;
   updated: { type: string; estimatedValue?: number | null; productionInfo?: string | null };
@@ -169,31 +209,20 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     const isAdmin = session.user.role === "ADMIN";
     const isOwner = order.client.email === session.user.email;
 
-    if (!isAdmin && !isOwner) {
-      return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
-    }
-
-    const adminActions = new Set(["propose", "start_production", "complete", "admin_reject"]);
-    if (adminActions.has(body.action) && !isAdmin) {
-      return NextResponse.json({ error: "Apenas admin." }, { status: 403 });
-    }
-    if (!adminActions.has(body.action) && !isOwner) {
-      return NextResponse.json({ error: "Apenas o dono do pedido." }, { status: 403 });
-    }
-
-    const result = adminActions.has(body.action)
-      ? buildAdminUpdateData(body)
-      : buildClientUpdateData(body, order);
-
+    const result = resolveActionData(body, order, isAdmin, isOwner);
     if (isApiError(result)) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
-    const updated = await db.order.update({
-      where: { id },
-      data: result,
-      include: { client: { select: { name: true, email: true } } },
-    });
+    // Optimistic lock: WHERE inclui o status atual — se outro worker já tiver
+    // avançado o estado, updateOrderWithLock retorna null e devolvemos 409.
+    const updated = await updateOrderWithLock(id, order.status, result);
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Estado do pedido foi alterado entretanto. Recarregue a página e tente novamente." },
+        { status: 409 },
+      );
+    }
 
     const baseUrl    = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";

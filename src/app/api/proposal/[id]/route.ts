@@ -64,15 +64,17 @@ async function handleSend(proposal: ProposalDoc) {
     return NextResponse.json({ error: "Proposta já foi enviada." }, { status: 422 });
   }
 
-  const updated = await db.proposal.update({
-    where: { id: proposal.id },
-    data: { status: "SENT" as ProposalStatus },
-  });
-
-  await prisma.briefing.update({
-    where: { id: proposal.briefingId },
-    data: { status: "PROPOSAL_SENT" as never },
-  });
+  // Transação atómica: proposta e briefing atualizam juntos ou nenhum atualiza
+  const [updated] = await prisma.$transaction([
+    db.proposal.update({
+      where: { id: proposal.id },
+      data: { status: "SENT" as ProposalStatus },
+    }),
+    prisma.briefing.update({
+      where: { id: proposal.briefingId },
+      data: { status: "PROPOSAL_SENT" as never },
+    }),
+  ]);
 
   // E-mail ao cliente
   const clientEmail: string = proposal.briefing.user.email;
@@ -112,15 +114,17 @@ async function handleApprove(proposal: ProposalDoc) {
     return NextResponse.json({ error: "Proposta não está em estado SENT." }, { status: 422 });
   }
 
-  const updated = await db.proposal.update({
-    where: { id: proposal.id },
-    data: { status: "APPROVED" as ProposalStatus, reviewedAt: new Date() },
-  });
-
-  await prisma.briefing.update({
-    where: { id: proposal.briefingId },
-    data: { status: "APPROVED" as never },
-  });
+  // Transação atómica: ambos os registos avançam ou nenhum avança
+  const [updated] = await prisma.$transaction([
+    db.proposal.update({
+      where: { id: proposal.id },
+      data: { status: "APPROVED" as ProposalStatus, reviewedAt: new Date() },
+    }),
+    prisma.briefing.update({
+      where: { id: proposal.briefingId },
+      data: { status: "APPROVED" as never },
+    }),
+  ]);
 
   const clientEmail: string = proposal.briefing.user.email;
   const adminEmail = process.env.EMAIL_SERVER_USER ?? "";
@@ -166,19 +170,21 @@ async function handleRevision(proposal: ProposalDoc, note: string | undefined) {
     return NextResponse.json({ error: "Proposta não está em estado SENT." }, { status: 422 });
   }
 
-  const updated = await db.proposal.update({
-    where: { id: proposal.id },
-    data: {
-      status: "REVISION" as ProposalStatus,
-      clientNote: note ?? "",
-      reviewedAt: new Date(),
-    },
-  });
-
-  await prisma.briefing.update({
-    where: { id: proposal.briefingId },
-    data: { status: "IN_NEGOTIATION" as never },
-  });
+  // Transação atómica: proposta e briefing recuam juntos
+  const [updated] = await prisma.$transaction([
+    db.proposal.update({
+      where: { id: proposal.id },
+      data: {
+        status: "REVISION" as ProposalStatus,
+        clientNote: note ?? "",
+        reviewedAt: new Date(),
+      },
+    }),
+    prisma.briefing.update({
+      where: { id: proposal.briefingId },
+      data: { status: "IN_NEGOTIATION" as never },
+    }),
+  ]);
 
   const adminEmail = process.env.EMAIL_SERVER_USER ?? "";
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";

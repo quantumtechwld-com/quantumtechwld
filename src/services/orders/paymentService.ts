@@ -12,6 +12,9 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
   });
   if (!order) return null;
 
+  // Guard: impede criação de múltiplos pagamentos para o mesmo pedido
+  const existing = await prisma.payment.findUnique({ where: { orderId } });
+  if (existing) return existing;
   // Cria PaymentIntent no Stripe
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(amount * 100), // Stripe espera centavos

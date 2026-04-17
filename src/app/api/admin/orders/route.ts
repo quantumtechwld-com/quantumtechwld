@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
       where,
       include: { client: { select: { id: true, name: true, email: true } } },
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
     return NextResponse.json({ orders });

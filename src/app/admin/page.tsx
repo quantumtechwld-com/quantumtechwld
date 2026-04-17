@@ -28,18 +28,6 @@ export default async function AdminDashboardPage() {
     redirect("/portal");
   }
 
-  const briefings = await prisma.briefing.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { user: { select: { email: true, name: true } } },
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scopes = await (prisma as any).scope.findMany({
-    select: { briefingId: true },
-  }) as { briefingId: string }[];
-
-  const scopeSet = new Set(scopes.map((s: { briefingId: string }) => s.briefingId));
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dbAny = prisma as any;
 
@@ -56,7 +44,10 @@ export default async function AdminDashboardPage() {
     payment: { status: string; amountCents: number } | null;
   };
 
+  // Todas as queries em paralelo — reduz latência no dashboard admin
   const [
+    briefings,
+    scopesRaw,
     orderPending,
     orderInProd,
     orderCompleted,
@@ -64,6 +55,11 @@ export default async function AdminDashboardPage() {
     monthRevenue,
     recentOrdersRaw,
   ] = await Promise.all([
+    prisma.briefing.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { email: true, name: true } } },
+    }),
+    dbAny.scope.findMany({ select: { briefingId: true } }),
     dbAny.order.count({ where: { status: { in: ["PENDING", "EVALUATING", "REVISION"] } } }),
     dbAny.order.count({ where: { status: "IN_PRODUCTION" } }),
     dbAny.order.count({ where: { status: "COMPLETED" } }),
@@ -82,6 +78,8 @@ export default async function AdminDashboardPage() {
       },
     }),
   ]);
+
+  const scopeSet = new Set((scopesRaw as { briefingId: string }[]).map((s) => s.briefingId));
 
   const recentOrders = recentOrdersRaw as RecentOrder[];
   const totalRevenueCents: number =

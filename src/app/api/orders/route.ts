@@ -10,39 +10,44 @@ const db = prisma as any;
 const VALID_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other", "contact"] as const;
 const VALID_URGENCIES = ["low", "normal", "high", "critical"] as const;
 
-/** Persiste o primeiro orderRef candidato que não viole a constraint UNIQUE. */
-async function assignOrderRef(orderId: string, clientName: string): Promise<void> {
+/** Cria o pedido com orderRef único num único INSERT — sem race condition. */
+async function createOrderWithRef(
+  data: { clientId: string; type: string; description: string; urgency: string; attachments: string[] },
+  clientName: string,
+) {
   for (const candidate of generateOrderRefCandidates(clientName, new Date(), 5)) {
     try {
-      await db.order.update({ where: { id: orderId }, data: { orderRef: candidate } });
-      return;
-    } catch {
-      // colisão de unique constraint → tenta próximo candidato
+      return await db.order.create({
+        data: { ...data, status: "PENDING", orderRef: candidate },
+        include: { client: { select: { name: true, email: true } } },
+      });
+    } catch (e: unknown) {
+      if ((e as { code?: string })?.code === "P2002") continue; // colisão unique → tenta próximo
+      throw e;
     }
   }
+  return null;
 }
 
 // ─── GET /api/orders — lista pedidos do cliente autenticado ──────────────────
 export async function GET(_req: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
+    // id e role estão no JWT — sem query extra ao banco
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, role: true },
-    });
-    if (!user) return NextResponse.json({ error: "Utilizador não encontrado." }, { status: 404 });
+    const { id: userId, role } = session.user;
 
-    // Admin vê todos; cliente vê apenas os seus
-    const where = user.role === "ADMIN" ? {} : { clientId: user.id };
+    // Admin vê os últimos 100; cliente vê apenas os seus
+    const where = role === "ADMIN" ? {} : { clientId: userId };
 
     const orders = await db.order.findMany({
       where,
       include: { client: { select: { name: true, email: true } } },
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
     return NextResponse.json({ orders });
@@ -87,21 +92,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Urgência inválida." }, { status: 422 });
     }
 
-    const order = await db.order.create({
-      data: {
+    // Gerar orderRef e incluir na criação — evita race condition entre workers
+    const clientName = (user.company?.trim() || user.name?.trim() || user.email) ?? "CLIENT";
+    const order = await createOrderWithRef(
+      {
         clientId:    user.id,
         type:        body.type,
         description: body.description.trim(),
         urgency:     body.urgency ?? "normal",
         attachments: body.attachments ?? [],
-        status:      "PENDING",
       },
-      include: { client: { select: { name: true, email: true } } },
-    });
-
-    // Gerar e persistir orderRef único — baseado na empresa ou nome do cliente
-    const clientName = (user.company?.trim() || user.name?.trim() || user.email) ?? "CLIENT";
-    await assignOrderRef(order.id, clientName);
+      clientName,
+    );
+    if (!order) {
+      return NextResponse.json({ error: "Erro ao gerar referência do pedido. Tente novamente." }, { status: 500 });
+    }
 
     // Notificar admin por email
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";

@@ -1,25 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendMail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { createRateLimiter, EMAIL_REGEX } from "@/lib/rateLimit";
 
-// Rate limit simples em memória: 3 contactos por IP por 10 minutos
-const RATE_WINDOW_MS = 10 * 60 * 1000;
-const RATE_MAX       = 3;
-const rateLimitMap   = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now   = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return false;
-  }
-  if (entry.count >= RATE_MAX) return true;
-  entry.count++;
-  return false;
-}
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// 3 contactos por IP por 10 minutos
+const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests: 3 });
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
