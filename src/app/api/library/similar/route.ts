@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
   const limit = Math.min(Number(body.limit ?? 3), 10);
 
-  // Buscar todos os projetos (biblioteca pequena — eficiente até ~1000 entradas)
+  // Buscar projetos da biblioteca (eficiente até ~1000 entradas; acima disso usar pgvector)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allProjects = (await (prisma as any).referenceProject.findMany({
     select: {
@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       budgetRange: true,
       embedding: true,
     },
+    take: 500,
   })) as RawProject[];
 
   // Calcular similaridade e filtrar

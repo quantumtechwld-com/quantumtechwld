@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateEmbedding, buildEmbeddingText, cosineSimilarity } from "@/lib/embeddings";
 import { prisma } from "@/lib/prisma";
+import { geminiGenerate, GeminiError } from "@/lib/gemini";
 
 const PROJECT_TYPES = ["website", "webapp", "mobile", "ecommerce", "automation", "system"];
 
@@ -17,8 +18,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ errorCode: "errEmptyText" }, { status: 400 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ errorCode: "errGeminiKey" }, { status: 500 });
   }
 
@@ -85,39 +85,18 @@ Return ONLY a valid JSON with this structure (no markdown, no explanations):
   "timeline": "one of: ${TIMELINE_KEYS.join(", ")} (empty string if not mentioned)"
 }`;
 
-  const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 2048,
-        },
-      }),
-    }
-  );
-
-  if (!geminiRes.ok) {
-    const errBody = await geminiRes.text().catch(() => "");
-    console.error("Gemini error:", geminiRes.status, errBody);
+  let rawText: string;
+  try {
+    const result = await geminiGenerate(prompt, { temperature: 0.1, maxOutputTokens: 2048 });
+    rawText = result.text;
+  } catch (err) {
+    const status = err instanceof GeminiError ? err.status : 500;
+    console.error("Gemini error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { errorCode: "errGeminiCall" },
+      { errorCode: status === 429 ? "errGeminiRateLimit" : "errGeminiCall" },
       { status: 502 },
     );
   }
-
-  const geminiJson = await geminiRes.json() as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string; thought?: boolean }> } }>;
-  };
-
-  const parts = geminiJson.candidates?.[0]?.content?.parts ?? [];
-  const rawText = parts
-    .filter((p) => !p.thought)
-    .map((p) => p.text ?? "")
-    .join("\n");
 
   const match = /\{[\s\S]*\}/.exec(rawText);
   if (!match) {

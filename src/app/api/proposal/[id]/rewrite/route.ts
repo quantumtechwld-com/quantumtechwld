@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { geminiGenerate, GeminiError } from "@/lib/gemini";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -39,8 +40,7 @@ export async function POST(
     return NextResponse.json({ error: "Proposta não encontrada." }, { status: 404 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: "GEMINI_API_KEY não configurada." }, { status: 500 });
   }
 
@@ -59,25 +59,15 @@ ${instruction}
 Reescreve o trecho de forma mais clara, profissional e persuasiva, mantendo o mesmo sentido e informações. 
 Responde APENAS com o texto reescrito, sem explicações ou comentários adicionais.`;
 
-  const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-    }
-  );
-
-  if (!geminiRes.ok) {
-    const err = await geminiRes.text().catch(() => "");
-    return NextResponse.json({ error: `Gemini error: ${geminiRes.status}`, detail: err }, { status: 502 });
+  let rewritten: string;
+  try {
+    const result = await geminiGenerate(prompt, { temperature: 0.5, maxOutputTokens: 2048 });
+    rewritten = result.text.trim();
+  } catch (err) {
+    const status = err instanceof GeminiError ? err.status : 500;
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Gemini error: ${status}`, detail }, { status: 502 });
   }
-
-  interface GeminiResponse {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  }
-  const data = (await geminiRes.json()) as GeminiResponse;
-  const rewritten = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
 
   if (!rewritten) {
     return NextResponse.json({ error: "IA não retornou resultado." }, { status: 502 });

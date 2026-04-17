@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { cosineSimilarity, generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
+import { geminiGenerate, GeminiError } from "@/lib/gemini";
 
 // ─── Tipos do escopo ─────────────────────────────────────────────────────────
 
@@ -67,8 +68,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: "GEMINI_API_KEY não configurada." }, { status: 500 });
   }
 
@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
         title: true, projectType: true, features: true,
         hoursActual: true, budgetRange: true, complexityScore: true, embedding: true,
       },
+      take: 200,
     })) as RefRow[];
 
     const similar = allProjects
@@ -165,43 +166,22 @@ Retorne APENAS um JSON válido com esta estrutura exata (sem markdown, sem expli
 
 Seja preciso e realista. Baseie as horas em desenvolvimento profissional real, não em estimativas otimistas.`;
 
-  const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 8192,
-          responseMimeType: "application/json",
-        },
-      }),
+  let raw: string;
+  try {
+    const result = await geminiGenerate(prompt, {
+      temperature: 0.2,
+      maxOutputTokens: 8192,
+      responseMimeType: "application/json",
+    });
+    raw = result.text;
+    if (!raw) {
+      const reason = result.finishReason ?? "unknown";
+      return NextResponse.json({ error: `Gemini não retornou conteúdo (finishReason: ${reason}).` }, { status: 502 });
     }
-  );
-
-  if (!geminiRes.ok) {
-    const err = await geminiRes.text().catch(() => "");
-    return NextResponse.json({ error: `Gemini error: ${geminiRes.status}`, detail: err }, { status: 502 });
-  }
-
-  interface GeminiResponse {
-    candidates?: Array<{
-      content?: { parts?: Array<{ text?: string; thought?: boolean }> };
-      finishReason?: string;
-    }>;
-  }
-
-  const geminiData = (await geminiRes.json()) as GeminiResponse;
-
-  // Gemini 2.5-flash (thinking model) pode ter múltiplas parts; pegar a última com texto
-  const parts = geminiData.candidates?.[0]?.content?.parts ?? [];
-  const raw = [...parts].reverse().find((p) => p.text)?.text ?? "";
-
-  if (!raw) {
-    const reason = geminiData.candidates?.[0]?.finishReason ?? "unknown";
-    return NextResponse.json({ error: `Gemini não retornou conteúdo (finishReason: ${reason}).` }, { status: 502 });
+  } catch (err) {
+    const status = err instanceof GeminiError ? err.status : 500;
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Gemini error: ${status}`, detail }, { status: 502 });
   }
 
   // Extracção robusta: encontrar o primeiro { e último } para isolar o JSON

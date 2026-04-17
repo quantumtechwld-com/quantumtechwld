@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -24,12 +24,12 @@ export default function LeadForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const stepTitles = [
+  const stepTitles = useMemo(() => [
     t("step1Title"), t("step2Title"), t("step3Title"), t("step4Title"), t("step5Title"),
-  ];
-  const stepSubs = [
+  ], [t]);
+  const stepSubs = useMemo(() => [
     t("step1Sub"), t("step2Sub"), t("step3Sub"), t("step4Sub"), t("step5Sub"),
-  ];
+  ], [t]);
 
   const analyzeWithAI = async () => {
     setAiLoading(true);

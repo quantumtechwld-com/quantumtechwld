@@ -39,6 +39,7 @@ export default async function PortalPage() {
     prisma.briefing.findMany({
       where: { user: { email: session.user.email } },
       orderBy: { createdAt: "desc" },
+      take: 50,
     }),
     db.order.findMany({
       where: {

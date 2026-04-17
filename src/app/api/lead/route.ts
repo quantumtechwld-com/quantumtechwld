@@ -4,6 +4,15 @@ import { computeComplexity } from "@/lib/complexity";
 import { sendMail } from "@/lib/email";
 import { createRateLimiter, EMAIL_REGEX } from "@/lib/rateLimit";
 
+function escapeHtml(str: string): string {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#x27;");
+}
+
 // 5 leads por IP por 10 minutos
 const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests: 5 });
 
@@ -93,7 +102,7 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail) {
       const featuresText = Array.isArray(payload.features) && payload.features.length
-        ? payload.features.join(", ")
+        ? payload.features.map(escapeHtml).join(", ")
         : "—";
       sendMail({
         to: adminEmail,
@@ -102,15 +111,15 @@ export async function POST(request: NextRequest) {
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
             <h2 style="color:#4f46e5">Novo Lead Recebido</h2>
             <table style="width:100%;border-collapse:collapse">
-              <tr><td style="padding:8px;font-weight:bold;width:140px">Nome</td><td style="padding:8px">${payload.name}</td></tr>
-              <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Email</td><td style="padding:8px">${payload.email}</td></tr>
-              <tr><td style="padding:8px;font-weight:bold">Empresa</td><td style="padding:8px">${payload.company ?? "—"}</td></tr>
-              <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Serviço</td><td style="padding:8px">${payload.service ?? payload.projectType ?? "—"}</td></tr>
-              <tr><td style="padding:8px;font-weight:bold">Budget</td><td style="padding:8px">${payload.budget}</td></tr>
-              <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Timeline</td><td style="padding:8px">${payload.timeline ?? "—"}</td></tr>
+              <tr><td style="padding:8px;font-weight:bold;width:140px">Nome</td><td style="padding:8px">${escapeHtml(payload.name)}</td></tr>
+              <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Email</td><td style="padding:8px">${escapeHtml(payload.email)}</td></tr>
+              <tr><td style="padding:8px;font-weight:bold">Empresa</td><td style="padding:8px">${escapeHtml(payload.company ?? "—")}</td></tr>
+              <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Serviço</td><td style="padding:8px">${escapeHtml(payload.service ?? payload.projectType ?? "—")}</td></tr>
+              <tr><td style="padding:8px;font-weight:bold">Budget</td><td style="padding:8px">${escapeHtml(payload.budget)}</td></tr>
+              <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Timeline</td><td style="padding:8px">${escapeHtml(payload.timeline ?? "—")}</td></tr>
               <tr><td style="padding:8px;font-weight:bold">Funcionalidades</td><td style="padding:8px">${featuresText}</td></tr>
               <tr style="background:#f8f8f8"><td style="padding:8px;font-weight:bold">Complexidade</td><td style="padding:8px">${cx.score} pts (${cx.hoursMin}–${cx.hoursMax}h)</td></tr>
-              <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Mensagem</td><td style="padding:8px">${payload.painPoints ?? payload.message ?? "—"}</td></tr>
+              <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Mensagem</td><td style="padding:8px">${escapeHtml(payload.painPoints ?? payload.message ?? "—")}</td></tr>
             </table>
             <p style="color:#888;font-size:12px;margin-top:24px">Recebido em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</p>
           </div>

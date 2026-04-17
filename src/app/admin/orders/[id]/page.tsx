@@ -5,55 +5,16 @@ import Link from "next/link";
 import { OrderAdminActions } from "./OrderAdminActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import LogoAnimated from "@/components/home/LogoAnimated";
+import {
+  ORDER_STATUS_LABEL as STATUS_LABEL,
+  ORDER_STATUS_COLOR as STATUS_COLOR,
+  ORDER_TYPE_LABEL,
+  URGENCY_LABEL,
+  URGENCY_COLOR,
+} from "@/lib/constants";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
-
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT:          "Rascunho",
-  PENDING:        "Pendente",
-  EVALUATING:     "Em análise",
-  PROPOSAL_SENT:  "Proposta enviada",
-  APPROVED:       "Aprovado",
-  REVISION:       "Revisão solicitada",
-  REJECTED:       "Recusado",
-  IN_PRODUCTION:  "Em produção",
-  COMPLETED:      "Concluído",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  DRAFT:          "bg-slate-500/20 text-slate-300 border border-slate-500/30",
-  PENDING:        "bg-blue-500/20 text-blue-300 border border-blue-500/30",
-  EVALUATING:     "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-  PROPOSAL_SENT:  "bg-accent/20 text-accent-light border border-accent/30",
-  APPROVED:       "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
-  REVISION:       "bg-orange-500/20 text-orange-300 border border-orange-500/30",
-  REJECTED:       "bg-red-500/20 text-red-300 border border-red-500/30",
-  IN_PRODUCTION:  "bg-purple-500/20 text-purple-300 border border-purple-500/30",
-  COMPLETED:      "bg-green-500/20 text-green-300 border border-green-500/30",
-};
-
-const ORDER_TYPE_LABEL: Record<string, string> = {
-  new_feature:  "Nova funcionalidade",
-  bug_fix:      "Correção de bug",
-  new_project:  "Novo projeto",
-  support:      "Suporte",
-  other:        "Outro",
-};
-
-const URGENCY_LABEL: Record<string, string> = {
-  low:      "Baixa",
-  normal:   "Normal",
-  high:     "Alta",
-  critical: "Crítica",
-};
-
-const URGENCY_COLOR: Record<string, string> = {
-  low:      "text-slate-300",
-  normal:   "text-blue-300",
-  high:     "text-orange-300",
-  critical: "text-red-300 font-semibold",
-};
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -135,7 +96,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Cliente</h2>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/20 text-sm font-semibold text-violet-300">
-              {(order.client.name ?? order.client.email)[0].toUpperCase()}
+              {((order.client.name ?? order.client.email)?.[0] ?? "?").toUpperCase()}
             </div>
             <div>
               <p className="text-sm font-medium text-white">{order.client.name ?? "—"}</p>

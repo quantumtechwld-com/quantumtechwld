@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { geminiGenerate, GeminiError } from "@/lib/gemini";
 
 // ─── POST /api/proposal/generate ─────────────────────────────────────────────
 // Apenas ADMIN. Gera proposta a partir do escopo M2 via Gemini.
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (session?.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
@@ -36,8 +37,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: "GEMINI_API_KEY não configurada." }, { status: 500 });
   }
 
@@ -75,36 +75,19 @@ Retorne um JSON com exatamente dois campos:
 
 Não inclua markdown fora do JSON. Retorne APENAS o JSON.`;
 
-  const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 8192,
-          responseMimeType: "application/json",
-        },
-      }),
-    }
-  );
-
-  if (!geminiRes.ok) {
-    const err = await geminiRes.text().catch(() => "");
-    return NextResponse.json({ error: `Gemini error: ${geminiRes.status}`, detail: err }, { status: 502 });
+  let raw: string;
+  try {
+    const result = await geminiGenerate(prompt, {
+      temperature: 0.4,
+      maxOutputTokens: 8192,
+      responseMimeType: "application/json",
+    });
+    raw = result.text;
+  } catch (err) {
+    const status = err instanceof GeminiError ? err.status : 500;
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Gemini error: ${status}`, detail }, { status: 502 });
   }
-
-  interface GeminiResponse {
-    candidates?: Array<{
-      content?: { parts?: Array<{ text?: string; thought?: boolean }> };
-    }>;
-  }
-
-  const geminiData = (await geminiRes.json()) as GeminiResponse;
-  const parts = geminiData.candidates?.[0]?.content?.parts ?? [];
-  const raw = [...parts].reverse().find((p) => !p.thought && p.text)?.text ?? "";
 
   let parsed: { summary: string; content: string };
   try {

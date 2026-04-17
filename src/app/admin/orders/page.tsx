@@ -41,6 +41,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
         messages: { where: { author: { role: "CLIENT" } }, select: { id: true, createdAt: true } },
       },
       orderBy: { createdAt: "desc" },
+      take: 100,
     }) as Promise<unknown>,
     db.order.groupBy({
       by: ["status"],

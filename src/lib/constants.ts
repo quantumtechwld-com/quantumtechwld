@@ -98,3 +98,10 @@ export const URGENCY_LABEL: Record<string, string> = {
   high:     "Alta",
   critical: "Crítica",
 };
+
+export const URGENCY_COLOR: Record<string, string> = {
+  low:      "text-slate-300",
+  normal:   "text-blue-300",
+  high:     "text-orange-300",
+  critical: "text-red-300 font-semibold",
+};
