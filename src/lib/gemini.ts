@@ -1,3 +1,4 @@
+import "server-only";
 /**
  * Gemini API Client — cliente centralizado com retry automático.
  *

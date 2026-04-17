@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { computeComplexity } from "@/lib/complexity";
 import { sendMail } from "@/lib/email";
-import { createRateLimiter, EMAIL_REGEX } from "@/lib/rateLimit";
+import { createRateLimiter } from "@/lib/rateLimit";
 
 function escapeHtml(str: string): string {
   return str
@@ -16,33 +17,24 @@ function escapeHtml(str: string): string {
 // 5 leads por IP por 10 minutos
 const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests: 5 });
 
-type LeadPayload = {
-  // Campos do wizard
-  projectType?: string;
-  painPoints?: string;
-  targetAudience?: string;
-  features?: string[];
-  customFeatures?: string;
-  timeline?: string;
-  // Campos base (mantidos por compatibilidade)
-  name: string;
-  email: string;
-  company?: string;
-  service: string;
-  budget: string;
-  message: string;
-};
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function isValidLead(payload: Partial<LeadPayload>): payload is LeadPayload {
-  return Boolean(
-    payload.name?.trim() &&
-      payload.email?.trim() &&
-      EMAIL_REGEX.test(payload.email.trim()) &&
-      payload.service?.trim() &&
-      payload.budget?.trim() &&
-      payload.message?.trim()
-  );
-}
+const LeadSchema = z.object({
+  name:           z.string().trim().min(1),
+  email:          z.string().trim().min(1).regex(EMAIL_RE),
+  company:        z.string().trim().optional(),
+  service:        z.string().trim().min(1),
+  budget:         z.string().trim().min(1),
+  message:        z.string().trim().min(1),
+  projectType:    z.string().trim().optional(),
+  painPoints:     z.string().trim().optional(),
+  targetAudience: z.string().trim().optional(),
+  features:       z.array(z.string()).optional(),
+  customFeatures: z.string().trim().optional(),
+  timeline:       z.string().trim().optional(),
+});
+
+type LeadPayload = z.infer<typeof LeadSchema>;
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,14 +49,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const payload = (await request.json()) as Partial<LeadPayload>;
-
-    if (!isValidLead(payload)) {
+    const raw = await request.json();
+    const result = LeadSchema.safeParse(raw);
+    if (!result.success) {
       return NextResponse.json(
         { error: "Dados do lead incompletos." },
         { status: 400 }
       );
     }
+    const payload: LeadPayload = result.data;
 
     // Salvar briefing no banco (upsert do user por email)
     const cx = computeComplexity(

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { cosineSimilarity, generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
@@ -37,18 +38,23 @@ const HOURLY_RATE = { min: 45, max: 85 };
 
 // ─── POST /api/briefing/scope ────────────────────────────────────────────────
 
+const ScopeSchema = z.object({
+  briefingId: z.string().min(1),
+  regenerate: z.boolean().optional(),
+});
+
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
-  const body = (await request.json()) as { briefingId?: string; regenerate?: boolean };
-  const { briefingId, regenerate } = body;
-
-  if (!briefingId) {
+  const reqBody = await request.json().catch(() => null);
+  const zodResult = ScopeSchema.safeParse(reqBody);
+  if (!zodResult.success) {
     return NextResponse.json({ error: "briefingId obrigatório." }, { status: 400 });
   }
+  const { briefingId, regenerate } = zodResult.data;
 
   // Verificar que o briefing pertence ao utilizador
   const briefing = await prisma.briefing.findFirst({

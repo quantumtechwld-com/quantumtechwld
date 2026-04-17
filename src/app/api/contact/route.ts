@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { sendMail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-import { createRateLimiter, EMAIL_REGEX } from "@/lib/rateLimit";
+import { createRateLimiter } from "@/lib/rateLimit";
 
 // 3 contactos por IP por 10 minutos
 const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests: 3 });
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const ContactSchema = z.object({
+  name:    z.string().trim().min(1),
+  email:   z.string().trim().min(1).regex(EMAIL_RE),
+  subject: z.string().trim().min(1),
+  message: z.string().trim().min(1),
+});
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
@@ -12,22 +22,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   }
 
-  let body: Record<string, unknown>;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const name    = typeof body.name    === "string" ? body.name.trim()    : "";
-  const email   = typeof body.email   === "string" ? body.email.trim()   : "";
-  const subject = typeof body.subject === "string" ? body.subject.trim() : "";
-  const message = typeof body.message === "string" ? body.message.trim() : "";
-
-  if (!name)                        return NextResponse.json({ error: "Name is required."    }, { status: 422 });
-  if (!email || !EMAIL_REGEX.test(email)) return NextResponse.json({ error: "Valid email is required." }, { status: 422 });
-  if (!subject)                     return NextResponse.json({ error: "Subject is required." }, { status: 422 });
-  if (!message)                     return NextResponse.json({ error: "Message is required." }, { status: 422 });
+  const result = ContactSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json({ error: "Campos obrigatórios em falta ou inválidos." }, { status: 422 });
+  }
+  const { name, email, subject, message } = result.data;
 
   // Persistir na base de dados
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

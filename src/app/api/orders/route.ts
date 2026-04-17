@@ -30,7 +30,7 @@ async function createOrderWithRef(
 }
 
 // ─── GET /api/orders — lista pedidos do cliente autenticado ──────────────────
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     // id e role estão no JWT — sem query extra ao banco

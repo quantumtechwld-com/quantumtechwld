@@ -56,6 +56,7 @@ function extractPrefix(name: string, size: number): string {
 }
 
 function randomAlphanumeric(length: number): string {
+  // eslint-disable-next-line no-secrets/no-secrets
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {

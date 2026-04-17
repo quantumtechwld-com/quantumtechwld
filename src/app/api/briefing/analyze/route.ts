@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { generateEmbedding, buildEmbeddingText, cosineSimilarity } from "@/lib/embeddings";
 import { prisma } from "@/lib/prisma";
 import { geminiGenerate, GeminiError } from "@/lib/gemini";
@@ -10,13 +11,17 @@ const FEATURE_KEYS = ["auth", "admin", "payments", "emails", "dashboard", "api",
 const BUDGET_KEYS = ["under3k", "3k-8k", "8k-20k", "over20k"];
 const TIMELINE_KEYS = ["urgent", "normal", "planned", "flexible"];
 
-export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { text?: string };
-  const text = body.text?.trim();
+const AnalyzeSchema = z.object({
+  text: z.string().trim().min(1),
+});
 
-  if (!text) {
+export async function POST(request: NextRequest) {
+  const reqBody = await request.json().catch(() => null);
+  const zodResult = AnalyzeSchema.safeParse(reqBody);
+  if (!zodResult.success) {
     return NextResponse.json({ errorCode: "errEmptyText" }, { status: 400 });
   }
+  const text = zodResult.data.text;
 
   if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ errorCode: "errGeminiKey" }, { status: 500 });

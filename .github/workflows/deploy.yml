@@ -4,11 +4,25 @@ on:
   push:
     branches: [main]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PIPELINE DE 3 CAMADAS
+#
+#  quality        → ESLint (security plugins) + npm audit
+#  build          → prisma generate + next build + empacotamento S3   (needs: quality)
+#  deploy         → SSM EC2 + PM2 reload                              (needs: build)
+#
+# O deploy NUNCA acontece se quality ou build falharem.
+# ─────────────────────────────────────────────────────────────────────────────
+
 jobs:
-  deploy:
-    name: Build & Deploy
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # CAMADA 1 — Qualidade & Segurança
+  # ──────────────────────────────────────────────────────────────────────────
+  quality:
+    name: Quality Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -21,7 +35,38 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: ESLint (security + no-secrets)
+        # Foca nos ficheiros server-side onde vulnerabilidades são críticas.
+        # TODO: Expandir para src/ completo após resolver os pre-existing no-html-link-for-pages
+        run: npx eslint src/app/api/ src/lib/ --max-warnings=0
+
+      - name: npm audit (bloqueia em Critical)
+        # Tighten para --audit-level=high após resolver vulnerabilidades transitivas de deps
+        run: npm audit --audit-level=critical
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # CAMADA 2 — Build & Empacotamento
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Generate Prisma Client
         run: npx prisma generate
@@ -106,29 +151,37 @@ jobs:
           aws s3 cp env.production.local      s3://${{ secrets.DEPLOY_BUCKET }}/env.production.local
           aws s3 cp scripts/deploy-remote.sh  s3://${{ secrets.DEPLOY_BUCKET }}/deploy-remote.sh
 
-          # Gera pre-signed URLs (válidas 1h) para que a EC2 baixe sem precisar de aws CLI
-          SCRIPT_URL=$(aws s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/deploy-remote.sh"   --expires-in 3600)
-          DEPLOY_URL=$(aws s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz"       --expires-in 3600)
-          ENV_URL=$(aws    s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/env.production.local" --expires-in 3600)
+  # ──────────────────────────────────────────────────────────────────────────
+  # CAMADA 3 — Deploy EC2
+  # ──────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy → EC2
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
 
-          # Exporta para o próximo step
-          echo "SCRIPT_URL=$SCRIPT_URL" >> "$GITHUB_ENV"
-          echo "DEPLOY_URL=$DEPLOY_URL" >> "$GITHUB_ENV"
-          echo "ENV_URL=$ENV_URL"       >> "$GITHUB_ENV"
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
 
-      # Executa o deploy via SSM — parâmetros em arquivo JSON (sem escaping inline)
       - name: Deploy via SSM
         run: |
           INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '[:space:]')
           echo "Instance ID: $INSTANCE_ID"
 
-          # Monta o comando interno que roda como ubuntu (su - carrega nvm/pm2/npm)
-          # curl baixa os artefatos via pre-signed URL — sem precisar de aws CLI na EC2
+          # Regenera presigned URLs (os arquivos já estão no S3 pelo job build)
+          SCRIPT_URL=$(aws s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/deploy-remote.sh"    --expires-in 3600)
+          DEPLOY_URL=$(aws s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz"        --expires-in 3600)
+          ENV_URL=$(aws    s3 presign "s3://${{ secrets.DEPLOY_BUCKET }}/env.production.local" --expires-in 3600)
+
           INNER="curl -fsSL '${SCRIPT_URL}' -o /tmp/deploy-remote.sh \
             && chmod +x /tmp/deploy-remote.sh \
             && bash /tmp/deploy-remote.sh '${DEPLOY_URL}' '${ENV_URL}' 2>&1"
 
-          # jq constrói o JSON corretamente escapado (sem aspas manuais)
           jq -n --arg cmd "su - ubuntu -c ${INNER@Q}" \
             '{"commands": [$cmd]}' > /tmp/ssm-params.json
           echo "SSM params:"; cat /tmp/ssm-params.json
@@ -172,3 +225,4 @@ jobs:
           done
           echo "Timeout aguardando o deploy."
           exit 1
+

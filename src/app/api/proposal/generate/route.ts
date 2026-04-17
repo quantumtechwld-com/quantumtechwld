@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { geminiGenerate, GeminiError } from "@/lib/gemini";
+
+const GenerateSchema = z.object({
+  briefingId: z.string().min(1),
+  send:       z.boolean().optional().default(false),
+});
 
 // ─── POST /api/proposal/generate ─────────────────────────────────────────────
 // Apenas ADMIN. Gera proposta a partir do escopo M2 via Gemini.
@@ -12,12 +18,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
-  const body = (await request.json()) as { briefingId?: string; send?: boolean };
-  const { briefingId, send = false } = body;
-
-  if (!briefingId) {
+  const reqBody = await request.json().catch(() => null);
+  const zodResult = GenerateSchema.safeParse(reqBody);
+  if (!zodResult.success) {
     return NextResponse.json({ error: "briefingId obrigatório." }, { status: 400 });
   }
+  const { briefingId, send } = zodResult.data;
 
   const briefing = await prisma.briefing.findUnique({
     where: { id: briefingId },
