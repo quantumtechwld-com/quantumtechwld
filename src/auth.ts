@@ -90,6 +90,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return "/portal/erro?reason=suspended";
       }
 
+      // Registra o último acesso bem-sucedido
+      await prisma.user.update({
+        where: { email: candidateEmail },
+        data:  { lastLoginAt: new Date() },
+      });
+
       return true;
     },
     // Chamado ao criar/renovar o JWT. `user` só existe no momento do signin.

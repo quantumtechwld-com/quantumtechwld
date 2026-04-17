@@ -14,12 +14,14 @@ export default async function AdminUsersPage() {
       { status: "asc" },   // PENDING primeiro dentro de CLIENT
     ],
     select: {
-      id:      true,
-      name:    true,
-      email:   true,
-      role:    true,
-      status:  true,
-      company: true,
+      id:            true,
+      name:          true,
+      email:         true,
+      role:          true,
+      status:        true,
+      company:       true,
+      emailVerified: true,
+      lastLoginAt:   true,
       _count:  { select: { briefings: true, orders: true } },
     },
   });

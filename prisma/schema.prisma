@@ -45,6 +45,7 @@ model User {
   phone         String?
   company       String?
   locale        String     @default("pt")
+  lastLoginAt   DateTime?
   accounts      Account[]
   sessions      Session[]
   briefings     Briefing[]
