@@ -40,6 +40,19 @@ export default async function PortalPage() {
       where: { user: { email: session.user.email } },
       orderBy: { createdAt: "desc" },
       take: 50,
+      select: {
+        id:             true,
+        projectType:    true,
+        painPoints:     true,
+        status:         true,
+        budget:         true,
+        timeline:       true,
+        complexityScore: true,
+        hoursMin:       true,
+        hoursMax:       true,
+        features:       true,
+        createdAt:      true,
+      },
     }),
     db.order.findMany({
       where: {
