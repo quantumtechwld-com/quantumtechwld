@@ -30,3 +30,22 @@
 - Work through each checklist item systematically.
 - Keep communication concise and focused.
 - Follow development best practices.
+
+## CRÍTICO: Pre-commit hooks são INTOCÁVEIS
+
+O projeto possui um pipeline de segurança obrigatório via Husky (`.husky/pre-commit`):
+- Camada 1: **gitleaks** — detecção de secrets/credenciais nos arquivos staged
+- Camada 2: **tsc --noEmit** — verificação estrutural TypeScript (Next.js + Prisma strict)
+- Camada 3: **lint-staged** — ESLint com `eslint-plugin-security` (SAST) + `eslint-plugin-no-secrets`
+
+### PROIBIDO:
+- NUNCA sugerir ou executar `git commit --no-verify`
+- NUNCA sugerir ou executar `git commit -n`
+- NUNCA desabilitar, modificar ou contornar os hooks do Husky
+- NUNCA remover `"postinstall": "prisma generate && husky"` do `package.json`
+
+### Fluxo correto quando um hook falha:
+1. Identificar qual camada falhou (gitleaks / tsc / eslint)
+2. Corrigir o problema na origem
+3. Re-stagear os arquivos corrigidos
+4. Commitar normalmente (sem flags de bypass)

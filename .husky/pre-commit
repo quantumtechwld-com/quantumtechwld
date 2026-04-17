@@ -1,0 +1,44 @@
+#!/bin/sh
+# =============================================================================
+# PRE-COMMIT HOOK — Quantum Technology Agency
+# Camadas de segurança obrigatórias antes de qualquer commit.
+# NUNCA usar `git commit --no-verify` ou `-n` para bypassar este hook.
+# =============================================================================
+
+# --- Camada 1: GITLEAKS — Detecção de secrets no staging area ---
+echo "🔍 [gitleaks] Verificando secrets nos arquivos staged..."
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --no-banner
+  if [ $? -ne 0 ]; then
+    echo "❌ [gitleaks] Secrets detectados. Remova antes de commitar."
+    exit 1
+  fi
+  echo "✅ [gitleaks] Nenhum secret encontrado."
+else
+  echo "⚠️  [gitleaks] Não instalado — instale para proteção máxima:"
+  echo "   Windows : winget install gitleaks"
+  echo "   macOS   : brew install gitleaks"
+  echo "   Linux   : https://github.com/gitleaks/gitleaks/releases"
+  echo "   A camada eslint-plugin-no-secrets está ativa como fallback."
+fi
+
+# --- Camada 2: TypeScript (structural + Next.js + Prisma) ---
+echo "🔧 [tsc] Verificando tipos (Next.js + Prisma strict)..."
+npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo "❌ [tsc] Erros de tipo encontrados. Corrija antes de commitar."
+  exit 1
+fi
+echo "✅ [tsc] Tipos OK."
+
+# --- Camada 3: ESLint (SAST: security + no-secrets + next) ---
+echo "🛡️  [lint-staged] Executando ESLint com camadas de segurança..."
+npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ [lint-staged] Violações ESLint encontradas. Corrija antes de commitar."
+  exit 1
+fi
+echo "✅ [lint-staged] ESLint OK."
+
+echo ""
+echo "✅ Pre-commit concluído — commit autorizado."
