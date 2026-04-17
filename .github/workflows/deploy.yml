@@ -46,6 +46,11 @@ jobs:
         # Tighten para --audit-level=high após resolver vulnerabilidades transitivas de deps
         run: npm audit --audit-level=critical
 
+      - name: SonarCloud SAST
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   # ──────────────────────────────────────────────────────────────────────────
   # CAMADA 2 — Build & Empacotamento
   # ──────────────────────────────────────────────────────────────────────────
