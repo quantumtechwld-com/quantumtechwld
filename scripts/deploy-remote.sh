@@ -38,7 +38,8 @@ cd "$APP_DIR"
 sudo chown -R ubuntu:ubuntu "$APP_DIR" 2>/dev/null || true
 # Remove node_modules completamente para instalação limpa
 rm -rf node_modules
-NODE_OPTIONS="--max-old-space-size=384" npm ci --omit=dev --prefer-offline
+# npm install em vez de npm ci: evita falha de lock file mismatch entre versões do npm (CI usa Node 24, EC2 pode ter versão diferente)
+NODE_OPTIONS="--max-old-space-size=384" npm install --omit=dev --prefer-offline
 
 echo "==> Gerando Prisma Client..."
 # Necessário após npm ci --omit=dev porque o prisma CLI fica em devDependencies
