@@ -50,3 +50,24 @@ export async function PATCH(
 
   return NextResponse.json({ user });
 }
+
+// DELETE /api/admin/users/[id] — remove permanentemente um utilizador
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  if (id === session.user.id) {
+    return NextResponse.json({ error: "Não pode excluir a sua própria conta." }, { status: 400 });
+  }
+
+  await prisma.user.delete({ where: { id } });
+
+  return NextResponse.json({ ok: true });
+}

@@ -39,6 +39,7 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
   const [users, setUsers]               = useState<UserRow[]>(initial);
   const [loadingId, setLoadingId]       = useState<string | null>(null);
   const [resendingId, setResendingId]   = useState<string | null>(null);
+  const [deletingId, setDeletingId]     = useState<string | null>(null);
   const [inviteEmail, setInviteEmail]   = useState("");
   const [inviteName, setInviteName]     = useState("");
   const [inviteLocale, setInviteLocale] = useState<"pt" | "en" | "es">("pt");
@@ -80,6 +81,21 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
       alert(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setResendingId(null);
+    }
+  }
+
+  async function handleDelete(userId: string, email: string) {
+    if (!confirm(`Excluir permanentemente o utilizador ${email}? Esta ação não pode ser desfeita.`)) return;
+    setDeletingId(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Falha ao excluir.");
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro inesperado.");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -127,9 +143,11 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
               users={pending}
               loadingId={loadingId}
               resendingId={resendingId}
+              deletingId={deletingId}
               onStatus={(id, s) => patchUser(id, { status: s })}
               onRole={(id, r)   => patchUser(id, { role:   r })}
               onResend={handleResend}
+              onDelete={handleDelete}
             />
           </div>
         </section>
@@ -145,9 +163,11 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
             users={rest}
             loadingId={loadingId}
             resendingId={resendingId}
+            deletingId={deletingId}
             onStatus={(id, s) => patchUser(id, { status: s })}
             onRole={(id, r)   => patchUser(id, { role:   r })}
             onResend={handleResend}
+            onDelete={handleDelete}
           />
         </div>
       </section>
@@ -215,16 +235,20 @@ function UserTable({
   users,
   loadingId,
   resendingId,
+  deletingId,
   onStatus,
   onRole,
   onResend,
+  onDelete,
 }: Readonly<{
   users:       UserRow[];
   loadingId:   string | null;
   resendingId: string | null;
+  deletingId:  string | null;
   onStatus:    (id: string, status: UserStatus) => void;
   onRole:      (id: string, role:   UserRole)   => void;
   onResend:    (id: string, email:  string)     => void;
+  onDelete:    (id: string, email:  string)     => void;
 }>) {
   if (users.length === 0) {
     return (
@@ -250,6 +274,7 @@ function UserTable({
           {users.map((u) => {
             const busy      = loadingId === u.id;
             const resending = resendingId === u.id;
+            const deleting  = deletingId === u.id;
             return (
               <tr key={u.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
                 <td className="px-5 py-4">
@@ -329,6 +354,14 @@ function UserTable({
                         color="sky"
                         busy={resending}
                         onClick={() => onResend(u.id, u.email!)}
+                      />
+                    )}
+                    <ActionBtn
+                      label={deleting ? "A excluir…" : "✕ Excluir"}
+                      color="red"
+                      busy={deleting}
+                      onClick={() => onDelete(u.id, u.email ?? u.id)}
+                    />
                       />
                     )}
                   </div>
