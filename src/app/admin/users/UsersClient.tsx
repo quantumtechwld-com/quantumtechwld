@@ -362,8 +362,6 @@ function UserTable({
                       busy={deleting}
                       onClick={() => onDelete(u.id, u.email ?? u.id)}
                     />
-                      />
-                    )}
                   </div>
                 </td>
               </tr>
