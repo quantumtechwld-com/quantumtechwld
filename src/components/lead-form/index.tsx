@@ -78,9 +78,13 @@ export default function LeadForm() {
         service: data.projectType,
         message: data.painPoints,
       };
+      const csrf = document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("__csrf="))
+        ?.split("=")[1] ?? "";
       const res = await fetch("/api/lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrf },
         body: JSON.stringify(payload),
       });
       if (!res.ok) {

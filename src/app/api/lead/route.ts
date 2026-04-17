@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { computeComplexity } from "@/lib/complexity";
 import { sendMail } from "@/lib/email";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { verifyCsrf } from "@/lib/csrf";
 
 function escapeHtml(str: string): string {
   return str
@@ -38,6 +39,11 @@ type LeadPayload = z.infer<typeof LeadSchema>;
 
 export async function POST(request: NextRequest) {
   try {
+    // CSRF double-submit cookie validation
+    if (!verifyCsrf(request)) {
+      return NextResponse.json({ error: "Invalid CSRF token." }, { status: 403 });
+    }
+
     // Rate limiting por IP
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
       ?? request.headers.get("x-real-ip")

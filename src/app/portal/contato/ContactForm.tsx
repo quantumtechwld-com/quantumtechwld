@@ -25,9 +25,13 @@ export function ContactForm() {
 
     setLoading(true);
     try {
+      const csrf = document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("__csrf="))
+        ?.split("=")[1] ?? "";
       const res = await fetch("/api/contact", {
         method:  "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrf },
         body: JSON.stringify({ name: name.trim(), email: email.trim(), subject: subject.trim(), message: message.trim() }),
       });
 

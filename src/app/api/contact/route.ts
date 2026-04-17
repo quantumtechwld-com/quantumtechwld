@@ -3,6 +3,7 @@ import { z } from "zod";
 import { sendMail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { verifyCsrf } from "@/lib/csrf";
 
 // 3 contactos por IP por 10 minutos
 const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests: 3 });
@@ -17,6 +18,11 @@ const ContactSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // CSRF double-submit cookie validation
+  if (!verifyCsrf(request)) {
+    return NextResponse.json({ error: "Invalid CSRF token." }, { status: 403 });
+  }
+
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   if (isRateLimited(ip)) {
     return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
