@@ -16,6 +16,7 @@
     "@lordicon/element": "^2.1.0",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "@sentry/nextjs": "^10.49.0",
     "gsap": "^3.14.2",
     "lucide-react": "^1.8.0",
     "next": "16.1.6",
