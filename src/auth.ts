@@ -90,12 +90,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return "/portal/erro?reason=suspended";
       }
 
-      // Registra o último acesso bem-sucedido
-      await prisma.user.update({
-        where: { email: candidateEmail },
-        data:  { lastLoginAt: new Date() },
-      });
-
       return true;
     },
     // Chamado ao criar/renovar o JWT. `user` só existe no momento do signin.
@@ -115,6 +109,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.status = token.status as "PENDING" | "ACTIVE" | "SUSPENDED";
       }
       return session;
+    },
+  },
+  events: {
+    // Disparado APÓS o token ser verificado e a sessão criada (clique no magic link).
+    // Diferente do callbacks.signIn que é chamado ao enviar o email.
+    async signIn({ user }) {
+      if (user.email) {
+        await prisma.user.update({
+          where: { email: user.email },
+          data:  { lastLoginAt: new Date() },
+        });
+      }
     },
   },
 });

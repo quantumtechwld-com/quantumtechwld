@@ -257,12 +257,11 @@ function UserTable({
                   <p className="text-white/40 text-xs mt-0.5">{u.email}</p>
                   {u.company && <p className="text-white/30 text-xs">{u.company}</p>}
                   {(() => {
-                    if (u.lastLoginAt) {
-                      const d = new Date(u.lastLoginAt);
-                      return <p className="text-emerald-400 text-xs mt-1">✓ Último acesso {d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })} {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p>;
-                    }
-                    if (u.emailVerified) {
-                      return <p className="text-sky-400/70 text-xs mt-1">✓ Verificado (sem sessão registada)</p>;
+                    const accessDate = u.lastLoginAt ?? u.emailVerified;
+                    if (accessDate) {
+                      const d = new Date(accessDate);
+                      const label = u.lastLoginAt ? "Último acesso" : "Acessou em";
+                      return <p className="text-emerald-400 text-xs mt-1">✓ {label} {d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })} {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p>;
                     }
                     return <p className="text-amber-400/70 text-xs mt-1">⏳ Nunca acessou</p>;
                   })()}
