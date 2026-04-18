@@ -79,7 +79,7 @@ export default async function PortalPage() {
       <div className="mb-8">
         <p className="text-sm uppercase tracking-widest text-accent-light">{t("tagline")}</p>
         <h1 className="mt-1 text-3xl font-bold text-white">{t("heading")}</h1>
-        <p className="mt-1 text-sm text-slate-400">{session.user.email}</p>
+        <p className="mt-1 text-sm font-semibold text-white">{session.user.name ?? session.user.email}</p>
       </div>
 
       {/* Cards de estatísticas */}
@@ -96,7 +96,7 @@ export default async function PortalPage() {
             <Clock size={15} className="text-amber-300" />
           </div>
           <p className="text-2xl font-bold text-white">{activeOrderCount}</p>
-          <p className="mt-0.5 text-xs text-slate-400">Pedidos activos</p>
+          <p className="mt-0.5 text-xs text-slate-400">Pedidos ativos</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
           <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15">
