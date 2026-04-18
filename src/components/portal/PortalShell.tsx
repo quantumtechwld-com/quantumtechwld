@@ -11,12 +11,14 @@ export default async function PortalShell({ children }: Readonly<Props>) {
   const email = session?.user?.email ?? "";
 
   let userName: string | null = null;
+  let userImage: string | null = null;
   if (email) {
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { name: true },
+      select: { name: true, image: true },
     });
-    userName = user?.name ?? null;
+    userName  = user?.name  ?? null;
+    userImage = user?.image ?? null;
   }
 
   const initial = (userName ?? email).charAt(0).toUpperCase() || "?";
@@ -27,6 +29,7 @@ export default async function PortalShell({ children }: Readonly<Props>) {
         userName={userName}
         userEmail={email}
         userInitial={initial}
+        userImage={userImage}
       />
       <main className="px-4 pb-16 pt-6 md:px-6">
         {children}

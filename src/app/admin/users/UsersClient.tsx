@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Clock } from "lucide-react";
 
 type UserStatus = "PENDING" | "ACTIVE" | "SUSPENDED";
@@ -10,6 +10,7 @@ interface UserRow {
   id:            string;
   name:          string | null;
   email:         string | null;
+  image:         string | null;
   role:          UserRole;
   status:        UserStatus;
   company:       string | null;
@@ -40,11 +41,38 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
   const [loadingId, setLoadingId]       = useState<string | null>(null);
   const [resendingId, setResendingId]   = useState<string | null>(null);
   const [deletingId, setDeletingId]     = useState<string | null>(null);
+  const [uploadingId, setUploadingId]   = useState<string | null>(null);
   const [inviteEmail, setInviteEmail]   = useState("");
   const [inviteName, setInviteName]     = useState("");
   const [inviteLocale, setInviteLocale] = useState<"pt" | "en" | "es">("pt");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteMsg, setInviteMsg]       = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  async function handleAvatarUpload(userId: string, file: File) {
+    setUploadingId(userId);
+    try {
+      const image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Erro ao ler ficheiro."));
+        reader.readAsDataURL(file);
+      });
+      const res  = await fetch(`/api/admin/users/${userId}`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ image }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Falha no upload.");
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, image: json.user.image } : u))
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro inesperado.");
+    } finally {
+      setUploadingId(null);
+    }
+  }
 
   async function patchUser(userId: string, data: { status?: string; role?: string }) {
     setLoadingId(userId);
@@ -144,10 +172,12 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
               loadingId={loadingId}
               resendingId={resendingId}
               deletingId={deletingId}
+              uploadingId={uploadingId}
               onStatus={(id, s) => patchUser(id, { status: s })}
               onRole={(id, r)   => patchUser(id, { role:   r })}
               onResend={handleResend}
               onDelete={handleDelete}
+              onAvatarUpload={handleAvatarUpload}
             />
           </div>
         </section>
@@ -164,10 +194,12 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
             loadingId={loadingId}
             resendingId={resendingId}
             deletingId={deletingId}
+            uploadingId={uploadingId}
             onStatus={(id, s) => patchUser(id, { status: s })}
             onRole={(id, r)   => patchUser(id, { role:   r })}
             onResend={handleResend}
             onDelete={handleDelete}
+            onAvatarUpload={handleAvatarUpload}
           />
         </div>
       </section>
@@ -231,24 +263,68 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
 
 // ─── Sub-componente tabela ────────────────────────────────────────────────────
 
+function AvatarCell({ user, uploading, onUpload }: Readonly<{
+  user:     UserRow;
+  uploading: boolean;
+  onUpload: (file: File) => void;
+}>) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const initial  = (user.name ?? user.email ?? "?")[0].toUpperCase();
+
+  return (
+    <button
+      type="button"
+      title={uploading ? "A enviar…" : "Clique para alterar foto"}
+      disabled={uploading}
+      onClick={() => inputRef.current?.click()}
+      className="relative mr-3 shrink-0 h-9 w-9 rounded-full overflow-hidden border border-white/15 bg-white/5 hover:border-accent/60 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-accent/50"
+    >
+      {user.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={user.image} alt={user.name ?? "avatar"} className="h-full w-full object-cover" />
+      ) : (
+        <span className="text-xs font-bold text-white/60">{initial}</span>
+      )}
+      {uploading && (
+        <span className="absolute inset-0 flex items-center justify-center bg-black/60 text-[10px] text-white">…</span>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="sr-only"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onUpload(f);
+          e.target.value = "";
+        }}
+      />
+    </button>
+  );
+}
+
 function UserTable({
   users,
   loadingId,
   resendingId,
   deletingId,
+  uploadingId,
   onStatus,
   onRole,
   onResend,
   onDelete,
+  onAvatarUpload,
 }: Readonly<{
-  users:       UserRow[];
-  loadingId:   string | null;
-  resendingId: string | null;
-  deletingId:  string | null;
-  onStatus:    (id: string, status: UserStatus) => void;
-  onRole:      (id: string, role:   UserRole)   => void;
-  onResend:    (id: string, email:  string)     => void;
-  onDelete:    (id: string, email:  string)     => void;
+  users:          UserRow[];
+  loadingId:      string | null;
+  resendingId:    string | null;
+  deletingId:     string | null;
+  uploadingId:    string | null;
+  onStatus:       (id: string, status: UserStatus) => void;
+  onRole:         (id: string, role:   UserRole)   => void;
+  onResend:       (id: string, email:  string)     => void;
+  onDelete:       (id: string, email:  string)     => void;
+  onAvatarUpload: (id: string, file:   File)       => void;
 }>) {
   if (users.length === 0) {
     return (
@@ -278,6 +354,13 @@ function UserTable({
             return (
               <tr key={u.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
                 <td className="px-5 py-4">
+                  <div className="flex items-start">
+                  <AvatarCell
+                    user={u}
+                    uploading={uploadingId === u.id}
+                    onUpload={(f) => onAvatarUpload(u.id, f)}
+                  />
+                  <div>
                   <p className="font-medium text-white">{u.name ?? <span className="text-white/30 italic">sem nome</span>}</p>
                   <p className="text-white/40 text-xs mt-0.5">{u.email}</p>
                   {u.company && <p className="text-white/30 text-xs">{u.company}</p>}
@@ -290,6 +373,8 @@ function UserTable({
                     }
                     return <p className="text-amber-400/70 text-xs mt-1">⏳ Nunca acessou</p>;
                   })()}
+                  </div>
+                  </div>
                 </td>
                 <td className="px-5 py-4">
                   <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[u.status]}`}>

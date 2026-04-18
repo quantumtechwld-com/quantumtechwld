@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/SignOutButton";
 import LogoAnimated from "@/components/home/LogoAnimated";
+import LogoTextAnimated from "@/components/home/LogoTextAnimated";
 import {
   User,
   FileText,
@@ -27,12 +28,13 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 interface Props {
-  userName?: string | null;
+  userName?:  string | null;
   userEmail?: string | null;
   userInitial?: string;
+  userImage?: string | null;
 }
 
-export default function PortalSidebar({ userName, userEmail, userInitial = "?" }: Readonly<Props>) {
+export default function PortalSidebar({ userName, userEmail, userInitial = "?", userImage }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -80,14 +82,20 @@ export default function PortalSidebar({ userName, userEmail, userInitial = "?" }
           <Menu size={20} />
         </button>
 
-        {/* Logo centrado */}
-        <Link href="/portal" className="absolute left-1/2 -translate-x-1/2">
+        {/* Logo centrado: ícone + texto (igual à home pública) */}
+        <Link href="/portal" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <LogoAnimated size={28} />
+          <LogoTextAnimated />
         </Link>
 
         {/* Avatar */}
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/20 text-xs font-semibold text-accent-light ring-1 ring-accent/30">
-          {userInitial}
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full overflow-hidden bg-accent/20 text-xs font-semibold text-accent-light ring-1 ring-accent/30">
+          {userImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={userImage} alt={userName ?? "avatar"} className="h-full w-full object-cover" />
+          ) : (
+            userInitial
+          )}
         </div>
       </header>
 
@@ -113,8 +121,13 @@ export default function PortalSidebar({ userName, userEmail, userInitial = "?" }
         {/* Cabeçalho do drawer */}
         <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/20 text-sm font-semibold text-accent-light ring-1 ring-accent/30">
-              {userInitial}
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full overflow-hidden bg-accent/20 text-sm font-semibold text-accent-light ring-1 ring-accent/30">
+              {userImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={userImage} alt={userName ?? "avatar"} className="h-full w-full object-cover" />
+              ) : (
+                userInitial
+              )}
             </div>
             <div className="min-w-0">
               {userName && (

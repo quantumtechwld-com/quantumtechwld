@@ -16,6 +16,7 @@ export default async function AdminUsersPage() {
       id:            true,
       name:          true,
       email:         true,
+      image:         true,
       role:          true,
       status:        true,
       company:       true,
