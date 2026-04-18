@@ -9,6 +9,7 @@ import {
   tplOrderInProduction,
   tplOrderCompleted,
 } from "@/lib/email";
+import { appUrl } from "@/lib/app-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -141,7 +142,7 @@ async function updateOrderWithLock(
 
 type EmailContext = {
   action: string;
-  updated: { type: string; estimatedValue?: number | null; productionInfo?: string | null };
+  updated: { type: string; title?: string | null; estimatedValue?: number | null; productionInfo?: string | null };
   clientEmail: string;
   clientName: string;
   adminEmail: string;
@@ -152,21 +153,22 @@ type EmailContext = {
 
 function dispatchPostUpdateEmail(ctx: EmailContext) {
   const { action, updated, clientEmail, clientName, adminEmail, orderUrl, adminOrderUrl, adminNote } = ctx;
+  const orderTitle = updated.title ?? "";
   const adminActions: Record<string, () => Promise<void>> = {
     propose: () => sendMail({
       to: clientEmail,
       subject: "[DevFlow] Proposta de produção recebida",
-      html: tplOrderProposalSent({ clientName, orderType: updated.type, estimatedValue: updated.estimatedValue ?? 0, productionInfo: updated.productionInfo ?? "", orderUrl }),
+      html: tplOrderProposalSent({ clientName, orderType: updated.type, orderTitle, estimatedValue: updated.estimatedValue ?? 0, productionInfo: updated.productionInfo ?? "", orderUrl }),
     }),
     start_production: () => sendMail({
       to: clientEmail,
       subject: "[DevFlow] O seu pedido está em produção",
-      html: tplOrderInProduction({ clientName, orderType: updated.type, orderUrl }),
+      html: tplOrderInProduction({ clientName, orderType: updated.type, orderTitle, orderUrl }),
     }),
     complete: () => sendMail({
       to: clientEmail,
       subject: "[DevFlow] Pedido concluído",
-      html: tplOrderCompleted({ clientName, orderType: updated.type, orderUrl }),
+      html: tplOrderCompleted({ clientName, orderType: updated.type, orderTitle, orderUrl }),
     }),
     approve: () => sendMail({
       to: adminEmail,
@@ -224,7 +226,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       );
     }
 
-    const baseUrl    = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const baseUrl    = appUrl();
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
     const clientEmail = updated.client.email as string;
     const clientName  = (updated.client.name ?? "") as string;

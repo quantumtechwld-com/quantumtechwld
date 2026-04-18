@@ -8,6 +8,7 @@ import {
   tplProposalApprovedClient,
   tplRevisionRequested,
 } from "@/lib/email";
+import { appUrl } from "@/lib/app-url";
 
 type ProposalStatus = "DRAFT" | "SENT" | "REVISION" | "APPROVED" | "REJECTED";
 
@@ -78,7 +79,7 @@ async function handleSend(proposal: ProposalDoc) {
 
   // E-mail ao cliente
   const clientEmail: string = proposal.briefing.user.email;
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = appUrl();
   const proposalUrl = `${baseUrl}/portal/briefing/${proposal.briefingId}/proposta`;
 
   await sendMail({
@@ -128,7 +129,7 @@ async function handleApprove(proposal: ProposalDoc) {
 
   const clientEmail: string = proposal.briefing.user.email;
   const adminEmail = process.env.EMAIL_SERVER_USER ?? "";
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = appUrl();
   const adminUrl = `${baseUrl}/admin/briefing/${proposal.briefingId}`;
 
   // E-mail ao admin
@@ -187,7 +188,7 @@ async function handleRevision(proposal: ProposalDoc, note: string | undefined) {
   ]);
 
   const adminEmail = process.env.EMAIL_SERVER_USER ?? "";
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = appUrl();
   const adminUrl = `${baseUrl}/admin/briefing/${proposal.briefingId}`;
 
   await sendMail({

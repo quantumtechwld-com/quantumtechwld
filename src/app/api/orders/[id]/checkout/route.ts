@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { appUrl } from "@/lib/app-url";
 
 const isMock =
   !process.env.STRIPE_SECRET_KEY ||
@@ -47,7 +48,7 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   }
 
   const amountCents = Math.round(order.estimatedValue * 100);
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = appUrl();
 
   // SENSIVEL: cobranca real nao pode seguir idioma do usuario.
   // O valor persistido em estimatedValue e interpretado neste fluxo como EUR.

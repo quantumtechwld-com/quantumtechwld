@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { sendMail, tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin } from "@/lib/email";
+import { appUrl } from "@/lib/app-url";
 import type Stripe from "stripe";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
       include: { client: { select: { name: true, email: true } } },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const baseUrl = appUrl();
     const adminEmail = process.env.EMAIL_ADMIN ?? process.env.EMAIL_FROM ?? "";
 
     // Notify client

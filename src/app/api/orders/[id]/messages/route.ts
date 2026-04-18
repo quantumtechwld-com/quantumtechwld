@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { sendMail, tplOrderNewMessage } from "@/lib/email";
+import { appUrl } from "@/lib/app-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -78,7 +79,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
   // Notify the other party by email (fire-and-forget)
   const adminEmail = process.env.EMAIL_ADMIN ?? process.env.EMAIL_FROM ?? "";
-  const orderUrl = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}`;
+  const orderUrl = appUrl();
+  const orderTitle: string = order.title ?? "";
 
   if (isAdmin && order.client.email) {
     // Admin sent message → notify client
@@ -89,6 +91,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         recipientName: order.client.name ?? "",
         senderRole: "admin",
         orderType: order.type,
+        orderTitle,
         body: text,
         orderUrl: `${orderUrl}/portal/orders/${id}`,
       }),
@@ -103,6 +106,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         senderRole: "client",
         senderEmail: session.user.email,
         orderType: order.type,
+        orderTitle,
         body: text,
         orderUrl: `${orderUrl}/admin/orders/${id}`,
       }),

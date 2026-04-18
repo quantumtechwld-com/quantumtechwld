@@ -34,6 +34,7 @@ export function tplOrderReceived(opts: {
 export function tplOrderProposalSent(opts: {
   clientName: string;
   orderType: string;
+  orderTitle?: string;
   estimatedValue: number;
   productionInfo: string;
   orderUrl: string;
@@ -43,7 +44,7 @@ export function tplOrderProposalSent(opts: {
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Proposta recebida ✦</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
-        A equipa avaliou o seu pedido de <strong style="color:#fff">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</strong>
+        A equipa avaliou o seu pedido de <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         e enviou uma proposta de produção.
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
@@ -107,6 +108,7 @@ export function tplOrderRevisionAdmin(opts: {
 export function tplOrderInProduction(opts: {
   clientName: string;
   orderType: string;
+  orderTitle?: string;
   orderUrl: string;
 }) {
   return /* html */ `
@@ -114,7 +116,7 @@ export function tplOrderInProduction(opts: {
       <h1 style="font-size:22px;font-weight:700;color:#8b5cf6;margin:0 0 8px">O seu pedido está em produção 🚀</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
-        O seu pedido de <strong style="color:#fff">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</strong>
+        O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         entrou em produção. Pode acompanhar o estado no seu portal.
       </p>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#8b5cf6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
@@ -128,6 +130,7 @@ export function tplOrderInProduction(opts: {
 export function tplOrderCompleted(opts: {
   clientName: string;
   orderType: string;
+  orderTitle?: string;
   orderUrl: string;
 }) {
   return /* html */ `
@@ -135,7 +138,7 @@ export function tplOrderCompleted(opts: {
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido concluído ✓</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
-        O seu pedido de <strong style="color:#fff">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</strong>
+        O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         foi concluído com sucesso. Obrigado pela confiança!
       </p>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
@@ -151,18 +154,20 @@ export function tplOrderNewMessage(opts: {
   senderRole: "admin" | "client";
   senderEmail?: string;
   orderType: string;
+  orderTitle?: string;
   body: string;
   orderUrl: string;
 }) {
   const clientLabel = opts.senderEmail ? `o cliente (${opts.senderEmail})` : "o cliente";
   const senderLabel = opts.senderRole === "admin" ? "a equipa Quantum Technology" : clientLabel;
+  const orderLabel = opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType);
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Nova mensagem no pedido 💬</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.recipientName ? ` ${opts.recipientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
-        Recebeu uma nova mensagem de ${senderLabel} no pedido de
-        <strong style="color:#fff">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</strong>.
+        Recebeu uma nova mensagem de ${senderLabel} no pedido
+        <strong style="color:#fff">${orderLabel}</strong>.
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
         <p style="color:#e2e8f0;font-size:14px;margin:0;white-space:pre-wrap">${opts.body.slice(0, 500)}${opts.body.length > 500 ? "…" : ""}</p>

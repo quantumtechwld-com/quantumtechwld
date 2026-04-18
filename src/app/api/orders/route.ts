@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail, tplOrderReceived } from "@/lib/email";
 import { generateOrderRefCandidates } from "@/lib/order-ref";
+import { appUrl } from "@/lib/app-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     // Notificar admin por email
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
-    const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const baseUrl = appUrl();
     if (adminEmail) {
       sendMail({
         to: adminEmail,
