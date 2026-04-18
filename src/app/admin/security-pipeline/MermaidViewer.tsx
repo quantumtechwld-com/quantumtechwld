@@ -1,7 +1,6 @@
 "use client";
 
-import Script from "next/script";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const CHART = `flowchart TD
     A[Código no Repositório] --> B[Camada 1: Qualidade & Segurança<br>ESLint + SonarQube + SAST]
@@ -24,45 +23,45 @@ export function MermaidViewer() {
   const [rendered, setRendered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  async function handleLoad() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mermaid = (globalThis as any).mermaid;
-    if (!mermaid) return;
+  useEffect(() => {
+    let cancelled = false;
 
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: "dark",
-      themeVariables: {
-        primaryColor: "#1e293b",
-        primaryTextColor: "#e2e8f0",
-        primaryBorderColor: "#6366f1",
-        lineColor: "#818cf8",
-        secondaryColor: "#0f172a",
-        tertiaryColor: "#1e293b",
-        background: "#0f172a",
-        nodeBorder: "#6366f1",
-        clusterBkg: "#1e293b",
-        titleColor: "#e2e8f0",
-        edgeLabelBackground: "#1e293b",
-      },
-      flowchart: { curve: "basis", htmlLabels: true },
-    });
+    async function render() {
+      const mermaid = (await import("mermaid")).default;
+      if (cancelled) return;
 
-    if (containerRef.current) {
-      const { svg } = await mermaid.render("mermaid-diagram", CHART);
-      containerRef.current.innerHTML = svg;
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: "dark",
+        themeVariables: {
+          primaryColor: "#1e293b",
+          primaryTextColor: "#e2e8f0",
+          primaryBorderColor: "#6366f1",
+          lineColor: "#818cf8",
+          secondaryColor: "#0f172a",
+          tertiaryColor: "#1e293b",
+          background: "#0f172a",
+          nodeBorder: "#6366f1",
+          clusterBkg: "#1e293b",
+          titleColor: "#e2e8f0",
+          edgeLabelBackground: "#1e293b",
+        },
+        flowchart: { curve: "basis", htmlLabels: true },
+      });
+
+      if (containerRef.current && !cancelled) {
+        const { svg } = await mermaid.render("mermaid-diagram", CHART);
+        containerRef.current.innerHTML = svg;
+        setRendered(true);
+      }
     }
-    setRendered(true);
-  }
+
+    render();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
-    <>
-      <Script
-        src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
-        strategy="afterInteractive"
-        onLoad={handleLoad}
-      />
-
+    <div>
       <div
         ref={containerRef}
         className={`transition-opacity duration-500 ${rendered ? "opacity-100" : "opacity-0"}`}
@@ -73,6 +72,6 @@ export function MermaidViewer() {
           Carregando diagrama…
         </div>
       )}
-    </>
+    </div>
   );
 }
