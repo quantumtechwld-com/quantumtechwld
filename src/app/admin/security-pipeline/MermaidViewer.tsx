@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const CHART = `flowchart TD
     A[Código no Repositório] --> B[Camada 1: Qualidade & Segurança<br>ESLint + SonarQube + SAST]
@@ -21,12 +21,16 @@ const CHART = `flowchart TD
     I -- Não --> K[Relatório com<br>Falhas de Segurança]`;
 
 export function MermaidViewer() {
-  const [ready, setReady] = useState(false);
+  const [rendered, setRendered] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  function handleLoad() {
+  async function handleLoad() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).mermaid?.initialize({
-      startOnLoad: true,
+    const mermaid = (globalThis as any).mermaid;
+    if (!mermaid) return;
+
+    mermaid.initialize({
+      startOnLoad: false,
       theme: "dark",
       themeVariables: {
         primaryColor: "#1e293b",
@@ -43,7 +47,12 @@ export function MermaidViewer() {
       },
       flowchart: { curve: "basis", htmlLabels: true },
     });
-    setReady(true);
+
+    if (containerRef.current) {
+      const { svg } = await mermaid.render("mermaid-diagram", CHART);
+      containerRef.current.innerHTML = svg;
+    }
+    setRendered(true);
   }
 
   return (
@@ -55,12 +64,11 @@ export function MermaidViewer() {
       />
 
       <div
-        className={`mermaid transition-opacity duration-500 ${ready ? "opacity-100" : "opacity-0"}`}
-      >
-        {CHART}
-      </div>
+        ref={containerRef}
+        className={`transition-opacity duration-500 ${rendered ? "opacity-100" : "opacity-0"}`}
+      />
 
-      {!ready && (
+      {!rendered && (
         <div className="flex items-center justify-center py-20 text-slate-400 text-sm animate-pulse">
           Carregando diagrama…
         </div>
