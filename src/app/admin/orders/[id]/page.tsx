@@ -75,8 +75,9 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-white">
-            {ORDER_TYPE_LABEL[order.type] ?? order.type}
+            {order.title ?? (ORDER_TYPE_LABEL[order.type] ?? order.type)}
           </h1>
+          <p className="mt-0.5 text-xs text-slate-500">{ORDER_TYPE_LABEL[order.type] ?? order.type}</p>
           <div className="mt-1.5 flex items-center gap-3 flex-wrap">
             {order.orderRef && (
               <span className="font-mono text-sm text-slate-300 bg-white/5 border border-white/15 rounded px-2.5 py-1">

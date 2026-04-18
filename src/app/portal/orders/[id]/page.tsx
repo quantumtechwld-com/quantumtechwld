@@ -116,8 +116,9 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         <div className="mt-2 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-white">
-              {orderTypeLabel(order.type)}
+              {order.title ?? orderTypeLabel(order.type)}
             </h1>
+            <p className="mt-0.5 text-xs text-slate-500">{orderTypeLabel(order.type)}</p>
             {order.orderRef && (
               <p className="mt-1 font-mono text-sm text-slate-400">
                 {t("orderRef")}{" "}

@@ -3,6 +3,7 @@ import { ORDER_TYPE_LABEL, URGENCY_LABEL } from "@/lib/constants";
 export function tplOrderReceived(opts: {
   clientEmail: string;
   orderType: string;
+  orderTitle: string;
   urgency: string;
   description: string;
   adminUrl: string;
@@ -14,6 +15,7 @@ export function tplOrderReceived(opts: {
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> submeteu um novo pedido.
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
+        ${opts.orderTitle ? `<p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Título</p><p style="color:#fff;font-weight:700;font-size:16px;margin:0 0 16px">${opts.orderTitle}</p>` : ""}
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Tipo</p>
         <p style="color:#fff;font-weight:600;margin:0 0 16px">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</p>
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Urgência</p>

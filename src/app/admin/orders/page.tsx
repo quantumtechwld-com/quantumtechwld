@@ -131,8 +131,11 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
                   className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition hover:bg-white/8 hover:border-accent/30"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-white group-hover:text-violet-300 transition-colors">
+                        {o.title ?? ORDER_TYPE_LABEL[o.type] ?? o.type}
+                      </span>
+                      <span className="text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
                         {ORDER_TYPE_LABEL[o.type] ?? o.type}
                       </span>
                       {o.orderRef && (

@@ -188,6 +188,7 @@ model Order {
   clientId        String
   client          User        @relation(fields: [clientId], references: [id], onDelete: Cascade)
   type            String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other"
+  title           String?     // título livre dado pelo cliente (ex: "Integração Pix")
   description     String      @db.Text
   urgency         String      @default("normal") // "low" | "normal" | "high" | "critical"
   attachments     String[]    // URLs dos ficheiros enviados

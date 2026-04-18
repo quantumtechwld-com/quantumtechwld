@@ -31,27 +31,51 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastMsgIdRef = useRef<string | null>(null);
+  const scrollAfterRenderRef = useRef<"instant" | "smooth" | null>(null);
+
+  /** Retorna true se a lista estiver a ≤80px do final. */
+  function isAtBottom(): boolean {
+    const el = listRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  }
 
   const fetchMessages = useCallback(async () => {
+    // Pausa o fetch quando a aba está em background
+    if (document.visibilityState === "hidden") return;
     const res = await fetch(`/api/orders/${orderId}/messages`);
-    if (res.ok) {
-      const data = await res.json() as { messages: Message[] };
-      setMessages(data.messages);
+    if (!res.ok) return;
+    const data = await res.json() as { messages: Message[] };
+    const newLastId = data.messages.at(-1)?.id ?? null;
+    const isFirstLoad = lastMsgIdRef.current === null;
+    const hasNew = newLastId !== lastMsgIdRef.current;
+    // Sem mensagens novas → nenhum setState, nenhum rerender
+    if (!hasNew) return;
+    const wasAtBottom = isFirstLoad || isAtBottom();
+    lastMsgIdRef.current = newLastId;
+    setMessages(data.messages);
+    if (wasAtBottom) {
+      scrollAfterRenderRef.current = isFirstLoad ? "instant" : "smooth";
     }
   }, [orderId]);
 
-  // Initial load + polling
+  // Scroll pós-render — só quando explicitamente sinalizado
+  useEffect(() => {
+    if (scrollAfterRenderRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: scrollAfterRenderRef.current });
+      scrollAfterRenderRef.current = null;
+    }
+  }, [messages]);
+
+  // Carga inicial + polling (pausado quando a aba está em background)
   useEffect(() => {
     void fetchMessages();
     const interval = setInterval(() => { void fetchMessages(); }, pollingInterval);
     return () => clearInterval(interval);
   }, [fetchMessages, pollingInterval]);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   async function handleSend() {
     const text = body.trim();
@@ -93,7 +117,7 @@ export function MessagesPanel({ orderId, currentUserId, pollingInterval = 15000 
       </div>
 
       {/* Message list */}
-      <div className="flex flex-col gap-3 px-5 py-4 min-h-30 max-h-96 overflow-y-auto">
+      <div ref={listRef} className="flex flex-col gap-3 px-5 py-4 min-h-30 max-h-96 overflow-y-auto">
         {messages.length === 0 ? (
           <p className="text-xs text-slate-600 text-center mt-6">
             {t("messagesEmpty")}

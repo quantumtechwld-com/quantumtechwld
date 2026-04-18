@@ -12,7 +12,7 @@ const VALID_URGENCIES = ["low", "normal", "high", "critical"] as const;
 
 /** Cria o pedido com orderRef único num único INSERT — sem race condition. */
 async function createOrderWithRef(
-  data: { clientId: string; type: string; description: string; urgency: string; attachments: string[] },
+  data: { clientId: string; type: string; title?: string; description: string; urgency: string; attachments: string[] },
   clientName: string,
 ) {
   for (const candidate of generateOrderRefCandidates(clientName, new Date(), 5)) {
@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json()) as {
       type?: string;
+      title?: string;
       description?: string;
       urgency?: string;
       attachments?: string[];
@@ -84,6 +85,9 @@ export async function POST(request: NextRequest) {
 
     if (!body.type || !VALID_TYPES.includes(body.type as typeof VALID_TYPES[number])) {
       return NextResponse.json({ error: "Tipo de pedido inválido." }, { status: 422 });
+    }
+    if (!body.title?.trim() || body.title.trim().length > 120) {
+      return NextResponse.json({ error: "Título obrigatório (máx. 120 caracteres)." }, { status: 422 });
     }
     if (!body.description?.trim()) {
       return NextResponse.json({ error: "A descrição é obrigatória." }, { status: 422 });
@@ -98,6 +102,7 @@ export async function POST(request: NextRequest) {
       {
         clientId:    user.id,
         type:        body.type,
+        title:       body.title.trim(),
         description: body.description.trim(),
         urgency:     body.urgency ?? "normal",
         attachments: body.attachments ?? [],
@@ -114,10 +119,11 @@ export async function POST(request: NextRequest) {
     if (adminEmail) {
       sendMail({
         to: adminEmail,
-        subject: `[DevFlow] Novo pedido de ${user.email}`,
+        subject: `[DevFlow] Novo pedido de ${user.email}: ${order.title ?? order.type}`,
         html: tplOrderReceived({
           clientEmail:  user.email!,
           orderType:    order.type,
+          orderTitle:   order.title ?? "",
           urgency:      order.urgency,
           description:  order.description,
           adminUrl:     `${baseUrl}/admin/orders/${order.id}`,

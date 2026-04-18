@@ -103,7 +103,7 @@ export default async function OrdersPage() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {orderList.map((o: any) => {
+          {orderList.map((o) => {
             const unread = unreadCount(o.id, o.messages);
             return (
             <Link
@@ -115,8 +115,11 @@ export default async function OrdersPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold text-white group-hover:text-accent-light transition-colors">
-                      {orderTypeLabel(o.type)}
+                      {o.title ?? orderTypeLabel(o.type)}
                     </p>
+                    <span className="text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
+                      {orderTypeLabel(o.type)}
+                    </span>
                     {o.orderRef && (
                       <span className="font-mono text-xs text-slate-500 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
                         {o.orderRef}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 export function NewOrderForm() {
   const t = useTranslations("portal");
@@ -24,6 +25,7 @@ export function NewOrderForm() {
   ];
 
   const [type,        setType]        = useState("new_feature");
+  const [title,       setTitle]       = useState("");
   const [description, setDescription] = useState("");
   const [urgency,     setUrgency]     = useState("normal");
   const [loading,     setLoading]     = useState(false);
@@ -32,13 +34,14 @@ export function NewOrderForm() {
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    if (!title.trim() || title.trim().length > 120) { setError(t("newOrderTitleRequired")); return; }
     if (!description.trim()) { setError(t("newOrderErrRequired")); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/orders", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ type, description: description.trim(), urgency }),
+        body:    JSON.stringify({ type, title: title.trim(), description: description.trim(), urgency }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -71,6 +74,22 @@ export function NewOrderForm() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label htmlFor="order-title" className="block text-sm font-medium text-slate-300 mb-2">
+          {t("newOrderTitleLabel")} <span className="text-red-400">*</span>
+        </label>
+        <input
+          id="order-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={120}
+          placeholder={t("newOrderTitlePlaceholder")}
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none"
+        />
+        <p className="mt-1 text-right text-[10px] text-slate-600">{title.length}/120</p>
       </div>
 
       <div>
@@ -114,12 +133,12 @@ export function NewOrderForm() {
       )}
 
       <div className="flex items-center justify-end gap-3 pt-2">
-        <a
+        <Link
           href="/portal/orders"
           className="rounded-xl border border-white/20 px-5 py-2.5 text-sm text-slate-300 transition hover:bg-white/10"
         >
           {t("newOrderCancel")}
-        </a>
+        </Link>
         <button
           type="submit"
           disabled={loading}
