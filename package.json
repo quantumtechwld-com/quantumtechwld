@@ -6,7 +6,7 @@
     "dev": "next dev",
     "start:dev": "next build && next start",
     "build": "prisma generate && next build",
-    "postinstall": "prisma generate && husky",
+    "postinstall": "prisma generate && (husky || true)",
     "migrate:deploy": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint",
