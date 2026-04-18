@@ -234,12 +234,12 @@ export default async function PortalPage() {
         </div>
       )}
 
-      {/* CTA novo projecto */}
+      {/* CTA novo projeto */}
       {briefingCount > 0 && (
         <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-white/8 bg-white/3 p-5">
           <div>
-            <p className="text-sm font-medium text-white">Novo projecto?</p>
-            <p className="mt-0.5 text-xs text-slate-400">Submeta um pedido directamente pelo portal.</p>
+            <p className="text-sm font-medium text-white">Novo projeto?</p>
+            <p className="mt-0.5 text-xs text-slate-400">Envie um pedido diretamente pelo portal.</p>
           </div>
           <Link
             href="/portal/orders/new"

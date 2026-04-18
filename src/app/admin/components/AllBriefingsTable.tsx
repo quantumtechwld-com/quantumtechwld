@@ -30,7 +30,7 @@ export default function AllBriefingsTable({ briefings, PROJECT_LABEL, STATUS_LAB
         <thead>
           <tr className="border-b border-white/5 text-white/40 text-xs uppercase tracking-wider">
             <th className="px-6 py-3 text-left">Cliente</th>
-            <th className="px-6 py-3 text-left">Projecto</th>
+            <th className="px-6 py-3 text-left">Projeto</th>
             <th className="px-6 py-3 text-left">Estado</th>
             <th className="px-6 py-3 text-left">Escopo</th>
             <th className="px-6 py-3 text-left">Data</th>

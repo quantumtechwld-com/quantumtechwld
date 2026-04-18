@@ -115,7 +115,7 @@ export default async function AdminBriefingDetailPage({
         <div className="rounded-xl border border-white/8 bg-white/3 p-6 space-y-5">
           <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">Detalhes do Briefing</h2>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Detail label="Tipo de Projecto" value={PROJECT_LABEL[briefing.projectType] ?? briefing.projectType} />
+            <Detail label="Tipo de Projeto" value={PROJECT_LABEL[briefing.projectType] ?? briefing.projectType} />
             <Detail label="Orçamento" value={briefing.budget} />
             <Detail label="Prazo" value={briefing.timeline} />
             <Detail label="Público-Alvo" value={briefing.targetAudience} />

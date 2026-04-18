@@ -21,7 +21,7 @@ type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?:
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/portal/profile",    label: "Perfil",     icon: User,       description: "Dados da conta"          },
-  { href: "/portal",            label: "Briefing",   icon: FileText,   description: "Projectos & briefings", exact: true },
+  { href: "/portal",            label: "Briefing",   icon: FileText,   description: "Projetos & briefings", exact: true },
   { href: "/portal/orders",     label: "Pedidos",    icon: ShoppingBag,description: "Acompanhar pedidos"     },
   { href: "/portal/biblioteca", label: "Biblioteca", icon: BookOpen,   description: "Recursos & ficheiros"   },
   { href: "/portal/guide",      label: "Guia",       icon: BookMarked, description: "Como funciona"          },
