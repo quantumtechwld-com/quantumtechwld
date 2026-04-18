@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { SignOutButton } from "@/components/SignOutButton";
 import { getTranslations, getLocale } from "next-intl/server";
+import { FileText, Clock, CheckCircle2 } from "lucide-react";
 
 const STATUS_COLOR: Record<string, string> = {
   RECEIVED:        "bg-slate-500/30 text-slate-200",
@@ -35,23 +35,23 @@ export default async function PortalPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = prisma as any;
 
-  const [briefings, pendingOrders] = await Promise.all([
+  const [briefings, pendingOrders, briefingCount, activeOrderCount, completedOrderCount] = await Promise.all([
     prisma.briefing.findMany({
       where: { user: { email: session.user.email } },
       orderBy: { createdAt: "desc" },
-      take: 50,
+      take: 5,
       select: {
-        id:             true,
-        projectType:    true,
-        painPoints:     true,
-        status:         true,
-        budget:         true,
-        timeline:       true,
+        id:              true,
+        projectType:     true,
+        painPoints:      true,
+        status:          true,
+        budget:          true,
+        timeline:        true,
         complexityScore: true,
-        hoursMin:       true,
-        hoursMax:       true,
-        features:       true,
-        createdAt:      true,
+        hoursMin:        true,
+        hoursMax:        true,
+        features:        true,
+        createdAt:       true,
       },
     }),
     db.order.findMany({
@@ -62,50 +62,54 @@ export default async function PortalPage() {
       orderBy: { createdAt: "desc" },
       take: 3,
     }),
+    prisma.briefing.count({ where: { user: { email: session.user.email } } }),
+    db.order.count({
+      where: {
+        client: { email: session.user.email },
+        status: { in: ["PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED", "REVISION", "IN_PRODUCTION"] },
+      },
+    }),
+    db.order.count({ where: { client: { email: session.user.email }, status: "COMPLETED" } }),
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="order-2 min-w-0 lg:order-1">
-          <p className="text-sm uppercase tracking-widest text-accent-light">{t("tagline")}</p>
-          <h1 className="mt-1 text-3xl font-bold text-white">{t("heading")}</h1>
-          <p className="mt-1 truncate text-sm text-slate-400">{session.user.email}</p>
-        </div>
-        <div className="order-1 -mx-1 overflow-x-auto pb-1 lg:order-2 lg:mx-0 lg:overflow-visible lg:pb-0">
-          <div className="flex min-w-max items-center gap-2 px-1 lg:min-w-0 lg:flex-wrap lg:justify-end lg:px-0">
-            <Link
-              href="/portal/orders"
-              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-            >
-              {t("navOrders")}
-            </Link>
-            <Link
-              href="/portal/biblioteca"
-              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-            >
-              {t("navLibrary")}
-            </Link>
-            <Link
-              href="/portal/guide"
-              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-            >
-              {t("navGuide")}
-            </Link>
-            <Link
-              href="/portal/profile"
-              className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
-            >
-              {t("navProfile")}
-            </Link>
-            <SignOutButton className="whitespace-nowrap rounded-xl border border-white/20 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10" label={t("profileSignOut")} />
+    <main className="mx-auto w-full max-w-3xl px-6 py-10">
+
+      {/* Cabeçalho */}
+      <div className="mb-8">
+        <p className="text-sm uppercase tracking-widest text-accent-light">{t("tagline")}</p>
+        <h1 className="mt-1 text-3xl font-bold text-white">{t("heading")}</h1>
+        <p className="mt-1 text-sm text-slate-400">{session.user.email}</p>
+      </div>
+
+      {/* Cards de estatísticas */}
+      <div className="mb-8 grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
+          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15">
+            <FileText size={15} className="text-accent-light" />
           </div>
+          <p className="text-2xl font-bold text-white">{briefingCount}</p>
+          <p className="mt-0.5 text-xs text-slate-400">Briefings</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
+          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15">
+            <Clock size={15} className="text-amber-300" />
+          </div>
+          <p className="text-2xl font-bold text-white">{activeOrderCount}</p>
+          <p className="mt-0.5 text-xs text-slate-400">Pedidos activos</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
+          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15">
+            <CheckCircle2 size={15} className="text-emerald-300" />
+          </div>
+          <p className="text-2xl font-bold text-white">{completedOrderCount}</p>
+          <p className="mt-0.5 text-xs text-slate-400">Concluídos</p>
         </div>
       </div>
 
       {/* Alertas de pedidos activos */}
       {pendingOrders.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-accent/30 bg-accent/5 p-4">
+        <div className="mb-8 rounded-2xl border border-accent/30 bg-accent/5 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold text-accent-light">{t("pendingTitle")}</p>
             <Link href="/portal/orders" className="text-xs text-accent hover:text-accent-light">
@@ -142,12 +146,20 @@ export default async function PortalPage() {
         </div>
       )}
 
+      {/* Briefings recentes */}
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-white/40">Briefings recentes</h2>
+        <Link href="/portal/orders" className="text-xs text-accent hover:text-accent-light transition-colors">
+          Ver pedidos →
+        </Link>
+      </div>
+
       {briefings.length === 0 ? (
         <div className="rounded-2xl border border-white/15 bg-white/5 p-8 text-center">
           <p className="text-slate-400">{t("emptyState")}</p>
           <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/#lead"
+              href="/portal/orders/new"
               className="inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
             >
               {t("submitBriefing")}
@@ -219,6 +231,22 @@ export default async function PortalPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* CTA novo projecto */}
+      {briefingCount > 0 && (
+        <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-white/8 bg-white/3 p-5">
+          <div>
+            <p className="text-sm font-medium text-white">Novo projecto?</p>
+            <p className="mt-0.5 text-xs text-slate-400">Submeta um pedido directamente pelo portal.</p>
+          </div>
+          <Link
+            href="/portal/orders/new"
+            className="shrink-0 rounded-xl border border-accent/30 bg-accent/15 px-4 py-2 text-sm font-medium text-accent-light transition hover:bg-accent/25"
+          >
+            Submeter →
+          </Link>
         </div>
       )}
     </main>
