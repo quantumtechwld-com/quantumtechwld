@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import AdminHeader from "../components/AdminHeader";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -64,9 +63,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
   }
 
   return (
-    <>
-      <AdminHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="mx-auto max-w-6xl px-6 py-10">
         {/* Stats strip */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
@@ -125,7 +122,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-slate-500">{total} pedido{total === 1 ? "" : "s"}</p>
-            {orderList.map((o: any) => {
+            {orderList.map((o) => {
               const unread = unreadCount(o.id, o.messages);
               return (
                 <Link
@@ -168,7 +165,6 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
             })}
           </div>
         )}
-      </main>
-    </>
+    </main>
   );
 }

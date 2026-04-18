@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>QuantumTech — Export PNG / WebP</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 32px; }
+    h1 { text-align: center; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: #555; margin-bottom: 40px; }
+    .logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a3e;
+      border-radius: 12px;
+      padding: 32px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .card.light-bg { background: #f8f8f8; }
+    .card canvas { display: none; }
+    .card img.preview { max-width: 100%; height: auto; border-radius: 4px; }
+    .card-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #555; }
+    .card.light-bg .card-title { color: #999; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    button {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: 1px solid #9B59FF55;
+      background: transparent;
+      color: #9B59FF;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    button:hover { background: #9B59FF22; border-color: #9B59FF; }
+    button.webp { border-color: #f59e0b55; color: #f59e0b; }
+    button.webp:hover { background: #f59e0b22; border-color: #f59e0b; }
+    button.all-png { border-color: #22D4C2; color: #22D4C2; }
+    button.all-webp { border-color: #f59e0b; color: #f59e0b; }
+    .btn-section { display:flex; flex-direction:column; gap:6px; width:100%; align-items:center; }
+    .btn-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; opacity:0.35; }
+    .status { font-size: 11px; color: #22D4C2; letter-spacing: 1px; height: 16px; }
+    canvas { display: none; }
+  </style>
+</head>
+<body>
+  <h1>QuantumTech · Logo Export PNG / WebP</h1>
+
+  <!-- Hidden canvases for rendering -->
+  <canvas id="c-dark"        width="760" height="176"></canvas>
+  <canvas id="c-light"       width="760" height="176"></canvas>
+  <canvas id="c-mono"        width="760" height="176"></canvas>
+  <canvas id="c-mono-white"  width="760" height="176"></canvas>
+  <canvas id="c-symbol"      width="256" height="256"></canvas>
+  <canvas id="c-partner"     width="480" height="96"></canvas>
+
+  <div class="logo-grid" id="grid"></div>
+
+  <script>
+    // ─── SVG definitions (inline — no external refs) ───────────────────────
+
+    const SVG_DARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 44" fill="none">
+      <defs>
+        <filter id="qt-glow-d" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="190" height="44" fill="#050816"/>
+      <g transform="translate(2,2)">
+        <circle cx="14" cy="20" r="9" fill="#9B59FF" opacity="0.10"/>
+        <circle cx="26" cy="20" r="9" fill="#C084FC" opacity="0.12"/>
+        <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20" stroke="#9B59FF" stroke-width="1.8" stroke-linecap="round" fill="none" filter="url(#qt-glow-d)"/>
+        <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20" stroke="#C084FC" stroke-width="1.8" stroke-linecap="round" fill="none" filter="url(#qt-glow-d)"/>
+        <path d="M5,20 L35,20" stroke="#22D4C2" stroke-width="0.6" stroke-linecap="round" opacity="0.55"/>
+        <circle cx="20" cy="20" r="5.5" stroke="#9B59FF" stroke-width="0.5" stroke-dasharray="2 5" opacity="0.45"/>
+        <circle cx="5" cy="20" r="1.8" fill="#9B59FF" filter="url(#qt-glow-d)"/>
+        <circle cx="35" cy="20" r="1.8" fill="#C084FC" filter="url(#qt-glow-d)"/>
+        <circle cx="20" cy="20" r="2.5" fill="#ffffff" opacity="0.92"/>
+      </g>
+      <text x="54" y="30" font-family="Inter,system-ui,sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3">
+        <tspan fill="#C4C4CC">Quantum</tspan><tspan fill="#9B59FF">Tech</tspan>
+      </text>
+    </svg>`;
+
+    const SVG_LIGHT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 44" fill="none">
+      <rect width="190" height="44" fill="#ffffff"/>
+      <g transform="translate(2,2)">
+        <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20" stroke="#7C3AED" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20" stroke="#9B59FF" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M5,20 L35,20" stroke="#22D4C2" stroke-width="0.7" stroke-linecap="round" opacity="0.70"/>
+        <circle cx="20" cy="20" r="5.5" stroke="#7C3AED" stroke-width="0.5" stroke-dasharray="2 5" opacity="0.50"/>
+        <circle cx="5" cy="20" r="1.8" fill="#7C3AED"/>
+        <circle cx="35" cy="20" r="1.8" fill="#9B59FF"/>
+        <circle cx="20" cy="20" r="2.5" fill="#7C3AED" opacity="0.90"/>
+      </g>
+      <text x="54" y="30" font-family="Inter,system-ui,sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3">
+        <tspan fill="#1A1A2E">Quantum</tspan><tspan fill="#7C3AED">Tech</tspan>
+      </text>
+    </svg>`;
+
+    const SVG_MONO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 44" fill="none">
+      <rect width="190" height="44" fill="#f5f5f5"/>
+      <g transform="translate(2,2)">
+        <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20" stroke="#0A0A0A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20" stroke="#0A0A0A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M5,20 L35,20" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.45"/>
+        <circle cx="20" cy="20" r="5.5" stroke="#0A0A0A" stroke-width="0.5" stroke-dasharray="2 5" opacity="0.40"/>
+        <circle cx="5" cy="20" r="1.8" fill="#0A0A0A"/>
+        <circle cx="35" cy="20" r="1.8" fill="#0A0A0A"/>
+        <circle cx="20" cy="20" r="2.5" fill="#0A0A0A"/>
+      </g>
+      <text x="54" y="30" font-family="Inter,system-ui,sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3" fill="#0A0A0A">QuantumTech</text>
+    </svg>`;
+
+    const SVG_MONO_WHITE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 44" fill="none">
+      <rect width="190" height="44" fill="#0a0a0a"/>
+      <g transform="translate(2,2)">
+        <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M5,20 L35,20" stroke="#ffffff" stroke-width="0.6" stroke-linecap="round" opacity="0.55"/>
+        <circle cx="20" cy="20" r="5.5" stroke="#ffffff" stroke-width="0.5" stroke-dasharray="2 5" opacity="0.50"/>
+        <circle cx="5" cy="20" r="1.8" fill="#ffffff"/>
+        <circle cx="35" cy="20" r="1.8" fill="#ffffff"/>
+        <circle cx="20" cy="20" r="2.5" fill="#ffffff"/>
+      </g>
+      <text x="54" y="30" font-family="Inter,system-ui,sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3" fill="#ffffff">QuantumTech</text>
+    </svg>`;
+
+    const SVG_SYMBOL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+      <defs>
+        <filter id="qt-glow-s" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="40" height="40" fill="#050816"/>
+      <circle cx="14" cy="20" r="9" fill="#9B59FF" opacity="0.10"/>
+      <circle cx="26" cy="20" r="9" fill="#C084FC" opacity="0.12"/>
+      <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20" stroke="#9B59FF" stroke-width="1.8" stroke-linecap="round" fill="none" filter="url(#qt-glow-s)"/>
+      <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20" stroke="#C084FC" stroke-width="1.8" stroke-linecap="round" fill="none" filter="url(#qt-glow-s)"/>
+      <path d="M5,20 L35,20" stroke="#22D4C2" stroke-width="0.6" stroke-linecap="round" opacity="0.55"/>
+      <circle cx="20" cy="20" r="5.5" stroke="#9B59FF" stroke-width="0.5" stroke-dasharray="2 5" opacity="0.45"/>
+      <circle cx="5" cy="20" r="1.8" fill="#9B59FF" filter="url(#qt-glow-s)"/>
+      <circle cx="35" cy="20" r="1.8" fill="#C084FC" filter="url(#qt-glow-s)"/>
+      <circle cx="20" cy="20" r="2.5" fill="#ffffff" opacity="0.92"/>
+    </svg>`;
+
+    const SVG_PARTNER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" fill="none">
+      <rect width="160" height="32" fill="#ffffff"/>
+      <path d="M14,16 C14,16 3,7 3,16 C3,25 14,16 14,16" stroke="#0A0A0A" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M14,16 C14,16 25,7 25,16 C25,25 14,16 14,16" stroke="#0A0A0A" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M3,16 L25,16" stroke="#0A0A0A" stroke-width="0.5" stroke-linecap="round" opacity="0.40"/>
+      <circle cx="14" cy="16" r="3.8" stroke="#0A0A0A" stroke-width="0.4" stroke-dasharray="1.6 3.5" opacity="0.35"/>
+      <circle cx="3" cy="16" r="1.3" fill="#0A0A0A"/>
+      <circle cx="25" cy="16" r="1.3" fill="#0A0A0A"/>
+      <circle cx="14" cy="16" r="1.8" fill="#0A0A0A"/>
+      <line x1="34" y1="7" x2="34" y2="25" stroke="#0A0A0A" stroke-width="0.5" opacity="0.18"/>
+      <text x="42" y="21.5" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" letter-spacing="-0.2" fill="#0A0A0A">QuantumTech</text>
+    </svg>`;
+
+    // ─── Logo definitions ──────────────────────────────────────────────────
+
+    const logos = [
+      {
+        id: 'dark',
+        svg: SVG_DARK,
+        label: 'logo-dark',
+        desc: 'Web · email · apresentações dark',
+        bg: '#050816',
+        canvasId: 'c-dark',
+        w: 760, h: 176,
+        viewW: 190, viewH: 44
+      },
+      {
+        id: 'light',
+        svg: SVG_LIGHT,
+        label: 'logo-light',
+        desc: 'PDF · Word · impressão fundo branco',
+        bg: '#ffffff',
+        canvasId: 'c-light',
+        w: 760, h: 176,
+        viewW: 190, viewH: 44
+      },
+      {
+        id: 'mono',
+        svg: SVG_MONO,
+        label: 'logo-mono',
+        desc: 'Carimbo · B&W · fundo claro',
+        bg: '#f5f5f5',
+        canvasId: 'c-mono',
+        w: 760, h: 176,
+        viewW: 190, viewH: 44
+      },
+      {
+        id: 'mono-white',
+        svg: SVG_MONO_WHITE,
+        label: 'logo-mono-white',
+        desc: 'Fundo escuro · cliente · apresentações black',
+        bg: '#0a0a0a',
+        canvasId: 'c-mono-white',
+        w: 760, h: 176,
+        viewW: 190, viewH: 44
+      },
+      {
+        id: 'symbol',
+        svg: SVG_SYMBOL,
+        label: 'logo-symbol',
+        desc: 'Favicon · avatar · ícone de app',
+        bg: '#050816',
+        canvasId: 'c-symbol',
+        w: 256, h: 256,
+        viewW: 40, viewH: 40
+      },
+      {
+        id: 'partner',
+        svg: SVG_PARTNER,
+        label: 'logo-partner',
+        desc: 'Secção de parceiros · clientes',
+        bg: '#ffffff',
+        canvasId: 'c-partner',
+        w: 480, h: 96,
+        viewW: 160, viewH: 32
+      },
+    ];
+
+    // ─── Render SVG to canvas then export ─────────────────────────────────
+
+    function svgToDataURL(svgStr) {
+      const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+      return URL.createObjectURL(blob);
+    }
+
+    function renderToCanvas(logo) {
+      return new Promise((resolve) => {
+        const canvas = document.getElementById(logo.canvasId);
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        const url = svgToDataURL(logo.svg);
+        img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          resolve(canvas);
+        };
+        img.src = url;
+      });
+    }
+
+    function downloadImage(canvas, filename, mime, statusEl) {
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        statusEl.textContent = `✓ ${filename} baixado`;
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      }, mime, mime === 'image/webp' ? 0.95 : undefined);
+    }
+
+    // ─── Build UI ─────────────────────────────────────────────────────────
+
+    const grid = document.getElementById('grid');
+
+    logos.forEach(logo => {
+      const isLight = ['light', 'mono', 'partner'].includes(logo.id);
+      const card = document.createElement('div');
+      card.className = `card${isLight ? ' light-bg' : ''}`;
+
+      // Preview SVG inline
+      const previewDiv = document.createElement('div');
+      previewDiv.style.cssText = `background:${logo.bg};padding:24px 32px;border-radius:8px;width:100%;display:flex;align-items:center;justify-content:center;`;
+      previewDiv.innerHTML = logo.svg.replace(/<rect[^/]*(fill="[^"]*")[^/]*\/>/, '');
+
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.textContent = logo.desc;
+
+      const status = document.createElement('div');
+      status.className = 'status';
+
+      const btnRow = document.createElement('div');
+      btnRow.className = 'btn-row';
+
+      // Resolution options
+      const resolutions = logo.id === 'symbol'
+        ? [['64px', 64, 64], ['128px', 128, 128], ['256px', 256, 256], ['512px', 512, 512]]
+        : [['1x', logo.w / 4, logo.h / 4], ['2x', logo.w / 2, logo.h / 2], ['4x', logo.w, logo.h]];
+
+      if (logo.id === 'partner') {
+        resolutions.splice(0, resolutions.length,
+          ['1x', 160, 32],
+          ['2x', 320, 64],
+          ['4x', 640, 128]
+        );
+      }
+
+      function makeFormatSection(mime) {
+        const ext = mime === 'image/webp' ? 'webp' : 'png';
+        const isWebp = ext === 'webp';
+        const section = document.createElement('div');
+        section.className = 'btn-section';
+
+        const lbl = document.createElement('div');
+        lbl.className = 'btn-label';
+        lbl.textContent = ext.toUpperCase();
+        section.appendChild(lbl);
+
+        const row = document.createElement('div');
+        row.className = 'btn-row';
+
+        resolutions.forEach(([label, w, h]) => {
+          const btn = document.createElement('button');
+          btn.textContent = `${label} (${w}×${h})`;
+          if (isWebp) btn.className = 'webp';
+          btn.onclick = async () => {
+            status.textContent = 'A renderizar…';
+            const canvas = document.getElementById(logo.canvasId);
+            canvas.width = w;
+            canvas.height = h;
+            await renderToCanvas(logo);
+            downloadImage(canvas, `${logo.label}@${w}x${h}.${ext}`, mime, status);
+          };
+          row.appendChild(btn);
+        });
+
+        const btnAll = document.createElement('button');
+        btnAll.textContent = `↓ Todos ${ext.toUpperCase()}`;
+        btnAll.className = isWebp ? 'all-webp' : 'all-png';
+        btnAll.onclick = async () => {
+          for (const [, w, h] of resolutions) {
+            const canvas = document.getElementById(logo.canvasId);
+            canvas.width = w;
+            canvas.height = h;
+            await renderToCanvas(logo);
+            downloadImage(canvas, `${logo.label}@${w}x${h}.${ext}`, mime, status);
+            await new Promise(r => setTimeout(r, 300));
+          }
+        };
+        row.appendChild(btnAll);
+        section.appendChild(row);
+        return section;
+      }
+
+      card.appendChild(previewDiv);
+      card.appendChild(title);
+      card.appendChild(makeFormatSection('image/png'));
+      card.appendChild(makeFormatSection('image/webp'));
+      card.appendChild(status);
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

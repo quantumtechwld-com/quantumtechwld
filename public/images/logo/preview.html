@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>QuantumTech — Logo Preview</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #111; color: #eee; }
+    h1 { text-align: center; padding: 32px 0 8px; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #666; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 48px 32px; }
+    .cell.dark  { background: #050816; }
+    .cell.light { background: #ffffff; }
+    .cell.mono-dark  { background: #0a0a0a; }
+    .cell.mono-light { background: #f5f5f5; }
+    .tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.45; }
+    .cell.light .tag, .cell.mono-light .tag { color: #333; }
+    img { max-width: 220px; height: auto; }
+  </style>
+</head>
+<body>
+  <h1>QuantumTech · Logo System</h1>
+  <div class="grid">
+    <div class="cell dark">
+      <img src="logo-dark.svg" alt="logo dark">
+      <span class="tag">logo-dark.svg — web / email / presentations</span>
+    </div>
+    <div class="cell light">
+      <img src="logo-light.svg" alt="logo light">
+      <span class="tag">logo-light.svg — PDF / Word / impressão</span>
+    </div>
+    <div class="cell mono-dark">
+      <img src="logo-mono.svg" alt="logo mono dark">
+      <span class="tag" style="color:#555">logo-mono.svg — fundo escuro</span>
+    </div>
+    <div class="cell mono-light">
+      <img src="logo-mono.svg" alt="logo mono light">
+      <span class="tag">logo-mono.svg — fundo claro / carimbo</span>
+    </div>
+  </div>
+
+  <h1 style="padding-top:40px">Símbolo isolado</h1>
+  <div class="grid">
+    <div class="cell dark">
+      <img src="logo-symbol.svg" alt="symbol dark" style="max-width:80px">
+      <span class="tag">logo-symbol.svg 64px</span>
+    </div>
+    <div class="cell light">
+      <img src="logo-symbol.svg" alt="symbol light" style="max-width:80px">
+      <span class="tag">logo-symbol.svg 64px</span>
+    </div>
+  </div>
+
+  <!-- ── SECÇÃO DE PARCEIROS (contexto real) ── -->
+  <h1 style="padding-top:40px">Variante "partner" — contexto de logos de parceiros</h1>
+
+  <!-- Fundo branco — logos em cinza/preto com opacidade -->
+  <div style="background:#fff; padding:48px 32px; text-align:center;">
+    <p style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#aaa;margin-bottom:36px;font-family:system-ui">
+      Colaboradores de empresas que prestamos consultoria e mentoria
+    </p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;">
+
+      <!-- Logo simulado A (tipo Estadão — wordmark puro) -->
+      <svg viewBox="0 0 110 32" width="110" height="32" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="22" font-family="Georgia,serif" font-size="20" font-weight="700" fill="#0A0A0A" opacity="0.30" letter-spacing="-0.5">Estadão</text>
+      </svg>
+
+      <!-- Logo simulado B (ícone + texto) -->
+      <svg viewBox="0 0 120 32" width="120" height="32" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="6" width="20" height="20" rx="4" fill="#0A0A0A" opacity="0.25"/>
+        <text x="28" y="22" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#0A0A0A" opacity="0.30">TechCorp</text>
+      </svg>
+
+      <!-- NOSSO LOGO — logo-partner.svg -->
+      <img src="logo-partner.svg" alt="QuantumTech" height="32" style="opacity:0.35">
+
+      <!-- Logo simulado C -->
+      <svg viewBox="0 0 90 32" width="90" height="32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="16" r="10" fill="none" stroke="#0A0A0A" stroke-width="1.5" opacity="0.25"/>
+        <text x="32" y="21" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#0A0A0A" opacity="0.30">Nexus</text>
+      </svg>
+
+      <!-- Logo simulado D -->
+      <svg viewBox="0 0 100 32" width="100" height="32" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="22" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="#0A0A0A" opacity="0.30" letter-spacing="2">VORTEX</text>
+      </svg>
+
+    </div>
+  </div>
+
+  <!-- Fundo escuro — mesma secção em dark mode -->
+  <div style="background:#050816; padding:48px 32px; text-align:center;">
+    <p style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#444;margin-bottom:36px;font-family:system-ui">
+      Colaboradores de empresas que prestamos consultoria e mentoria
+    </p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;">
+
+      <svg viewBox="0 0 110 32" width="110" height="32" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="22" font-family="Georgia,serif" font-size="20" font-weight="700" fill="#fff" opacity="0.25" letter-spacing="-0.5">Estadão</text>
+      </svg>
+
+      <svg viewBox="0 0 120 32" width="120" height="32" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="6" width="20" height="20" rx="4" fill="#fff" opacity="0.20"/>
+        <text x="28" y="22" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#fff" opacity="0.25">TechCorp</text>
+      </svg>
+
+      <!-- NOSSO LOGO dark — logo-dark.svg reduzido -->
+      <img src="logo-dark.svg" alt="QuantumTech" height="32" style="opacity:0.55">
+
+      <svg viewBox="0 0 90 32" width="90" height="32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="16" r="10" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.20"/>
+        <text x="32" y="21" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#fff" opacity="0.25">Nexus</text>
+      </svg>
+
+      <svg viewBox="0 0 100 32" width="100" height="32" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="22" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="#fff" opacity="0.20" letter-spacing="2">VORTEX</text>
+      </svg>
+
+    </div>
+  </div>
+</body>
+</html>

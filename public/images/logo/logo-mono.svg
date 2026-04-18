@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 44" fill="none" role="img" aria-label="QuantumTech">
+  <title>QuantumTech</title>
+
+  <!-- ── Símbolo de Superposição Quântica ∞ — monocromático ── -->
+  <!-- Para uso em: carimbos, bordados, gravações, documentos P&B, fax -->
+  <g transform="translate(2,2)">
+    <!-- Loop esquerdo — estado |0⟩ -->
+    <path d="M20,20 C20,20 5,8 5,20 C5,32 20,20 20,20"
+          stroke="#0A0A0A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+    <!-- Loop direito — estado |1⟩ -->
+    <path d="M20,20 C20,20 35,8 35,20 C35,32 20,20 20,20"
+          stroke="#0A0A0A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+    <!-- Eixo quântico -->
+    <path d="M5,20 L35,20"
+          stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Ring dashed -->
+    <circle cx="20" cy="20" r="5.5"
+            stroke="#0A0A0A" stroke-width="0.5" stroke-dasharray="2 5" opacity="0.50"/>
+
+    <!-- Nós extremos -->
+    <circle cx="5"  cy="20" r="1.8" fill="#0A0A0A"/>
+    <circle cx="35" cy="20" r="1.8" fill="#0A0A0A"/>
+
+    <!-- Nó central -->
+    <circle cx="20" cy="20" r="2.5" fill="#0A0A0A"/>
+  </g>
+
+  <!-- ── Wordmark ── -->
+  <text x="54" y="30"
+        font-family="'Geist Sans','Inter',system-ui,-apple-system,sans-serif"
+        font-size="20" font-weight="600" letter-spacing="-0.3"
+        fill="#0A0A0A">
+    QuantumTech
+  </text>
+</svg>

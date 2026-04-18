@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import AdminHeader from "../components/AdminHeader";
 import { Mail, MailOpen } from "lucide-react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +33,6 @@ export default async function AdminContactsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminHeader />
       <main className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8 flex items-center justify-between">
           <div>

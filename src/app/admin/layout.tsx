@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import AdminHeader from "./components/AdminHeader";
 
 const VALID_LOCALES = ["pt", "en", "es"] as const;
 type Locale = (typeof VALID_LOCALES)[number];
@@ -15,8 +16,9 @@ function isValid(locale: string | undefined | null): locale is Locale {
 
 function detectLocaleFromHeader(acceptLanguage: string): Locale {
   const lang = acceptLanguage.toLowerCase();
-  if (/\ben(-[a-z]{2})?\b/.test(lang)) return "en";
-  if (/\bes(-[a-z]{2})?\b/.test(lang)) return "es";
+  const parts = lang.split(",").map((p) => p.split(";")[0].trim());
+  if (parts.some((p) => p === "en" || p.startsWith("en-"))) return "en";
+  if (parts.some((p) => p === "es" || p.startsWith("es-"))) return "es";
   return "pt";
 }
 
@@ -59,7 +61,10 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <div className="min-h-screen bg-background text-white">
-        {children}
+        <AdminHeader />
+        <main className="mx-auto max-w-400 px-5 py-8">
+          {children}
+        </main>
       </div>
     </NextIntlClientProvider>
   );

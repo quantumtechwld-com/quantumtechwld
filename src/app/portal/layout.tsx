@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import PortalShell from "@/components/portal/PortalShell";
 
 const VALID_LOCALES = ["pt", "en", "es"] as const;
 type Locale = (typeof VALID_LOCALES)[number];
@@ -14,8 +15,9 @@ function isValid(l: string | undefined | null): l is Locale {
 /** Parse Accept-Language header e retorna "en" | "es" | "pt" */
 function detectLocaleFromHeader(acceptLanguage: string): Locale {
   const lang = acceptLanguage.toLowerCase();
-  if (/\ben(-[a-z]{2})?\b/.test(lang)) return "en";
-  if (/\bes(-[a-z]{2})?\b/.test(lang)) return "es";
+  const parts = lang.split(",").map((p) => p.split(";")[0].trim());
+  if (parts.some((p) => p === "en" || p.startsWith("en-"))) return "en";
+  if (parts.some((p) => p === "es" || p.startsWith("es-"))) return "es";
   return "pt";
 }
 
@@ -82,7 +84,9 @@ export default async function PortalLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
+      <PortalShell>
+        {children}
+      </PortalShell>
     </NextIntlClientProvider>
   );
 }

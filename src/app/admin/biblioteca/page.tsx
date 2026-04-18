@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import AdminHeader from "@/app/admin/components/AdminHeader";
 import AddToLibraryForm from "@/app/portal/biblioteca/AddToLibraryForm";
 
 type RefProject = {
@@ -45,9 +44,7 @@ export default async function AdminBibliotecaPage() {
   })) as RefProject[];
 
   return (
-    <>
-      <AdminHeader />
-      <main className="mx-auto max-w-4xl px-6 py-10 space-y-10">
+    <main className="mx-auto max-w-4xl px-6 py-10 space-y-10">
 
         {/* Cabeçalho */}
         <div>
@@ -119,7 +116,6 @@ export default async function AdminBibliotecaPage() {
           </div>
         </section>
 
-      </main>
-    </>
+    </main>
   );
 }

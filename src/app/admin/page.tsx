@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 import StatsGrid from "./components/StatsGrid";
-import AdminHeader from "./components/AdminHeader";
 import BriefingStats from "./components/BriefingStats";
 import RecentOrdersTable from "./components/RecentOrdersTable";
 import AllBriefingsTable from "./components/AllBriefingsTable";
+import Link from "next/link";
 import { Users, Package, FileText, BookOpen } from "lucide-react";
 import {
   BRIEFING_STATUS_LABEL as STATUS_LABEL,
@@ -95,28 +95,26 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <>
-      <AdminHeader />
-      <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
+    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
 
         {/* Navegação rápida */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <a href="/admin/users" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+          <Link href="/admin/users" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
             <Users size={18} className="text-accent-light group-hover:text-accent shrink-0" />
             <span className="text-sm font-medium text-accent-light group-hover:text-accent">Utilizadores</span>
-          </a>
-          <a href="/admin/orders" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+          </Link>
+          <Link href="/admin/orders" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
             <Package size={18} className="text-accent-light group-hover:text-accent shrink-0" />
             <span className="text-sm font-medium text-accent-light group-hover:text-accent">Pedidos</span>
-          </a>
-          <a href="/admin/briefing" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+          </Link>
+          <Link href="/admin/briefing" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
             <FileText size={18} className="text-accent-light group-hover:text-accent shrink-0" />
             <span className="text-sm font-medium text-accent-light group-hover:text-accent">Briefings</span>
-          </a>
-          <a href="/admin/biblioteca" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+          </Link>
+          <Link href="/admin/biblioteca" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
             <BookOpen size={18} className="text-accent-light group-hover:text-accent shrink-0" />
             <span className="text-sm font-medium text-accent-light group-hover:text-accent">Biblioteca</span>
-          </a>
+          </Link>
         </div>
 
         <StatsGrid
@@ -147,7 +145,6 @@ export default async function AdminDashboardPage() {
             scopeSet={scopeSet}
           />
         </div>
-      </main>
-    </>
+    </main>
   );
 }

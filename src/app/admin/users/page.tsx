@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import AdminHeader from "../components/AdminHeader";
 import UsersClient from "./UsersClient";
 
 export default async function AdminUsersPage() {
@@ -27,11 +26,8 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <>
-      <AdminHeader />
-      <main className="max-w-7xl mx-auto px-6 py-10">
+    <main className="max-w-7xl mx-auto px-6 py-10">
         <UsersClient users={users} />
-      </main>
-    </>
+    </main>
   );
 }
