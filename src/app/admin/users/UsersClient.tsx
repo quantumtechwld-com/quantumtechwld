@@ -36,6 +36,71 @@ const ROLE_COLOR: Record<UserRole, string> = {
   CLIENT: "bg-accent/15 text-accent-light border-accent/30",
 };
 
+// ── Helpers para normalização de imagem (escopo de módulo) ──────────────
+
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Erro ao ler ficheiro."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageEl(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = () => reject(new Error("Imagem inválida."));
+    img.src = src;
+  });
+}
+
+function samplePixel(ctx: CanvasRenderingContext2D, x: number, y: number): [number, number, number, number] {
+  const d = ctx.getImageData(x, y, 1, 1).data;
+  return [d[0], d[1], d[2], d[3]];
+}
+
+/** Detecta a cor de fundo pelos 4 cantos e normaliza a imagem para quadrado. */
+async function normalizeToSquare(file: File): Promise<string> {
+  const src = await readFileAsDataURL(file);
+  const img = await loadImageEl(src);
+  const { naturalWidth: w, naturalHeight: h } = img;
+  const size = Math.max(w, h);
+
+  const sampler = document.createElement("canvas");
+  sampler.width  = w;
+  sampler.height = h;
+  const sCtx = sampler.getContext("2d")!;
+  sCtx.drawImage(img, 0, 0);
+
+  const corners: [number, number, number, number][] = [
+    samplePixel(sCtx, 0,     0),
+    samplePixel(sCtx, w - 1, 0),
+    samplePixel(sCtx, 0,     h - 1),
+    samplePixel(sCtx, w - 1, h - 1),
+  ];
+  const allTransparent = corners.every(([, , , a]) => a < 10);
+  const avg = corners
+    .reduce((acc, [r, g, b]) => [acc[0] + r, acc[1] + g, acc[2] + b], [0, 0, 0])
+    .map((v) => Math.round(v / 4));
+
+  const canvas = document.createElement("canvas");
+  canvas.width  = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+
+  if (!allTransparent) {
+    ctx.fillStyle = `rgb(${avg[0]},${avg[1]},${avg[2]})`;
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  ctx.drawImage(img, Math.round((size - w) / 2), Math.round((size - h) / 2), w, h);
+  return canvas.toDataURL("image/png");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function UsersClient({ users: initial }: Readonly<{ users: UserRow[] }>) {
   const [users, setUsers]               = useState<UserRow[]>(initial);
   const [loadingId, setLoadingId]       = useState<string | null>(null);
@@ -51,12 +116,7 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
   async function handleAvatarUpload(userId: string, file: File) {
     setUploadingId(userId);
     try {
-      const image = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload  = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("Erro ao ler ficheiro."));
-        reader.readAsDataURL(file);
-      });
+      const image = await normalizeToSquare(file);
       const res  = await fetch(`/api/admin/users/${userId}`, {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
