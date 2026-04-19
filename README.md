@@ -2,6 +2,18 @@
 
 Landing page + sistema DevFlow para agência de desenvolvimento de software.
 
+## Ordem obrigatória de leitura
+
+Para evitar perda de contexto, execução fora do padrão ou falha de release, qualquer trabalho técnico neste repositório deve começar por estes documentos:
+
+1. `AGENTS.md`
+2. `.github/copilot-instructions.md`
+3. `docs/QUALITY-EXECUTION-PLAN.md`
+4. `docs/DEVELOPER-GUIDE.md`
+5. `docs/REFACTORING-PLAN.md`
+
+O `README.md` é a visão geral do projeto, mas não substitui as instruções operacionais e de qualidade definidas nos documentos acima.
+
 ## Funcionalidades implementadas
 
 | Módulo | Descrição | Status |
