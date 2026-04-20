@@ -584,7 +584,9 @@ para um estado:
 
 - AGENTS.md
 - .github/copilot-instructions.md
+- docs/M1-CLOSING-REPORT.md
 - docs/M1-EXECUTION-BACKLOG.md
+- docs/M2-EXECUTION-BACKLOG.md
 - docs/DEVELOPER-GUIDE.md
 - docs/REFACTORING-PLAN.md
 - docs/DEPLOY.md
