@@ -3,7 +3,7 @@
 **Projeto:** Quantum Technology Agency  
 **Ciclo:** M1  
 **Objetivo do ciclo:** criar a fundação mínima de qualidade técnica para evolução segura  
-**Status do ciclo:** executado tecnicamente, aguardando apenas teste manual final e commit das alterações do ciclo
+**Status do ciclo:** concluído tecnicamente e operacionalmente, com commit, push e deploy aprovados
 
 ---
 
@@ -101,14 +101,14 @@ Os seguintes checks foram executados com sucesso:
 
 ---
 
-## 6. Pendências remanescentes do ciclo
+## 6. Fechamento operacional do ciclo
 
-O M1 está tecnicamente concluído, mas ainda há duas pendências operacionais:
+O M1 foi encerrado operacionalmente com:
 
-1. teste manual do utilizador
-2. commit das alterações do ciclo
-
-Esses itens ficaram pendentes por regra operacional do repositório.
+1. teste manual e validação prática do fluxo base
+2. commit local do ciclo
+3. push para `main`
+4. deploy concluído com sucesso
 
 ---
 
@@ -137,8 +137,8 @@ O M1 reduziu o risco de regressão silenciosa em alterações futuras e criou um
 O M1 deve ser considerado:
 
 - **tecnicamente concluído**
-- **operacionalmente pronto para transição ao M2**
-- **pendente apenas de teste manual e commit**
+- **operacionalmente concluído**
+- **encerrado e pronto para auditoria futura**
 
 ---
 

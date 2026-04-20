@@ -3,6 +3,7 @@ import { Payment } from '@prisma/client';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { sendMail, tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin } from '@/lib/email';
+import { appUrl } from '@/lib/app-url';
 
 export async function createPayment(orderId: string, amount: number): Promise<Payment | null> {
   // Busca o pedido
@@ -36,7 +37,7 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
 
   // Envia e-mail de confirmação para cliente e admin
   const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? '';
-  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';
+  const baseUrl = appUrl();
   if (order.client.email) {
     sendMail({
       to: order.client.email,

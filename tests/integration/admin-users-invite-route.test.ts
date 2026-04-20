@@ -1,0 +1,76 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
+
+const mocks = vi.hoisted(() => ({
+  auth: vi.fn(),
+  signIn: vi.fn(),
+  userUpsert: vi.fn(),
+}));
+
+vi.mock("@/auth", () => ({
+  auth: mocks.auth,
+  signIn: mocks.signIn,
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      upsert: mocks.userUpsert,
+    },
+  },
+}));
+
+import { POST } from "@/app/api/admin/users/invite/route";
+
+describe("POST /api/admin/users/invite", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.auth.mockResolvedValue({ user: { role: "ADMIN" } });
+    mocks.userUpsert.mockResolvedValue({ id: "user_1" });
+    mocks.signIn.mockResolvedValue(undefined);
+  });
+
+  it("retorna 403 quando nao e admin", async () => {
+    mocks.auth.mockResolvedValue({ user: { role: "CLIENT" } });
+
+    const response = await POST(new NextRequest("http://localhost/api/admin/users/invite", {
+      method: "POST",
+      body: JSON.stringify({ email: "client@example.com" }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body.error).toBe("Não autorizado.");
+  });
+
+  it("retorna 400 quando o email e invalido", async () => {
+    const response = await POST(new NextRequest("http://localhost/api/admin/users/invite", {
+      method: "POST",
+      body: JSON.stringify({ email: "invalido" }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("Email inválido.");
+  });
+
+  it("cria ou ativa utilizador e envia convite", async () => {
+    const response = await POST(new NextRequest("http://localhost/api/admin/users/invite", {
+      method: "POST",
+      body: JSON.stringify({ email: "CLIENT@EXAMPLE.COM", name: "Joao", locale: "en" }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(mocks.userUpsert).toHaveBeenCalledTimes(1);
+    expect(mocks.signIn).toHaveBeenCalledWith("nodemailer", expect.objectContaining({
+      email: "client@example.com",
+      redirectTo: "/portal?invite_locale=en",
+      redirect: false,
+    }));
+  });
+});
