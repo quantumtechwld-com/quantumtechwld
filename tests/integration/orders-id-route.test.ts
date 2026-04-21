@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   tplOrderRevisionAdmin: vi.fn(),
   tplOrderInProduction: vi.fn(),
   tplOrderCompleted: vi.fn(),
+  tplOrderInReview: vi.fn(),
+  tplOrderReviewApprovedAdmin: vi.fn(),
   appUrl: vi.fn(),
 }));
 
@@ -34,6 +36,8 @@ vi.mock("@/lib/email", () => ({
   tplOrderRevisionAdmin: mocks.tplOrderRevisionAdmin,
   tplOrderInProduction: mocks.tplOrderInProduction,
   tplOrderCompleted: mocks.tplOrderCompleted,
+  tplOrderInReview: mocks.tplOrderInReview,
+  tplOrderReviewApprovedAdmin: mocks.tplOrderReviewApprovedAdmin,
 }));
 
 vi.mock("@/lib/app-url", () => ({
@@ -82,6 +86,8 @@ describe("/api/orders/[id]", () => {
     mocks.tplOrderRevisionAdmin.mockReturnValue("<html>revision</html>");
     mocks.tplOrderInProduction.mockReturnValue("<html>production</html>");
     mocks.tplOrderCompleted.mockReturnValue("<html>completed</html>");
+    mocks.tplOrderInReview.mockReturnValue("<html>in-review</html>");
+    mocks.tplOrderReviewApprovedAdmin.mockReturnValue("<html>review-approved-admin</html>");
     mocks.sendMail.mockResolvedValue(undefined);
     mocks.appUrl.mockReturnValue("https://quantumtechwld.com");
     process.env.ADMIN_EMAIL = "admin@example.com";
@@ -207,5 +213,251 @@ describe("/api/orders/[id]", () => {
 
     expect(response.status).toBe(422);
     expect(body.error).toBe("Só é possível aprovar uma proposta enviada.");
+  });
+
+  // ─── submit_review ────────────────────────────────────────────────────────
+
+  it("permite ao admin entregar para revisao (submit_review)", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_REVIEW",
+      deliveryNote: "Tudo implementado conforme briefing.",
+      deliveryLinks: ["https://staging.example.com"],
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Tudo implementado conforme briefing.",
+        deliveryLinks: ["https://staging.example.com"],
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.order.status).toBe("IN_REVIEW");
+    expect(mocks.sendMail).toHaveBeenCalledTimes(1);
+  });
+
+  it("retorna 422 em submit_review quando deliveryNote esta ausente", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "submit_review", deliveryNote: "   " }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Descrição do trabalho realizado é obrigatória.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  // ─── approve_review ───────────────────────────────────────────────────────
+
+  it("permite ao cliente aprovar a entrega (approve_review)", async () => {
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_REVIEW",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REVIEW_APPROVED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "approve_review" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.order.status).toBe("REVIEW_APPROVED");
+    expect(mocks.sendMail).toHaveBeenCalledTimes(1);
+  });
+
+  it("retorna 422 em approve_review quando pedido nao esta IN_REVIEW", async () => {
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PROPOSAL_SENT",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "approve_review" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Só é possível aprovar uma entrega em revisão.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  // ─── request_correction ───────────────────────────────────────────────────
+
+  it("permite ao cliente pedir correcao (request_correction)", async () => {
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_REVIEW",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "request_correction", adminNote: "Faltou ajustar o formulário." }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.order.status).toBe("IN_PRODUCTION");
+    expect(mocks.sendMail).toHaveBeenCalledTimes(1);
+  });
+
+  it("retorna 422 em request_correction quando pedido nao esta IN_REVIEW", async () => {
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "COMPLETED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "request_correction" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Só é possível pedir correção de uma entrega em revisão.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  // ─── reopen ───────────────────────────────────────────────────────────────
+
+  it("permite ao admin reabrir pedido rejeitado (reopen)", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REJECTED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REVISION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "reopen" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.order.status).toBe("REVISION");
+    expect(mocks.sendMail).not.toHaveBeenCalled();
+  });
+
+  // ─── complete com finalDeliveryUrl ────────────────────────────────────────
+
+  it("permite ao admin finalizar pedido com URL de entrega final (complete)", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REVIEW_APPROVED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "COMPLETED",
+      finalDeliveryUrl: "https://cliente.example.com",
+      finalDeliveryNote: "Entrega final aprovada.",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "complete",
+        finalDeliveryUrl: "https://cliente.example.com",
+        finalDeliveryNote: "Entrega final aprovada.",
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.order.status).toBe("COMPLETED");
+    expect(body.order.finalDeliveryUrl).toBe("https://cliente.example.com");
+    expect(mocks.sendMail).toHaveBeenCalledTimes(1);
   });
 });

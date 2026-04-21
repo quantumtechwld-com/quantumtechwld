@@ -30,6 +30,9 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Integration tests
+        run: npm run test:integration
+
       - name: Build
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/quantum_devflow?sslmode=disable
