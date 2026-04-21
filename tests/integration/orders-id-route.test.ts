@@ -460,4 +460,117 @@ describe("/api/orders/[id]", () => {
     expect(body.order.finalDeliveryUrl).toBe("https://cliente.example.com");
     expect(mocks.sendMail).toHaveBeenCalledTimes(1);
   });
+
+  // ─── segurança: validação de URL ─────────────────────────────────────────
+
+  it("rejeita submit_review com link javascript: (XSS via URL)", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Trabalho concluído.",
+        deliveryLinks: ["javascript:alert(1)"],
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Todos os links devem começar com https:// ou http://.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita submit_review com link data: URI", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Trabalho concluído.",
+        deliveryLinks: ["data:text/html,<script>alert(1)</script>"],
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Todos os links devem começar com https:// ou http://.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita complete com finalDeliveryUrl usando javascript:", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REVIEW_APPROVED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "complete",
+        finalDeliveryUrl: "javascript:alert(document.cookie)",
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("URL do resultado final inválida. Use https:// ou http://.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("aceita submit_review com links https validos", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1", type: "new_feature", title: "Nova funcionalidade", status: "IN_REVIEW",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Entrega pronta.",
+        deliveryLinks: ["https://staging.exemplo.com", "http://localhost:3000/demo"],
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    expect(response.status).toBe(200);
+  });
 });

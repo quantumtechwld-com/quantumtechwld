@@ -65,39 +65,54 @@ type PatchBody = {
 
 type ApiError = { error: string; status: number };
 
+const SAFE_URL_RE = /^https?:\/\//i;
+const MAX_TEXT_LEN = 4000;
+const MAX_URL_LEN  = 2048;
+
+function isSafeUrl(url: string): boolean {
+  return SAFE_URL_RE.test(url) && url.length <= MAX_URL_LEN;
+}
+
+function buildSubmitReviewData(body: PatchBody): Record<string, unknown> | ApiError {
+  const note = body.deliveryNote?.trim() ?? "";
+  if (!note)                       return { error: "Descrição do trabalho realizado é obrigatória.", status: 422 };
+  if (note.length > MAX_TEXT_LEN)  return { error: "Descrição do trabalho demasiado longa.", status: 422 };
+  const links = (body.deliveryLinks ?? []).map((l) => l.trim()).filter(Boolean);
+  if (links.length > 20)           return { error: "Máximo de 20 links por entrega.", status: 422 };
+  if (links.some((l) => !isSafeUrl(l))) return { error: "Todos os links devem começar com https:// ou http://.", status: 422 };
+  return { status: "IN_REVIEW", deliveryNote: note, deliveryLinks: links, respondedAt: new Date() };
+}
+
+function buildCompleteData(body: PatchBody): Record<string, unknown> | ApiError {
+  const finalUrl  = body.finalDeliveryUrl?.trim()  ?? null;
+  const finalNote = body.finalDeliveryNote?.trim()  ?? null;
+  if (finalUrl  && !isSafeUrl(finalUrl))           return { error: "URL do resultado final inválida. Use https:// ou http://.", status: 422 };
+  if (finalNote && finalNote.length > MAX_TEXT_LEN) return { error: "Nota final demasiado longa.", status: 422 };
+  return { status: "COMPLETED", finalDeliveryNote: finalNote, finalDeliveryUrl: finalUrl };
+}
+
 function buildAdminUpdateData(
   body: PatchBody,
 ): Record<string, unknown> | ApiError {
   switch (body.action) {
-    case "propose":
-      if (!body.productionInfo?.trim()) return { error: "Informações de produção obrigatórias.", status: 422 };
+    case "propose": {
+      const info = body.productionInfo?.trim() ?? "";
+      if (!info)                      return { error: "Informações de produção obrigatórias.", status: 422 };
+      if (info.length > MAX_TEXT_LEN) return { error: "Informações de produção demasiado longas.", status: 422 };
       if (body.estimatedValue == null || body.estimatedValue < 0) return { error: "Valor estimado inválido.", status: 422 };
-      return {
-        status:         "PROPOSAL_SENT",
-        productionInfo: body.productionInfo.trim(),
-        estimatedValue: body.estimatedValue,
-        adminNote:      body.adminNote?.trim() ?? null,
-        respondedAt:    new Date(),
-      };
+      return { status: "PROPOSAL_SENT", productionInfo: info, estimatedValue: body.estimatedValue, adminNote: body.adminNote?.trim() ?? null, respondedAt: new Date() };
+    }
     case "start_production": return { status: "IN_PRODUCTION" };
-    case "submit_review":
-      if (!body.deliveryNote?.trim()) return { error: "Descrição do trabalho realizado é obrigatória.", status: 422 };
-      return {
-        status:        "IN_REVIEW",
-        deliveryNote:  body.deliveryNote.trim(),
-        deliveryLinks: (body.deliveryLinks ?? []).map((l) => l.trim()).filter(Boolean),
-        respondedAt:   new Date(),
-      };
-    case "complete":         return {
-        status:           "COMPLETED",
-        finalDeliveryNote: body.finalDeliveryNote?.trim() ?? null,
-        finalDeliveryUrl:  body.finalDeliveryUrl?.trim() ?? null,
-      };
+    case "submit_review":    return buildSubmitReviewData(body);
+    case "complete":         return buildCompleteData(body);
     case "reopen":           return { status: "REVISION", adminNote: null };
-    case "admin_reject":
-      if (!body.adminNote?.trim()) return { error: "O motivo da recusa é obrigatório.", status: 422 };
-      return { status: "REJECTED", estimatedValue: null, adminNote: body.adminNote.trim() };
-    default:                 return { error: "Acção inválida.", status: 422 };
+    case "admin_reject": {
+      const reason = body.adminNote?.trim() ?? "";
+      if (!reason)                      return { error: "O motivo da recusa é obrigatório.", status: 422 };
+      if (reason.length > MAX_TEXT_LEN) return { error: "Motivo de recusa demasiado longo.", status: 422 };
+      return { status: "REJECTED", estimatedValue: null, adminNote: reason };
+    }
+    default: return { error: "Acção inválida.", status: 422 };
   }
 }
 

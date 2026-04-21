@@ -225,6 +225,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 value={deliveryNote}
                 onChange={(e) => setDeliveryNote(e.target.value)}
                 rows={5}
+                maxLength={4000}
                 placeholder="Descreva o trabalho realizado, alterações efetuadas, decisões técnicas tomadas…"
                 className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none"
               />
@@ -238,6 +239,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 value={deliveryLinks}
                 onChange={(e) => setDeliveryLinks(e.target.value)}
                 rows={3}
+                maxLength={4096}
                 placeholder={"https://staging.exemplo.com\nhttps://drive.google.com/…"}
                 className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none font-mono"
               />
@@ -267,6 +269,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 type="url"
                 value={finalDeliveryUrl}
                 onChange={(e) => setFinalDeliveryUrl(e.target.value)}
+                maxLength={2048}
                 placeholder="https://resultado.exemplo.com"
                 className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
               />
@@ -278,6 +281,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 value={finalDeliveryNote}
                 onChange={(e) => setFinalDeliveryNote(e.target.value)}
                 rows={3}
+                maxLength={4000}
                 placeholder="Instruções de acesso, próximos passos, agradecimento…"
                 className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none resize-none"
               />
