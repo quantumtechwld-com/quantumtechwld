@@ -34,6 +34,7 @@ export default async function AdminDashboardPage() {
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
+  const monthLabel = startOfMonth.toLocaleDateString("pt-PT", { month: "long", year: "numeric" });
 
   type RecentOrder = {
     id: string;
@@ -49,6 +50,8 @@ export default async function AdminDashboardPage() {
     briefings,
     scopesRaw,
     orderPending,
+    orderProposalSent,
+    orderApproved,
     orderInProd,
     orderCompleted,
     totalRevenue,
@@ -61,6 +64,8 @@ export default async function AdminDashboardPage() {
     }),
     dbAny.scope.findMany({ select: { briefingId: true } }),
     dbAny.order.count({ where: { status: { in: ["PENDING", "EVALUATING", "REVISION"] } } }),
+    dbAny.order.count({ where: { status: "PROPOSAL_SENT" } }),
+    dbAny.order.count({ where: { status: "APPROVED" } }),
     dbAny.order.count({ where: { status: "IN_PRODUCTION" } }),
     dbAny.order.count({ where: { status: "COMPLETED" } }),
     dbAny.payment.aggregate({ _sum: { amountCents: true }, where: { status: "PAID" } }),
@@ -95,7 +100,7 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-6 py-10 space-y-8">
 
         {/* Navegação rápida */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -119,10 +124,13 @@ export default async function AdminDashboardPage() {
 
         <StatsGrid
           orderPending={orderPending}
+          orderProposalSent={orderProposalSent}
+          orderApproved={orderApproved}
           orderInProd={orderInProd}
           orderCompleted={orderCompleted}
           totalRevenueCents={totalRevenueCents}
           monthRevenueCents={monthRevenueCents}
+          monthLabel={monthLabel}
           fmtEur={fmtEur}
         />
         <BriefingStats counts={counts} />
@@ -145,6 +153,6 @@ export default async function AdminDashboardPage() {
             scopeSet={scopeSet}
           />
         </div>
-    </main>
+    </div>
   );
 }

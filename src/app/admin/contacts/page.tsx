@@ -33,7 +33,7 @@ export default async function AdminContactsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <div className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">Mensagens de Contato</h1>
@@ -103,7 +103,7 @@ export default async function AdminContactsPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

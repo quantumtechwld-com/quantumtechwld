@@ -73,7 +73,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-10 space-y-5">
+      <div className="mx-auto max-w-4xl px-6 py-10 space-y-5">
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-white">
@@ -264,7 +264,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
 
         {/* Canal de mensagens */}
         <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
-      </main>
+      </div>
     </>
   );
 }

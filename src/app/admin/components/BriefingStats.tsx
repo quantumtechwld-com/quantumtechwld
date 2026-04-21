@@ -18,10 +18,10 @@ export default function BriefingStats({ counts }: BriefingStatsProps) {
       ].map((stat) => (
         <div
           key={stat.label}
-          className="rounded-xl border border-white/8 bg-white/3 p-5"
+          className="rounded-xl border border-white/8 bg-white/3 p-3"
         >
-          <p className="text-sm text-white/50 mb-1">{stat.label}</p>
-          <p className={`text-3xl font-bold bg-linear-to-r ${stat.color} bg-clip-text text-transparent`}>
+          <p className="text-xs text-white/50 mb-1">{stat.label}</p>
+          <p className={`text-2xl font-bold bg-linear-to-r ${stat.color} bg-clip-text text-transparent`}>
             {stat.value}
           </p>
         </div>

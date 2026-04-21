@@ -24,7 +24,7 @@ export default async function AdminNewOrderPage({ searchParams }: Readonly<{ sea
   });
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-10">
+    <div className="mx-auto w-full max-w-3xl px-6 py-10">
       <div className="mb-10">
         <Link href="/admin/orders" className="text-sm text-accent hover:text-accent-light transition-colors">
           ← Pedidos
@@ -36,6 +36,6 @@ export default async function AdminNewOrderPage({ searchParams }: Readonly<{ sea
       <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
         <AdminNewOrderForm clients={clients} initialClientId={initialClientId} />
       </div>
-    </main>
+    </div>
   );
 }

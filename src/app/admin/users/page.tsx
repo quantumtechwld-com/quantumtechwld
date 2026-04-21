@@ -27,8 +27,8 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-6 py-10">
         <UsersClient users={users} />
-    </main>
+    </div>
   );
 }

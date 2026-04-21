@@ -86,7 +86,7 @@ export default async function AdminBriefingDetailPage({
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
         {/* Client + Project Info */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Client card */}
@@ -162,7 +162,7 @@ export default async function AdminBriefingDetailPage({
             hasScope={!!scopeRaw}
           />
         </div>
-      </main>
+      </div>
     </>
   );
 }

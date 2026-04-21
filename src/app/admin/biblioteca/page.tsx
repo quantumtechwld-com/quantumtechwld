@@ -44,7 +44,7 @@ export default async function AdminBibliotecaPage() {
   })) as RefProject[];
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10 space-y-10">
+    <div className="mx-auto max-w-4xl px-6 py-10 space-y-10">
 
         {/* Cabeçalho */}
         <div>
@@ -116,6 +116,6 @@ export default async function AdminBibliotecaPage() {
           </div>
         </section>
 
-    </main>
+    </div>
   );
 }
