@@ -192,6 +192,16 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
             <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.adminNote}</p>
           </section>
         )}
+
+        {/* Motivo de rejeição */}
+        {order.status === "REJECTED" && order.adminNote && (
+          <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-red-400 mb-2">
+              Motivo da recusa
+            </h2>
+            <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.adminNote}</p>
+          </section>
+        )}
       </div>
 
       {/* Client action buttons  */}

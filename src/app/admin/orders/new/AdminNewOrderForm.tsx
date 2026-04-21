@@ -104,8 +104,9 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
       setError("Informações de produção são obrigatórias.");
       return;
     }
-    const val = Number.parseFloat(estimatedValue);
-    if (!estimatedValue || Number.isNaN(val) || val < 0) {
+    const fallbackVal = needsParent ? 0 : Number.NaN;
+    const parsedVal = estimatedValue.trim() ? Number.parseFloat(estimatedValue) : fallbackVal;
+    if (Number.isNaN(parsedVal) || parsedVal < 0) {
       setError("Valor estimado inválido.");
       return;
     }
@@ -122,7 +123,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           description: description.trim(),
           urgency,
           productionInfo: productionInfo.trim(),
-          estimatedValue: val,
+          estimatedValue: parsedVal,
           adminNote: adminNote.trim() || undefined,
           ...(selectedParentOrderId ? { parentOrderId: selectedParentOrderId } : {}),
         }),
@@ -301,7 +302,10 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           </div>
           <div>
             <label htmlFor="admin-estimated-value" className="block text-xs font-medium text-slate-400 mb-1">
-              Valor estimado (€) <span className="text-red-400">*</span>
+              Valor estimado (€){" "}
+              {needsParent
+                ? <span className="text-slate-500">(opcional — custo zero se vazio)</span>
+                : <span className="text-red-400">*</span>}
             </label>
             <input
               id="admin-estimated-value"

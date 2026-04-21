@@ -22,7 +22,10 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
   async function sendProposal() {
     setError("");
     if (!productionInfo.trim()) { setError("Informações de produção são obrigatórias."); return; }
-    if (!estimatedValue || Number.isNaN(Number.parseFloat(estimatedValue)) || Number.parseFloat(estimatedValue) < 0) {
+    const isFreeOrder = order.type === "correction" || order.type === "alteration";
+    const fallback = isFreeOrder ? 0 : Number.NaN;
+    const parsedValue = estimatedValue.trim() ? Number.parseFloat(estimatedValue) : fallback;
+    if (Number.isNaN(parsedValue) || parsedValue < 0) {
       setError("Valor estimado inválido."); return;
     }
     setLoading("propose");
@@ -33,7 +36,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
         body:    JSON.stringify({
           action:         "propose",
           productionInfo: productionInfo.trim(),
-          estimatedValue: Number.parseFloat(estimatedValue),
+          estimatedValue: parsedValue,
           adminNote:      adminNote.trim() || undefined,
         }),
       });
@@ -105,7 +108,10 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
             </div>
             <div>
               <label htmlFor="admin-estimated-value" className="block text-xs text-slate-400 mb-1">
-                Valor estimado (€) <span className="text-red-400">*</span>
+                Valor estimado (€){" "}
+                {(order.type === "correction" || order.type === "alteration")
+                  ? <span className="text-slate-500">(opcional — custo zero se vazio)</span>
+                  : <span className="text-red-400">*</span>}
               </label>
               <input
                 id="admin-estimated-value"
