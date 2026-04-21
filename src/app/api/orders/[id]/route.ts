@@ -8,6 +8,8 @@ import {
   tplOrderRevisionAdmin,
   tplOrderInProduction,
   tplOrderCompleted,
+  tplOrderInReview,
+  tplOrderReviewApprovedAdmin,
 } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
 
@@ -55,6 +57,10 @@ type PatchBody = {
   productionInfo?: string;
   estimatedValue?: number;
   adminNote?: string;
+  deliveryNote?: string;
+  deliveryLinks?: string[];
+  finalDeliveryNote?: string;
+  finalDeliveryUrl?: string;
 };
 
 type ApiError = { error: string; status: number };
@@ -74,7 +80,20 @@ function buildAdminUpdateData(
         respondedAt:    new Date(),
       };
     case "start_production": return { status: "IN_PRODUCTION" };
-    case "complete":         return { status: "COMPLETED" };
+    case "submit_review":
+      if (!body.deliveryNote?.trim()) return { error: "Descrição do trabalho realizado é obrigatória.", status: 422 };
+      return {
+        status:        "IN_REVIEW",
+        deliveryNote:  body.deliveryNote.trim(),
+        deliveryLinks: (body.deliveryLinks ?? []).map((l) => l.trim()).filter(Boolean),
+        respondedAt:   new Date(),
+      };
+    case "complete":         return {
+        status:           "COMPLETED",
+        finalDeliveryNote: body.finalDeliveryNote?.trim() ?? null,
+        finalDeliveryUrl:  body.finalDeliveryUrl?.trim() ?? null,
+      };
+    case "reopen":           return { status: "REVISION", adminNote: null };
     case "admin_reject":
       if (!body.adminNote?.trim()) return { error: "O motivo da recusa é obrigatório.", status: 422 };
       return { status: "REJECTED", estimatedValue: null, adminNote: body.adminNote.trim() };
@@ -94,6 +113,12 @@ function buildClientUpdateData(
       if (order.status !== "PROPOSAL_SENT") return { error: "Só é possível pedir revisão de uma proposta enviada.", status: 422 };
       return { status: "REVISION", adminNote: body.adminNote?.trim() ?? null };
     case "reject": return { status: "REJECTED" };
+    case "approve_review":
+      if (order.status !== "IN_REVIEW") return { error: "Só é possível aprovar uma entrega em revisão.", status: 422 };
+      return { status: "REVIEW_APPROVED" };
+    case "request_correction":
+      if (order.status !== "IN_REVIEW") return { error: "Só é possível pedir correção de uma entrega em revisão.", status: 422 };
+      return { status: "IN_PRODUCTION", adminNote: body.adminNote?.trim() ?? null };
     default:       return { error: "Acção inválida.", status: 422 };
   }
 }
@@ -102,7 +127,7 @@ function isApiError(v: Record<string, unknown>): v is ApiError {
   return typeof v.error === "string" && typeof v.status === "number";
 }
 
-const ADMIN_ACTIONS = new Set(["propose", "start_production", "complete", "admin_reject"]);
+const ADMIN_ACTIONS = new Set(["propose", "start_production", "submit_review", "complete", "reopen", "admin_reject"]);
 
 /**
  * Valida autorização e devolve os dados a persistir (ou um ApiError).
@@ -144,7 +169,7 @@ async function updateOrderWithLock(
 
 type EmailContext = {
   action: string;
-  updated: { type: string; title?: string | null; estimatedValue?: number | null; productionInfo?: string | null };
+  updated: { type: string; title?: string | null; estimatedValue?: number | null; productionInfo?: string | null; finalDeliveryUrl?: string | null };
   clientEmail: string;
   clientName: string;
   adminEmail: string;
@@ -167,19 +192,34 @@ function dispatchPostUpdateEmail(ctx: EmailContext) {
       subject: "[DevFlow] O seu pedido está em produção",
       html: tplOrderInProduction({ clientName, orderType: updated.type, orderTitle, orderUrl }),
     }),
+    submit_review: () => sendMail({
+      to: clientEmail,
+      subject: "[DevFlow] Entrega pronta — avalie o trabalho realizado",
+      html: tplOrderInReview({ clientName, orderType: updated.type, orderTitle, orderUrl }),
+    }),
     complete: () => sendMail({
       to: clientEmail,
       subject: "[DevFlow] Pedido concluído",
-      html: tplOrderCompleted({ clientName, orderType: updated.type, orderTitle, orderUrl }),
+      html: tplOrderCompleted({ clientName, orderType: updated.type, orderTitle, orderUrl, finalDeliveryUrl: updated.finalDeliveryUrl ?? undefined }),
     }),
     approve: () => sendMail({
       to: adminEmail,
       subject: "[DevFlow] Pedido aprovado pelo cliente",
       html: tplOrderApprovedAdmin({ clientEmail, orderType: updated.type, adminUrl: adminOrderUrl }),
     }),
+    approve_review: () => sendMail({
+      to: adminEmail,
+      subject: "[DevFlow] Cliente aprovou a entrega",
+      html: tplOrderReviewApprovedAdmin({ clientEmail, orderType: updated.type, adminUrl: adminOrderUrl }),
+    }),
     revision: () => sendMail({
       to: adminEmail,
       subject: "[DevFlow] Revisão solicitada pelo cliente",
+      html: tplOrderRevisionAdmin({ clientEmail, orderType: updated.type, adminNote, adminUrl: adminOrderUrl }),
+    }),
+    request_correction: () => sendMail({
+      to: adminEmail,
+      subject: "[DevFlow] Cliente pediu correção na entrega",
       html: tplOrderRevisionAdmin({ clientEmail, orderType: updated.type, adminNote, adminUrl: adminOrderUrl }),
     }),
   };

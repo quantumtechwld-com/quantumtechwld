@@ -132,6 +132,7 @@ export function tplOrderCompleted(opts: {
   orderType: string;
   orderTitle?: string;
   orderUrl: string;
+  finalDeliveryUrl?: string;
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
@@ -141,10 +142,54 @@ export function tplOrderCompleted(opts: {
         O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         foi concluído com sucesso. Obrigado pela confiança!
       </p>
+      ${opts.finalDeliveryUrl ? `<p style="color:#94a3b8;margin:0 0 16px">Aceda ao resultado final:</p><a href="${opts.finalDeliveryUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px;margin-bottom:16px">Ver resultado final →</a><br/>` : ""}
       <a href="${opts.orderUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver detalhes →
       </a>
       <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
+    </div>
+  `;
+}
+
+export function tplOrderInReview(opts: {
+  clientName: string;
+  orderType: string;
+  orderTitle?: string;
+  orderUrl: string;
+}) {
+  return /* html */ `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      <h1 style="font-size:22px;font-weight:700;color:#0ea5e9;margin:0 0 8px">Entrega pronta para revisão 🔍</h1>
+      <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
+      <p style="color:#94a3b8;margin:0 0 24px">
+        O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
+        foi entregue e está aguardando a sua avaliação. Aceda ao portal para revisar o trabalho realizado e aprovar ou pedir correções.
+      </p>
+      <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
+        Avaliar entrega →
+      </a>
+      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
+    </div>
+  `;
+}
+
+export function tplOrderReviewApprovedAdmin(opts: {
+  clientEmail: string;
+  orderType: string;
+  adminUrl: string;
+}) {
+  return /* html */ `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      <h1 style="font-size:22px;font-weight:700;color:#14b8a6;margin:0 0 8px">Cliente aprovou a entrega ✅</h1>
+      <p style="color:#94a3b8;margin:0 0 24px">
+        O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a entrega do pedido
+        (${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}).
+      </p>
+      <p style="color:#94a3b8;margin:0 0 24px">Pode agora marcar o pedido como <strong style="color:#fff">Concluído</strong> e adicionar o link do resultado final.</p>
+      <a href="${opts.adminUrl}" style="display:inline-block;background:#14b8a6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
+        Finalizar pedido →
+      </a>
+      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
     </div>
   `;
 }

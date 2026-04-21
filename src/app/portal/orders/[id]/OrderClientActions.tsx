@@ -10,17 +10,23 @@ type Order = {
   estimatedValue: number | null;
   productionInfo: string | null;
   adminNote?:     string | null;
+  deliveryNote?:  string | null;
+  deliveryLinks?: string[];
 };
 
 export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
   const t = useTranslations("portal");
   const router = useRouter();
-  const [revisionNote, setRevisionNote] = useState("");
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error,   setError]   = useState("");
-  const [confirm, setConfirm] = useState<"approve" | "reject" | null>(null);
+  const [revisionNote,    setRevisionNote]    = useState("");
+  const [correctionNote,  setCorrectionNote]  = useState("");
+  const [loading,  setLoading]  = useState<string | null>(null);
+  const [error,    setError]    = useState("");
+  const [confirm,  setConfirm]  = useState<"approve" | "reject" | null>(null);
 
-  if (order.status !== "PROPOSAL_SENT") return null;
+  if (![
+    "PROPOSAL_SENT",
+    "IN_REVIEW",
+  ].includes(order.status)) return null;
 
   async function act(action: "approve" | "revision" | "reject") {
     if (action !== "revision" && !confirm) { setConfirm(action); return; }
@@ -49,7 +55,10 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/5 p-5">
+    <>
+      {/* PROPOSAL_SENT block */}
+      {order.status === "PROPOSAL_SENT" && (
+      <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/5 p-5">
       <p className="text-sm font-semibold text-accent-light mb-4">{t("orderActionsTitle")}</p>
 
       {/* Revision note */}
@@ -99,29 +108,114 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => { setConfirm(null); act("revision"); }}
-          disabled={!!loading}
-          className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-60"
-        >
-          {loading === "revision" ? t("orderActionsSending") : t("orderActionsRevisionBtn")}
-        </button>
-        <button
-          onClick={() => { setConfirm(null); act("reject"); }}
-          disabled={!!loading}
-          className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-60"
-        >
-          {t("orderActionsRejectBtn")}
-        </button>
-        <button
-          onClick={() => act("approve")}
-          disabled={!!loading}
-          className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:opacity-60"
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => { setConfirm(null); act("revision"); }}
+            disabled={!!loading}
+            className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-60"
+          >
+            {loading === "revision" ? t("orderActionsSending") : t("orderActionsRevisionBtn")}
+          </button>
+          <button
+            onClick={() => { setConfirm(null); act("reject"); }}
+            disabled={!!loading}
+            className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-60"
+          >
+            {t("orderActionsRejectBtn")}
+          </button>
+          <button
+            onClick={() => act("approve")}
+            disabled={!!loading}
+            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:opacity-60"
         >
           {loading === "approve" ? t("orderActionsConfirming") : t("orderActionsApproveBtn")}
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
+      )}
+
+      {/* IN_REVIEW block — cliente avalia entrega */}
+      {order.status === "IN_REVIEW" && (
+        <div className="mt-6 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
+          <p className="text-sm font-semibold text-sky-300 mb-4">Avalie a entrega</p>
+
+          <div className="mb-4">
+            <label htmlFor="correction-note" className="block text-xs text-slate-400 mb-1">
+              Nota para o programador (obrigatória se pedir correção)
+            </label>
+            <textarea
+              id="correction-note"
+              value={correctionNote}
+              onChange={(e) => setCorrectionNote(e.target.value)}
+              rows={3}
+              placeholder="Descreva o que precisa de ser corrigido ou melhorado…"
+              className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none"
+            />
+          </div>
+
+          {error && (
+            <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+              {error}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={async () => {
+                if (!correctionNote.trim()) { setError("A nota para o programador é obrigatória para pedir correção."); return; }
+                setError("");
+                setLoading("request_correction");
+                try {
+                  const res = await fetch(`/api/orders/${order.id}`, {
+                    method:  "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify({ action: "request_correction", adminNote: correctionNote.trim() }),
+                  });
+                  if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error((data as { error?: string }).error ?? "Erro inesperado.");
+                  }
+                  router.refresh();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Erro inesperado.");
+                } finally {
+                  setLoading(null);
+                }
+              }}
+              disabled={!!loading}
+              className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-60"
+            >
+              {loading === "request_correction" ? "A enviar…" : "Pedir correção"}
+            </button>
+            <button
+              onClick={async () => {
+                setError("");
+                setLoading("approve_review");
+                try {
+                  const res = await fetch(`/api/orders/${order.id}`, {
+                    method:  "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify({ action: "approve_review" }),
+                  });
+                  if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error((data as { error?: string }).error ?? "Erro inesperado.");
+                  }
+                  router.refresh();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Erro inesperado.");
+                } finally {
+                  setLoading(null);
+                }
+              }}
+              disabled={!!loading}
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:opacity-60"
+            >
+              {loading === "approve_review" ? "A aprovar…" : "Aprovar entrega"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -204,6 +204,12 @@ model Order {
   estimatedValue  Float?
   adminNote       String?     @db.Text
   respondedAt     DateTime?
+  /// Entrega do dev (IN_PRODUCTION → IN_REVIEW)
+  deliveryNote    String?     @db.Text
+  deliveryLinks   String[]
+  /// Conclusão final do admin (REVIEW_APPROVED → COMPLETED)
+  finalDeliveryNote String?   @db.Text
+  finalDeliveryUrl  String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   messages        OrderMessage[]
@@ -223,6 +229,8 @@ enum OrderStatus {
   REVISION         // cliente pediu revisão
   REJECTED         // cliente recusou
   IN_PRODUCTION    // em execução
+  IN_REVIEW        // dev entregou — cliente a avaliar a entrega
+  REVIEW_APPROVED  // cliente aprovou a entrega — admin finaliza com URL
   COMPLETED        // concluído
 }
 

@@ -158,7 +158,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         </section>
 
         {/* Proposta do admin (visible when PROPOSAL_SENT or later) */}
-        {["PROPOSAL_SENT", "APPROVED", "REVISION", "IN_PRODUCTION", "COMPLETED"].includes(order.status) &&
+        {["PROPOSAL_SENT", "APPROVED", "REVISION", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"].includes(order.status) &&
           order.productionInfo && (
             <section className="rounded-2xl border border-accent/30 bg-accent/5 p-5">
               <h2 className="text-xs font-semibold uppercase tracking-widest text-accent mb-3">
@@ -202,6 +202,58 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
             <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.adminNote}</p>
           </section>
         )}
+
+        {/* CTA solicitar esclarecimento quando recusado */}
+        {order.status === "REJECTED" && (
+          <section className="rounded-2xl border border-slate-500/30 bg-slate-500/5 p-5">
+            <p className="text-sm text-slate-300 mb-3">Tem alguma dúvida sobre a recusa? Envie uma mensagem à nossa equipa.</p>
+            <a
+              href="#messages"
+              className="inline-flex rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+            >
+              Solicitar esclarecimento
+            </a>
+          </section>
+        )}
+
+        {/* Entrega do dev — visível a partir de IN_REVIEW */}
+        {["IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"].includes(order.status) && order.deliveryNote && (
+          <section className="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-sky-400 mb-3">O que foi feito</h2>
+            <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.deliveryNote}</p>
+            {order.deliveryLinks?.length > 0 && (
+              <ul className="mt-3 space-y-1">
+                {(order.deliveryLinks as string[]).map((link) => (
+                  <li key={link}>
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-sky-400 hover:text-sky-300 underline underline-offset-2 break-all">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {/* Resultado final (COMPLETED) */}
+        {order.status === "COMPLETED" && (order.finalDeliveryUrl || order.finalDeliveryNote) && (
+          <section className="rounded-2xl border border-teal-500/30 bg-teal-500/5 p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-teal-400 mb-3">Resultado final</h2>
+            {order.finalDeliveryNote && (
+              <p className="text-sm text-slate-200 whitespace-pre-wrap mb-3">{order.finalDeliveryNote}</p>
+            )}
+            {order.finalDeliveryUrl && (
+              <a
+                href={order.finalDeliveryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-2.5 text-sm font-medium text-teal-300 transition hover:bg-teal-500/20"
+              >
+                Aceder ao resultado final →
+              </a>
+            )}
+          </section>
+        )}
       </div>
 
       {/* Client action buttons  */}
@@ -212,6 +264,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
           estimatedValue: order.estimatedValue,
           productionInfo: order.productionInfo,
           adminNote:      order.adminNote,
+          deliveryNote:   order.deliveryNote,
+          deliveryLinks:  order.deliveryLinks,
         }}
       />
 
@@ -256,7 +310,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         </div>
       )}
 
-      <div className="mt-6">
+      <div id="messages" className="mt-6">
         <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
       </div>
     </main>

@@ -9,85 +9,111 @@ type Order = {
   type:   string;
 };
 
+async function patchOrder(
+  orderId: string,
+  body: Record<string, unknown>,
+): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`/api/orders/${orderId}`, {
+    method:  "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify(body),
+  }).catch(() => null);
+  if (!res) return { ok: false, error: "Erro de ligação." };
+  if (res.ok) return { ok: true };
+  const data = await res.json().catch(() => ({}));
+  return { ok: false, error: (data as { error?: string }).error ?? "Erro inesperado." };
+}
+
+function parseEstimatedValue(raw: string, isFree: boolean): number {
+  if (raw.trim()) return Number.parseFloat(raw);
+  return isFree ? 0 : Number.NaN;
+}
+
+function isInvalidPrice(value: number): boolean {
+  return Number.isNaN(value) || value < 0;
+}
+
 export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Order; paymentPaid?: boolean }>) {
   const router = useRouter();
   const [loading, setLoading]         = useState<string | null>(null);
   const [error,   setError]           = useState("");
+
+  // Proposta
   const [productionInfo, setProductionInfo] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
   const [adminNote,       setAdminNote]     = useState("");
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [confirmAction,  setConfirmAction]  = useState<"start_production" | "complete" | "reject" | null>(null);
 
+  // Entrega para revisão
+  const [deliveryNote,  setDeliveryNote]  = useState("");
+  const [deliveryLinks, setDeliveryLinks] = useState(""); // uma por linha
+
+  // Conclusão final
+  const [finalDeliveryNote, setFinalDeliveryNote] = useState("");
+  const [finalDeliveryUrl,  setFinalDeliveryUrl]  = useState("");
+
+  // Rejeição
+  const [rejectionReason, setRejectionReason] = useState("");
+
+  const [confirmAction, setConfirmAction] = useState<"start_production" | "admin_reject" | "reopen" | null>(null);
+
+  const isFreeOrderType = order.type === "correction" || order.type === "alteration";
+
+  // ── enviar proposta ──────────────────────────────────────────────────────
   async function sendProposal() {
     setError("");
     if (!productionInfo.trim()) { setError("Informações de produção são obrigatórias."); return; }
-    const isFreeOrder = order.type === "correction" || order.type === "alteration";
-    const fallback = isFreeOrder ? 0 : Number.NaN;
-    const parsedValue = estimatedValue.trim() ? Number.parseFloat(estimatedValue) : fallback;
-    if (Number.isNaN(parsedValue) || parsedValue < 0) {
-      setError("Valor estimado inválido."); return;
-    }
+    const parsedValue = parseEstimatedValue(estimatedValue, isFreeOrderType);
+    if (isInvalidPrice(parsedValue)) { setError("Valor estimado inválido."); return; }
     setLoading("propose");
-    try {
-      const res = await fetch(`/api/orders/${order.id}`, {
-        method:  "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          action:         "propose",
-          productionInfo: productionInfo.trim(),
-          estimatedValue: parsedValue,
-          adminNote:      adminNote.trim() || undefined,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Erro ao enviar proposta.");
-      }
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
-    } finally {
-      setLoading(null);
-    }
+    const result = await patchOrder(order.id, { action: "propose", productionInfo: productionInfo.trim(), estimatedValue: parsedValue, adminNote: adminNote.trim() || undefined });
+    if (result.ok) router.refresh(); else setError(result.error ?? "Erro inesperado.");
+    setLoading(null);
   }
 
-  async function runAction(action: "start_production" | "complete" | "admin_reject") {
+  // ── entregar para revisão (IN_PRODUCTION → IN_REVIEW) ───────────────────
+  async function submitReview() {
     setError("");
-    if (action === "admin_reject") {
-      if (!rejectionReason.trim()) { setError("O motivo da recusa é obrigatório."); return; }
-    }
-    setLoading(action);
-    try {
-      const body: Record<string, unknown> = { action };
-      if (action === "admin_reject") body.adminNote = rejectionReason.trim();
-      const res = await fetch(`/api/orders/${order.id}`, {
-        method:  "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Erro ao actualizar.");
-      }
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
-    } finally {
-      setLoading(null);
-      setConfirmAction(null);
-    }
+    if (!deliveryNote.trim()) { setError("A descrição do trabalho realizado é obrigatória."); return; }
+    setLoading("submit_review");
+    const links = deliveryLinks.split("\n").map((l) => l.trim()).filter(Boolean);
+    const result = await patchOrder(order.id, { action: "submit_review", deliveryNote: deliveryNote.trim(), deliveryLinks: links });
+    if (result.ok) router.refresh(); else setError(result.error ?? "Erro inesperado.");
+    setLoading(null);
   }
 
-  const canPropose       = ["PENDING", "EVALUATING", "REVISION"].includes(order.status);
-  const canStartProd     = order.status === "APPROVED";
-  const canComplete      = order.status === "IN_PRODUCTION";
-  const canReject        = ["PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED"].includes(order.status);
+  // ── finalizar (REVIEW_APPROVED → COMPLETED) ──────────────────────────────
+  async function finalizeComplete() {
+    setError("");
+    setLoading("complete");
+    const result = await patchOrder(order.id, { action: "complete", finalDeliveryNote: finalDeliveryNote.trim() || undefined, finalDeliveryUrl: finalDeliveryUrl.trim() || undefined });
+    if (result.ok) router.refresh(); else setError(result.error ?? "Erro inesperado.");
+    setLoading(null);
+  }
 
-  if (!canPropose && !canStartProd && !canComplete && !canReject) return null;
+  // ── acções simples (start_production, admin_reject, reopen) ─────────────
+  async function runAction(action: "start_production" | "admin_reject" | "reopen") {
+    setError("");
+    if (action === "admin_reject" && !rejectionReason.trim()) { setError("O motivo da recusa é obrigatório."); return; }
+    setLoading(action);
+    const body: Record<string, unknown> = { action, adminNote: rejectionReason.trim() || undefined };
+    const result = await patchOrder(order.id, body);
+    if (result.ok) router.refresh(); else setError(result.error ?? "Erro inesperado.");
+    setLoading(null);
+    setConfirmAction(null);
+  }
+
+  const canPropose      = ["PENDING", "EVALUATING", "REVISION"].includes(order.status);
+  const canStartProd    = order.status === "APPROVED";
+  const canSubmitReview = order.status === "IN_PRODUCTION";
+  const canFinalize     = order.status === "REVIEW_APPROVED";
+  const canReject       = ["PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED"].includes(order.status);
+  const canReopen       = order.status === "REJECTED";
+
+  if (!canPropose && !canStartProd && !canSubmitReview && !canFinalize && !canReject && !canReopen) return null;
 
   return (
     <div className="mt-6 space-y-4">
+
       {/* Enviar proposta */}
       {canPropose && (
         <div className="rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5">
@@ -109,7 +135,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
             <div>
               <label htmlFor="admin-estimated-value" className="block text-xs text-slate-400 mb-1">
                 Valor estimado (€){" "}
-                {(order.type === "correction" || order.type === "alteration")
+                {isFreeOrderType
                   ? <span className="text-slate-500">(opcional — custo zero se vazio)</span>
                   : <span className="text-red-400">*</span>}
               </label>
@@ -136,9 +162,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
               />
             </div>
             {error && (
-              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-                {error}
-              </p>
+              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</p>
             )}
             <div className="flex justify-end">
               <button
@@ -166,32 +190,19 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 O cliente aprovou a proposta. Marque o pedido como <strong>Em produção</strong> quando iniciar os trabalhos.
               </p>
               {error && (
-                <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-                  {error}
-                </p>
+                <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</p>
               )}
               {confirmAction === "start_production" ? (
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => runAction("start_production")}
-                    disabled={!!loading}
-                    className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60"
-                  >
+                  <button onClick={() => runAction("start_production")} disabled={!!loading} className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60">
                     {loading === "start_production" ? "A actualizar…" : "Confirmar"}
                   </button>
-                  <button
-                    onClick={() => setConfirmAction(null)}
-                    className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
-                  >
+                  <button onClick={() => setConfirmAction(null)} className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10">
                     Cancelar
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setConfirmAction("start_production")}
-                  disabled={!!loading}
-                  className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60"
-                >
+                <button onClick={() => setConfirmAction("start_production")} disabled={!!loading} className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-400 disabled:opacity-60">
                   Marcar em produção
                 </button>
               )}
@@ -200,44 +211,89 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
         </div>
       )}
 
-      {/* Marcar concluído */}
-      {canComplete && (
-        <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-5">
-          <p className="text-sm text-slate-300 mb-3">
-            Clique em <strong>Marcar concluído</strong> quando a entrega estiver feita.
-          </p>
-          {error && (
-            <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-              {error}
-            </p>
-          )}
-          {confirmAction === "complete" ? (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => runAction("complete")}
-                disabled={!!loading}
-                className="rounded-xl bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-400 disabled:opacity-60"
-              >
-                {loading === "complete" ? "A finalizar…" : "Confirmar conclusão"}
-              </button>
-              <button
-                onClick={() => setConfirmAction(null)}
-                className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
-              >
-                Cancelar
+      {/* Entregar para revisão (IN_PRODUCTION → IN_REVIEW) */}
+      {canSubmitReview && (
+        <div className="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
+          <h3 className="text-sm font-semibold text-sky-300 mb-4">Entregar para revisão pelo cliente</h3>
+          <div className="grid gap-4">
+            <div>
+              <label htmlFor="admin-delivery-note" className="block text-xs text-slate-400 mb-1">
+                O que foi feito <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                id="admin-delivery-note"
+                value={deliveryNote}
+                onChange={(e) => setDeliveryNote(e.target.value)}
+                rows={5}
+                placeholder="Descreva o trabalho realizado, alterações efetuadas, decisões técnicas tomadas…"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="admin-delivery-links" className="block text-xs text-slate-400 mb-1">
+                Links (opcional — um por linha)
+              </label>
+              <textarea
+                id="admin-delivery-links"
+                value={deliveryLinks}
+                onChange={(e) => setDeliveryLinks(e.target.value)}
+                rows={3}
+                placeholder={"https://staging.exemplo.com\nhttps://drive.google.com/…"}
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none font-mono"
+              />
+            </div>
+            {error && (
+              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</p>
+            )}
+            <div className="flex justify-end">
+              <button onClick={submitReview} disabled={!!loading} className="rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:opacity-60">
+                {loading === "submit_review" ? "A enviar…" : "Enviar para revisão"}
               </button>
             </div>
-          ) : (
-            <button
-              onClick={() => setConfirmAction("complete")}
-              disabled={!!loading}
-              className="rounded-xl bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-400 disabled:opacity-60"
-            >
-              Marcar concluído
-            </button>
-          )}
+          </div>
         </div>
       )}
+
+      {/* Finalizar pedido (REVIEW_APPROVED → COMPLETED) */}
+      {canFinalize && (
+        <div className="rounded-2xl border border-teal-500/30 bg-teal-500/5 p-5">
+          <h3 className="text-sm font-semibold text-teal-300 mb-1">Marcar como concluído</h3>
+          <p className="text-xs text-slate-400 mb-4">O cliente aprovou a entrega. Adicione o link do resultado final e finalize o ciclo.</p>
+          <div className="grid gap-4">
+            <div>
+              <label htmlFor="final-delivery-url" className="block text-xs text-slate-400 mb-1">URL do resultado final (opcional)</label>
+              <input
+                id="final-delivery-url"
+                type="url"
+                value={finalDeliveryUrl}
+                onChange={(e) => setFinalDeliveryUrl(e.target.value)}
+                placeholder="https://resultado.exemplo.com"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="final-delivery-note" className="block text-xs text-slate-400 mb-1">Nota final para o cliente (opcional)</label>
+              <textarea
+                id="final-delivery-note"
+                value={finalDeliveryNote}
+                onChange={(e) => setFinalDeliveryNote(e.target.value)}
+                rows={3}
+                placeholder="Instruções de acesso, próximos passos, agradecimento…"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none resize-none"
+              />
+            </div>
+            {error && (
+              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</p>
+            )}
+            <div className="flex justify-end">
+              <button onClick={finalizeComplete} disabled={!!loading} className="rounded-xl bg-teal-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-400 disabled:opacity-60">
+                {loading === "complete" ? "A finalizar…" : "Confirmar conclusão"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Rejeitar pedido */}
       {canReject && (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
@@ -245,12 +301,10 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
             Rejeite o pedido caso não seja possível dar seguimento.
             O cliente será notificado e o estado será alterado para <strong>Recusado</strong>.
           </p>
-          {confirmAction === "reject" && (
+          {confirmAction === "admin_reject" && (
             <>
               {error && (
-                <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-                  {error}
-                </p>
+                <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</p>
               )}
               <div className="mb-3">
                 <label htmlFor="rejection-reason" className="block text-xs text-slate-400 mb-1">
@@ -266,33 +320,49 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 />
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => runAction("admin_reject")}
-                  disabled={!!loading}
-                  className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 disabled:opacity-60"
-                >
+                <button onClick={() => runAction("admin_reject")} disabled={!!loading} className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 disabled:opacity-60">
                   {loading === "admin_reject" ? "A recusar…" : "Confirmar recusa"}
                 </button>
-                <button
-                  onClick={() => { setConfirmAction(null); setRejectionReason(""); setError(""); }}
-                  className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
-                >
+                <button onClick={() => { setConfirmAction(null); setRejectionReason(""); setError(""); }} className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10">
                   Cancelar
                 </button>
               </div>
             </>
           )}
-          {confirmAction !== "reject" && (
-            <button
-              onClick={() => setConfirmAction("reject")}
-              disabled={!!loading}
-              className="rounded-xl border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:opacity-60"
-            >
+          {confirmAction !== "admin_reject" && (
+            <button onClick={() => setConfirmAction("admin_reject")} disabled={!!loading} className="rounded-xl border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:opacity-60">
               Rejeitar pedido
             </button>
           )}
         </div>
       )}
+
+      {/* Reabrir pedido REJECTED → REVISION */}
+      {canReopen && (
+        <div className="rounded-2xl border border-orange-500/30 bg-orange-500/5 p-5">
+          <p className="text-sm text-slate-300 mb-3">
+            Reabra o pedido após esclarecimentos. O estado voltará para <strong>Revisão</strong>.
+          </p>
+          {error && (
+            <p className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</p>
+          )}
+          {confirmAction === "reopen" ? (
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => runAction("reopen")} disabled={!!loading} className="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-400 disabled:opacity-60">
+                {loading === "reopen" ? "A reabrir…" : "Confirmar reabertura"}
+              </button>
+              <button onClick={() => { setConfirmAction(null); setError(""); }} className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10">
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setConfirmAction("reopen")} disabled={!!loading} className="rounded-xl border border-orange-500/40 px-5 py-2.5 text-sm font-semibold text-orange-400 transition hover:bg-orange-500/10 disabled:opacity-60">
+              Reabrir pedido
+            </button>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
