@@ -1,9 +1,9 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ORDER_TYPE_LABEL, URGENCY_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR } from "@/lib/constants";
+import { ORDER_TYPE_LABEL, URGENCY_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, EUR_TO_BRL, EUR_TO_USD, FX_REFERENCE_DATE } from "@/lib/constants";
 
 type ClientOption = {
   id: string;
@@ -24,6 +24,15 @@ type Props = Readonly<{
   clients: ClientOption[];
   initialClientId?: string;
 }>;
+
+function calcFxConversion(raw: string) {
+  const eur = Number.parseFloat(raw);
+  if (!raw || Number.isNaN(eur) || eur <= 0) return null;
+  return {
+    brl: (eur * EUR_TO_BRL).toFixed(2),
+    usd: (eur * EUR_TO_USD).toFixed(2),
+  };
+}
 
 // "contact" é reservado para o formulário público — não disponível aqui.
 // "correction" e "alteration" exigem vinculação a um pedido pai.
@@ -53,6 +62,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [selectedParentOrderId, setSelectedParentOrderId] = useState<string | null>(null);
 
   const needsParent = PARENT_REQUIRED_TYPES.has(type);
+  const fxConversion = useMemo(() => calcFxConversion(estimatedValue), [estimatedValue]);
 
   // Buscar pedidos abertos apenas quando o tipo exige vinculação
   useEffect(() => {
@@ -317,6 +327,12 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
               placeholder="0.00"
               className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-violet-500 focus:outline-none"
             />
+            {fxConversion && (
+              <p className="mt-1 text-xs text-slate-500">
+                ≈ R$ {fxConversion.brl} BRL · $ {fxConversion.usd} USD{" "}
+                <span className="text-slate-600">(câmbio ref. {FX_REFERENCE_DATE})</span>
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="admin-note" className="block text-xs font-medium text-slate-400 mb-1">
