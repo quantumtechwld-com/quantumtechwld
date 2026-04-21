@@ -20,6 +20,9 @@ command -v pm2  || { echo "ERRO: pm2 não encontrado"; exit 1; }
 echo "==> Preparando diretórios..."
 mkdir -p "$APP_DIR" "$STAGING"
 
+echo "==> Corrigindo permissões (arquivos criados por root em restarts de emergência)..."
+sudo chown -R ubuntu:ubuntu "$APP_DIR" 2>/dev/null || true
+
 echo "==> Baixando artefatos via pre-signed URL..."
 curl -fsSL "$DEPLOY_URL" -o "$STAGING/deploy.tar.gz"
 curl -fsSL "$ENV_URL"    -o "$APP_DIR/.env.production.local"
@@ -34,8 +37,6 @@ rm "$STAGING/deploy.tar.gz"
 
 echo "==> Instalando dependências de produção..."
 cd "$APP_DIR"
-# Corrige permissões de arquivos criados como root em deploys anteriores
-sudo chown -R ubuntu:ubuntu "$APP_DIR" 2>/dev/null || true
 # Remove node_modules completamente para instalação limpa
 rm -rf node_modules
 # npm install em vez de npm ci: evita falha de lock file mismatch entre versões do npm (CI usa Node 24, EC2 pode ter versão diferente)
