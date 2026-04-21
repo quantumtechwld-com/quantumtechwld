@@ -54,6 +54,7 @@ export default async function AdminDashboardPage() {
     orderApproved,
     orderInProd,
     orderCompleted,
+    orderRejected,
     totalRevenue,
     monthRevenue,
     recentOrdersRaw,
@@ -68,6 +69,7 @@ export default async function AdminDashboardPage() {
     dbAny.order.count({ where: { status: "APPROVED" } }),
     dbAny.order.count({ where: { status: "IN_PRODUCTION" } }),
     dbAny.order.count({ where: { status: "COMPLETED" } }),
+    dbAny.order.count({ where: { status: "REJECTED" } }),
     dbAny.payment.aggregate({ _sum: { amountCents: true }, where: { status: "PAID" } }),
     dbAny.payment.aggregate({
       _sum: { amountCents: true },
@@ -128,6 +130,7 @@ export default async function AdminDashboardPage() {
           orderApproved={orderApproved}
           orderInProd={orderInProd}
           orderCompleted={orderCompleted}
+          orderRejected={orderRejected}
           totalRevenueCents={totalRevenueCents}
           monthRevenueCents={monthRevenueCents}
           monthLabel={monthLabel}

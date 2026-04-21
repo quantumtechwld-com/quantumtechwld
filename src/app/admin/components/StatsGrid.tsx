@@ -7,6 +7,7 @@ type StatsGridProps = Readonly<{
   orderApproved: number;
   orderInProd: number;
   orderCompleted: number;
+  orderRejected: number;
   totalRevenueCents: number;
   monthRevenueCents: number;
   monthLabel: string;
@@ -19,6 +20,7 @@ const STATUS_ITEMS = (props: StatsGridProps) => [
   { label: "Aprovados", value: props.orderApproved, color: "text-sky-300", dot: "bg-sky-400" },
   { label: "Em produção", value: props.orderInProd, color: "text-accent-light", dot: "bg-accent" },
   { label: "Concluídos", value: props.orderCompleted, color: "text-emerald-300", dot: "bg-emerald-500" },
+  { label: "Recusados", value: props.orderRejected, color: "text-red-400", dot: "bg-red-500" },
 ];
 
 export default function StatsGrid(props: StatsGridProps) {
@@ -58,7 +60,7 @@ export default function StatsGrid(props: StatsGridProps) {
       </div>
 
       {/* Estado dos pedidos */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-6 gap-2">
         {statusItems.map((item) => (
           <div key={item.label} className="rounded-lg border border-white/8 bg-white/3 p-3">
             <div className="flex items-center gap-1.5 mb-1.5">
