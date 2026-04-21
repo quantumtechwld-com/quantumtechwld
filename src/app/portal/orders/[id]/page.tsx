@@ -169,7 +169,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
                   <span className="text-slate-500">{t("orderEstValue")} </span>
                   <span className="font-semibold text-white">{estimatedFormatted}</span>
                   {isConverted && (
-                    <span className="ml-1 text-xs text-slate-500">(aprox.)</span>
+                    <span className="ml-1 text-xs text-slate-500">{t("orderValueApprox")}</span>
                   )}
                 </p>
               )}
@@ -197,7 +197,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         {order.status === "REJECTED" && order.adminNote && (
           <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-red-400 mb-2">
-              Motivo da recusa
+              {t("orderRejectionTitle")}
             </h2>
             <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.adminNote}</p>
           </section>
@@ -206,12 +206,12 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         {/* CTA solicitar esclarecimento quando recusado */}
         {order.status === "REJECTED" && (
           <section className="rounded-2xl border border-slate-500/30 bg-slate-500/5 p-5">
-            <p className="text-sm text-slate-300 mb-3">Tem alguma dúvida sobre a recusa? Envie uma mensagem à nossa equipa.</p>
+            <p className="text-sm text-slate-300 mb-3">{t("orderRejectedQuestion")}</p>
             <a
               href="#messages"
               className="inline-flex rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
             >
-              Solicitar esclarecimento
+              {t("orderClarificationBtn")}
             </a>
           </section>
         )}
@@ -219,7 +219,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         {/* Entrega do dev — visível a partir de IN_REVIEW */}
         {["IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"].includes(order.status) && order.deliveryNote && (
           <section className="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-sky-400 mb-3">O que foi feito</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-sky-400 mb-3">{t("orderDeliveryTitle")}</h2>
             <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.deliveryNote}</p>
             {order.deliveryLinks?.length > 0 && (
               <ul className="mt-3 space-y-1">
@@ -238,7 +238,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         {/* Resultado final (COMPLETED) */}
         {order.status === "COMPLETED" && (order.finalDeliveryUrl || order.finalDeliveryNote) && (
           <section className="rounded-2xl border border-teal-500/30 bg-teal-500/5 p-5">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-teal-400 mb-3">Resultado final</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-teal-400 mb-3">{t("orderFinalResultTitle")}</h2>
             {order.finalDeliveryNote && (
               <p className="text-sm text-slate-200 whitespace-pre-wrap mb-3">{order.finalDeliveryNote}</p>
             )}
@@ -249,7 +249,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-2.5 text-sm font-medium text-teal-300 transition hover:bg-teal-500/20"
               >
-                Aceder ao resultado final →
+                {t("orderFinalResultBtn")}
               </a>
             )}
           </section>
