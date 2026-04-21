@@ -587,6 +587,8 @@ para um estado:
 - docs/M1-CLOSING-REPORT.md
 - docs/M1-EXECUTION-BACKLOG.md
 - docs/M2-EXECUTION-BACKLOG.md
+- docs/M3-CLOSING-REPORT.md
+- docs/M4-EXECUTION-BACKLOG.md
 - docs/DEVELOPER-GUIDE.md
 - docs/REFACTORING-PLAN.md
 - docs/DEPLOY.md
