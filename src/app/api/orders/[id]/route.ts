@@ -61,6 +61,8 @@ type PatchBody = {
   deliveryLinks?: string[];
   finalDeliveryNote?: string;
   finalDeliveryUrl?: string;
+  downPaymentPct?: number;   // 0 = pagamento único; 1-99 = % de entrada
+  paymentMethod?: string;    // STRIPE | MANUAL_PIX | MANUAL_TRANSFER | MANUAL_OTHER
 };
 
 type ApiError = { error: string; status: number };
@@ -245,6 +247,46 @@ function dispatchPostUpdateEmail(ctx: EmailContext) {
   }
 }
 
+// ─── Financeiro: criar/substituir OrderFinancial + parcelas ─────────────────
+
+async function createOrReplaceOrderFinancial(
+  orderId: string,
+  totalCents: number,
+  downPaymentPct: number,
+  method: string,
+): Promise<void> {
+  // Remove financeiro anterior (re-proposta) — cascade apaga installments
+  await db.orderFinancial.deleteMany({ where: { orderId } });
+
+  const entryCents = downPaymentPct > 0 ? Math.round(totalCents * downPaymentPct / 100) : totalCents;
+  const installments: Array<{ sequence: number; amountCents: number; method: string }> =
+    downPaymentPct > 0
+      ? [
+          { sequence: 1, amountCents: entryCents, method },
+          { sequence: 2, amountCents: totalCents - entryCents, method },
+        ]
+      : [{ sequence: 1, amountCents: totalCents, method }];
+
+  await db.orderFinancial.create({
+    data: {
+      orderId,
+      totalAmountCents: totalCents,
+      downPaymentPct,
+      paidCents: 0,
+      status: "PENDING",
+      installments: {
+        create: installments.map(({ sequence, amountCents, method: m }) => ({
+          sequence,
+          amountCents,
+          method: m,
+          status: "PENDING",
+        })),
+      },
+    },
+  });
+}
+
+// ─── Financeiro: criar/substituir OrderFinancial + parcelas ─────────────────
 // ─── PATCH /api/orders/[id] ──────────────────────────────────────────────────
 // Admin: { action: "propose", productionInfo, estimatedValue, adminNote? }
 //        { action: "start_production" | "complete" | "admin_reject" }
@@ -298,6 +340,14 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       adminOrderUrl: `${baseUrl}/admin/orders/${id}`,
       adminNote:    body.adminNote ?? "",
     });
+
+    // Quando o admin envia proposta com valor estimado, criar/actualizar OrderFinancial
+    if (body.action === "propose" && updated.estimatedValue != null && updated.estimatedValue > 0) {
+      const totalCents = Math.round(updated.estimatedValue * 100);
+      const pct = Math.max(0, Math.min(99, Math.round(body.downPaymentPct ?? 0)));
+      const method = body.paymentMethod ?? "STRIPE";
+      await createOrReplaceOrderFinancial(id, totalCents, pct, method);
+    }
 
     return NextResponse.json({ order: updated });
   } catch (err) {

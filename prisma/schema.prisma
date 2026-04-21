@@ -214,6 +214,7 @@ model Order {
   updatedAt       DateTime    @updatedAt
   messages        OrderMessage[]
   payment         Payment?
+  financial       OrderFinancial?
   rating          OrderRating?
 
   @@index([createdByAdminId])
@@ -297,6 +298,62 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+}
+
+// ─── M7b: Gestão Financeira ──────────────────────────────────────────────────
+
+/// Cabeçalho financeiro de um pedido (1:1 com Order).
+/// Criado automaticamente quando o admin envia a proposta.
+model OrderFinancial {
+  id              String          @id @default(cuid())
+  orderId         String          @unique
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  totalAmountCents Int            // valor total acordado em EUR cents
+  downPaymentPct   Int            @default(0) // 0 = pagamento único; ex: 50 = 50% entrada
+  paidCents        Int            @default(0) // soma do efectivamente pago (atualizado em cada confirmação)
+  status          FinancialStatus @default(PENDING)
+  installments    PaymentInstallment[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+enum FinancialStatus {
+  PENDING   // nenhuma parcela paga
+  PARTIAL   // entrada paga, restante pendente
+  PAID      // 100% pago
+  REFUNDED  // estornado
+  OVERDUE   // prazo ultrapassado (futuro)
+}
+
+/// Parcela de pagamento (entrada ou parcela final).
+/// Suporta Stripe e pagamentos manuais.
+model PaymentInstallment {
+  id                  String          @id @default(cuid())
+  financialId         String
+  financial           OrderFinancial  @relation(fields: [financialId], references: [id], onDelete: Cascade)
+  sequence            Int             // 1 = entrada, 2 = final (ou 1 se pagamento único)
+  amountCents         Int
+  method              PaymentMethod   @default(STRIPE)
+  status              PaymentStatus   @default(PENDING)
+  /// Stripe (nullable — pagamentos manuais não têm)
+  stripeSessionId     String?         @unique
+  stripePaymentIntent String?
+  /// Pagamento manual
+  paidAt              DateTime?
+  notes               String?         @db.Text // ex: "PIX recebido em 21/04/2026 — Fulano"
+  confirmedByAdminId  String?         // rastreabilidade
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([financialId])
+  @@index([stripeSessionId])
+}
+
+enum PaymentMethod {
+  STRIPE
+  MANUAL_PIX
+  MANUAL_TRANSFER
+  MANUAL_OTHER
 }
 
 // ─── M10: Avaliação pós-conclusão ───────────────────────────────────────────

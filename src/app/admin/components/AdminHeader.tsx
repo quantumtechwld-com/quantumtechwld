@@ -12,6 +12,7 @@ import {
   BookOpen,
   MessageSquare,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; exact?: boolean };
@@ -23,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/briefing",          label: "Briefings",      icon: FileText         },
   { href: "/admin/biblioteca",        label: "Biblioteca",     icon: BookOpen         },
   { href: "/admin/contacts",          label: "Contatos",       icon: MessageSquare    },
+  { href: "/admin/financeiro",        label: "Financeiro",     icon: Wallet           },
   { href: "/admin/security-pipeline", label: "Segurança",      icon: ShieldCheck      },
 ];
 

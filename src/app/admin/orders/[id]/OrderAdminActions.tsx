@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import {
+  EUR_TO_BRL,
+  EUR_TO_USD,
+  FX_REFERENCE_DATE,
+  PAYMENT_METHOD_OPTIONS,
+  DOWN_PAYMENT_OPTIONS,
+} from "@/lib/constants";
 
 type Order = {
   id:     string;
@@ -33,15 +40,38 @@ function isInvalidPrice(value: number): boolean {
   return Number.isNaN(value) || value < 0;
 }
 
+function calcFxConversion(raw: string) {
+  const eur = Number.parseFloat(raw);
+  if (!raw || Number.isNaN(eur) || eur <= 0) return null;
+  return {
+    brl: (eur * EUR_TO_BRL).toFixed(2),
+    usd: (eur * EUR_TO_USD).toFixed(2),
+  };
+}
+
+function rejectValidationError(action: string, reason: string): string | null {
+  if (action !== "admin_reject") return null;
+  return reason.trim() ? null : "O motivo da recusa é obrigatório.";
+}
+
+function hasNoActions(flags: boolean[]): boolean {
+  return flags.every((f) => !f);
+}
+
 export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Order; paymentPaid?: boolean }>) {
   const router = useRouter();
   const [loading, setLoading]         = useState<string | null>(null);
   const [error,   setError]           = useState("");
 
   // Proposta
-  const [productionInfo, setProductionInfo] = useState("");
-  const [estimatedValue, setEstimatedValue] = useState("");
-  const [adminNote,       setAdminNote]     = useState("");
+  const [productionInfo,  setProductionInfo]  = useState("");
+  const [estimatedValue,  setEstimatedValue]  = useState("");
+  const [adminNote,       setAdminNote]       = useState("");
+  const [downPaymentPct,  setDownPaymentPct]  = useState(0);
+  const [paymentMethod,   setPaymentMethod]   = useState("STRIPE");
+
+  // Conversão de moeda — informativa, client-side
+  const fxConversion = useMemo(() => calcFxConversion(estimatedValue), [estimatedValue]);
 
   // Entrega para revisão
   const [deliveryNote,  setDeliveryNote]  = useState("");
@@ -65,7 +95,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
     const parsedValue = parseEstimatedValue(estimatedValue, isFreeOrderType);
     if (isInvalidPrice(parsedValue)) { setError("Valor estimado inválido."); return; }
     setLoading("propose");
-    const result = await patchOrder(order.id, { action: "propose", productionInfo: productionInfo.trim(), estimatedValue: parsedValue, adminNote: adminNote.trim() || undefined });
+    const result = await patchOrder(order.id, { action: "propose", productionInfo: productionInfo.trim(), estimatedValue: parsedValue, adminNote: adminNote.trim() || undefined, downPaymentPct, paymentMethod });
     if (result.ok) router.refresh(); else setError(result.error ?? "Erro inesperado.");
     setLoading(null);
   }
@@ -93,7 +123,8 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
   // ── acções simples (start_production, admin_reject, reopen) ─────────────
   async function runAction(action: "start_production" | "admin_reject" | "reopen") {
     setError("");
-    if (action === "admin_reject" && !rejectionReason.trim()) { setError("O motivo da recusa é obrigatório."); return; }
+    const validationErr = rejectValidationError(action, rejectionReason);
+    if (validationErr) { setError(validationErr); return; }
     setLoading(action);
     const body: Record<string, unknown> = { action, adminNote: rejectionReason.trim() || undefined };
     const result = await patchOrder(order.id, body);
@@ -109,7 +140,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
   const canReject       = ["PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED"].includes(order.status);
   const canReopen       = order.status === "REJECTED";
 
-  if (!canPropose && !canStartProd && !canSubmitReview && !canFinalize && !canReject && !canReopen) return null;
+  if (hasNoActions([canPropose, canStartProd, canSubmitReview, canFinalize, canReject, canReopen])) return null;
 
   return (
     <div className="mt-6 space-y-4">
@@ -149,6 +180,40 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 placeholder="0.00"
                 className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-violet-500 focus:outline-none"
               />
+              {fxConversion && (
+                <p className="mt-1 text-xs text-slate-500">
+                  ≈ R$ {fxConversion.brl} BRL · $ {fxConversion.usd} USD{" "}
+                  <span className="text-slate-600">(referência BCE {FX_REFERENCE_DATE})</span>
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="admin-down-pct" className="block text-xs text-slate-400 mb-1">Condições de pagamento</label>
+                <select
+                  id="admin-down-pct"
+                  value={downPaymentPct}
+                  onChange={(e) => setDownPaymentPct(Number(e.target.value))}
+                  className="w-full rounded-xl border border-white/15 bg-[#0f0f1a] px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+                >
+                  {DOWN_PAYMENT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="admin-payment-method" className="block text-xs text-slate-400 mb-1">Método de pagamento</label>
+                <select
+                  id="admin-payment-method"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full rounded-xl border border-white/15 bg-[#0f0f1a] px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+                >
+                  {PAYMENT_METHOD_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
               <label htmlFor="admin-note" className="block text-xs text-slate-400 mb-1">Nota adicional (opcional)</label>

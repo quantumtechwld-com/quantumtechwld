@@ -111,3 +111,52 @@ export const URGENCY_COLOR: Record<string, string> = {
   high:     "text-orange-300",
   critical: "text-red-300 font-semibold",
 };
+
+// ── Taxas de câmbio de referência (atualizar por deploy) ─────
+// Fonte: BCE / referência informativa — não usar para contabilidade oficial
+export const EUR_TO_BRL = 6.1;
+export const EUR_TO_USD = 1.07;
+export const FX_REFERENCE_DATE = "21/04/2026";
+
+// ── Financial Status ─────────────────────────────────────────
+
+export const FINANCIAL_STATUS_LABEL: Record<string, string> = {
+  PENDING:  "Aguardando pagamento",
+  PARTIAL:  "Entrada recebida",
+  PAID:     "Pago na totalidade",
+  REFUNDED: "Reembolsado",
+  OVERDUE:  "Em atraso",
+};
+
+export const FINANCIAL_STATUS_COLOR: Record<string, string> = {
+  PENDING:  "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
+  PARTIAL:  "bg-blue-500/20 text-blue-300 border border-blue-500/30",
+  PAID:     "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
+  REFUNDED: "bg-slate-500/20 text-slate-300 border border-slate-500/30",
+  OVERDUE:  "bg-red-500/20 text-red-300 border border-red-500/30",
+};
+
+// ── Payment Method ────────────────────────────────────────────
+
+export const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  STRIPE:           "Stripe (cartão)",
+  MANUAL_PIX:       "PIX manual",
+  MANUAL_TRANSFER:  "Transferência manual",
+  MANUAL_OTHER:     "Outro (manual)",
+};
+
+export const PAYMENT_METHOD_OPTIONS = [
+  { value: "STRIPE",          label: "Stripe (cartão)" },
+  { value: "MANUAL_PIX",      label: "PIX manual" },
+  { value: "MANUAL_TRANSFER", label: "Transferência manual" },
+  { value: "MANUAL_OTHER",    label: "Outro (manual)" },
+] as const;
+
+export const DOWN_PAYMENT_OPTIONS = [
+  { value: 0,  label: "Pagamento único" },
+  { value: 25, label: "25% entrada + 75% final" },
+  { value: 30, label: "30% entrada + 70% final" },
+  { value: 40, label: "40% entrada + 60% final" },
+  { value: 50, label: "50% entrada + 50% final" },
+  { value: 60, label: "60% entrada + 40% final" },
+] as const;
