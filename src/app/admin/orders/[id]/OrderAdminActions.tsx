@@ -16,6 +16,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
   const [productionInfo, setProductionInfo] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
   const [adminNote,       setAdminNote]     = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
   const [confirmAction,  setConfirmAction]  = useState<"start_production" | "complete" | "reject" | null>(null);
 
   async function sendProposal() {
@@ -50,12 +51,17 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
 
   async function runAction(action: "start_production" | "complete" | "admin_reject") {
     setError("");
+    if (action === "admin_reject") {
+      if (!rejectionReason.trim()) { setError("O motivo da recusa é obrigatório."); return; }
+    }
     setLoading(action);
     try {
+      const body: Record<string, unknown> = { action };
+      if (action === "admin_reject") body.adminNote = rejectionReason.trim();
       const res = await fetch(`/api/orders/${order.id}`, {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ action }),
+        body:    JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -240,6 +246,19 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                   {error}
                 </p>
               )}
+              <div className="mb-3">
+                <label htmlFor="rejection-reason" className="block text-xs text-slate-400 mb-1">
+                  Motivo da recusa <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  id="rejection-reason"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  rows={3}
+                  placeholder="Explique ao cliente o motivo pelo qual o pedido não pode ser aceite…"
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-red-500 focus:outline-none resize-none"
+                />
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => runAction("admin_reject")}
@@ -249,7 +268,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                   {loading === "admin_reject" ? "A recusar…" : "Confirmar recusa"}
                 </button>
                 <button
-                  onClick={() => setConfirmAction(null)}
+                  onClick={() => { setConfirmAction(null); setRejectionReason(""); setError(""); }}
                   className="rounded-xl border border-white/20 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/10"
                 >
                   Cancelar

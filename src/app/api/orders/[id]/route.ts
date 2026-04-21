@@ -75,7 +75,9 @@ function buildAdminUpdateData(
       };
     case "start_production": return { status: "IN_PRODUCTION" };
     case "complete":         return { status: "COMPLETED" };
-    case "admin_reject":     return { status: "REJECTED" };
+    case "admin_reject":
+      if (!body.adminNote?.trim()) return { error: "O motivo da recusa é obrigatório.", status: 422 };
+      return { status: "REJECTED", estimatedValue: null, adminNote: body.adminNote.trim() };
     default:                 return { error: "Acção inválida.", status: 422 };
   }
 }
