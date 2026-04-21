@@ -44,7 +44,7 @@ export function tplOrderProposalSent(opts: {
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Proposta recebida ✦</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
-        A equipa avaliou o seu pedido de <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
+        A equipe avaliou o seu pedido de <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         e enviou uma proposta de produção.
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
@@ -56,7 +56,7 @@ export function tplOrderProposalSent(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver proposta e responder →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipa Quantum Technology</p>
+      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
     </div>
   `;
 }
@@ -117,12 +117,12 @@ export function tplOrderInProduction(opts: {
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
-        entrou em produção. Pode acompanhar o estado no seu portal.
+        entrou em produção. Você pode acompanhar o estado no seu portal.
       </p>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#8b5cf6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Acompanhar pedido →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipa Quantum Technology</p>
+      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
     </div>
   `;
 }
@@ -144,7 +144,7 @@ export function tplOrderCompleted(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver detalhes →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipa Quantum Technology</p>
+      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
     </div>
   `;
 }
@@ -166,7 +166,7 @@ export function tplOrderNewMessage(opts: {
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Nova mensagem no pedido 💬</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.recipientName ? ` ${opts.recipientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
-        Recebeu uma nova mensagem de ${senderLabel} no pedido
+        Você recebeu uma nova mensagem de ${senderLabel} no pedido
         <strong style="color:#fff">${orderLabel}</strong>.
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">

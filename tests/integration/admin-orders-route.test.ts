@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   orderFindMany: vi.fn(),
   userFindUnique: vi.fn(),
   createOrderWithRef: vi.fn(),
+  sendMail: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/auth", () => ({ auth: mocks.auth }));
@@ -25,6 +26,15 @@ vi.mock("@/services/orders/createOrder", () => ({
   VALID_ORDER_TYPES: ["new_feature", "bug_fix", "new_project", "support", "other", "contact"],
   VALID_ORDER_URGENCIES: ["low", "normal", "high", "critical"],
   createOrderWithRef: mocks.createOrderWithRef,
+}));
+
+vi.mock("@/lib/email", () => ({
+  sendMail: mocks.sendMail,
+  tplOrderProposalSent: vi.fn().mockReturnValue("<html>proposta</html>"),
+}));
+
+vi.mock("@/lib/app-url", () => ({
+  appUrl: () => "https://quantumtechwld.com",
 }));
 
 import { GET, POST } from "@/app/api/admin/orders/route";
@@ -97,6 +107,43 @@ describe("GET /api/admin/orders", () => {
       clientId: "client_1",
       createdByAdminId: "admin_1",
     }));
+  });
+
+  it("cria pedido em PROPOSAL_SENT e envia email quando campos de proposta sao fornecidos", async () => {
+    mocks.createOrderWithRef.mockResolvedValue({
+      id: "ord_3",
+      status: "PROPOSAL_SENT",
+      type: "new_project",
+      title: "Plataforma de vendas",
+      estimatedValue: 2500,
+      productionInfo: "Desenvolvimento full-stack em 4 semanas.",
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/admin/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: "client_1",
+        type: "new_project",
+        title: "Plataforma de vendas",
+        description: "Criar plataforma de e-commerce B2B.",
+        urgency: "high",
+        productionInfo: "Desenvolvimento full-stack em 4 semanas.",
+        estimatedValue: 2500,
+        adminNote: "Arrancar em maio.",
+      }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(body.order.id).toBe("ord_3");
+    expect(mocks.createOrderWithRef).toHaveBeenCalledWith(expect.objectContaining({
+      productionInfo: "Desenvolvimento full-stack em 4 semanas.",
+      estimatedValue: 2500,
+      adminNote: "Arrancar em maio.",
+    }));
+    // Email deve ser enviado de forma assíncrona
+    await vi.waitFor(() => expect(mocks.sendMail).toHaveBeenCalled());
   });
 
   it("retorna 422 quando o cliente selecionado nao e ativo", async () => {

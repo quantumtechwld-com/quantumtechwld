@@ -6,6 +6,8 @@ import {
   VALID_ORDER_TYPES,
   VALID_ORDER_URGENCIES,
 } from "@/services/orders/createOrder";
+import { sendMail, tplOrderProposalSent } from "@/lib/email";
+import { appUrl } from "@/lib/app-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -29,6 +31,10 @@ type CreateOrderBody = {
   description?: string;
   urgency?: string;
   attachments?: string[];
+  /** Campos opcionais de proposta — se fornecidos, o pedido nasce em PROPOSAL_SENT */
+  productionInfo?: string;
+  estimatedValue?: number;
+  adminNote?: string;
 };
 
 type AdminOrderCreateInput = {
@@ -38,6 +44,9 @@ type AdminOrderCreateInput = {
   description: string;
   urgency: typeof VALID_ORDER_URGENCIES[number];
   attachments: string[];
+  productionInfo?: string;
+  estimatedValue?: number;
+  adminNote?: string;
 };
 
 type ValidationError = { error: string; status: number };
@@ -72,6 +81,11 @@ function validateCreateOrderBody(body: CreateOrderBody): AdminOrderCreateInput |
     description: body.description.trim(),
     urgency: (body.urgency ?? "normal") as typeof VALID_ORDER_URGENCIES[number],
     attachments: body.attachments ?? [],
+    ...(body.productionInfo?.trim() ? {
+      productionInfo: body.productionInfo.trim(),
+      estimatedValue: body.estimatedValue,
+      adminNote: body.adminNote?.trim() || undefined,
+    } : {}),
   };
 }
 
@@ -180,10 +194,30 @@ export async function POST(request: NextRequest) {
       urgency: payload.urgency,
       attachments: payload.attachments,
       createdByAdminId: adminUser.id,
+      productionInfo: payload.productionInfo,
+      estimatedValue: payload.estimatedValue,
+      adminNote: payload.adminNote,
     });
 
     if (!order) {
       return NextResponse.json({ error: "Erro ao gerar referência do pedido. Tente novamente." }, { status: 500 });
+    }
+
+    // Se o pedido foi criado directamente com proposta, notificar o cliente por email
+    if (order.status === "PROPOSAL_SENT" && clientUser.email) {
+      const orderUrl = `${appUrl()}/portal/orders/${order.id}`;
+      sendMail({
+        to: clientUser.email,
+        subject: "Proposta recebida — Quantum Technology",
+        html: tplOrderProposalSent({
+          clientName: clientUser.name ?? "",
+          orderType: order.type,
+          orderTitle: order.title ?? undefined,
+          estimatedValue: order.estimatedValue ?? 0,
+          productionInfo: order.productionInfo ?? "",
+          orderUrl,
+        }),
+      }).catch((err: unknown) => console.error("[POST /api/admin/orders] email error", err));
     }
 
     return NextResponse.json({ order }, { status: 201 });

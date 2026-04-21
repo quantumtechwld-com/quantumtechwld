@@ -18,10 +18,16 @@ export type CreateOrderInput = {
   urgency: string;
   attachments: string[];
   createdByAdminId?: string | null;
+  /** Se fornecido, o pedido é criado directamente em PROPOSAL_SENT */
+  productionInfo?: string;
+  estimatedValue?: number;
+  adminNote?: string | null;
 };
 
 /** Cria o pedido com orderRef único num único INSERT — sem race condition. */
 export async function createOrderWithRef(input: CreateOrderInput) {
+  const hasProposal = input.productionInfo?.trim();
+
   const orderData = {
     clientId: input.clientId,
     type: input.type,
@@ -29,8 +35,16 @@ export async function createOrderWithRef(input: CreateOrderInput) {
     description: input.description,
     urgency: input.urgency,
     attachments: input.attachments,
-    status: "PENDING",
+    status: hasProposal ? "PROPOSAL_SENT" : "PENDING",
     ...(input.createdByAdminId ? { createdByAdminId: input.createdByAdminId } : {}),
+    ...(hasProposal
+      ? {
+          productionInfo: input.productionInfo!.trim(),
+          estimatedValue: input.estimatedValue,
+          adminNote: input.adminNote?.trim() ?? null,
+          respondedAt: new Date(),
+        }
+      : {}),
   };
 
   for (const candidate of generateOrderRefCandidates(input.clientName, new Date(), 5)) {

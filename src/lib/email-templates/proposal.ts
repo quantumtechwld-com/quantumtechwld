@@ -11,7 +11,7 @@ export function tplProposalSent(opts: {
       <div style="margin-bottom:24px">
         <img src="${process.env.NEXTAUTH_URL}/logo.png" alt="Quantum Technology" height="32" style="filter:brightness(2)" onerror="this.style.display='none'" />
       </div>
-      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">A sua proposta está pronta ✦</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Sua proposta está pronta ✦</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         A proposta comercial para o projeto <strong style="color:#fff">${opts.projectType}</strong> 
@@ -33,8 +33,8 @@ export function tplProposalSent(opts: {
         Ver proposta completa →
       </a>
       <p style="color:#475569;font-size:12px;margin-top:32px">
-        Se tiver dúvidas, responda a este e-mail ou contacte-nos diretamente.<br/>
-        — Equipa Quantum Technology
+        Se tiver dúvidas, responda a este e-mail ou entre em contato conosco.<br/>
+        — Equipe Quantum Technology
       </p>
     </div>
   `;
@@ -70,13 +70,13 @@ export function tplProposalApprovedClient(opts: {
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada — bem-vindo a bordo! 🚀</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
-        A sua aprovação foi registada para o projeto <strong style="color:#fff">${opts.projectType}</strong>.
+        Sua aprovação foi registrada para o projeto <strong style="color:#fff">${opts.projectType}</strong>.
       </p>
       <p style="color:#94a3b8;margin:0 0 24px">
-        A nossa equipa irá entrar em contacto em breve para agendar o kickoff e iniciar o desenvolvimento.
+        Nossa equipe entrará em contato em breve para agendar o kickoff e iniciar o desenvolvimento.
       </p>
       <p style="color:#475569;font-size:12px;margin-top:32px">
-        Obrigado pela confiança!<br/>— Equipa Quantum Technology
+        Obrigado pela confiança!<br/>— Equipe Quantum Technology
       </p>
     </div>
   `;

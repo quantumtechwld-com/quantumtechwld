@@ -27,6 +27,10 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [urgency, setUrgency] = useState<(typeof URGENCY_OPTIONS)[number]>("normal");
+  const [sendProposal, setSendProposal] = useState(false);
+  const [productionInfo, setProductionInfo] = useState("");
+  const [estimatedValue, setEstimatedValue] = useState("");
+  const [adminNote, setAdminNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,6 +51,18 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
       return;
     }
 
+    if (sendProposal) {
+      if (!productionInfo.trim()) {
+        setError("Informações de produção são obrigatórias para enviar proposta.");
+        return;
+      }
+      const val = Number.parseFloat(estimatedValue);
+      if (!estimatedValue || Number.isNaN(val) || val < 0) {
+        setError("Valor estimado inválido.");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/admin/orders", {
@@ -58,6 +74,11 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           title: title.trim(),
           description: description.trim(),
           urgency,
+          ...(sendProposal ? {
+            productionInfo: productionInfo.trim(),
+            estimatedValue: Number.parseFloat(estimatedValue),
+            adminNote: adminNote.trim() || undefined,
+          } : {}),
         }),
       });
       const data = (await res.json()) as { error?: string; order?: { id: string } };
@@ -71,6 +92,12 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function getSubmitLabel() {
+    if (loading) return "A criar...";
+    if (sendProposal) return "Criar e enviar proposta";
+    return "Criar pedido";
   }
 
   return (
@@ -162,6 +189,69 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
         </div>
       </div>
 
+      {/* Proposta opcional */}
+      <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            id="send-proposal-toggle"
+            type="checkbox"
+            checked={sendProposal}
+            onChange={(e) => setSendProposal(e.target.checked)}
+            className="h-4 w-4 rounded border-white/20 bg-white/5 accent-violet-500"
+          />
+          <span className="text-sm font-medium text-slate-200">Enviar proposta ao cliente agora</span>
+        </label>
+        <p className="mt-1 ml-7 text-xs text-slate-500">
+          Se preenchida, o pedido é criado directamente em &quot;Proposta enviada&quot; e o cliente recebe email.
+        </p>
+
+        {sendProposal && (
+          <div className="mt-4 grid gap-4">
+            <div>
+              <label htmlFor="admin-production-info" className="block text-xs font-medium text-slate-400 mb-1">
+                Informações de produção <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                id="admin-production-info"
+                value={productionInfo}
+                onChange={(e) => setProductionInfo(e.target.value)}
+                rows={4}
+                placeholder="Detalhe o que será feito, prazo estimado, tecnologias envolvidas…"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-violet-500 focus:outline-none resize-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="admin-estimated-value" className="block text-xs font-medium text-slate-400 mb-1">
+                Valor estimado (€) <span className="text-red-400">*</span>
+              </label>
+              <input
+                id="admin-estimated-value"
+                type="number"
+                min="0"
+                step="0.01"
+                value={estimatedValue}
+                onChange={(e) => setEstimatedValue(e.target.value)}
+                placeholder="0.00"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-violet-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="admin-note" className="block text-xs font-medium text-slate-400 mb-1">
+                Nota adicional (opcional)
+              </label>
+              <textarea
+                id="admin-note"
+                value={adminNote}
+                onChange={(e) => setAdminNote(e.target.value)}
+                rows={2}
+                placeholder="Observações, condicionantes, perguntas ao cliente…"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-violet-500 focus:outline-none resize-none"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       {error && (
         <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {error}
@@ -180,7 +270,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           disabled={loading}
           className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-60"
         >
-          {loading ? "A criar..." : "Criar pedido"}
+          {getSubmitLabel()}
         </button>
       </div>
     </form>
