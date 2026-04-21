@@ -80,6 +80,7 @@ describe("AdminOrderDetailPage", () => {
       productionInfo: "Backend e dashboard administrativo",
       adminNote: "Entrega em duas fases",
       client: { id: "client_1", name: "Joao", email: "joao@example.com" },
+      createdByAdmin: { id: "admin_2", name: "Maria", email: "maria@example.com" },
       payment: {
         status: "PAID",
         amountCents: 120000,
@@ -101,6 +102,8 @@ describe("AdminOrderDetailPage", () => {
     expect(screen.getByText("QTA-101")).toBeInTheDocument();
     expect(screen.getByText("Joao")).toBeInTheDocument();
     expect(screen.getByText("joao@example.com")).toBeInTheDocument();
+    expect(screen.getByText("Maria")).toBeInTheDocument();
+    expect(screen.getByText(/maria@example.com/i)).toBeInTheDocument();
     expect(screen.getByText("Implementar novo fluxo de onboarding")).toBeInTheDocument();
     expect(screen.getByText("Backend e dashboard administrativo")).toBeInTheDocument();
     expect(screen.getByText("Entrega em duas fases")).toBeInTheDocument();
@@ -125,6 +128,7 @@ describe("AdminOrderDetailPage", () => {
       productionInfo: null,
       adminNote: null,
       client: { id: "client_1", name: "Joao", email: "joao@example.com" },
+      createdByAdmin: null,
       payment: null,
       rating: null,
     });

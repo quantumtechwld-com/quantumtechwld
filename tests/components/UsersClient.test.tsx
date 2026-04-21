@@ -39,7 +39,19 @@ describe("UsersClient", () => {
             company: "Empresa A",
             emailVerified: null,
             lastLoginAt: null,
-            _count: { briefings: 1, orders: 2 },
+            _count: { briefings: 1, orders: 2, createdOrders: 0 },
+          },
+          {
+            id: "u3",
+            name: "Carla",
+            email: "carla@example.com",
+            image: null,
+            role: "CLIENT",
+            status: "ACTIVE",
+            company: "Empresa C",
+            emailVerified: new Date("2026-04-21T10:00:00.000Z"),
+            lastLoginAt: null,
+            _count: { briefings: 2, orders: 1, createdOrders: 0 },
           },
           {
             id: "u2",
@@ -51,14 +63,16 @@ describe("UsersClient", () => {
             company: "Empresa B",
             emailVerified: new Date("2026-04-21T10:00:00.000Z"),
             lastLoginAt: null,
-            _count: { briefings: 3, orders: 4 },
+            _count: { briefings: 3, orders: 4, createdOrders: 5 },
           },
         ]}
       />
     );
 
     expect(screen.getByText(/Aguardam Aprovação \(1\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Todos os Utilizadores \(1\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Todos os Utilizadores \(2\)/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /\+ Pedido/i })).toHaveAttribute("href", "/admin/orders/new?clientId=u3");
+    expect(screen.getByText("Criados: 5")).toBeInTheDocument();
 
     await user.type(screen.getByPlaceholderText("email@cliente.com"), "novo@example.com");
     await user.click(screen.getByRole("button", { name: /Enviar Convite/i }));
@@ -89,7 +103,7 @@ describe("UsersClient", () => {
             company: "Empresa A",
             emailVerified: null,
             lastLoginAt: null,
-            _count: { briefings: 1, orders: 2 },
+            _count: { briefings: 1, orders: 2, createdOrders: 0 },
           },
         ]}
       />

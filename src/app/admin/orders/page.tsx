@@ -64,6 +64,19 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Pedidos</h1>
+            <p className="mt-1 text-sm text-slate-400">Acompanhe, filtre e crie pedidos para clientes ativos.</p>
+          </div>
+          <Link
+            href="/admin/orders/new"
+            className="shrink-0 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+          >
+            Novo pedido
+          </Link>
+        </div>
+
         {/* Stats strip */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[

@@ -5,10 +5,9 @@ const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   userFindUnique: vi.fn(),
   orderFindMany: vi.fn(),
-  orderCreate: vi.fn(),
+  createOrderWithRef: vi.fn(),
   sendMail: vi.fn(),
   tplOrderReceived: vi.fn(),
-  generateOrderRefCandidates: vi.fn(),
   appUrl: vi.fn(),
 }));
 
@@ -23,7 +22,6 @@ vi.mock("@/lib/prisma", () => ({
     },
     order: {
       findMany: mocks.orderFindMany,
-      create: mocks.orderCreate,
     },
   },
 }));
@@ -33,8 +31,10 @@ vi.mock("@/lib/email", () => ({
   tplOrderReceived: mocks.tplOrderReceived,
 }));
 
-vi.mock("@/lib/order-ref", () => ({
-  generateOrderRefCandidates: mocks.generateOrderRefCandidates,
+vi.mock("@/services/orders/createOrder", () => ({
+  VALID_ORDER_TYPES: ["new_feature", "bug_fix", "new_project", "support", "other", "contact"],
+  VALID_ORDER_URGENCIES: ["low", "normal", "high", "critical"],
+  createOrderWithRef: mocks.createOrderWithRef,
 }));
 
 vi.mock("@/lib/app-url", () => ({
@@ -60,8 +60,7 @@ describe("/api/orders", () => {
       company: "Quantum",
     });
     mocks.orderFindMany.mockResolvedValue([{ id: "ord_1" }]);
-    mocks.generateOrderRefCandidates.mockReturnValue(["QT-REF-001"]);
-    mocks.orderCreate.mockResolvedValue({
+    mocks.createOrderWithRef.mockResolvedValue({
       id: "ord_1",
       type: "new_feature",
       title: "Nova funcionalidade",
@@ -132,7 +131,11 @@ describe("/api/orders", () => {
 
     expect(response.status).toBe(201);
     expect(body.order.id).toBe("ord_1");
-    expect(mocks.orderCreate).toHaveBeenCalledTimes(1);
+    expect(mocks.createOrderWithRef).toHaveBeenCalledTimes(1);
+    expect(mocks.createOrderWithRef).toHaveBeenCalledWith(expect.objectContaining({
+      clientId: "user_1",
+      createdByAdminId: null,
+    }));
     expect(mocks.sendMail).toHaveBeenCalledTimes(1);
   });
 });

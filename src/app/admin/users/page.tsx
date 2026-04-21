@@ -22,7 +22,7 @@ export default async function AdminUsersPage() {
       company:       true,
       emailVerified: true,
       lastLoginAt:   true,
-      _count:  { select: { briefings: true, orders: true } },
+      _count:  { select: { briefings: true, orders: true, createdOrders: true } },
     },
   });
 

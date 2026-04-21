@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { Clock } from "lucide-react";
 
@@ -16,7 +17,7 @@ interface UserRow {
   company:       string | null;
   emailVerified: Date | string | null;
   lastLoginAt:   Date | string | null;
-  _count: { briefings: number; orders: number };
+  _count: { briefings: number; orders: number; createdOrders: number };
 }
 
 const STATUS_LABEL: Record<UserStatus, string> = {
@@ -447,10 +448,21 @@ function UserTable({
                   </span>
                 </td>
                 <td className="px-5 py-4 text-center text-white/50">
-                  {u._count.briefings} / {u._count.orders}
+                  <p>{u._count.briefings} / {u._count.orders}</p>
+                  {u.role === "ADMIN" && u._count.createdOrders > 0 && (
+                    <p className="mt-1 text-[10px] font-medium text-violet-300">Criados: {u._count.createdOrders}</p>
+                  )}
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center justify-end gap-2 flex-wrap">
+                    {u.role === "CLIENT" && u.status === "ACTIVE" && (
+                      <Link
+                        href={`/admin/orders/new?clientId=${u.id}`}
+                        className="rounded-lg border border-accent/30 px-2.5 py-1 text-xs font-medium text-accent-light transition-colors hover:bg-accent/15"
+                      >
+                        + Pedido
+                      </Link>
+                    )}
                     {/* Ações de status */}
                     {u.status !== "ACTIVE" && (
                       <ActionBtn

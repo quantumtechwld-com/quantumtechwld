@@ -51,7 +51,8 @@ model User {
   sessions      Session[]
   briefings     Briefing[]
   comments      ProposalComment[]
-  orders        Order[]
+  orders        Order[]    @relation("OrderClient")
+  createdOrders Order[]    @relation("OrderCreatedByAdmin")
   orderMessages OrderMessage[]
 }
 
@@ -186,7 +187,9 @@ model Order {
   id              String      @id @default(cuid())
   orderRef        String?     @unique  // ex: DAWGF26-A3K7M
   clientId        String
-  client          User        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client          User        @relation("OrderClient", fields: [clientId], references: [id], onDelete: Cascade)
+  createdByAdminId String?
+  createdByAdmin  User?       @relation("OrderCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
   type            String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other"
   title           String?     // título livre dado pelo cliente (ex: "Integração Pix")
   description     String      @db.Text
@@ -203,6 +206,8 @@ model Order {
   messages        OrderMessage[]
   payment         Payment?
   rating          OrderRating?
+
+  @@index([createdByAdminId])
 }
 
 enum OrderStatus {

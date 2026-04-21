@@ -42,5 +42,10 @@ describe("AdminUsersPage", () => {
     render(await AdminUsersPage());
 
     expect(screen.getByText("UsersClientMock:2")).toBeInTheDocument();
+    expect(mocks.userFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      select: expect.objectContaining({
+        _count: { select: { briefings: true, orders: true, createdOrders: true } },
+      }),
+    }));
   });
 });

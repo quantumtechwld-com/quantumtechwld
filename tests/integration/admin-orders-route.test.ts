@@ -4,25 +4,45 @@ import { NextRequest } from "next/server";
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   orderFindMany: vi.fn(),
+  userFindUnique: vi.fn(),
+  createOrderWithRef: vi.fn(),
 }));
 
 vi.mock("@/auth", () => ({ auth: mocks.auth }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    user: {
+      findUnique: mocks.userFindUnique,
+    },
     order: {
       findMany: mocks.orderFindMany,
     },
   },
 }));
 
-import { GET } from "@/app/api/admin/orders/route";
+vi.mock("@/services/orders/createOrder", () => ({
+  VALID_ORDER_TYPES: ["new_feature", "bug_fix", "new_project", "support", "other", "contact"],
+  VALID_ORDER_URGENCIES: ["low", "normal", "high", "critical"],
+  createOrderWithRef: mocks.createOrderWithRef,
+}));
+
+import { GET, POST } from "@/app/api/admin/orders/route";
 
 describe("GET /api/admin/orders", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.auth.mockResolvedValue({ user: { id: "admin_1", email: "admin@example.com", role: "ADMIN" } });
     mocks.orderFindMany.mockResolvedValue([{ id: "ord_1" }]);
+    mocks.userFindUnique.mockResolvedValue({
+      id: "client_1",
+      name: "Joao",
+      email: "joao@example.com",
+      company: "Quantum Client",
+      role: "CLIENT",
+      status: "ACTIVE",
+    });
+    mocks.createOrderWithRef.mockResolvedValue({ id: "ord_2" });
   });
 
   it("retorna 401 quando nao ha sessao", async () => {
@@ -55,5 +75,53 @@ describe("GET /api/admin/orders", () => {
       where: { status: "APPROVED", clientId: "user_1" },
       take: 100,
     }));
+  });
+
+  it("cria pedido para cliente ativo quando o utilizador e admin", async () => {
+    const response = await POST(new NextRequest("http://localhost/api/admin/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: "client_1",
+        type: "support",
+        title: "Suporte recorrente",
+        description: "Abrir backlog recorrente para cliente enterprise",
+        urgency: "high",
+      }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(body.order.id).toBe("ord_2");
+    expect(mocks.createOrderWithRef).toHaveBeenCalledWith(expect.objectContaining({
+      clientId: "client_1",
+      createdByAdminId: "admin_1",
+    }));
+  });
+
+  it("retorna 422 quando o cliente selecionado nao e ativo", async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      id: "client_1",
+      name: "Joao",
+      email: "joao@example.com",
+      company: "Quantum Client",
+      role: "CLIENT",
+      status: "PENDING",
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/admin/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: "client_1",
+        type: "support",
+        title: "Suporte recorrente",
+        description: "Abrir backlog recorrente para cliente enterprise",
+      }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Só é possível criar pedido para clientes ativos.");
   });
 });

@@ -2,33 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail, tplOrderReceived } from "@/lib/email";
-import { generateOrderRefCandidates } from "@/lib/order-ref";
 import { appUrl } from "@/lib/app-url";
+import {
+  createOrderWithRef,
+  VALID_ORDER_TYPES,
+  VALID_ORDER_URGENCIES,
+} from "@/services/orders/createOrder";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
-
-const VALID_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other", "contact"] as const;
-const VALID_URGENCIES = ["low", "normal", "high", "critical"] as const;
-
-/** Cria o pedido com orderRef único num único INSERT — sem race condition. */
-async function createOrderWithRef(
-  data: { clientId: string; type: string; title?: string; description: string; urgency: string; attachments: string[] },
-  clientName: string,
-) {
-  for (const candidate of generateOrderRefCandidates(clientName, new Date(), 5)) {
-    try {
-      return await db.order.create({
-        data: { ...data, status: "PENDING", orderRef: candidate },
-        include: { client: { select: { name: true, email: true } } },
-      });
-    } catch (e: unknown) {
-      if ((e as { code?: string })?.code === "P2002") continue; // colisão unique → tenta próximo
-      throw e;
-    }
-  }
-  return null;
-}
 
 // ─── GET /api/orders — lista pedidos do cliente autenticado ──────────────────
 export async function GET() {
@@ -84,7 +66,7 @@ export async function POST(request: NextRequest) {
       attachments?: string[];
     };
 
-    if (!body.type || !VALID_TYPES.includes(body.type as typeof VALID_TYPES[number])) {
+    if (!body.type || !VALID_ORDER_TYPES.includes(body.type as typeof VALID_ORDER_TYPES[number])) {
       return NextResponse.json({ error: "Tipo de pedido inválido." }, { status: 422 });
     }
     if (!body.title?.trim() || body.title.trim().length > 120) {
@@ -93,7 +75,7 @@ export async function POST(request: NextRequest) {
     if (!body.description?.trim()) {
       return NextResponse.json({ error: "A descrição é obrigatória." }, { status: 422 });
     }
-    if (body.urgency && !VALID_URGENCIES.includes(body.urgency as typeof VALID_URGENCIES[number])) {
+    if (body.urgency && !VALID_ORDER_URGENCIES.includes(body.urgency as typeof VALID_ORDER_URGENCIES[number])) {
       return NextResponse.json({ error: "Urgência inválida." }, { status: 422 });
     }
 
@@ -101,14 +83,15 @@ export async function POST(request: NextRequest) {
     const clientName = (user.company?.trim() || user.name?.trim() || user.email) ?? "CLIENT";
     const order = await createOrderWithRef(
       {
-        clientId:    user.id,
-        type:        body.type,
-        title:       body.title.trim(),
-        description: body.description.trim(),
-        urgency:     body.urgency ?? "normal",
-        attachments: body.attachments ?? [],
+        clientId:         user.id,
+        clientName,
+        type:             body.type,
+        title:            body.title.trim(),
+        description:      body.description.trim(),
+        urgency:          body.urgency ?? "normal",
+        attachments:      body.attachments ?? [],
+        createdByAdminId: null,
       },
-      clientName,
     );
     if (!order) {
       return NextResponse.json({ error: "Erro ao gerar referência do pedido. Tente novamente." }, { status: 500 });

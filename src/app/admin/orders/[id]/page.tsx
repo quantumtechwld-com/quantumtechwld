@@ -28,6 +28,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
       where: { id },
       include: {
         client:  { select: { id: true, name: true, email: true } },
+        createdByAdmin: { select: { id: true, name: true, email: true } },
         payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
         rating:  true,
       },
@@ -103,6 +104,16 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
               <p className="text-sm font-medium text-white">{order.client.name ?? "—"}</p>
               <p className="text-xs text-slate-400">{order.client.email}</p>
             </div>
+          </div>
+          <div className="mt-4 border-t border-white/10 pt-4 text-xs text-slate-400">
+            {order.createdByAdmin ? (
+              <p>
+                Criado por admin: <span className="text-white">{order.createdByAdmin.name ?? order.createdByAdmin.email}</span>
+                <span className="ml-1 text-slate-500">({order.createdByAdmin.email})</span>
+              </p>
+            ) : (
+              <p>Origem do pedido: <span className="text-white">Cliente</span></p>
+            )}
           </div>
         </section>
 
