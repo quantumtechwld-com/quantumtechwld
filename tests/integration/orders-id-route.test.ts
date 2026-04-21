@@ -573,4 +573,243 @@ describe("/api/orders/[id]", () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
     expect(response.status).toBe(200);
   });
+
+  // ─── segurança: limites de tamanho ────────────────────────────────────────
+
+  it("rejeita submit_review com mais de 20 links", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Trabalho concluído.",
+        deliveryLinks: Array.from({ length: 21 }, (_, i) => `https://link${i}.example.com`),
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Máximo de 20 links por entrega.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita submit_review com deliveryNote superior a 4000 chars", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "a".repeat(4001),
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Descrição do trabalho demasiado longa.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita complete com finalDeliveryNote superior a 4000 chars", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REVIEW_APPROVED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "complete",
+        finalDeliveryNote: "b".repeat(4001),
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Nota final demasiado longa.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita propose com productionInfo superior a 4000 chars", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PENDING",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "propose",
+        productionInfo: "c".repeat(4001),
+        estimatedValue: 1000,
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Informações de produção demasiado longas.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita admin_reject com adminNote superior a 4000 chars", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PENDING",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "admin_reject",
+        adminNote: "d".repeat(4001),
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Motivo de recusa demasiado longo.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita link com URL superior a 2048 chars em submit_review", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Entrega concluída.",
+        deliveryLinks: [`https://example.com/${"e".repeat(2050)}`],
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("Todos os links devem começar com https:// ou http://.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejeita finalDeliveryUrl superior a 2048 chars em complete", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "REVIEW_APPROVED",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "complete",
+        finalDeliveryUrl: `https://example.com/${"f".repeat(2050)}`,
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe("URL do resultado final inválida. Use https:// ou http://.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  // ─── segurança: controlo de acesso no PATCH ───────────────────────────────
+
+  it("retorna 401 no PATCH quando nao ha sessao", async () => {
+    mocks.auth.mockResolvedValue(null);
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "approve" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body.error).toBe("Não autenticado.");
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
+
+  it("retorna 403 quando CLIENT tenta executar acao exclusiva de ADMIN (submit_review)", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "client@example.com", role: "CLIENT" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "IN_PRODUCTION",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "submit_review",
+        deliveryNote: "Tentativa de entrega pelo cliente.",
+        deliveryLinks: [],
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+
+    expect(response.status).toBe(403);
+    expect(mocks.orderUpdate).not.toHaveBeenCalled();
+  });
 });
