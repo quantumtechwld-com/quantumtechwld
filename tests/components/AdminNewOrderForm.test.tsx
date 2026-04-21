@@ -24,20 +24,16 @@ vi.mock("next/link", () => ({
 
 import { AdminNewOrderForm } from "@/app/admin/orders/new/AdminNewOrderForm";
 
-/** Stub genérico do fetch que retorna { orders: [] } para o GET de pedidos abertos
- *  e recebe as chamadas de POST de criação conforme configurado por cada teste. */
-function stubFetchNoOpenOrders(postResponse: unknown) {
+const CLIENTS = [{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }];
+const OPEN_ORDER = { id: "ord_99", orderRef: "QT-0099", title: "Pedido existente", type: "support", status: "EVALUATING" };
+
+/** Fetch stub: GET devolve open orders; POST devolve postResponse */
+function stubFetch(openOrders: unknown[], postResponse: unknown) {
   vi.stubGlobal("fetch", vi.fn((url: string, opts?: RequestInit) => {
     if (opts?.method !== "POST") {
-      return Promise.resolve({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ orders: [] }),
-      });
+      return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue({ orders: openOrders }) });
     }
-    return Promise.resolve({
-      ok: true,
-      json: vi.fn().mockResolvedValue(postResponse),
-    });
+    return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(postResponse) });
   }));
 }
 
@@ -48,14 +44,9 @@ describe("AdminNewOrderForm", () => {
 
   it("cria pedido com proposta e redireciona para o detalhe", async () => {
     const user = userEvent.setup();
-    stubFetchNoOpenOrders({ order: { id: "ord_1" } });
+    stubFetch([], { order: { id: "ord_1" } });
 
-    render(
-      <AdminNewOrderForm
-        initialClientId="client_1"
-        clients={[{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }]}
-      />
-    );
+    render(<AdminNewOrderForm initialClientId="client_1" clients={CLIENTS} />);
 
     await user.type(screen.getByLabelText(/Título/i), "Painel executivo de vendas");
     await user.type(screen.getByLabelText(/Descrição/i), "Criar backlog inicial e escopo do pedido");
@@ -67,10 +58,7 @@ describe("AdminNewOrderForm", () => {
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
         "/api/admin/orders",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.stringContaining("productionInfo"),
-        }),
+        expect.objectContaining({ method: "POST", body: expect.stringContaining("productionInfo") }),
       );
     });
     expect(mocks.push).toHaveBeenCalledWith("/admin/orders/ord_1");
@@ -81,77 +69,101 @@ describe("AdminNewOrderForm", () => {
     const user = userEvent.setup();
     vi.stubGlobal("fetch", vi.fn());
 
-    render(
-      <AdminNewOrderForm
-        clients={[{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }]}
-      />
-    );
+    render(<AdminNewOrderForm clients={CLIENTS} />);
 
     await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
-
     expect(screen.getByText("Selecione um cliente.")).toBeInTheDocument();
   });
 
   it("mostra erro de validacao quando productionInfo esta vazio", async () => {
     const user = userEvent.setup();
-    stubFetchNoOpenOrders(null);
+    stubFetch([], null);
 
-    render(
-      <AdminNewOrderForm
-        initialClientId="client_1"
-        clients={[{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }]}
-      />
-    );
+    render(<AdminNewOrderForm initialClientId="client_1" clients={CLIENTS} />);
 
     await user.type(screen.getByLabelText(/Título/i), "Plataforma de vendas");
     await user.type(screen.getByLabelText(/Descrição/i), "Sistema B2B completo.");
-    // Deixar productionInfo vazio e clicar submeter
     await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
 
     expect(screen.getByText("Informações de produção são obrigatórias.")).toBeInTheDocument();
   });
 
-  it("mostra banner de pedidos abertos quando cliente ja tem pedido em aberto", async () => {
-    const user = userEvent.setup();
+  it("NAO mostra seletor de pedido pai para tipo new_feature mesmo com pedidos abertos", async () => {
+    // fetch com pedidos abertos, mas tipo é new_feature — seletor não deve aparecer
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue({
-        orders: [
-          { id: "ord_99", orderRef: "QT-0099", title: "Pedido existente", type: "support", status: "EVALUATING" },
-        ],
-      }),
+      json: vi.fn().mockResolvedValue({ orders: [OPEN_ORDER] }),
     }));
 
-    render(
-      <AdminNewOrderForm
-        initialClientId="client_1"
-        clients={[{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }]}
-      />
-    );
+    render(<AdminNewOrderForm initialClientId="client_1" clients={CLIENTS} />);
+    // O tipo padrão é new_feature — não deve buscar nem mostrar seletor
+    expect(screen.queryByText(/Selecione o pedido original/i)).not.toBeInTheDocument();
+    // fetch não deve ser chamado para new_feature
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("mostra seletor de pedido pai ao escolher tipo correction", async () => {
+    const user = userEvent.setup();
+    stubFetch([OPEN_ORDER], { order: { id: "ord_2" } });
+
+    render(<AdminNewOrderForm initialClientId="client_1" clients={CLIENTS} />);
+
+    await user.selectOptions(screen.getByLabelText(/Tipo do pedido/i), "correction");
 
     await waitFor(() => {
-      expect(screen.getByText(/Este cliente já tem 1 pedido em aberto/i)).toBeInTheDocument();
+      expect(screen.getByText(/Selecione o pedido original/i)).toBeInTheDocument();
     });
     expect(screen.getByText("QT-0099")).toBeInTheDocument();
     expect(screen.getByText("Pedido existente")).toBeInTheDocument();
-
-    // Banner pode ser dispensado
-    await user.click(screen.getByRole("button", { name: /Fechar aviso/i }));
-    expect(screen.queryByText(/Este cliente já tem 1 pedido em aberto/i)).not.toBeInTheDocument();
   });
 
-  it("nao mostra banner quando cliente nao tem pedidos abertos", async () => {
-    stubFetchNoOpenOrders(null);
+  it("mostra erro se tipo correction mas nenhum pedido pai selecionado", async () => {
+    const user = userEvent.setup();
+    stubFetch([OPEN_ORDER], null);
 
-    render(
-      <AdminNewOrderForm
-        initialClientId="client_1"
-        clients={[{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }]}
-      />
-    );
+    render(<AdminNewOrderForm initialClientId="client_1" clients={CLIENTS} />);
 
-    // Aguarda fetch completar
-    await waitFor(() => expect(fetch).toHaveBeenCalled());
-    expect(screen.queryByText(/pedido.*aberto/i)).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/Tipo do pedido/i), "correction");
+    await waitFor(() => expect(screen.getByText("QT-0099")).toBeInTheDocument());
+
+    await user.type(screen.getByLabelText(/Título/i), "Corrigir bug de login");
+    await user.type(screen.getByLabelText(/Descrição/i), "Corrige o fluxo de autenticação.");
+    await user.type(screen.getByLabelText(/Informações de produção/i), "Fix em 2 dias.");
+    await user.type(screen.getByLabelText(/Valor estimado/i), "100");
+    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
+
+    // A mensagem de erro é específica sobre correção/alteração (diferente do label do seletor)
+    expect(
+      screen.getByText(/selecione o pedido original ao qual esta corre[çc][\u00e3a]o\/altera[\u00e7c][\u00e3a]o/i)
+    ).toBeInTheDocument();
+  });
+
+  it("cria pedido correction vinculado ao pedido pai e envia parentOrderId", async () => {
+    const user = userEvent.setup();
+    stubFetch([OPEN_ORDER], { order: { id: "ord_correction_1" } });
+
+    render(<AdminNewOrderForm initialClientId="client_1" clients={CLIENTS} />);
+
+    await user.selectOptions(screen.getByLabelText(/Tipo do pedido/i), "correction");
+    await waitFor(() => expect(screen.getByText("QT-0099")).toBeInTheDocument());
+
+    // Selecionar o pedido pai
+    await user.click(screen.getByRole("button", { name: /QT-0099/i }));
+    expect(screen.getByText(/Pedido pai selecionado/i)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/Título/i), "Corrigir bug de login");
+    await user.type(screen.getByLabelText(/Descrição/i), "Corrige o fluxo de autenticação.");
+    await user.type(screen.getByLabelText(/Informações de produção/i), "Fix em 2 dias.");
+    await user.type(screen.getByLabelText(/Valor estimado/i), "100");
+    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
+
+    await waitFor(() => {
+      const body = JSON.parse(
+        vi.mocked(fetch).mock.calls.find(([, o]) => (o as RequestInit)?.method === "POST")?.[1]?.body as string ?? "{}"
+      );
+      expect(body.parentOrderId).toBe("ord_99");
+      expect(body.type).toBe("correction");
+    });
+    expect(mocks.push).toHaveBeenCalledWith("/admin/orders/ord_correction_1");
   });
 });

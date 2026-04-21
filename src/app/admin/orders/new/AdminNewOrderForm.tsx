@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -25,12 +25,17 @@ type Props = Readonly<{
   initialClientId?: string;
 }>;
 
-// "contact" é reservado para o formulário público de contacto — não disponível aqui.
-const ORDER_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other"] as const;
+// "contact" é reservado para o formulário público — não disponível aqui.
+// "correction" e "alteration" exigem vinculação a um pedido pai.
+const ORDER_TYPES = [
+  "new_feature", "bug_fix", "new_project", "support", "other", "correction", "alteration",
+] as const;
 const URGENCY_OPTIONS = ["low", "normal", "high", "critical"] as const;
 const OPEN_STATUSES = new Set([
   "PENDING", "EVALUATING", "PROPOSAL_SENT", "APPROVED", "REVISION", "IN_PRODUCTION",
 ]);
+// Tipos que requerem vinculação a pedido existente
+const PARENT_REQUIRED_TYPES = new Set(["correction", "alteration"]);
 
 export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const router = useRouter();
@@ -45,12 +50,15 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
-  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [selectedParentOrderId, setSelectedParentOrderId] = useState<string | null>(null);
 
+  const needsParent = PARENT_REQUIRED_TYPES.has(type);
+
+  // Buscar pedidos abertos apenas quando o tipo exige vinculação
   useEffect(() => {
     setOpenOrders([]);
-    setBannerDismissed(false);
-    if (!clientId) return;
+    setSelectedParentOrderId(null);
+    if (!clientId || !needsParent) return;
 
     let cancelled = false;
     fetch(`/api/admin/orders?clientId=${encodeURIComponent(clientId)}`)
@@ -62,7 +70,15 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
       .catch(() => { /* silent — não bloquear o formulário */ });
 
     return () => { cancelled = true; };
-  }, [clientId]);
+  }, [clientId, type, needsParent]);
+
+  // Ao mudar o tipo para um que não precisa de pai, limpar seleção
+  useEffect(() => {
+    if (!needsParent) {
+      setOpenOrders([]);
+      setSelectedParentOrderId(null);
+    }
+  }, [needsParent]);
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -70,6 +86,10 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
 
     if (!clientId) {
       setError("Selecione um cliente.");
+      return;
+    }
+    if (needsParent && !selectedParentOrderId) {
+      setError("Selecione o pedido original ao qual esta correção/alteração se refere.");
       return;
     }
     if (!title.trim() || title.trim().length > 120) {
@@ -104,6 +124,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           productionInfo: productionInfo.trim(),
           estimatedValue: val,
           adminNote: adminNote.trim() || undefined,
+          ...(selectedParentOrderId ? { parentOrderId: selectedParentOrderId } : {}),
         }),
       });
       const data = (await res.json()) as { error?: string; order?: { id: string } };
@@ -140,48 +161,6 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
         </select>
       </div>
 
-      {/* Banner de pedidos abertos */}
-      {openOrders.length > 0 && !bannerDismissed && (
-        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-medium text-amber-300">
-              ⚠️ Este cliente já tem {openOrders.length} pedido{openOrders.length > 1 ? "s" : ""} em aberto.
-              Verifique se pretende criar um novo ou continuar num existente.
-            </p>
-            <button
-              type="button"
-              onClick={() => setBannerDismissed(true)}
-              className="shrink-0 text-amber-400/60 hover:text-amber-300 text-lg leading-none"
-              aria-label="Fechar aviso"
-            >
-              ✕
-            </button>
-          </div>
-          <ul className="mt-3 space-y-1.5">
-            {openOrders.map((o) => (
-              <li key={o.id}>
-                <Link
-                  href={`/admin/orders/${o.id}`}
-                  className="flex items-center gap-2 rounded-xl bg-amber-500/10 px-3 py-2 text-xs hover:bg-amber-500/20 transition"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {o.orderRef && (
-                    <span className="font-mono text-amber-200">{o.orderRef}</span>
-                  )}
-                  <span className="flex-1 truncate text-slate-300">
-                    {o.title ?? (ORDER_TYPE_LABEL[o.type] ?? o.type)}
-                  </span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${ORDER_STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"}`}>
-                    {ORDER_STATUS_LABEL[o.status] ?? o.status}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       <div>
         <label htmlFor="admin-order-type" className="mb-2 block text-sm font-medium text-slate-300">
           Tipo do pedido
@@ -199,6 +178,59 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           ))}
         </select>
       </div>
+
+      {/* Seleção de pedido pai — só para correction e alteration */}
+      {needsParent && clientId && (
+        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
+          <p className="text-sm font-medium text-amber-300 mb-3">
+            🔗 Selecione o pedido original ao qual esta {ORDER_TYPE_LABEL[type]?.toLowerCase()} se refere:
+          </p>
+          {openOrders.length === 0 ? (
+            <p className="text-xs text-slate-400">
+              Nenhum pedido em aberto encontrado para este cliente. Verifique se o pedido original existe e está ativo.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {openOrders.map((o) => {
+                const isSelected = selectedParentOrderId === o.id;
+                return (
+                  <li key={o.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedParentOrderId(isSelected ? null : o.id)}
+                      className={`w-full flex items-center gap-2 rounded-xl border px-3 py-2 text-xs text-left transition ${
+                        isSelected
+                          ? "border-amber-400 bg-amber-500/20 text-amber-200"
+                          : "border-white/10 bg-amber-500/5 text-slate-300 hover:bg-amber-500/15"
+                      }`}
+                    >
+                      <span className={`shrink-0 flex h-4 w-4 items-center justify-center rounded-full border text-[9px] ${
+                        isSelected ? "border-amber-400 bg-amber-400 text-gray-900" : "border-slate-500"
+                      }`}>
+                        {isSelected && "✓"}
+                      </span>
+                      {o.orderRef && (
+                        <span className="font-mono text-amber-300/80">{o.orderRef}</span>
+                      )}
+                      <span className="flex-1 truncate">
+                        {o.title ?? (ORDER_TYPE_LABEL[o.type] ?? o.type)}
+                      </span>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${ORDER_STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"}`}>
+                        {ORDER_STATUS_LABEL[o.status] ?? o.status}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {selectedParentOrderId && (
+            <p className="mt-2 text-[11px] text-amber-400">
+              ✓ Pedido pai selecionado. O novo pedido ficará vinculado ao original.
+            </p>
+          )}
+        </div>
+      )}
 
       <div>
         <label htmlFor="admin-order-title" className="mb-2 block text-sm font-medium text-slate-300">

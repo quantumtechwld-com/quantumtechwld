@@ -80,6 +80,8 @@ export const ORDER_TYPE_LABEL: Record<string, string> = {
   bug_fix:      "Correção de bug",
   new_project:  "Novo projeto",
   support:      "Suporte",
+  correction:   "Correção",
+  alteration:   "Alteração",
   other:        "Outro",
 };
 

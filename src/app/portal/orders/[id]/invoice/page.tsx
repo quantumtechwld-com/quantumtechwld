@@ -22,6 +22,8 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
     bug_fix:     t("invoiceTypeBugFix"),
     new_project: t("invoiceTypeNewProject"),
     support:     t("invoiceTypeSupport"),
+    correction:  t("invoiceTypeCorrection"),
+    alteration:  t("invoiceTypeAlteration"),
     other:       t("invoiceTypeOther"),
   };
 

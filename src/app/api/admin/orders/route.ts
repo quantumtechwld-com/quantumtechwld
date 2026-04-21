@@ -31,6 +31,8 @@ type CreateOrderBody = {
   description?: string;
   urgency?: string;
   attachments?: string[];
+  /** ID do pedido original — obrigatório para tipos correction e alteration */
+  parentOrderId?: string;
   /** Campos opcionais de proposta — se fornecidos, o pedido nasce em PROPOSAL_SENT */
   productionInfo?: string;
   estimatedValue?: number;
@@ -44,6 +46,7 @@ type AdminOrderCreateInput = {
   description: string;
   urgency: typeof VALID_ORDER_URGENCIES[number];
   attachments: string[];
+  parentOrderId?: string;
   productionInfo?: string;
   estimatedValue?: number;
   adminNote?: string;
@@ -81,6 +84,7 @@ function validateCreateOrderBody(body: CreateOrderBody): AdminOrderCreateInput |
     description: body.description.trim(),
     urgency: (body.urgency ?? "normal") as typeof VALID_ORDER_URGENCIES[number],
     attachments: body.attachments ?? [],
+    ...(body.parentOrderId ? { parentOrderId: body.parentOrderId } : {}),
     ...(body.productionInfo?.trim() ? {
       productionInfo: body.productionInfo.trim(),
       estimatedValue: body.estimatedValue,
@@ -194,6 +198,7 @@ export async function POST(request: NextRequest) {
       urgency: payload.urgency,
       attachments: payload.attachments,
       createdByAdminId: adminUser.id,
+      parentOrderId: payload.parentOrderId,
       productionInfo: payload.productionInfo,
       estimatedValue: payload.estimatedValue,
       adminNote: payload.adminNote,

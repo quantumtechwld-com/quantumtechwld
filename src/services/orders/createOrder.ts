@@ -6,9 +6,10 @@ import { generateOrderRefCandidates } from "@/lib/order-ref";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 
-export const VALID_ORDER_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other", "contact"] as const;
+export const VALID_ORDER_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other", "contact", "correction", "alteration"] as const;
 // Nota: "contact" é um tipo reservado para pedidos gerados via formulário público de contacto.
 // Não é exposto nos selects do admin nem do portal — existe aqui para validação da rota de contacto.
+// "correction" e "alteration" são usados pelo admin para associar ao pedido pai (parentOrderId).
 export const VALID_ORDER_URGENCIES = ["low", "normal", "high", "critical"] as const;
 
 export type CreateOrderInput = {
@@ -20,6 +21,8 @@ export type CreateOrderInput = {
   urgency: string;
   attachments: string[];
   createdByAdminId?: string | null;
+  /** ID do pedido original — apenas para tipos correction e alteration */
+  parentOrderId?: string | null;
   /** Se fornecido, o pedido é criado directamente em PROPOSAL_SENT */
   productionInfo?: string;
   estimatedValue?: number;
@@ -39,6 +42,7 @@ export async function createOrderWithRef(input: CreateOrderInput) {
     attachments: input.attachments,
     status: hasProposal ? "PROPOSAL_SENT" : "PENDING",
     ...(input.createdByAdminId ? { createdByAdminId: input.createdByAdminId } : {}),
+    ...(input.parentOrderId ? { parentOrderId: input.parentOrderId } : {}),
     ...(hasProposal
       ? {
           productionInfo: input.productionInfo!.trim(),

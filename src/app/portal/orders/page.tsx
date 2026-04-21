@@ -49,6 +49,8 @@ export default async function OrdersPage() {
       support: "orderTypeSupport",
       other: "orderTypeOther",
       contact: "orderTypeContact",
+      correction: "orderTypeCorrection",
+      alteration: "orderTypeAlteration",
     };
     const key = keyMap[type];
     return key ? t(key) : type;

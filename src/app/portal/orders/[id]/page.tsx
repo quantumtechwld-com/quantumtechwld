@@ -58,6 +58,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       new_project: "orderTypeNewProject",
       support: "orderTypeSupport",
       other: "orderTypeOther",
+      correction: "orderTypeCorrection",
+      alteration: "orderTypeAlteration",
     };
     const key = keyMap[type];
     return key ? t(key) : type;

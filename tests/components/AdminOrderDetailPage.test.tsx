@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
   redirect: mocks.redirect,
   notFound: mocks.notFound,
+  useRouter: vi.fn(() => ({ push: vi.fn(), refresh: vi.fn(), replace: vi.fn() })),
 }));
 
 vi.mock("next/link", () => ({

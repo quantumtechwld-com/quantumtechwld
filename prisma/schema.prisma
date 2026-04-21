@@ -190,12 +190,15 @@ model Order {
   client          User        @relation("OrderClient", fields: [clientId], references: [id], onDelete: Cascade)
   createdByAdminId String?
   createdByAdmin  User?       @relation("OrderCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
-  type            String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other"
+  type            String      // "new_feature" | "bug_fix" | "new_project" | "support" | "other" | "correction" | "alteration"
   title           String?     // título livre dado pelo cliente (ex: "Integração Pix")
   description     String      @db.Text
   urgency         String      @default("normal") // "low" | "normal" | "high" | "critical"
   attachments     String[]    // URLs dos ficheiros enviados
   status          OrderStatus @default(PENDING)
+  parentOrderId   String?     // referencia ao pedido original (para correction/alteration)
+  parentOrder     Order?      @relation("OrderChildren", fields: [parentOrderId], references: [id], onDelete: SetNull)
+  childOrders     Order[]     @relation("OrderChildren")
   /// Resposta do admin
   productionInfo  String?     @db.Text
   estimatedValue  Float?
@@ -208,6 +211,7 @@ model Order {
   rating          OrderRating?
 
   @@index([createdByAdminId])
+  @@index([parentOrderId])
 }
 
 enum OrderStatus {
