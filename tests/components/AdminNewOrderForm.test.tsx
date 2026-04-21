@@ -24,17 +24,31 @@ vi.mock("next/link", () => ({
 
 import { AdminNewOrderForm } from "@/app/admin/orders/new/AdminNewOrderForm";
 
+/** Stub genérico do fetch que retorna { orders: [] } para o GET de pedidos abertos
+ *  e recebe as chamadas de POST de criação conforme configurado por cada teste. */
+function stubFetchNoOpenOrders(postResponse: unknown) {
+  vi.stubGlobal("fetch", vi.fn((url: string, opts?: RequestInit) => {
+    if (opts?.method !== "POST") {
+      return Promise.resolve({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ orders: [] }),
+      });
+    }
+    return Promise.resolve({
+      ok: true,
+      json: vi.fn().mockResolvedValue(postResponse),
+    });
+  }));
+}
+
 describe("AdminNewOrderForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("cria pedido para cliente escolhido e redireciona para o detalhe", async () => {
+  it("cria pedido com proposta e redireciona para o detalhe", async () => {
     const user = userEvent.setup();
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({ order: { id: "ord_1" } }),
-    }));
+    stubFetchNoOpenOrders({ order: { id: "ord_1" } });
 
     render(
       <AdminNewOrderForm
@@ -46,10 +60,18 @@ describe("AdminNewOrderForm", () => {
     await user.type(screen.getByLabelText(/Título/i), "Painel executivo de vendas");
     await user.type(screen.getByLabelText(/Descrição/i), "Criar backlog inicial e escopo do pedido");
     await user.click(screen.getByRole("button", { name: "Alta" }));
-    await user.click(screen.getByRole("button", { name: "Criar pedido" }));
+    await user.type(screen.getByLabelText(/Informações de produção/i), "Full-stack em 4 semanas.");
+    await user.type(screen.getByLabelText(/Valor estimado/i), "3000");
+    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/admin/orders", expect.objectContaining({ method: "POST" }));
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/admin/orders",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("productionInfo"),
+        }),
+      );
     });
     expect(mocks.push).toHaveBeenCalledWith("/admin/orders/ord_1");
     expect(mocks.refresh).toHaveBeenCalled();
@@ -57,6 +79,7 @@ describe("AdminNewOrderForm", () => {
 
   it("mostra erro se nenhum cliente for selecionado", async () => {
     const user = userEvent.setup();
+    vi.stubGlobal("fetch", vi.fn());
 
     render(
       <AdminNewOrderForm
@@ -64,16 +87,39 @@ describe("AdminNewOrderForm", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Criar pedido" }));
+    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
 
     expect(screen.getByText("Selecione um cliente.")).toBeInTheDocument();
   });
 
-  it("envia proposta junto com o pedido quando o toggle esta ativo e campos preenchidos", async () => {
+  it("mostra erro de validacao quando productionInfo esta vazio", async () => {
+    const user = userEvent.setup();
+    stubFetchNoOpenOrders(null);
+
+    render(
+      <AdminNewOrderForm
+        initialClientId="client_1"
+        clients={[{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }]}
+      />
+    );
+
+    await user.type(screen.getByLabelText(/Título/i), "Plataforma de vendas");
+    await user.type(screen.getByLabelText(/Descrição/i), "Sistema B2B completo.");
+    // Deixar productionInfo vazio e clicar submeter
+    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
+
+    expect(screen.getByText("Informações de produção são obrigatórias.")).toBeInTheDocument();
+  });
+
+  it("mostra banner de pedidos abertos quando cliente ja tem pedido em aberto", async () => {
     const user = userEvent.setup();
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue({ order: { id: "ord_2" } }),
+      json: vi.fn().mockResolvedValue({
+        orders: [
+          { id: "ord_99", orderRef: "QT-0099", title: "Pedido existente", type: "support", status: "EVALUATING" },
+        ],
+      }),
     }));
 
     render(
@@ -83,24 +129,19 @@ describe("AdminNewOrderForm", () => {
       />
     );
 
-    await user.type(screen.getByLabelText(/Título/i), "Plataforma de vendas");
-    await user.type(screen.getByLabelText(/Descrição/i), "Sistema B2B completo.");
-    await user.click(screen.getByRole("checkbox", { name: /Enviar proposta ao cliente agora/i }));
-    await user.type(screen.getByLabelText(/Informações de produção/i), "Full-stack em 4 semanas.");
-    await user.type(screen.getByLabelText(/Valor estimado/i), "2500");
-    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
-
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/admin/orders", expect.objectContaining({
-        method: "POST",
-        body: expect.stringContaining("productionInfo"),
-      }));
+      expect(screen.getByText(/Este cliente já tem 1 pedido em aberto/i)).toBeInTheDocument();
     });
-    expect(mocks.push).toHaveBeenCalledWith("/admin/orders/ord_2");
+    expect(screen.getByText("QT-0099")).toBeInTheDocument();
+    expect(screen.getByText("Pedido existente")).toBeInTheDocument();
+
+    // Banner pode ser dispensado
+    await user.click(screen.getByRole("button", { name: /Fechar aviso/i }));
+    expect(screen.queryByText(/Este cliente já tem 1 pedido em aberto/i)).not.toBeInTheDocument();
   });
 
-  it("mostra erro de validacao quando toggle ativo mas productionInfo vazio", async () => {
-    const user = userEvent.setup();
+  it("nao mostra banner quando cliente nao tem pedidos abertos", async () => {
+    stubFetchNoOpenOrders(null);
 
     render(
       <AdminNewOrderForm
@@ -109,12 +150,8 @@ describe("AdminNewOrderForm", () => {
       />
     );
 
-    await user.type(screen.getByLabelText(/Título/i), "Plataforma de vendas");
-    await user.type(screen.getByLabelText(/Descrição/i), "Sistema B2B completo.");
-    await user.click(screen.getByRole("checkbox", { name: /Enviar proposta ao cliente agora/i }));
-    // Deixar productionInfo vazio
-    await user.click(screen.getByRole("button", { name: "Criar e enviar proposta" }));
-
-    expect(screen.getByText("Informações de produção são obrigatórias para enviar proposta.")).toBeInTheDocument();
+    // Aguarda fetch completar
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    expect(screen.queryByText(/pedido.*aberto/i)).not.toBeInTheDocument();
   });
 });

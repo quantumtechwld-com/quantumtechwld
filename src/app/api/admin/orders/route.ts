@@ -13,7 +13,7 @@ import { appUrl } from "@/lib/app-url";
 const db = prisma as any;
 
 const VALID_STATUSES = [
-  "DRAFT",
+  "DRAFT",          // existe no schema Prisma mas nunca é atribuído pelo fluxo normal
   "PENDING",
   "EVALUATING",
   "PROPOSAL_SENT",

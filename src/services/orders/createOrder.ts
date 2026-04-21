@@ -7,6 +7,8 @@ import { generateOrderRefCandidates } from "@/lib/order-ref";
 const db = prisma as any;
 
 export const VALID_ORDER_TYPES = ["new_feature", "bug_fix", "new_project", "support", "other", "contact"] as const;
+// Nota: "contact" é um tipo reservado para pedidos gerados via formulário público de contacto.
+// Não é exposto nos selects do admin nem do portal — existe aqui para validação da rota de contacto.
 export const VALID_ORDER_URGENCIES = ["low", "normal", "high", "critical"] as const;
 
 export type CreateOrderInput = {

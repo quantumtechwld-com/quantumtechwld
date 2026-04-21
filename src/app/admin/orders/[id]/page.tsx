@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OrderAdminActions } from "./OrderAdminActions";
+import { OrderEditForm } from "./OrderEditForm";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import LogoAnimated from "@/components/home/LogoAnimated";
 import {
@@ -247,6 +248,19 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
           order={{ id: order.id, status: order.status, type: order.type }}
           paymentPaid={order.payment?.status === "PAID"}
         />
+
+        {/* Edição de campos básicos (só em PENDING / EVALUATING) */}
+        {(order.status === "PENDING" || order.status === "EVALUATING") && (
+          <OrderEditForm
+            order={{
+              id: order.id,
+              type: order.type,
+              title: order.title,
+              description: order.description,
+              urgency: order.urgency,
+            }}
+          />
+        )}
 
         {/* Canal de mensagens */}
         <MessagesPanel orderId={order.id} currentUserId={me?.id ?? ""} />
