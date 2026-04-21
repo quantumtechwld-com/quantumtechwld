@@ -1,6 +1,20 @@
 // PM2 Ecosystem — Quantum Technology Agency
 // Uso: pm2 start ecosystem.config.cjs
 //      pm2 reload ecosystem.config.cjs --update-env  (zero-downtime deploy)
+//
+// Alerta de downtime: pm2-health monitora a app e envia email quando ela cai.
+// Instalação (apenas 1x no servidor):
+//   pm2 install pm2-health
+// Configuração (1x no servidor):
+//   pm2 set pm2-health:smtp_host smtp.resend.com
+//   pm2 set pm2-health:smtp_port 465
+//   pm2 set pm2-health:smtp_secure true
+//   pm2 set pm2-health:smtp_user resend
+//   pm2 set pm2-health:smtp_password <RESEND_API_KEY do .env EMAIL_SERVER_PASSWORD>
+//   pm2 set pm2-health:mail_from "noreply@quantumtechwld.com"
+//   pm2 set pm2-health:mail_to felipepodesta@quantum-tech.com.br
+//   pm2 set pm2-health:hold_period 30
+//   pm2 set pm2-health:restart_crunch 5
 
 module.exports = {
   apps: [

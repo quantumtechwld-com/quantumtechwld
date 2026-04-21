@@ -36,9 +36,13 @@ export async function POST(request: NextRequest) {
   // Auth.js gera o token, faz o hash, persiste no DB e chama sendVerificationRequest.
   // redirect: false evita que signIn() lance NEXT_REDIRECT neste Route Handler.
   // O locale é passado via invite_locale no callbackUrl e lido em sendVerificationRequest (auth.ts).
+  // CRÍTICO: callbackUrl deve ser absoluto em produção — NextAuth v5 rejeita URLs relativas
+  // por validação de origin, causando erro "Verification" mesmo com token válido.
+  const baseUrl = process.env.NEXTAUTH_URL?.replace(/\/$/, "") ??
+    `${request.headers.get("x-forwarded-proto") ?? "https"}://${request.headers.get("host")}`;
   await signIn("nodemailer", {
     email,
-    redirectTo: `/portal?invite_locale=${locale}`,
+    redirectTo: `${baseUrl}/portal?invite_locale=${locale}`,
     redirect: false,
   });
 
