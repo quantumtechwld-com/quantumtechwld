@@ -29,7 +29,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
       order: {
         select: {
           id: true,
-          ref: true,
+          orderRef: true,
           type: true,
           status: true,
           estimatedValue: true,
@@ -51,14 +51,14 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
       <nav className="flex items-center gap-2 text-xs text-slate-500">
         <Link href="/admin/financeiro" className="hover:text-white transition">Financeiro</Link>
         <span>/</span>
-        <span className="text-slate-300">{financial.order.ref ?? orderId.slice(0, 8)}</span>
+        <span className="text-slate-300">{financial.order.orderRef ?? orderId.slice(0, 8)}</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white">
-            Pedido {financial.order.ref ?? orderId.slice(0, 8)}
+            Pedido {financial.order.orderRef ?? orderId.slice(0, 8)}
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
             {financial.order.client.name ?? "—"} · {financial.order.client.email}

@@ -28,7 +28,7 @@ export default async function AdminFinanceiroPage() {
       order: {
         select: {
           id: true,
-          ref: true,
+          orderRef: true,
           type: true,
           status: true,
           client: { select: { name: true, email: true } },
@@ -102,11 +102,11 @@ export default async function AdminFinanceiroPage() {
                   paidCents: number;
                   status: string;
                   installments: Array<{ id: string; sequence: number; amountCents: number; method: string; status: string }>;
-                  order: { id: string; ref?: string; type: string; client: { name?: string; email: string } };
+                  order: { id: string; orderRef?: string; type: string; client: { name?: string; email: string } };
                 }) => (
                   <tr key={f.id} className="border-b border-white/5 hover:bg-white/2 transition">
                     <td className="px-5 py-3 text-white font-mono text-xs">
-                      {f.order.ref ?? f.order.id.slice(0, 8)}
+                      {f.order.orderRef ?? f.order.id.slice(0, 8)}
                     </td>
                     <td className="px-5 py-3 text-slate-300">
                       <div className="text-xs font-medium">{f.order.client.name ?? "—"}</div>
