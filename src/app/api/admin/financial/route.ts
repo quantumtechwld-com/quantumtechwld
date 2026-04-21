@@ -20,7 +20,7 @@ export async function GET(): Promise<NextResponse> {
       order: {
         select: {
           id: true,
-          ref: true,
+          orderRef: true,
           type: true,
           status: true,
           client: { select: { id: true, name: true, email: true } },

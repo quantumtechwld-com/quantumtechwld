@@ -40,6 +40,7 @@ export async function createOrderWithRef(input: CreateOrderInput) {
     description: input.description,
     urgency: input.urgency,
     attachments: input.attachments,
+    deliveryLinks: [],
     status: hasProposal ? "PROPOSAL_SENT" : "PENDING",
     ...(input.createdByAdminId ? { createdByAdminId: input.createdByAdminId } : {}),
     ...(input.parentOrderId ? { parentOrderId: input.parentOrderId } : {}),

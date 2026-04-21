@@ -23,7 +23,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
       order: {
         select: {
           id: true,
-          ref: true,
+          orderRef: true,
           type: true,
           status: true,
           estimatedValue: true,
