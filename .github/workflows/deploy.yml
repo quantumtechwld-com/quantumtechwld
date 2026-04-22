@@ -78,22 +78,23 @@ jobs:
 
       - name: Build Next.js
         env:
-          DATABASE_URL:           ${{ secrets.DATABASE_URL }}
-          AUTH_SECRET:            ${{ secrets.AUTH_SECRET }}
-          AUTH_URL:               ${{ secrets.AUTH_URL }}
-          EMAIL_SERVER_HOST:      ${{ secrets.EMAIL_SERVER_HOST }}
-          EMAIL_SERVER_PORT:      ${{ secrets.EMAIL_SERVER_PORT }}
-          EMAIL_SERVER_USER:      ${{ secrets.EMAIL_SERVER_USER }}
-          EMAIL_SERVER_PASSWORD:  ${{ secrets.EMAIL_SERVER_PASSWORD }}
-          EMAIL_FROM:             ${{ secrets.EMAIL_FROM }}
-          EMAIL_ADMIN:            ${{ secrets.EMAIL_ADMIN }}
-          ADMIN_EMAIL:            ${{ secrets.ADMIN_EMAIL }}
-          STRIPE_SECRET_KEY:      ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET:  ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          STRIPE_MOCK:            "false"
-          GEMINI_API_KEY:         ${{ secrets.GEMINI_API_KEY }}
-          N8N_WEBHOOK_URL:        ${{ secrets.N8N_WEBHOOK_URL }}
-          NODE_ENV:               production
+          DATABASE_URL:                ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET:                 ${{ secrets.AUTH_SECRET }}
+          AUTH_URL:                    ${{ secrets.AUTH_URL }}
+          EMAIL_SERVER_HOST:           ${{ secrets.EMAIL_SERVER_HOST }}
+          EMAIL_SERVER_PORT:           ${{ secrets.EMAIL_SERVER_PORT }}
+          EMAIL_SERVER_USER:           ${{ secrets.EMAIL_SERVER_USER }}
+          EMAIL_SERVER_PASSWORD:       ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          EMAIL_FROM:                  ${{ secrets.EMAIL_FROM }}
+          EMAIL_ADMIN:                 ${{ secrets.EMAIL_ADMIN }}
+          ADMIN_EMAIL:                 ${{ secrets.ADMIN_EMAIL }}
+          STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_MOCK:                 "false"
+          GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
+          N8N_WEBHOOK_URL:             ${{ secrets.N8N_WEBHOOK_URL }}
+          NEXT_PUBLIC_SENTRY_DSN:      ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NODE_ENV:                    production
         run: npm run build
 
       - name: Create deploy package
@@ -119,37 +120,39 @@ jobs:
       # Gera .env via env vars (sem escaping) e envia artefatos para S3
       - name: Upload artifacts to S3
         env:
-          DATABASE_URL:           ${{ secrets.DATABASE_URL }}
-          AUTH_SECRET:            ${{ secrets.AUTH_SECRET }}
-          AUTH_URL:               ${{ secrets.AUTH_URL }}
-          EMAIL_SERVER_HOST:      ${{ secrets.EMAIL_SERVER_HOST }}
-          EMAIL_SERVER_PORT:      ${{ secrets.EMAIL_SERVER_PORT }}
-          EMAIL_SERVER_USER:      ${{ secrets.EMAIL_SERVER_USER }}
-          EMAIL_SERVER_PASSWORD:  ${{ secrets.EMAIL_SERVER_PASSWORD }}
-          EMAIL_FROM:             ${{ secrets.EMAIL_FROM }}
-          EMAIL_ADMIN:            ${{ secrets.EMAIL_ADMIN }}
-          ADMIN_EMAIL:            ${{ secrets.ADMIN_EMAIL }}
-          STRIPE_SECRET_KEY:      ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET:  ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          GEMINI_API_KEY:         ${{ secrets.GEMINI_API_KEY }}
-          N8N_WEBHOOK_URL:        ${{ secrets.N8N_WEBHOOK_URL }}
+          DATABASE_URL:                ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET:                 ${{ secrets.AUTH_SECRET }}
+          AUTH_URL:                    ${{ secrets.AUTH_URL }}
+          EMAIL_SERVER_HOST:           ${{ secrets.EMAIL_SERVER_HOST }}
+          EMAIL_SERVER_PORT:           ${{ secrets.EMAIL_SERVER_PORT }}
+          EMAIL_SERVER_USER:           ${{ secrets.EMAIL_SERVER_USER }}
+          EMAIL_SERVER_PASSWORD:       ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          EMAIL_FROM:                  ${{ secrets.EMAIL_FROM }}
+          EMAIL_ADMIN:                 ${{ secrets.EMAIL_ADMIN }}
+          ADMIN_EMAIL:                 ${{ secrets.ADMIN_EMAIL }}
+          STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
+          N8N_WEBHOOK_URL:             ${{ secrets.N8N_WEBHOOK_URL }}
+          NEXT_PUBLIC_SENTRY_DSN:      ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
         run: |
-          printf 'NODE_ENV=production\n'                                   > env.production.local
-          printf 'DATABASE_URL=%s\n'          "$DATABASE_URL"             >> env.production.local
-          printf 'AUTH_SECRET=%s\n'           "$AUTH_SECRET"              >> env.production.local
-          printf 'AUTH_URL=%s\n'              "$AUTH_URL"                 >> env.production.local
-          printf 'EMAIL_SERVER_HOST=%s\n'     "$EMAIL_SERVER_HOST"        >> env.production.local
-          printf 'EMAIL_SERVER_PORT=%s\n'     "$EMAIL_SERVER_PORT"        >> env.production.local
-          printf 'EMAIL_SERVER_USER=%s\n'     "$EMAIL_SERVER_USER"        >> env.production.local
-          printf 'EMAIL_SERVER_PASSWORD=%s\n' "$EMAIL_SERVER_PASSWORD"    >> env.production.local
-          printf 'EMAIL_FROM=%s\n'            "$EMAIL_FROM"               >> env.production.local
-          printf 'EMAIL_ADMIN=%s\n'           "$EMAIL_ADMIN"              >> env.production.local
-          printf 'ADMIN_EMAIL=%s\n'           "$ADMIN_EMAIL"              >> env.production.local
-          printf 'STRIPE_SECRET_KEY=%s\n'     "$STRIPE_SECRET_KEY"        >> env.production.local
-          printf 'STRIPE_WEBHOOK_SECRET=%s\n' "$STRIPE_WEBHOOK_SECRET"    >> env.production.local
-          printf 'STRIPE_MOCK=false\n'                                    >> env.production.local
-          printf 'GEMINI_API_KEY=%s\n'        "$GEMINI_API_KEY"           >> env.production.local
-          printf 'N8N_WEBHOOK_URL=%s\n'       "$N8N_WEBHOOK_URL"          >> env.production.local
+          printf 'NODE_ENV=production\n'                                        > env.production.local
+          printf 'DATABASE_URL=%s\n'          "$DATABASE_URL"                 >> env.production.local
+          printf 'AUTH_SECRET=%s\n'           "$AUTH_SECRET"                  >> env.production.local
+          printf 'AUTH_URL=%s\n'              "$AUTH_URL"                     >> env.production.local
+          printf 'EMAIL_SERVER_HOST=%s\n'     "$EMAIL_SERVER_HOST"            >> env.production.local
+          printf 'EMAIL_SERVER_PORT=%s\n'     "$EMAIL_SERVER_PORT"            >> env.production.local
+          printf 'EMAIL_SERVER_USER=%s\n'     "$EMAIL_SERVER_USER"            >> env.production.local
+          printf 'EMAIL_SERVER_PASSWORD=%s\n' "$EMAIL_SERVER_PASSWORD"        >> env.production.local
+          printf 'EMAIL_FROM=%s\n'            "$EMAIL_FROM"                   >> env.production.local
+          printf 'EMAIL_ADMIN=%s\n'           "$EMAIL_ADMIN"                  >> env.production.local
+          printf 'ADMIN_EMAIL=%s\n'           "$ADMIN_EMAIL"                  >> env.production.local
+          printf 'STRIPE_SECRET_KEY=%s\n'     "$STRIPE_SECRET_KEY"            >> env.production.local
+          printf 'STRIPE_WEBHOOK_SECRET=%s\n' "$STRIPE_WEBHOOK_SECRET"        >> env.production.local
+          printf 'STRIPE_MOCK=false\n'                                         >> env.production.local
+          printf 'GEMINI_API_KEY=%s\n'        "$GEMINI_API_KEY"               >> env.production.local
+          printf 'N8N_WEBHOOK_URL=%s\n'       "$N8N_WEBHOOK_URL"              >> env.production.local
+          printf 'NEXT_PUBLIC_SENTRY_DSN=%s\n' "$NEXT_PUBLIC_SENTRY_DSN"      >> env.production.local
           chmod 600 env.production.local
 
           aws s3 cp deploy.tar.gz             s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz
