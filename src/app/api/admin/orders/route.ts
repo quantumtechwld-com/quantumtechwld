@@ -231,7 +231,6 @@ export async function POST(request: NextRequest) {
         data: {
           orderId: order.id,
           totalAmountCents: totalCents,
-          method,
           downPaymentPct: pct,
           paidCents: 0,
           status: "PENDING",
