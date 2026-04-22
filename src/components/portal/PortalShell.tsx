@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
 import PortalSidebar from "@/components/portal/PortalSidebar";
 
 interface Props {
@@ -22,6 +23,7 @@ export default async function PortalShell({ children }: Readonly<Props>) {
   }
 
   const initial = (userName ?? email).charAt(0).toUpperCase() || "?";
+  const currentLocale = await getLocale();
 
   return (
     <div className="min-h-screen bg-background text-white">
@@ -30,6 +32,7 @@ export default async function PortalShell({ children }: Readonly<Props>) {
         userEmail={email}
         userInitial={initial}
         userImage={userImage}
+        currentLocale={currentLocale}
       />
       <main className="px-4 pb-16 pt-6 md:px-6">
         {children}

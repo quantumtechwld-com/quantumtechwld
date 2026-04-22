@@ -9,8 +9,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   redirect: vi.fn(),
-  briefingFindMany: vi.fn(),
-  briefingCount: vi.fn(),
   orderFindMany: vi.fn(),
   orderCount: vi.fn(),
 }));
@@ -40,10 +38,6 @@ vi.mock("@/auth", () => ({ auth: mocks.auth }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    briefing: {
-      findMany: mocks.briefingFindMany,
-      count: mocks.briefingCount,
-    },
     order: {
       findMany: mocks.orderFindMany,
       count: mocks.orderCount,
@@ -54,6 +48,10 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
   getLocale: async () => "pt-PT",
+}));
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
 }));
 
 import PortalPage from "@/app/portal/page";
@@ -77,8 +75,8 @@ describe("PortalPage", () => {
     expect(screen.getByText("tagline")).toBeInTheDocument();
     expect(screen.getByText("heading")).toBeInTheDocument();
     expect(screen.getByText("Joao")).toBeInTheDocument();
-    expect(screen.getByText("Ainda não tem pedidos.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "+ Novo pedido" })).toHaveAttribute("href", "/portal/orders/new");
+    expect(screen.getByText("dashboardEmptyOrders")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "dashboardNewOrder" })).toHaveAttribute("href", "/portal/orders/new");
   });
 
   it("renderiza painel amber quando existem pedidos com proposta enviada", async () => {
@@ -102,8 +100,8 @@ describe("PortalPage", () => {
 
     render(await PortalPage());
 
-    expect(screen.getByText("Aguardam a sua resposta")).toBeInTheDocument();
+    expect(screen.getByText("dashboardAwaitingResponse")).toBeInTheDocument();
     expect(screen.getAllByText("Automação de fluxo").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "Ver todos →" })[0]).toHaveAttribute("href", "/portal/orders");
+    expect(screen.getAllByRole("link", { name: "pendingViewAll" })[0]).toHaveAttribute("href", "/portal/orders");
   });
 });

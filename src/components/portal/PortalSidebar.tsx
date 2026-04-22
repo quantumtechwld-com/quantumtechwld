@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/SignOutButton";
 import LogoAnimated from "@/components/home/LogoAnimated";
 import LogoTextAnimated from "@/components/home/LogoTextAnimated";
+import PortalLocaleSwitcher from "@/components/portal/PortalLocaleSwitcher";
 import {
   User,
   FileText,
@@ -32,9 +33,10 @@ interface Props {
   userEmail?: string | null;
   userInitial?: string;
   userImage?: string | null;
+  currentLocale?: string;
 }
 
-export default function PortalSidebar({ userName, userEmail, userInitial = "?", userImage }: Readonly<Props>) {
+export default function PortalSidebar({ userName, userEmail, userInitial = "?", userImage, currentLocale = "pt" }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -188,7 +190,8 @@ export default function PortalSidebar({ userName, userEmail, userInitial = "?", 
         </nav>
 
         {/* Rodapé do drawer */}
-        <div className="border-t border-white/5 px-3 py-4">
+        <div className="border-t border-white/5 px-3 py-4 space-y-2">
+          <PortalLocaleSwitcher currentLocale={currentLocale} />
           <SignOutButton
             label="Terminar sessão"
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/40 transition hover:bg-red-500/10 hover:text-red-400"

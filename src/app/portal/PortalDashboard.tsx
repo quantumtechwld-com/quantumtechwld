@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Bell, Zap, Eye, CheckCircle2, XCircle, X } from "lucide-react";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, ORDER_TYPE_LABEL } from "@/lib/constants";
 
@@ -35,16 +36,17 @@ type Props = Readonly<{
   counts: Counts;
 }>;
 
-const FILTER_LABEL: Record<string, string> = {
-  PROPOSAL_SENT: "Aguardam resposta",
-  IN_PRODUCTION: "Em produção",
-  IN_REVIEW:     "Em revisão",
-  COMPLETED:     "Concluídos",
-  REJECTED:      "Recusados",
-};
-
 export function PortalDashboard({ tagline, heading, userName, userEmail, locale, allOrders, counts }: Props) {
+  const t = useTranslations("portal");
   const [activeFilter, setActiveFilter] = useState<FilterType>(null);
+
+  const FILTER_LABEL: Record<string, string> = {
+    PROPOSAL_SENT: t("dashboardFilterProposalSent"),
+    IN_PRODUCTION: t("dashboardFilterInProduction"),
+    IN_REVIEW:     t("dashboardFilterInReview"),
+    COMPLETED:     t("dashboardFilterCompleted"),
+    REJECTED:      t("dashboardFilterRejected"),
+  };
 
   function toggleFilter(f: FilterType) {
     setActiveFilter(prev => (prev === f ? null : f));
@@ -72,7 +74,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
           href="/portal/orders/new"
           className="shrink-0 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
         >
-          + Novo pedido
+          {t("dashboardNewOrder")}
         </Link>
       </div>
 
@@ -87,7 +89,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
             <Bell size={15} className="text-amber-300" />
           </div>
           <p className="text-2xl font-bold text-white">{counts.proposalSent}</p>
-          <p className="mt-0.5 text-xs text-slate-400">Aguardam resposta</p>
+          <p className="mt-0.5 text-xs text-slate-400">{t("dashboardFilterProposalSent")}</p>
         </button>
 
         <button
@@ -99,7 +101,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
             <Zap size={15} className="text-violet-300" />
           </div>
           <p className="text-2xl font-bold text-white">{counts.inProduction}</p>
-          <p className="mt-0.5 text-xs text-slate-400">Em produção</p>
+          <p className="mt-0.5 text-xs text-slate-400">{t("dashboardFilterInProduction")}</p>
         </button>
 
         <button
@@ -111,7 +113,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
             <Eye size={15} className="text-sky-300" />
           </div>
           <p className="text-2xl font-bold text-white">{counts.inReview}</p>
-          <p className="mt-0.5 text-xs text-slate-400">Em revisão</p>
+          <p className="mt-0.5 text-xs text-slate-400">{t("dashboardFilterInReview")}</p>
         </button>
 
         <button
@@ -123,7 +125,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
             <CheckCircle2 size={15} className="text-emerald-300" />
           </div>
           <p className="text-2xl font-bold text-white">{counts.completed}</p>
-          <p className="mt-0.5 text-xs text-slate-400">Concluídos</p>
+          <p className="mt-0.5 text-xs text-slate-400">{t("dashboardFilterCompleted")}</p>
         </button>
 
         <button
@@ -135,7 +137,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
             <XCircle size={15} className="text-red-400" />
           </div>
           <p className="text-2xl font-bold text-white">{counts.rejected}</p>
-          <p className="mt-0.5 text-xs text-slate-400">Recusados</p>
+          <p className="mt-0.5 text-xs text-slate-400">{t("dashboardFilterRejected")}</p>
         </button>
       </div>
 
@@ -143,9 +145,9 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
       {!activeFilter && inReviewOrders.length > 0 && (
         <div className="mb-4 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-sky-300">A aguardar a sua revisão</p>
+            <p className="text-sm font-semibold text-sky-300">{t("dashboardAwaitingReview")}</p>
             <Link href="/portal/orders" className="text-xs text-accent hover:text-accent-light">
-              Ver todos →
+              {t("pendingViewAll")}
             </Link>
           </div>
           <div className="grid gap-2">
@@ -159,7 +161,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
                   <p className="text-sm text-slate-200 truncate">{o.title ?? (ORDER_TYPE_LABEL[o.type] ?? o.type)}</p>
                 </div>
                 <span className="ml-3 shrink-0 rounded-full border border-sky-500/30 bg-sky-500/20 px-2 py-0.5 text-xs font-medium text-sky-300">
-                  Em revisão
+                  {t("dashboardBadgeInReview")}
                 </span>
               </Link>
             ))}
@@ -171,9 +173,9 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
       {!activeFilter && proposalSentOrders.length > 0 && (
         <div className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-amber-300">Aguardam a sua resposta</p>
+            <p className="text-sm font-semibold text-amber-300">{t("dashboardAwaitingResponse")}</p>
             <Link href="/portal/orders" className="text-xs text-accent hover:text-accent-light">
-              Ver todos →
+              {t("pendingViewAll")}
             </Link>
           </div>
           <div className="grid gap-2">
@@ -192,7 +194,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
                   )}
                 </div>
                 <span className="ml-3 shrink-0 rounded-full border border-amber-500/30 bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
-                  Proposta enviada
+                  {t("dashboardBadgeProposalSent")}
                 </span>
               </Link>
             ))}
@@ -203,7 +205,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
       {/* Lista de pedidos */}
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-widest text-white/40">
-          {activeFilter ? FILTER_LABEL[activeFilter] : "Pedidos recentes"}
+          {activeFilter ? FILTER_LABEL[activeFilter] : t("dashboardRecentOrders")}
         </h2>
         {activeFilter ? (
           <button
@@ -212,11 +214,11 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
             className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition"
           >
             <X size={12} />
-            Limpar filtro
+            {t("dashboardClearFilter")}
           </button>
         ) : (
           <Link href="/portal/orders" className="text-xs text-accent hover:text-accent-light transition-colors">
-            Ver todos →
+            {t("pendingViewAll")}
           </Link>
         )}
       </div>
@@ -225,8 +227,8 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
         <div className="rounded-2xl border border-white/15 bg-white/5 p-6 text-center">
           <p className="text-sm text-slate-400">
             {activeFilter
-              ? `Sem pedidos com estado "${FILTER_LABEL[activeFilter]}".`
-              : "Ainda não tem pedidos."}
+              ? t("dashboardEmptyFiltered", { filter: FILTER_LABEL[activeFilter] })
+              : t("dashboardEmptyOrders")}
           </p>
           {!activeFilter && (
             <div className="mt-4 flex justify-center">
@@ -234,7 +236,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
                 href="/portal/orders/new"
                 className="inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
               >
-                Submeter primeiro pedido
+                {t("dashboardFirstOrder")}
               </Link>
             </div>
           )}

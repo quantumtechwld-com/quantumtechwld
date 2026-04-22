@@ -219,3 +219,34 @@ O teste declara e mocka `briefingFindMany` e `briefingCount` (linhas 12–13 e 4
 ### 8.4 Confirmação arquitetural pendente
 
 Antes de executar 8.1–8.3, confirmar explicitamente: **o fluxo de briefings foi intencionalmente removido da área do cliente?** Se sim, as chaves i18n de briefing no portal podem ser removidas. Se não, o briefing precisa ser reintegrado ao `PortalDashboard`.
+
+---
+
+## 9. Débito de observabilidade identificado em 22/04/2026 — monitoramento de produção
+
+Auditoria realizada em 22/04/2026. O sistema não tem cobertura completa de alertas de infra.
+
+### 9.1 Estado atual dos alertas
+
+| Cenário | Coberto | Ferramenta |
+|---|---|---|
+| Erro de aplicação (exceção, 500) | ✅ Sim | Sentry (`@sentry/nextjs`) — ativo em `NODE_ENV=production` |
+| Crash da app / PM2 restart | ⚠️ Parcial | `pm2-health` — documentado no `ecosystem.config.cjs`, **não confirmado instalado no EC2** |
+| EC2 fora do ar | ❌ Não | Nenhuma ferramenta configurada |
+| Deploy falho / app não sobe | ❌ Não | GitHub Actions loga o erro mas **não notifica proativamente** |
+| Disco cheio / OOM na EC2 | ❌ Não | Sem monitoramento de recursos |
+| Uptime externo (`https://quantumtechwld.com`) | ❌ Não | Better Stack previsto em `STACK-TECNICA.md` mas não implementado |
+
+### 9.2 Risco do Sentry
+
+A variável `NEXT_PUBLIC_SENTRY_DSN` precisa estar configurada nos GitHub Secrets **e** no `.env.production.local` da EC2. Se estiver ausente, o Sentry inicializa mas não envia nenhum evento — falha silenciosa.
+
+### 9.3 Ações pendentes (ordem de urgência)
+
+| Prioridade | Ação | Esforço |
+|---|---|---|
+| P0 | Confirmar se `pm2-health` está instalado e ativo na EC2 via SSM (`pm2 show pm2-health`) | 5 min |
+| P0 | Confirmar `NEXT_PUBLIC_SENTRY_DSN` nos GitHub Secrets e no `.env.production.local` da EC2 | 5 min |
+| P1 | Criar endpoint `GET /api/health` — retorna `200 OK` + timestamp para monitoramento externo | 30 min |
+| P1 | Configurar Better Stack ou UptimeRobot (plano gratuito) para pingar `https://quantumtechwld.com` a cada 1 min e alertar por e-mail/SMS se cair | 15 min |
+| P2 | Adicionar notificação de falha de deploy no `deploy.yml` (step final com `if: failure()`) | 30 min |
