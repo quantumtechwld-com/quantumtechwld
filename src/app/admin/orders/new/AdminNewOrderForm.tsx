@@ -58,6 +58,8 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [adminNote, setAdminNote] = useState("");
   const [downPaymentPct, setDownPaymentPct] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("STRIPE");
+  const [entryDueDate, setEntryDueDate] = useState("");
+  const [finalDueDate, setFinalDueDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
@@ -139,6 +141,10 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           adminNote: adminNote.trim() || undefined,
           downPaymentPct,
           paymentMethod,
+          ...(downPaymentPct > 0 ? {
+            entryDueDate: entryDueDate || undefined,
+            finalDueDate: finalDueDate || undefined,
+          } : {}),
           ...(selectedParentOrderId ? { parentOrderId: selectedParentOrderId } : {}),
         }),
       });
@@ -366,6 +372,34 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
               </select>
             </div>
           </div>
+          {downPaymentPct > 0 && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="admin-entry-due" className="block text-xs font-medium text-slate-400 mb-1">
+                  Prazo da entrada <span className="text-slate-600">(opcional)</span>
+                </label>
+                <input
+                  id="admin-entry-due"
+                  type="date"
+                  value={entryDueDate}
+                  onChange={(e) => setEntryDueDate(e.target.value)}
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="admin-final-due" className="block text-xs font-medium text-slate-400 mb-1">
+                  Prazo da parcela final <span className="text-slate-600">(opcional)</span>
+                </label>
+                <input
+                  id="admin-final-due"
+                  type="date"
+                  value={finalDueDate}
+                  onChange={(e) => setFinalDueDate(e.target.value)}
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
           <div>
             <label htmlFor="admin-note" className="block text-xs font-medium text-slate-400 mb-1">
               Nota adicional (opcional)
