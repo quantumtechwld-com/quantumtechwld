@@ -209,3 +209,73 @@ describe("PATCH confirm_manual installment", () => {
     );
   });
 });
+
+// ─── PATCH set_due_date ──────────────────────────────────────────────────────────────────
+
+describe("PATCH set_due_date installment", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const ctx = {
+    params: Promise.resolve({ orderId: ORDER_ID, installmentId: INSTALLMENT_ID }),
+  };
+
+  it("200 define dueDate válido na parcela", async () => {
+    mocks.auth.mockResolvedValue(ADMIN_SESSION);
+    mocks.installmentFindFirst.mockResolvedValue({
+      ...SAMPLE_FINANCIAL.installments[0],
+      financial: SAMPLE_FINANCIAL,
+    });
+    mocks.installmentUpdate.mockResolvedValue({});
+
+    const res = await PATCH(makePatchReq({ action: "set_due_date", dueDate: "2026-05-15" }), ctx);
+    expect(res.status).toBe(200);
+
+    expect(mocks.installmentUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: INSTALLMENT_ID },
+        data:  { dueDate: new Date("2026-05-15") },
+      }),
+    );
+  });
+
+  it("200 limpa dueDate quando dueDate é null", async () => {
+    mocks.auth.mockResolvedValue(ADMIN_SESSION);
+    mocks.installmentFindFirst.mockResolvedValue({
+      ...SAMPLE_FINANCIAL.installments[0],
+      financial: SAMPLE_FINANCIAL,
+    });
+    mocks.installmentUpdate.mockResolvedValue({});
+
+    const res = await PATCH(makePatchReq({ action: "set_due_date", dueDate: null }), ctx);
+    expect(res.status).toBe(200);
+
+    expect(mocks.installmentUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: INSTALLMENT_ID },
+        data:  { dueDate: null },
+      }),
+    );
+  });
+
+  it("422 quando dueDate é string inválida", async () => {
+    mocks.auth.mockResolvedValue(ADMIN_SESSION);
+    mocks.installmentFindFirst.mockResolvedValue({
+      ...SAMPLE_FINANCIAL.installments[0],
+      financial: SAMPLE_FINANCIAL,
+    });
+
+    const res = await PATCH(makePatchReq({ action: "set_due_date", dueDate: "not-a-date" }), ctx);
+    expect(res.status).toBe(422);
+
+    const body = await res.json() as { error: string };
+    expect(body.error).toBe("Data inválida.");
+    expect(mocks.installmentUpdate).not.toHaveBeenCalled();
+  });
+
+  it("403 para não-admin em set_due_date", async () => {
+    mocks.auth.mockResolvedValue(CLIENT_SESSION);
+    const res = await PATCH(makePatchReq({ action: "set_due_date", dueDate: "2026-05-01" }), ctx);
+    expect(res.status).toBe(403);
+    expect(mocks.installmentUpdate).not.toHaveBeenCalled();
+  });
+});

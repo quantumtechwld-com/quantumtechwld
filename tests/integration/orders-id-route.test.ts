@@ -818,4 +818,111 @@ describe("/api/orders/[id]", () => {
     expect(response.status).toBe(403);
     expect(mocks.orderUpdate).not.toHaveBeenCalled();
   });
+
+  // ─── propose com parcelas e datas ───────────────────────────────────────────────────
+
+  it("propose com downPaymentPct + datas cria OrderFinancial com dueDate nas parcelas", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PENDING",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PROPOSAL_SENT",
+      estimatedValue: 1000,
+      productionInfo: "Detalhes.",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderFinancialDeleteMany.mockResolvedValue({});
+    mocks.orderFinancialCreate.mockResolvedValue({});
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "propose",
+        productionInfo: "Detalhes.",
+        estimatedValue: 1000,
+        downPaymentPct: 50,
+        paymentMethod: "STRIPE",
+        entryDueDate: "2026-05-01",
+        finalDueDate: "2026-06-01",
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    expect(response.status).toBe(200);
+
+    // Verifica que o financeiro foi criado com as datas corretas nas parcelas
+    expect(mocks.orderFinancialCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          downPaymentPct: 50,
+          totalAmountCents: 100000,
+          installments: expect.objectContaining({
+            create: expect.arrayContaining([
+              expect.objectContaining({ sequence: 1, amountCents: 50000, dueDate: new Date("2026-05-01") }),
+              expect.objectContaining({ sequence: 2, amountCents: 50000, dueDate: new Date("2026-06-01") }),
+            ]),
+          }),
+        }),
+      }),
+    );
+  });
+
+  it("propose com downPaymentPct 0 (pagamento único) não inclui dueDate", async () => {
+    mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PENDING",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PROPOSAL_SENT",
+      estimatedValue: 2000,
+      productionInfo: "Detalhes.",
+      client: { id: "user_1", name: "Joao Silva", email: "client@example.com" },
+    });
+    mocks.orderFinancialDeleteMany.mockResolvedValue({});
+    mocks.orderFinancialCreate.mockResolvedValue({});
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({
+        action: "propose",
+        productionInfo: "Detalhes.",
+        estimatedValue: 2000,
+        downPaymentPct: 0,
+        paymentMethod: "STRIPE",
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    expect(response.status).toBe(200);
+
+    // Pagamento único: só 1 parcela, sem dueDate
+    expect(mocks.orderFinancialCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          downPaymentPct: 0,
+          totalAmountCents: 200000,
+          installments: expect.objectContaining({
+            create: [expect.objectContaining({ sequence: 1, amountCents: 200000 })],
+          }),
+        }),
+      }),
+    );
+  });
 });
