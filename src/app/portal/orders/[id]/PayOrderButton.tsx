@@ -6,10 +6,13 @@ import { formatCurrency } from "@/lib/currency";
 
 interface PayOrderButtonProps {
   orderId: string;
-  estimatedValue: number;
+  /** Valor em cêntimos a cobrar (parcela ou total). */
+  amountCents: number;
+  /** Etiqueta opcional: "Entrada" ou "Parcela final" */
+  installmentLabel?: string;
 }
 
-export function PayOrderButton({ orderId, estimatedValue }: Readonly<PayOrderButtonProps>) {
+export function PayOrderButton({ orderId, amountCents, installmentLabel }: Readonly<PayOrderButtonProps>) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
@@ -19,7 +22,11 @@ export function PayOrderButton({ orderId, estimatedValue }: Readonly<PayOrderBut
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/orders/${orderId}/checkout`, { method: "POST" });
+      const res = await fetch(`/api/orders/${orderId}/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountCents }),
+      });
       const data = await res.json() as { url?: string; error?: string };
       if (res.ok && data.url) {
         globalThis.location.href = data.url;
@@ -35,11 +42,12 @@ export function PayOrderButton({ orderId, estimatedValue }: Readonly<PayOrderBut
 
   // Sensivel: o CTA de pagamento deve mostrar a moeda real de cobranca.
   // Hoje o checkout Stripe deste fluxo cobra em EUR; nao usar locale aqui.
-  const amount = formatCurrency(estimatedValue, locale, "EUR");
+  const amount = formatCurrency(amountCents / 100, locale, "EUR");
+  const title = installmentLabel ?? t("payTitle");
 
   return (
     <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-      <h2 className="text-sm font-semibold text-emerald-300 mb-1">{t("payTitle")}</h2>
+      <h2 className="text-sm font-semibold text-emerald-300 mb-1">{title}</h2>
       <p className="text-xs text-slate-400 mb-4">
         {t("payBody", { amount })}
       </p>

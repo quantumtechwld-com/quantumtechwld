@@ -21,13 +21,17 @@ const ORDER_TYPE_LABEL: Record<string, string> = {
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-export async function POST(_req: NextRequest, { params }: RouteParams) {
+export async function POST(req: NextRequest, { params }: RouteParams) {
   const session = await auth();
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
+
+  // amountCents pode vir no body (parcela específica) — caso contrário usa estimatedValue
+  const body = await req.json().catch(() => ({})) as { amountCents?: number };
+
   const order = await db.order.findUnique({
     where: { id },
     include: {
@@ -47,7 +51,11 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Valor estimado inválido" }, { status: 400 });
   }
 
-  const amountCents = Math.round(order.estimatedValue * 100);
+  // Usar amountCents do body (parcela) se válido, caso contrário usar estimatedValue total
+  const amountCents =
+    body.amountCents && Number.isInteger(body.amountCents) && body.amountCents > 0
+      ? body.amountCents
+      : Math.round(order.estimatedValue * 100);
   const baseUrl = appUrl();
 
   // SENSIVEL: cobranca real nao pode seguir idioma do usuario.

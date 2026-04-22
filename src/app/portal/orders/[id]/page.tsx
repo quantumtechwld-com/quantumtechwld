@@ -32,9 +32,14 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     db.order.findUnique({
       where: { id },
       include: {
-        client:  { select: { email: true, name: true } },
-        payment: { select: { status: true, amountCents: true } },
-        rating:  true,
+        client:   { select: { email: true, name: true } },
+        payment:  { select: { status: true, amountCents: true } },
+        rating:   true,
+        financial: {
+          include: {
+            installments: { orderBy: { sequence: "asc" } },
+          },
+        },
       },
     }),
     prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
@@ -269,15 +274,66 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         }}
       />
 
-      {/* Pagamento Stripe: visível apenas quando APPROVED e sem pagamento confirmado */}
-      {order.status === "APPROVED" && order.payment?.status !== "PAID" && order.estimatedValue && (
-        <div className="mt-4">
-          <PayOrderButton orderId={order.id} estimatedValue={Number(order.estimatedValue)} />
-        </div>
-      )}
+      {/* Pagamento: visível quando APPROVED */}
+      {order.status === "APPROVED" && (() => {
+        const financial = order.financial;
+        // Determinar se há pagamento já completo
+        const isFullyPaid = financial
+          ? financial.status === "PAID"
+          : order.payment?.status === "PAID";
+
+        if (isFullyPaid) return null;
+
+        // Parcela pendente (quando existe OrderFinancial)
+        const pendingInstallment = financial?.installments?.find(
+          (i: { status: string }) => i.status === "PENDING",
+        );
+
+        if (financial && pendingInstallment) {
+          const isStripe = pendingInstallment.method === "STRIPE";
+          const amtCents: number = pendingInstallment.amountCents;
+          const isEntry = pendingInstallment.sequence === 1;
+
+          if (isStripe) {
+            return (
+              <div className="mt-4">
+                <PayOrderButton
+                  orderId={order.id}
+                  amountCents={amtCents}
+                  installmentLabel={isEntry ? t("payInstallmentEntry") : t("payInstallmentFinal")}
+                />
+              </div>
+            );
+          }
+
+          // Método manual — mostrar card informativo
+          return (
+            <div className="mt-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5">
+              <h2 className="text-sm font-semibold text-yellow-300 mb-1">
+                {isEntry ? t("payInstallmentEntry") : t("payInstallmentFinal")}
+              </h2>
+              <p className="text-2xl font-bold text-white mb-3">
+                {(amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
+              </p>
+              <p className="text-xs text-slate-400">{t("payManualInstructions")}</p>
+            </div>
+          );
+        }
+
+        // Fallback: sem OrderFinancial, fluxo Stripe legado pelo total
+        if (!financial && order.payment?.status !== "PAID" && order.estimatedValue) {
+          return (
+            <div className="mt-4">
+              <PayOrderButton orderId={order.id} amountCents={Math.round(Number(order.estimatedValue) * 100)} />
+            </div>
+          );
+        }
+
+        return null;
+      })()}
 
       {/* Fatura: visível quando pagamento confirmado */}
-      {order.payment?.status === "PAID" && (
+      {(order.financial?.status === "PAID" || order.payment?.status === "PAID") && (
         <div className="mt-4">
           <Link
             href={`/portal/orders/${order.id}/invoice`}

@@ -30,7 +30,7 @@ describe("PayOrderButton", () => {
       json: vi.fn().mockResolvedValue({ error: "Falha ao iniciar checkout" }),
     }));
 
-    render(<PayOrderButton orderId="ord_1" estimatedValue={125} />);
+    render(<PayOrderButton orderId="ord_1" amountCents={12500} />);
 
     await user.click(screen.getByRole("button", { name: /payBtn:/ }));
 
@@ -50,7 +50,7 @@ describe("PayOrderButton", () => {
       writable: true,
     });
 
-    render(<PayOrderButton orderId="ord_1" estimatedValue={125} />);
+    render(<PayOrderButton orderId="ord_1" amountCents={12500} />);
 
     await user.click(screen.getByRole("button", { name: /payBtn:/ }));
 

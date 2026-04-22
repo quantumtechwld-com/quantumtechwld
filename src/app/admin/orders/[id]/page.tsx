@@ -91,6 +91,15 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
                 day: "2-digit", month: "long", year: "numeric",
               })}
             </p>
+            {/* Atalho direto para o detalhe financeiro */}
+            {["PROPOSAL_SENT", "APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"].includes(order.status) && (
+              <Link
+                href={`/admin/financeiro/${order.id}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/20"
+              >
+                💳 Ver financeiro
+              </Link>
+            )}
           </div>
         </div>
 
