@@ -479,6 +479,8 @@
     "payBody": "Para iniciar la producción, completa el pago de {amount} vía Stripe.",
     "payInstallmentEntry": "Entrada — realiza el pago",
     "payInstallmentFinal": "Cuota final — realiza el pago",
+    "payDueDate": "Vencimiento:",
+    "payDueDateOverdue": "⚠ Vencimiento:",
     "payManualInstructions": "El pago deberá realizarse según las instrucciones enviadas por el equipo (PIX, transferencia u otro). La producción avanzará automáticamente tras la confirmación.",
     "payBtn": "Pagar {amount} →",
     "payRedirecting": "Redirigiendo a Stripe…",

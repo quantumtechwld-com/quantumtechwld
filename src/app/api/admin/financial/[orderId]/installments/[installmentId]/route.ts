@@ -8,8 +8,9 @@ const db = prisma as any;
 type RouteContext = { params: Promise<{ orderId: string; installmentId: string }> };
 
 interface PatchBody {
-  action: "confirm_manual";
+  action: "confirm_manual" | "set_due_date";
   notes?: string;
+  dueDate?: string | null; // ISO 8601 — usado em set_due_date
 }
 
 // PATCH /api/admin/financial/[orderId]/installments/[installmentId]
@@ -23,8 +24,21 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   const { orderId, installmentId } = await params;
   const body: PatchBody = await req.json();
 
-  if (body.action !== "confirm_manual") {
+  if (body.action !== "confirm_manual" && body.action !== "set_due_date") {
     return NextResponse.json({ error: "Ação inválida." }, { status: 400 });
+  }
+
+  // ── set_due_date: apenas actualiza a data-limite, sem marcar como pago ──
+  if (body.action === "set_due_date") {
+    const dueDate = body.dueDate ? new Date(body.dueDate) : null;
+    if (body.dueDate && Number.isNaN(dueDate!.getTime())) {
+      return NextResponse.json({ error: "Data inválida." }, { status: 422 });
+    }
+    await db.paymentInstallment.update({
+      where: { id: installmentId },
+      data:  { dueDate },
+    });
+    return NextResponse.json({ ok: true });
   }
 
   // Verificar que a parcela pertence ao financeiro correto

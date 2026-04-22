@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { PAYMENT_METHOD_LABEL } from "@/lib/constants";
 
 interface Installment {
-  id:        string;
-  sequence:  number;
+  id:          string;
+  sequence:    number;
   amountCents: number;
-  method:    string;
-  status:    string;
-  paidAt?:   string | null;
-  notes?:    string | null;
+  method:      string;
+  status:      string;
+  paidAt?:     string | null;
+  dueDate?:    string | null;
+  notes?:      string | null;
 }
 
 interface Props {
@@ -26,9 +27,33 @@ function fmtEur(cents: number) {
 
 export function InstallmentActions({ orderId, installments, onUpdated }: Readonly<Props>) {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [notes,   setNotes]   = useState<Record<string, string>>({});
-  const [error,   setError]   = useState("");
+  const [loading,   setLoading]   = useState<string | null>(null);
+  const [savingDue, setSavingDue] = useState<string | null>(null);
+  const [notes,     setNotes]     = useState<Record<string, string>>({});
+  const [dueDates,  setDueDates]  = useState<Record<string, string>>({});
+  const [error,     setError]     = useState("");
+
+  async function saveDueDate(installmentId: string) {
+    setError("");
+    setSavingDue(installmentId);
+    const dueDate = dueDates[installmentId] ?? null;
+    const res = await fetch(
+      `/api/admin/financial/${orderId}/installments/${installmentId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "set_due_date", dueDate }),
+      },
+    ).catch(() => null);
+    setSavingDue(null);
+    if (!res?.ok) {
+      const data = await res?.json().catch(() => ({})) as { error?: string };
+      setError(data.error ?? "Erro ao guardar prazo.");
+      return;
+    }
+    onUpdated?.();
+    router.refresh();
+  }
 
   async function confirmManual(installmentId: string) {
     setError("");
@@ -88,6 +113,24 @@ export function InstallmentActions({ orderId, installments, onUpdated }: Readonl
               Pago em {new Date(inst.paidAt).toLocaleDateString("pt-PT")}
               {inst.notes ? ` · ${inst.notes}` : ""}
             </p>
+          )}
+
+          {inst.status !== "PAID" && (
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                type="date"
+                value={dueDates[inst.id] ?? (inst.dueDate ? inst.dueDate.slice(0, 10) : "")}
+                onChange={(e) => setDueDates((prev) => ({ ...prev, [inst.id]: e.target.value }))}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:border-violet-500 focus:outline-none"
+              />
+              <button
+                onClick={() => saveDueDate(inst.id)}
+                disabled={savingDue === inst.id}
+                className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-xs text-violet-300 transition hover:bg-violet-500/20 disabled:opacity-60"
+              >
+                {savingDue === inst.id ? "A guardar…" : "Definir prazo"}
+              </button>
+            </div>
           )}
 
           {inst.status !== "PAID" && inst.method !== "STRIPE" && (

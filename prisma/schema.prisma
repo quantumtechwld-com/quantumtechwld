@@ -340,6 +340,7 @@ model PaymentInstallment {
   stripePaymentIntent String?
   /// Pagamento manual
   paidAt              DateTime?
+  dueDate             DateTime?       // data-limite para pagamento (opcional — definida pelo admin)
   notes               String?         @db.Text // ex: "PIX recebido em 21/04/2026 — Fulano"
   confirmedByAdminId  String?         // rastreabilidade
   createdAt           DateTime        @default(now())

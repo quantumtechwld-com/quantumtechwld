@@ -63,6 +63,8 @@ type PatchBody = {
   finalDeliveryUrl?: string;
   downPaymentPct?: number;   // 0 = pagamento único; 1-99 = % de entrada
   paymentMethod?: string;    // STRIPE | MANUAL_PIX | MANUAL_TRANSFER | MANUAL_OTHER
+  entryDueDate?: string | null;  // ISO 8601 — prazo da 1.ª parcela
+  finalDueDate?: string | null;  // ISO 8601 — prazo da 2.ª parcela
 };
 
 type ApiError = { error: string; status: number };
@@ -247,23 +249,24 @@ function dispatchPostUpdateEmail(ctx: EmailContext) {
   }
 }
 
-// ─── Financeiro: criar/substituir OrderFinancial + parcelas ─────────────────
-
 async function createOrReplaceOrderFinancial(
   orderId: string,
   totalCents: number,
   downPaymentPct: number,
   method: string,
+  dueDates?: { entry?: string | null; final?: string | null },
 ): Promise<void> {
   // Remove financeiro anterior (re-proposta) — cascade apaga installments
   await db.orderFinancial.deleteMany({ where: { orderId } });
 
   const entryCents = downPaymentPct > 0 ? Math.round(totalCents * downPaymentPct / 100) : totalCents;
-  const installments: Array<{ sequence: number; amountCents: number; method: string }> =
+
+  type InstallmentDraft = { sequence: number; amountCents: number; method: string; dueDate?: Date | null };
+  const installments: InstallmentDraft[] =
     downPaymentPct > 0
       ? [
-          { sequence: 1, amountCents: entryCents, method },
-          { sequence: 2, amountCents: totalCents - entryCents, method },
+          { sequence: 1, amountCents: entryCents,              method, dueDate: dueDates?.entry  ? new Date(dueDates.entry)  : null },
+          { sequence: 2, amountCents: totalCents - entryCents, method, dueDate: dueDates?.final ? new Date(dueDates.final) : null },
         ]
       : [{ sequence: 1, amountCents: totalCents, method }];
 
@@ -275,11 +278,12 @@ async function createOrReplaceOrderFinancial(
       paidCents: 0,
       status: "PENDING",
       installments: {
-        create: installments.map(({ sequence, amountCents, method: m }) => ({
+        create: installments.map(({ sequence, amountCents, method: m, dueDate }) => ({
           sequence,
           amountCents,
           method: m,
           status: "PENDING",
+          ...(dueDate ? { dueDate } : {}),
         })),
       },
     },
@@ -346,7 +350,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       const totalCents = Math.round(updated.estimatedValue * 100);
       const pct = Math.max(0, Math.min(99, Math.round(body.downPaymentPct ?? 0)));
       const method = body.paymentMethod ?? "STRIPE";
-      await createOrReplaceOrderFinancial(id, totalCents, pct, method);
+      await createOrReplaceOrderFinancial(id, totalCents, pct, method, { entry: body.entryDueDate, final: body.finalDueDate });
     }
 
     return NextResponse.json({ order: updated });

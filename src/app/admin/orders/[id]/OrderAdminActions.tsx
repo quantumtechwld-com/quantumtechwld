@@ -69,6 +69,8 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
   const [adminNote,       setAdminNote]       = useState("");
   const [downPaymentPct,  setDownPaymentPct]  = useState(0);
   const [paymentMethod,   setPaymentMethod]   = useState("STRIPE");
+  const [entryDueDate,    setEntryDueDate]    = useState("");
+  const [finalDueDate,    setFinalDueDate]    = useState("");
 
   // Conversão de moeda — informativa, client-side
   const fxConversion = useMemo(() => calcFxConversion(estimatedValue), [estimatedValue]);
@@ -95,7 +97,18 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
     const parsedValue = parseEstimatedValue(estimatedValue, isFreeOrderType);
     if (isInvalidPrice(parsedValue)) { setError("Valor estimado inválido."); return; }
     setLoading("propose");
-    const result = await patchOrder(order.id, { action: "propose", productionInfo: productionInfo.trim(), estimatedValue: parsedValue, adminNote: adminNote.trim() || undefined, downPaymentPct, paymentMethod });
+    const result = await patchOrder(order.id, {
+      action: "propose",
+      productionInfo: productionInfo.trim(),
+      estimatedValue: parsedValue,
+      adminNote: adminNote.trim() || undefined,
+      downPaymentPct,
+      paymentMethod,
+      ...(downPaymentPct > 0 ? {
+        entryDueDate: entryDueDate || undefined,
+        finalDueDate: finalDueDate || undefined,
+      } : {}),
+    });
     if (result.ok) router.refresh(); else setError(result.error ?? "Erro inesperado.");
     setLoading(null);
   }
@@ -215,6 +228,34 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                 </select>
               </div>
             </div>
+            {downPaymentPct > 0 && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="admin-entry-due" className="block text-xs text-slate-400 mb-1">
+                    Prazo da entrada <span className="text-slate-600">(opcional)</span>
+                  </label>
+                  <input
+                    id="admin-entry-due"
+                    type="date"
+                    value={entryDueDate}
+                    onChange={(e) => setEntryDueDate(e.target.value)}
+                    className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="admin-final-due" className="block text-xs text-slate-400 mb-1">
+                    Prazo da parcela final <span className="text-slate-600">(opcional)</span>
+                  </label>
+                  <input
+                    id="admin-final-due"
+                    type="date"
+                    value={finalDueDate}
+                    onChange={(e) => setFinalDueDate(e.target.value)}
+                    className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
             <div>
               <label htmlFor="admin-note" className="block text-xs text-slate-400 mb-1">Nota adicional (opcional)</label>
               <textarea

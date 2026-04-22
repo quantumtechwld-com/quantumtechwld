@@ -104,6 +104,64 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     });
   }
 
+  // ── Widget de pagamento de parcelas pendentes ─────────────────────────────
+  function renderInstallmentCard(inst: { method: string; amountCents: number; sequence: number; dueDate?: string | null }) {
+    const isEntry  = inst.sequence === 1;
+    const amtCents = inst.amountCents;
+    const label    = isEntry ? t("payInstallmentEntry") : t("payInstallmentFinal");
+    const dueDate  = inst.dueDate ? new Date(inst.dueDate) : null;
+    const isOverdue = dueDate ? dueDate < new Date() : false;
+    const dueDateLabel = dueDate
+      ? dueDate.toLocaleDateString(locale, { day: "2-digit", month: "long", year: "numeric" })
+      : null;
+    const dueBadge = dueDateLabel ? (
+      <p className={`text-xs mb-2 ${isOverdue ? "text-red-400 font-semibold" : "text-slate-400"}`}>
+        {isOverdue ? t("payDueDateOverdue") : t("payDueDate")} {dueDateLabel}
+      </p>
+    ) : null;
+
+    if (inst.method === "STRIPE") {
+      return (
+        <div className="mt-4 rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5">
+          <h2 className="text-sm font-semibold text-violet-300 mb-1">{label}</h2>
+          <p className="text-2xl font-bold text-white mb-3">
+            {(amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
+          </p>
+          {dueBadge}
+          <PayOrderButton orderId={order.id} amountCents={amtCents} installmentLabel={label} />
+        </div>
+      );
+    }
+    return (
+      <div className={`mt-4 rounded-2xl border p-5 ${isOverdue ? "border-red-500/40 bg-red-500/5" : "border-yellow-500/30 bg-yellow-500/5"}`}>
+        <h2 className={`text-sm font-semibold mb-1 ${isOverdue ? "text-red-300" : "text-yellow-300"}`}>{label}</h2>
+        <p className="text-2xl font-bold text-white mb-3">
+          {(amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
+        </p>
+        {dueBadge}
+        <p className="text-xs text-slate-400">{t("payManualInstructions")}</p>
+      </div>
+    );
+  }
+
+  function renderPendingPayment() {
+    const POST_APPROVAL = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"];
+    if (!POST_APPROVAL.includes(order.status)) return null;
+    const financial   = order.financial;
+    const isFullyPaid = financial ? financial.status === "PAID" : order.payment?.status === "PAID";
+    if (isFullyPaid) return null;
+    const pending = financial?.installments?.find((i: { status: string }) => i.status === "PENDING");
+    if (financial && pending) return renderInstallmentCard(pending);
+    if (!financial && order.payment?.status !== "PAID" && order.estimatedValue) {
+      return (
+        <div className="mt-4">
+          <PayOrderButton orderId={order.id} amountCents={Math.round(Number(order.estimatedValue) * 100)} />
+        </div>
+      );
+    }
+    return null;
+  }
+
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
       {paymentCancelled && (
@@ -274,63 +332,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         }}
       />
 
-      {/* Pagamento: visível quando APPROVED */}
-      {order.status === "APPROVED" && (() => {
-        const financial = order.financial;
-        // Determinar se há pagamento já completo
-        const isFullyPaid = financial
-          ? financial.status === "PAID"
-          : order.payment?.status === "PAID";
-
-        if (isFullyPaid) return null;
-
-        // Parcela pendente (quando existe OrderFinancial)
-        const pendingInstallment = financial?.installments?.find(
-          (i: { status: string }) => i.status === "PENDING",
-        );
-
-        if (financial && pendingInstallment) {
-          const isStripe = pendingInstallment.method === "STRIPE";
-          const amtCents: number = pendingInstallment.amountCents;
-          const isEntry = pendingInstallment.sequence === 1;
-
-          if (isStripe) {
-            return (
-              <div className="mt-4">
-                <PayOrderButton
-                  orderId={order.id}
-                  amountCents={amtCents}
-                  installmentLabel={isEntry ? t("payInstallmentEntry") : t("payInstallmentFinal")}
-                />
-              </div>
-            );
-          }
-
-          // Método manual — mostrar card informativo
-          return (
-            <div className="mt-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5">
-              <h2 className="text-sm font-semibold text-yellow-300 mb-1">
-                {isEntry ? t("payInstallmentEntry") : t("payInstallmentFinal")}
-              </h2>
-              <p className="text-2xl font-bold text-white mb-3">
-                {(amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
-              </p>
-              <p className="text-xs text-slate-400">{t("payManualInstructions")}</p>
-            </div>
-          );
-        }
-
-        // Fallback: sem OrderFinancial, fluxo Stripe legado pelo total
-        if (!financial && order.payment?.status !== "PAID" && order.estimatedValue) {
-          return (
-            <div className="mt-4">
-              <PayOrderButton orderId={order.id} amountCents={Math.round(Number(order.estimatedValue) * 100)} />
-            </div>
-          );
-        }
-
-        return null;
-      })()}
+      {/* Pagamento: visível em qualquer status pós-aprovação quando há parcelas pendentes */}
+      {renderPendingPayment()}
 
       {/* Fatura: visível quando pagamento confirmado */}
       {(order.financial?.status === "PAID" || order.payment?.status === "PAID") && (

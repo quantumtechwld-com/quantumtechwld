@@ -479,6 +479,8 @@
     "payBody": "To start production, complete the payment of {amount} via Stripe.",
     "payInstallmentEntry": "Down payment — complete your payment",
     "payInstallmentFinal": "Final installment — complete your payment",
+    "payDueDate": "Due date:",
+    "payDueDateOverdue": "⚠ Due date:",
     "payManualInstructions": "Please complete the payment following the instructions sent by our team (PIX, bank transfer, or other). Production will proceed automatically after confirmation.",
     "payBtn": "Pay {amount} →",
     "payRedirecting": "Redirecting to Stripe…",
