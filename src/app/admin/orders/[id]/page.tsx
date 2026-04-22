@@ -31,6 +31,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
         client:  { select: { id: true, name: true, email: true } },
         createdByAdmin: { select: { id: true, name: true, email: true } },
         payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
+        financial: { select: { id: true, status: true, totalAmountCents: true, paidCents: true } },
         rating:  true,
       },
     }),
@@ -91,8 +92,8 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
                 day: "2-digit", month: "long", year: "numeric",
               })}
             </p>
-            {/* Atalho direto para o detalhe financeiro */}
-            {["PROPOSAL_SENT", "APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"].includes(order.status) && (
+            {/* Atalho direto para o detalhe financeiro — só aparece quando OrderFinancial existe */}
+            {order.financial?.id && (
               <Link
                 href={`/admin/financeiro/${order.id}`}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/20"

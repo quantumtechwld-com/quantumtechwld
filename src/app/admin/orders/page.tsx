@@ -8,6 +8,7 @@ import {
   ORDER_TYPE_LABEL,
   ALL_ORDER_STATUSES as ALL_STATUSES,
 } from "@/lib/constants";
+import { ClientFilter } from "./ClientFilter";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -20,11 +21,23 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
 
   const sp = await searchParams;
   const statusFilter = sp.status ?? "";
+  const clientFilter = sp.client ?? "";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: Record<string, any> = {};
   if (statusFilter && ALL_STATUSES.includes(statusFilter)) {
     where.status = statusFilter;
+  }
+  if (clientFilter) {
+    where.clientId = clientFilter;
+  }
+
+  function statusHref(status: string) {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (clientFilter) params.set("client", clientFilter);
+    const qs = params.size ? `?${params.toString()}` : "";
+    return `/admin/orders${qs}`;
   }
 
   const adminUser = await prisma.user.findUnique({
@@ -32,7 +45,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
     select: { id: true },
   });
 
-  const [orders, countsRaw, reads] = await Promise.all([
+  const [orders, countsRaw, reads, clientsRaw] = await Promise.all([
     db.order.findMany({
       where,
       include: {
@@ -49,6 +62,12 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
     adminUser
       ? (db.orderMessageRead.findMany({ where: { userId: adminUser.id }, select: { orderId: true, lastReadAt: true } }) as Promise<unknown>)
       : Promise.resolve([]),
+    // Clientes únicos que têm pelo menos um pedido
+    db.user.findMany({
+      where: { role: "CLIENT", orders: { some: {} } },
+      select: { id: true, name: true, email: true },
+      orderBy: { name: "asc" },
+    }) as Promise<unknown>,
   ]);
 
   const countMap = Object.fromEntries((countsRaw as { status: string; _count: { id: number } }[]).map((c) => [c.status, c._count.id]));
@@ -56,6 +75,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
   const orderList = orders as any[];
   const total = orderList.length;
   const readMap = new Map<string, Date>((reads as { orderId: string; lastReadAt: Date }[]).map((r) => [r.orderId, r.lastReadAt]));
+  const clients = clientsRaw as { id: string; name: string | null; email: string }[];
 
   function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
     const last = readMap.get(orderId);
@@ -87,7 +107,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
           ].map((s) => (
             <Link
               key={s.filter}
-              href={s.filter ? `/admin/orders?status=${s.filter}` : "/admin/orders"}
+              href={statusHref(s.filter)}
               className={`rounded-2xl border p-4 text-center transition ${
                 statusFilter === s.filter
                   ? "border-accent/50 bg-accent/10"
@@ -101,36 +121,46 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
         </div>
 
         {/* Filter bar */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Link
-            href="/admin/orders"
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              statusFilter === ""
-                ? "border-accent/50 bg-accent/20 text-accent-light"
-                : "border-white/15 text-slate-400 hover:bg-white/5"
-            }`}
-          >
-            Todos ({Object.values(countMap).reduce((a, b) => a + b, 0)})
-          </Link>
-          {ALL_STATUSES.map((s) => (
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          {/* Filtro por cliente */}
+          <ClientFilter clients={clients} currentClientId={clientFilter} />
+
+          {/* Separador */}
+          <div className="h-5 w-px bg-white/10 hidden sm:block" />
+
+          {/* Filtros de status */}
+          <div className="flex flex-wrap gap-2">
             <Link
-              key={s}
-              href={`/admin/orders?status=${s}`}
+              href={statusHref("")}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                statusFilter === s
+                statusFilter === ""
                   ? "border-accent/50 bg-accent/20 text-accent-light"
                   : "border-white/15 text-slate-400 hover:bg-white/5"
               }`}
             >
-              {STATUS_LABEL[s]} {countMap[s] ? `(${countMap[s]})` : ""}
+              Todos ({Object.values(countMap).reduce((a, b) => a + b, 0)})
             </Link>
-          ))}
+            {ALL_STATUSES.map((s) => (
+              <Link
+                key={s}
+                href={statusHref(s)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  statusFilter === s
+                    ? "border-accent/50 bg-accent/20 text-accent-light"
+                    : "border-white/15 text-slate-400 hover:bg-white/5"
+                }`}
+              >
+                {STATUS_LABEL[s]} {countMap[s] ? `(${countMap[s]})` : ""}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Orders table */}
         {orderList.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-slate-400">
-            Nenhum pedido encontrado{statusFilter ? ` com estado "${STATUS_LABEL[statusFilter]}"` : ""}.
+            Nenhum pedido encontrado{statusFilter ? ` com estado "${STATUS_LABEL[statusFilter]}"` : ""}
+            {clientFilter ? ` para o cliente selecionado` : ""}.
           </div>
         ) : (
           <div className="space-y-3">

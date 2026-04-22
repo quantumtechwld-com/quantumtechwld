@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { FINANCIAL_STATUS_LABEL, FINANCIAL_STATUS_COLOR, ORDER_STATUS_LABEL } from "@/lib/constants";
@@ -39,7 +39,62 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
     },
   });
 
-  if (!financial) notFound();
+  // Sem OrderFinancial — mostrar UI clara em vez de 404
+  if (!financial) {
+    // Tentar buscar o pedido para dar contexto
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        orderRef: true,
+        status: true,
+        estimatedValue: true,
+        client: { select: { name: true, email: true } },
+      },
+    });
+
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-10 space-y-6">
+        <nav className="flex items-center gap-2 text-xs text-slate-500">
+          <Link href="/admin/financeiro" className="hover:text-white transition">Financeiro</Link>
+          <span>/</span>
+          <span className="text-slate-300">{order?.orderRef ?? orderId.slice(0, 8)}</span>
+        </nav>
+        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-8 text-center space-y-3">
+          <p className="text-4xl">💳</p>
+          <h2 className="text-lg font-semibold text-yellow-300">Sem registo financeiro</h2>
+          {order ? (
+            <p className="text-sm text-slate-400">
+              O pedido <span className="text-white font-mono">{order.orderRef ?? orderId.slice(0, 8)}</span> de{" "}
+              <span className="text-white">{order.client.name ?? order.client.email}</span>{" "}
+              não tem financeiro associado.{" "}
+              {order.status === "PROPOSAL_SENT" || order.status === "APPROVED"
+                ? "O financeiro é criado automaticamente quando a proposta é enviada com valor definido. Re-envie a proposta para gerar o registo."
+                : "Apenas propostas com valor estimado criam registo financeiro."}
+            </p>
+          ) : (
+            <p className="text-sm text-slate-400">Pedido não encontrado. O ID pode estar incorreto.</p>
+          )}
+          <div className="flex justify-center gap-3 pt-2">
+            {order && (
+              <Link
+                href={`/admin/orders/${order.id}`}
+                className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/8"
+              >
+                ← Ver pedido
+              </Link>
+            )}
+            <Link
+              href="/admin/financeiro"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/8"
+            >
+              Lista financeiro
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const progress = financial.totalAmountCents > 0
     ? Math.round((financial.paidCents / financial.totalAmountCents) * 100)
