@@ -55,25 +55,25 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/app/admin/components/StatsGrid", () => ({
   default: ({ orderPending, orderCompleted }: { orderPending: number; orderCompleted: number }) => (
-    <div>StatsGridMock:{orderPending}:{orderCompleted}</div>
+    <div>{`StatsGridMock:${orderPending}:${orderCompleted}`}</div>
   ),
 }));
 
 vi.mock("@/app/admin/components/BriefingStats", () => ({
   default: ({ counts }: { counts: { total: number; received: number } }) => (
-    <div>BriefingStatsMock:{counts.total}:{counts.received}</div>
+    <div>{`BriefingStatsMock:${counts.total}:${counts.received}`}</div>
   ),
 }));
 
 vi.mock("@/app/admin/components/RecentOrdersTable", () => ({
   default: ({ recentOrders }: { recentOrders: Array<{ id: string }> }) => (
-    <div>RecentOrdersTableMock:{recentOrders.length}</div>
+    <div>{`RecentOrdersTableMock:${recentOrders.length}`}</div>
   ),
 }));
 
 vi.mock("@/app/admin/components/AllBriefingsTable", () => ({
   default: ({ briefings, scopeSet }: { briefings: Array<{ id: string }>; scopeSet: Set<string> }) => (
-    <div>AllBriefingsTableMock:{briefings.length}:{scopeSet.size}</div>
+    <div>{`AllBriefingsTableMock:${briefings.length}:${scopeSet.size}`}</div>
   ),
 }));
 
@@ -88,7 +88,13 @@ describe("AdminDashboardPage", () => {
       { id: "brief_2", status: "IN_PROGRESS", user: { email: "b@example.com", name: "B" } },
     ]);
     mocks.scopeFindMany.mockResolvedValue([{ briefingId: "brief_1" }]);
-    mocks.orderCount.mockResolvedValueOnce(2).mockResolvedValueOnce(1).mockResolvedValueOnce(3);
+    mocks.orderCount
+      .mockResolvedValueOnce(2)   // orderPending
+      .mockResolvedValueOnce(0)   // orderProposalSent
+      .mockResolvedValueOnce(0)   // orderApproved
+      .mockResolvedValueOnce(0)   // orderInProd
+      .mockResolvedValueOnce(3)   // orderCompleted
+      .mockResolvedValueOnce(0);  // orderRejected
     mocks.paymentAggregate.mockResolvedValueOnce({ _sum: { amountCents: 500000 } }).mockResolvedValueOnce({ _sum: { amountCents: 200000 } });
     mocks.orderFindMany.mockResolvedValue([{ id: "ord_1" }, { id: "ord_2" }]);
   });

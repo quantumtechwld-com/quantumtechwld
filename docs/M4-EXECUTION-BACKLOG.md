@@ -164,3 +164,58 @@ O M4 só pode ser considerado concluído se:
 Ao concluir este backlog, o próximo passo obrigatório é:
 
 **entrar no M5 com foco em redução de `any`, padronização com Zod e consolidação estrutural.**
+
+---
+
+## 8. Débito técnico identificado em 22/04/2026 — corrigir antes ou durante M4
+
+Descoberto durante a sessão de correção de testes. O `PortalDashboard.tsx` foi redesenhado em sessão anterior sem atualizar os testes nem corrigir os textos — confirmado como descuido.
+
+### 8.1 Textos hardcoded em PT no `PortalDashboard.tsx`
+
+**Ficheiro:** `src/app/portal/PortalDashboard.tsx`
+
+O componente foi refatorado e abandonou o i18n. Todos os textos da área do cliente estão em português hardcoded, quebrando o suporte trilíngue (PT/EN/ES):
+
+| Linha aprox. | Texto hardcoded |
+|---|---|
+| 39–43 | `FILTER_LABEL`: "Aguardam resposta", "Em produção", "Em revisão", "Concluídos", "Recusados" |
+| 90, 102, 114, 126, 138 | Labels dos cards de contagem (duplicados do FILTER_LABEL) |
+| 146 | "A aguardar a sua revisão" |
+| 162 | "Em revisão" (badge inline) |
+| 174 | "Aguardam a sua resposta" |
+| 195 | "Proposta enviada" |
+| 206 | "Pedidos recentes", "Limpar filtro" |
+| 229 | "Ainda não tem pedidos." |
+
+**Ação:** migrar todos estes textos para chaves i18n em `messages/pt.json`, `messages/en.json` e `messages/es.json`, usando `useTranslations("portal")` no componente (é client component — usar `useTranslations`, não `getTranslations`).
+
+---
+
+### 8.2 Chaves i18n obsoletas em `messages/pt.json`
+
+As seguintes chaves existem no ficheiro de tradução mas **nenhum componente as usa**, pois o `PortalDashboard` foi redesenhado:
+
+```
+"pendingTitle", "pendingViewAll", "alertProposalSent", "alertInProduction",
+"alertPending", "emptyState", "submitBriefing", "viewScope",
+"statusReceived", "statusInAnalysis", "statusProposalSent", "statusInNegotiation"
+```
+
+**Ação:** após migrar os textos (item 8.1), substituir estas chaves pelas novas e remover as obsoletas dos três ficheiros de mensagens.
+
+---
+
+### 8.3 Mocks órfãos no teste `PortalPage.test.tsx`
+
+**Ficheiro:** `tests/components/PortalPage.test.tsx`
+
+O teste declara e mocka `briefingFindMany` e `briefingCount` (linhas 12–13 e 45–49), mas o componente `PortalPage` já não consulta briefings. São mocks mortos que podem induzir confusão.
+
+**Ação:** remover as entradas `briefingFindMany` e `briefingCount` do `vi.hoisted` e do `vi.mock("@/lib/prisma")` no teste.
+
+---
+
+### 8.4 Confirmação arquitetural pendente
+
+Antes de executar 8.1–8.3, confirmar explicitamente: **o fluxo de briefings foi intencionalmente removido da área do cliente?** Se sim, as chaves i18n de briefing no portal podem ser removidas. Se não, o briefing precisa ser reintegrado ao `PortalDashboard`.

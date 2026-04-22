@@ -56,7 +56,7 @@ describe("POST /api/admin/users/invite", () => {
     expect(body.error).toBe("Email inválido.");
   });
 
-  it("cria ou ativa utilizador e envia convite", async () => {
+  it("cria ou ativa utilizador e envia convite com callbackUrl absoluto", async () => {
     const response = await POST(new NextRequest("http://localhost/api/admin/users/invite", {
       method: "POST",
       body: JSON.stringify({ email: "CLIENT@EXAMPLE.COM", name: "Joao", locale: "en" }),
@@ -67,10 +67,12 @@ describe("POST /api/admin/users/invite", () => {
     expect(response.status).toBe(200);
     expect(body.ok).toBe(true);
     expect(mocks.userUpsert).toHaveBeenCalledTimes(1);
-    expect(mocks.signIn).toHaveBeenCalledWith("nodemailer", expect.objectContaining({
-      email: "client@example.com",
-      redirectTo: "/portal?invite_locale=en",
-      redirect: false,
-    }));
+
+    // redirectTo deve ser URL absoluta — NextAuth v5 rejeita URLs relativas em produção.
+    // Em teste: NEXTAUTH_URL não está definida, fallback usa header host="localhost".
+    const call = mocks.signIn.mock.calls[0];
+    expect(call[0]).toBe("nodemailer");
+    expect(call[1]).toMatchObject({ email: "client@example.com", redirect: false });
+    expect(call[1].redirectTo).toMatch(/^https?:\/\/.+\/portal\?invite_locale=en$/);
   });
 });

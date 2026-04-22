@@ -29,6 +29,11 @@ vi.mock("lucide-react", () => ({
   FileText: () => <span>FileTextIcon</span>,
   Clock: () => <span>ClockIcon</span>,
   CheckCircle2: () => <span>CheckCircle2Icon</span>,
+  Bell: () => <span>BellIcon</span>,
+  Zap: () => <span>ZapIcon</span>,
+  Eye: () => <span>EyeIcon</span>,
+  XCircle: () => <span>XCircleIcon</span>,
+  X: () => <span>XIcons</span>,
 }));
 
 vi.mock("@/auth", () => ({ auth: mocks.auth }));
@@ -57,54 +62,48 @@ describe("PortalPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ user: { email: "client@example.com", name: "Joao" } });
-    mocks.briefingFindMany.mockResolvedValue([]);
     mocks.orderFindMany.mockResolvedValue([]);
-    mocks.briefingCount.mockResolvedValue(0);
-    mocks.orderCount.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+    mocks.orderCount
+      .mockResolvedValueOnce(0)  // proposalSent
+      .mockResolvedValueOnce(0)  // inProduction
+      .mockResolvedValueOnce(0)  // inReview
+      .mockResolvedValueOnce(0)  // completed
+      .mockResolvedValueOnce(0); // rejected
   });
 
-  it("renderiza empty state quando o cliente ainda nao tem briefings", async () => {
+  it("renderiza empty state quando o cliente ainda nao tem pedidos", async () => {
     render(await PortalPage());
 
     expect(screen.getByText("tagline")).toBeInTheDocument();
     expect(screen.getByText("heading")).toBeInTheDocument();
     expect(screen.getByText("Joao")).toBeInTheDocument();
-    expect(screen.getByText("emptyState")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "submitBriefing" })).toHaveAttribute("href", "/portal/orders/new");
+    expect(screen.getByText("Ainda não tem pedidos.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "+ Novo pedido" })).toHaveAttribute("href", "/portal/orders/new");
   });
 
-  it("renderiza briefing e alerta de pedido pendente quando existem dados", async () => {
-    mocks.briefingFindMany.mockResolvedValue([
-      {
-        id: "brief_1",
-        projectType: "website",
-        painPoints: "Problema central",
-        status: "RECEIVED",
-        budget: "3k-8k",
-        timeline: "normal",
-        complexityScore: 6,
-        hoursMin: 40,
-        hoursMax: 80,
-        features: ["auth"],
-        createdAt: new Date("2026-04-21T10:00:00.000Z"),
-      },
-    ]);
+  it("renderiza painel amber quando existem pedidos com proposta enviada", async () => {
     mocks.orderFindMany.mockResolvedValue([
       {
         id: "ord_1",
-        description: "Nova automacao importante para o cliente com detalhe grande o suficiente para truncar no cartão.",
+        title: "Automação de fluxo",
+        type: "automation",
         status: "PROPOSAL_SENT",
+        createdAt: new Date("2026-04-21T10:00:00.000Z"),
+        orderRef: null,
+        estimatedValue: null,
       },
     ]);
-    mocks.briefingCount.mockResolvedValue(1);
-    mocks.orderCount.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+    mocks.orderCount
+      .mockResolvedValueOnce(1)  // proposalSent
+      .mockResolvedValueOnce(0)  // inProduction
+      .mockResolvedValueOnce(0)  // inReview
+      .mockResolvedValueOnce(0)  // completed
+      .mockResolvedValueOnce(0); // rejected
 
     render(await PortalPage());
 
-    expect(screen.getByText("pendingTitle")).toBeInTheDocument();
-    expect(screen.getByText("Problema central")).toBeInTheDocument();
-    expect(screen.getByText("auth")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "viewScope" })).toHaveAttribute("href", "/portal/briefing/brief_1");
-    expect(screen.getByRole("link", { name: "pendingViewAll" })).toHaveAttribute("href", "/portal/orders");
+    expect(screen.getByText("Aguardam a sua resposta")).toBeInTheDocument();
+    expect(screen.getAllByText("Automação de fluxo").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Ver todos →" })[0]).toHaveAttribute("href", "/portal/orders");
   });
 });

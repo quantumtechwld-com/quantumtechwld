@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -22,9 +23,14 @@ export async function sendMagicLink(email: string): Promise<MagicLinkResult> {
 
     const destination = user.role === "ADMIN" ? "/admin" : "/portal";
 
+    // CRÍTICO: redirectTo deve ser absoluto — NextAuth v5 rejeita URLs relativas em produção.
+    const headersList = await headers();
+    const baseUrl = process.env.NEXTAUTH_URL?.replace(/\/$/, "") ??
+      `${headersList.get("x-forwarded-proto") ?? "https"}://${headersList.get("host")}`;
+
     await signIn("nodemailer", {
       email: cleanEmail,
-      redirectTo: destination,
+      redirectTo: `${baseUrl}${destination}`,
     });
 
     return { ok: true };

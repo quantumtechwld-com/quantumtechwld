@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handoff — 22 de Abril de 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      border-bottom: 1px solid #21262d;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 0.25rem;
+    }
+    .header .meta {
+      font-size: 0.8rem;
+      color: #8b949e;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .header .meta span::before { content: "• "; color: #30363d; }
+    .header .meta span:first-child::before { content: ""; }
+
+    /* Section */
+    section { margin-bottom: 2.5rem; }
+    section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #21262d;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-green  { background: #0d3520; color: #56d364; border: 1px solid #238636; }
+    .badge-yellow { background: #2d1f00; color: #e3b341; border: 1px solid #9e6a03; }
+    .badge-red    { background: #3b1010; color: #ff7b72; border: 1px solid #da3633; }
+    .badge-blue   { background: #0c2040; color: #79c0ff; border: 1px solid #1f6feb; }
+    .badge-purple { background: #2a1b4a; color: #d2a8ff; border: 1px solid #8957e5; }
+
+    /* Cards */
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+    .card p, .card li {
+      font-size: 0.84rem;
+      color: #8b949e;
+    }
+    .card ul { padding-left: 1.25rem; margin-top: 0.35rem; }
+    .card li { margin-bottom: 0.2rem; }
+
+    /* Code */
+    code {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.78rem;
+      font-family: "Cascadia Code", "Fira Code", monospace;
+      color: #79c0ff;
+    }
+    pre {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.78rem;
+      font-family: "Cascadia Code", "Fira Code", monospace;
+      color: #e6edf3;
+      margin: 0.75rem 0;
+    }
+    pre .key   { color: #79c0ff; }
+    pre .val   { color: #a5d6ff; }
+    pre .str   { color: #a8d8a8; }
+    pre .cmt   { color: #6e7681; }
+
+    /* Test results */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .test-box {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .test-box .number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3fb950;
+      display: block;
+    }
+    .test-box .label {
+      font-size: 0.75rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .test-box .sub {
+      font-size: 0.7rem;
+      color: #6e7681;
+      margin-top: 0.2rem;
+    }
+    .test-box.total { border-color: #3fb950; }
+
+    /* Debt table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      margin-top: 0.5rem;
+    }
+    th {
+      background: #161b22;
+      color: #8b949e;
+      font-weight: 600;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #21262d;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #21262d;
+      vertical-align: top;
+      color: #c9d1d9;
+    }
+    tr:nth-child(even) td { background: #0d1117; }
+
+    /* Timeline */
+    .timeline { list-style: none; padding: 0; position: relative; }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px; top: 8px; bottom: 8px;
+      width: 1px;
+      background: #21262d;
+    }
+    .timeline li {
+      padding-left: 1.75rem;
+      position: relative;
+      margin-bottom: 1rem;
+      font-size: 0.84rem;
+    }
+    .timeline li::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 5px;
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: #21262d;
+      border: 2px solid #3fb950;
+    }
+    .timeline li strong { color: #f0f6fc; }
+    .timeline li span   { color: #8b949e; font-size: 0.78rem; display: block; }
+
+    /* Alert */
+    .alert {
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.84rem;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid;
+    }
+    .alert-warning { background: #2d1f00; border-color: #9e6a03; color: #e3b341; }
+    .alert-info    { background: #0c2040; border-color: #1f6feb; color: #79c0ff; }
+    .alert-danger  { background: #3b1010; border-color: #da3633; color: #ff7b72; }
+
+    /* Footer */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #21262d;
+      font-size: 0.75rem;
+      color: #6e7681;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Handoff — Sessão de 22 de Abril de 2026</h1>
+    <div class="meta">
+      <span>Projeto: Quantum Technology Agency</span>
+      <span>Repositório: quantumtechwld-com/quantumtechwld</span>
+      <span>Branch: main</span>
+      <span>Commit: b825278</span>
+      <span>Ambiente: produção (quantumtechwld.com)</span>
+    </div>
+  </div>
+
+  <!-- Resumo da sessão -->
+  <section>
+    <h2>Resumo da sessão</h2>
+    <div class="card">
+      <p>Sessão iniciada com investigação de bug em produção reportado pelo cliente <strong style="color:#f0f6fc">miguelramonpodesta@hotmail.com</strong>, que recebia "link expirado" imediatamente após o convite. A investigação revelou o bug raiz, problemas adicionais de produção e conduziu a um ciclo de fix, deploy e validação completa por testes automatizados.</p>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section>
+    <h2>Sequência de eventos</h2>
+    <ul class="timeline">
+      <li>
+        <strong>Bug reportado — magic link "expirado"</strong>
+        <span>Miguel recebia o email mas ao clicar o NextAuth v5 rejeitava o token com <code>[auth][error] Verification</code>. Confirmado nos logs do EC2 às 20:46 e 20:47 UTC.</span>
+      </li>
+      <li>
+        <strong>Causa raiz identificada</strong>
+        <span>O campo <code>redirectTo</code> passado ao <code>signIn("nodemailer")</code> era uma URL relativa (<code>/portal?invite_locale=en</code>). O NextAuth v5 em produção rejeita URLs relativas no <code>callbackUrl</code>.</span>
+      </li>
+      <li>
+        <strong>Problemas adicionais descobertos nos logs</strong>
+        <span>App caiu às 21:09 UTC (build <code>.next</code> apagado durante deploy anterior). <code>StripeAuthenticationError</code> com chave <code>sk_test_</code> às 21:25 UTC (STRIPE_MOCK=true já estava ativo — sem impacto real).</span>
+      </li>
+      <li>
+        <strong>Fix implementado e deployado</strong>
+        <span>Commit <code>b825278</code> pushed para <code>main</code>. GitHub Actions disparado. <code>callbackUrl</code> agora usa URL absoluta via <code>NEXTAUTH_URL</code> com fallback pelo header <code>host</code>.</span>
+      </li>
+      <li>
+        <strong>Testes corrigidos e suíte 100% verde</strong>
+        <span>208 testes passando. Unit: 7/7 · Component: 65/65 · Integration: 136/136.</span>
+      </li>
+      <li>
+        <strong>Débito técnico identificado e documentado</strong>
+        <span>Textos hardcoded em PT no <code>PortalDashboard.tsx</code> e chaves i18n obsoletas — confirmado como descuido de sessão anterior. Documentado em <code>docs/M4-EXECUTION-BACKLOG.md</code> secção 8.</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Bug fix -->
+  <section>
+    <h2>Bug corrigido — Magic link callbackUrl relativo</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">src/app/api/admin/users/invite/route.ts</span>
+        <span class="badge badge-green">Corrigido</span>
+      </div>
+      <p>O <code>redirectTo</code> passado ao NextAuth v5 era relativo. Em produção, isso causa rejeição silenciosa do token, resultando em "link expirado" imediato.</p>
+      <pre><cmt>// ANTES — URL relativa → NextAuth v5 rejeita em produção</cmt>
+await signIn("nodemailer", {
+  email,
+  <key>redirectTo</key>: <str>"/portal?invite_locale=en"</str>,   <cmt>// ❌ relativo</cmt>
+  redirect: false,
+});
+
+<cmt>// DEPOIS — URL absoluta com fallback</cmt>
+const baseUrl = process.env.NEXTAUTH_URL?.replace(<str>/\/$/</str>, "") ??
+  `${request.headers.get("x-forwarded-proto") ?? "https"}://${request.headers.get("host")}`;
+
+await signIn("nodemailer", {
+  email,
+  <key>redirectTo</key>: <str>`${baseUrl}/portal?invite_locale=${locale}`</str>,  <cmt>// ✅ absoluto</cmt>
+  redirect: false,
+});</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">tests/integration/admin-users-invite-route.test.ts</span>
+        <span class="badge badge-green">Atualizado</span>
+      </div>
+      <p>Assertion atualizada para validar padrão de URL absoluta via regex em vez de string hardcoded.</p>
+      <pre><cmt>// ANTES</cmt>
+expect(mocks.signIn).toHaveBeenCalledWith("nodemailer", expect.objectContaining({
+  <key>redirectTo</key>: <str>"/portal?invite_locale=en"</str>,  <cmt>// ❌ quebrava após o fix</cmt>
+}));
+
+<cmt>// DEPOIS</cmt>
+const call = mocks.signIn.mock.calls[0];
+expect(call[1].redirectTo).toMatch(<str>/^https?:\/\/.+\/portal\?invite_locale=en$/</str>);  <cmt>// ✅</cmt></pre>
+    </div>
+  </section>
+
+  <!-- Testes -->
+  <section>
+    <h2>Resultado final dos testes</h2>
+
+    <div class="test-grid">
+      <div class="test-box">
+        <span class="number">7</span>
+        <span class="label">Unit</span>
+        <span class="sub">3 ficheiros · 0 falhas</span>
+      </div>
+      <div class="test-box">
+        <span class="number">65</span>
+        <span class="label">Component</span>
+        <span class="sub">32 ficheiros · 0 falhas</span>
+      </div>
+      <div class="test-box">
+        <span class="number">136</span>
+        <span class="label">Integration</span>
+        <span class="sub">25 ficheiros · 0 falhas</span>
+      </div>
+      <div class="test-box total">
+        <span class="number">208</span>
+        <span class="label">Total</span>
+        <span class="sub">Exit code 0 ✓</span>
+      </div>
+    </div>
+
+    <br/>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Ficheiros de testes corrigidos nesta sessão</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ficheiro</th>
+            <th>Problema</th>
+            <th>Correção</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tests/components/AdminDashboardPage.test.tsx</code></td>
+            <td>Mock <code>orderCount</code> com 3 valores em vez de 6; template literals quebravam texto no DOM</td>
+            <td>6 valores no mock; backtick templates nas strings do mock</td>
+          </tr>
+          <tr>
+            <td><code>tests/components/PortalPage.test.tsx</code></td>
+            <td>Ícones <code>Bell</code>, <code>Zap</code>, <code>Eye</code>, <code>XCircle</code>, <code>X</code> ausentes no mock lucide; testes testavam componente antigo (briefings + i18n)</td>
+            <td>Ícones adicionados; testes reescritos para o componente atual</td>
+          </tr>
+          <tr>
+            <td><code>tests/integration/orders-id-route.test.ts</code></td>
+            <td><code>db.orderFinancial</code> indefinido no mock — <code>deleteMany</code> crashava</td>
+            <td><code>orderFinancial.deleteMany</code> e <code>orderFinancial.create</code> adicionados ao mock Prisma</td>
+          </tr>
+          <tr>
+            <td><code>tests/integration/stripe-webhook-route.test.ts</code></td>
+            <td><code>db.paymentInstallment</code> indefinido no mock — <code>updateMany</code> crashava</td>
+            <td><code>paymentInstallment.updateMany</code> adicionado ao mock Prisma</td>
+          </tr>
+          <tr>
+            <td><code>tests/integration/admin-users-invite-route.test.ts</code></td>
+            <td>Assertion esperava URL relativa — incompatível com o fix do callbackUrl</td>
+            <td>Assertion migrada para regex de URL absoluta</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Estado da produção -->
+  <section>
+    <h2>Estado da produção</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Infraestrutura</span>
+        <span class="badge badge-green">Online</span>
+      </div>
+      <table>
+        <thead><tr><th>Variável / Serviço</th><th>Valor</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>EC2</td><td>i-0551c166546ff66e7 (t3.small, sa-east-1)</td><td><span class="badge badge-green">OK</span></td></tr>
+          <tr><td>NEXTAUTH_URL</td><td>https://quantumtechwld.com</td><td><span class="badge badge-green">Confirmado</span></td></tr>
+          <tr><td>STRIPE_MOCK</td><td>true</td><td><span class="badge badge-yellow">Mock ativo</span></td></tr>
+          <tr><td>SMTP</td><td>smtp.resend.com:465 · noreply@quantumtechwld.com</td><td><span class="badge badge-green">OK</span></td></tr>
+          <tr><td>PM2</td><td>Cluster mode, 2 workers</td><td><span class="badge badge-green">Online</span></td></tr>
+          <tr><td>Deploy pipeline</td><td>GH Actions → S3 → SSM → deploy-remote.sh → pm2 reload</td><td><span class="badge badge-green">Funcional</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-warning">
+      <strong>pm2-health não instalado</strong> — os comandos estão documentados em <code>ecosystem.config.cjs</code> mas ainda não foram executados no servidor. Requer 1 vez via SSM: <code>pm2 install pm2-health</code> + configuração SMTP.
+    </div>
+
+    <div class="alert alert-warning">
+      <strong>Stripe em mock</strong> — quando a chave <code>sk_live_...</code> estiver disponível, substituir no <code>.env.production.local</code> via SSM e remover <code>STRIPE_MOCK=true</code>.
+    </div>
+  </section>
+
+  <!-- Débito técnico -->
+  <section>
+    <h2>Débito técnico — Próxima sessão</h2>
+
+    <div class="alert alert-danger">
+      <strong>Ponto 8.4 — Confirmar antes de qualquer ação:</strong> O fluxo de briefings foi intencionalmente removido da área do cliente (<code>PortalDashboard</code>)? Foi confirmado como descuido. Esta confirmação condiciona os itens 8.1 a 8.3 abaixo.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Problema</th>
+          <th>Ficheiro(s)</th>
+          <th>Ação</th>
+          <th>Prioridade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>8.1</td>
+          <td>10+ textos em PT hardcoded no <code>PortalDashboard.tsx</code> — sem i18n. Clientes em EN/ES veem o portal em português.</td>
+          <td><code>src/app/portal/PortalDashboard.tsx</code></td>
+          <td>Migrar todos os textos para chaves i18n. Usar <code>useTranslations("portal")</code> (é client component). Adicionar chaves em PT, EN e ES.</td>
+          <td><span class="badge badge-red">Alta</span></td>
+        </tr>
+        <tr>
+          <td>8.2</td>
+          <td>Chaves i18n obsoletas nos 3 ficheiros de mensagens: <code>emptyState</code>, <code>submitBriefing</code>, <code>pendingTitle</code>, <code>pendingViewAll</code>, <code>viewScope</code>, <code>alertProposalSent</code>, <code>alertInProduction</code>, <code>alertPending</code>, <code>statusReceived</code>, <code>statusInAnalysis</code>, <code>statusProposalSent</code>, <code>statusInNegotiation</code>.</td>
+          <td><code>messages/pt.json</code> <code>messages/en.json</code> <code>messages/es.json</code></td>
+          <td>Após 8.1, substituir pelas novas chaves e remover as obsoletas dos 3 ficheiros.</td>
+          <td><span class="badge badge-yellow">Média</span></td>
+        </tr>
+        <tr>
+          <td>8.3</td>
+          <td>Mocks órfãos <code>briefingFindMany</code> e <code>briefingCount</code> no teste do <code>PortalPage</code> — componente já não consulta briefings.</td>
+          <td><code>tests/components/PortalPage.test.tsx</code></td>
+          <td>Remover entradas do <code>vi.hoisted</code> e do <code>vi.mock("@/lib/prisma")</code>.</td>
+          <td><span class="badge badge-blue">Limpeza</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Pendentes -->
+  <section>
+    <h2>Itens pendentes de sessões anteriores</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Convite — miguelramonpodesta@hotmail.com</span>
+        <span class="badge badge-yellow">Aguarda reenvio</span>
+      </div>
+      <p>O bug de callbackUrl foi corrigido e deployado (<code>b825278</code>). O reenvio do convite para o Miguel não foi executado nesta sessão por decisão do utilizador. O próximo passo é reenviar via área de admin após confirmação.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">M4 — Smoke E2E</span>
+        <span class="badge badge-purple">Em aberto</span>
+      </div>
+      <p>Jornadas P0 de E2E (login, criação de pedido, visualização) ainda sem cobertura. O único teste E2E existente é a navegação da home. Detalhes no backlog em <code>docs/M4-EXECUTION-BACKLOG.md</code>.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Stripe live</span>
+        <span class="badge badge-yellow">Aguarda chave</span>
+      </div>
+      <p>Quando a chave <code>sk_live_...</code> estiver disponível: substituir no <code>.env.production.local</code> via SSM e remover <code>STRIPE_MOCK=true</code>.</p>
+    </div>
+  </section>
+
+  <footer>
+    Gerado em 22 de Abril de 2026 · Quantum Technology Agency · docs/HANDOFF-2026-04-22.html
+  </footer>
+
+</div>
+</body>
+</html>

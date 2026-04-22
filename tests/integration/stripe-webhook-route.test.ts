@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   constructEvent: vi.fn(),
   paymentUpdate: vi.fn(),
   paymentUpdateMany: vi.fn(),
+  paymentInstallmentUpdateMany: vi.fn(),
   orderUpdate: vi.fn(),
   sendMail: vi.fn(),
   tplOrderPaymentConfirmed: vi.fn(),
@@ -25,6 +26,9 @@ vi.mock("@/lib/prisma", () => ({
     payment: {
       update: mocks.paymentUpdate,
       updateMany: mocks.paymentUpdateMany,
+    },
+    paymentInstallment: {
+      updateMany: mocks.paymentInstallmentUpdateMany,
     },
     order: {
       update: mocks.orderUpdate,
@@ -52,6 +56,7 @@ describe("POST /api/webhooks/stripe", () => {
     mocks.appUrl.mockReturnValue("https://quantumtechwld.com");
     mocks.paymentUpdate.mockResolvedValue({ id: "pay_1" });
     mocks.paymentUpdateMany.mockResolvedValue({ count: 1 });
+    mocks.paymentInstallmentUpdateMany.mockResolvedValue({ count: 1 });
     mocks.orderUpdate.mockResolvedValue({
       id: "ord_1",
       type: "new_feature",

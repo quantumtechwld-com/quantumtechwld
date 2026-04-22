@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   orderFindUnique: vi.fn(),
   orderUpdate: vi.fn(),
+  orderFinancialDeleteMany: vi.fn(),
+  orderFinancialCreate: vi.fn(),
   sendMail: vi.fn(),
   tplOrderProposalSent: vi.fn(),
   tplOrderApprovedAdmin: vi.fn(),
@@ -25,6 +27,10 @@ vi.mock("@/lib/prisma", () => ({
     order: {
       findUnique: mocks.orderFindUnique,
       update: mocks.orderUpdate,
+    },
+    orderFinancial: {
+      deleteMany: mocks.orderFinancialDeleteMany,
+      create: mocks.orderFinancialCreate,
     },
   },
 }));

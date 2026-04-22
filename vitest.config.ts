@@ -13,6 +13,7 @@ export default defineConfig({
     globals: false,
     setupFiles: ["./tests/setup/vitest.setup.ts"],
     include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+    exclude: ["tests/e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
