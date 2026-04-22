@@ -37,6 +37,8 @@ type CreateOrderBody = {
   productionInfo?: string;
   estimatedValue?: number;
   adminNote?: string;
+  downPaymentPct?: number;
+  paymentMethod?: string;
 };
 
 type AdminOrderCreateInput = {
@@ -50,6 +52,8 @@ type AdminOrderCreateInput = {
   productionInfo?: string;
   estimatedValue?: number;
   adminNote?: string;
+  downPaymentPct?: number;
+  paymentMethod?: string;
 };
 
 type ValidationError = { error: string; status: number };
@@ -89,6 +93,8 @@ function validateCreateOrderBody(body: CreateOrderBody): AdminOrderCreateInput |
       productionInfo: body.productionInfo.trim(),
       estimatedValue: body.estimatedValue,
       adminNote: body.adminNote?.trim() || undefined,
+      downPaymentPct: body.downPaymentPct,
+      paymentMethod: body.paymentMethod,
     } : {}),
   };
 }
@@ -206,6 +212,39 @@ export async function POST(request: NextRequest) {
 
     if (!order) {
       return NextResponse.json({ error: "Erro ao gerar referência do pedido. Tente novamente." }, { status: 500 });
+    }
+
+    // Se criado em PROPOSAL_SENT com valor > 0, criar OrderFinancial + parcelas
+    if (order.status === "PROPOSAL_SENT" && order.estimatedValue != null && order.estimatedValue > 0) {
+      const totalCents = Math.round(order.estimatedValue * 100);
+      const pct = Math.max(0, Math.min(99, Math.round(payload.downPaymentPct ?? 0)));
+      const method = payload.paymentMethod ?? "STRIPE";
+      await db.orderFinancial.deleteMany({ where: { orderId: order.id } });
+      const entryCents = pct > 0 ? Math.round(totalCents * pct / 100) : totalCents;
+      const installments = pct > 0
+        ? [
+            { sequence: 1, amountCents: entryCents, method },
+            { sequence: 2, amountCents: totalCents - entryCents, method },
+          ]
+        : [{ sequence: 1, amountCents: totalCents, method }];
+      await db.orderFinancial.create({
+        data: {
+          orderId: order.id,
+          totalAmountCents: totalCents,
+          method,
+          downPaymentPct: pct,
+          paidCents: 0,
+          status: "PENDING",
+          installments: {
+            create: installments.map(({ sequence, amountCents, method: m }) => ({
+              sequence,
+              amountCents,
+              method: m,
+              status: "PENDING",
+            })),
+          },
+        },
+      });
     }
 
     // Se o pedido foi criado directamente com proposta, notificar o cliente por email

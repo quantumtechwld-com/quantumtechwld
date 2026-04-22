@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   orderFindUnique: vi.fn(),
+  orderFinancialFindUnique: vi.fn(),
   paymentUpsert: vi.fn(),
   orderUpdate: vi.fn(),
   appUrl: vi.fn(),
@@ -23,6 +24,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     payment: {
       upsert: mocks.paymentUpsert,
+    },
+    orderFinancial: {
+      findUnique: mocks.orderFinancialFindUnique,
     },
   },
 }));
@@ -71,6 +75,7 @@ describe("POST /api/orders/[id]/checkout", () => {
     });
     mocks.paymentUpsert.mockResolvedValue({ id: "pay_1" });
     mocks.orderUpdate.mockResolvedValue({ id: "ord_1", status: "IN_PRODUCTION" });
+    mocks.orderFinancialFindUnique.mockResolvedValue(null); // sem OrderFinancial por defeito
     mocks.appUrl.mockReturnValue("https://quantumtechwld.com");
     mocks.stripeRetrieve.mockResolvedValue({ status: "open", url: "https://stripe.test/existing" });
     mocks.stripeCreate.mockResolvedValue({

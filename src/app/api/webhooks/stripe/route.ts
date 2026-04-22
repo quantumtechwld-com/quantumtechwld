@@ -38,7 +38,7 @@ async function handleInstallmentPaid(
   });
 
   // Primeira parcela paga → mover pedido para IN_PRODUCTION
-  if (paid.length === 0) {
+  if (paid.length === 1) {
     await db.order.update({ where: { id: orderId }, data: { status: "IN_PRODUCTION" } });
   }
 }

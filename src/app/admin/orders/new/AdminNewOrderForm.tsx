@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ORDER_TYPE_LABEL, URGENCY_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, EUR_TO_BRL, EUR_TO_USD, FX_REFERENCE_DATE } from "@/lib/constants";
+import { ORDER_TYPE_LABEL, URGENCY_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, EUR_TO_BRL, EUR_TO_USD, FX_REFERENCE_DATE, PAYMENT_METHOD_OPTIONS, DOWN_PAYMENT_OPTIONS } from "@/lib/constants";
 
 type ClientOption = {
   id: string;
@@ -56,6 +56,8 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [productionInfo, setProductionInfo] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
   const [adminNote, setAdminNote] = useState("");
+  const [downPaymentPct, setDownPaymentPct] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState("STRIPE");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
@@ -135,6 +137,8 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           productionInfo: productionInfo.trim(),
           estimatedValue: parsedVal,
           adminNote: adminNote.trim() || undefined,
+          downPaymentPct,
+          paymentMethod,
           ...(selectedParentOrderId ? { parentOrderId: selectedParentOrderId } : {}),
         }),
       });
@@ -333,6 +337,34 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
                 <span className="text-slate-600">(câmbio ref. {FX_REFERENCE_DATE})</span>
               </p>
             )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="admin-down-pct" className="block text-xs font-medium text-slate-400 mb-1">Condições de pagamento</label>
+              <select
+                id="admin-down-pct"
+                value={downPaymentPct}
+                onChange={(e) => setDownPaymentPct(Number(e.target.value))}
+                className="w-full rounded-xl border border-white/15 bg-[#0f0f1a] px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+              >
+                {DOWN_PAYMENT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="admin-payment-method" className="block text-xs font-medium text-slate-400 mb-1">Método de pagamento</label>
+              <select
+                id="admin-payment-method"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="w-full rounded-xl border border-white/15 bg-[#0f0f1a] px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+              >
+                {PAYMENT_METHOD_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
             <label htmlFor="admin-note" className="block text-xs font-medium text-slate-400 mb-1">

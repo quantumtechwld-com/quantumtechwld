@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxo Financeiro — Quantum Technology Agency</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      border-bottom: 1px solid #21262d;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .header h1 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 0.3rem;
+    }
+    .header .meta {
+      font-size: 0.8rem;
+      color: #8b949e;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+    .header .meta span::before { content: "• "; color: #30363d; }
+    .header .meta span:first-child::before { content: ""; }
+
+    /* ── Section ── */
+    section { margin-bottom: 3rem; }
+    section > h2 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #21262d;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge-green  { background: #1a3a2a; color: #3fb950; border: 1px solid #238636; }
+    .badge-red    { background: #3d1b1b; color: #f85149; border: 1px solid #6e2e2e; }
+    .badge-yellow { background: #332a00; color: #e3b341; border: 1px solid #6e5300; }
+    .badge-blue   { background: #1b2a3d; color: #58a6ff; border: 1px solid #1f5fa6; }
+    .badge-purple { background: #2a1b3d; color: #bc8cff; border: 1px solid #5a3a8a; }
+    .badge-gray   { background: #1c2128; color: #8b949e; border: 1px solid #30363d; }
+
+    /* ── Test Results ── */
+    .test-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .test-card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      text-align: center;
+    }
+    .test-card .num {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .test-card .label { font-size: 0.72rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.06em; }
+    .test-card.green .num  { color: #3fb950; }
+    .test-card.red .num    { color: #f85149; }
+    .test-card.yellow .num { color: #e3b341; }
+    .test-card.blue .num   { color: #58a6ff; }
+
+    .test-file-list { display: flex; flex-direction: column; gap: 0.35rem; }
+    .test-file {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 0.75rem;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+    .test-file .ico { font-size: 0.9rem; flex-shrink: 0; }
+    .test-file .name { color: #8b949e; flex: 1; }
+    .test-file .name strong { color: #c9d1d9; }
+    .test-file .cnt { font-size: 0.68rem; color: #8b949e; margin-left: auto; }
+    .test-file.fail { border-color: #3d1b1b; background: #1a0f0f; }
+    .test-file.fail .name { color: #8b949e; }
+    .test-file .note { font-size: 0.65rem; color: #e3b341; margin-left: 0.4rem; }
+
+    /* ── Flow Diagram ── */
+    .flow-wrap {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .flow {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      min-width: 900px;
+    }
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .flow-node {
+      background: #161b22;
+      border: 1.5px solid #30363d;
+      border-radius: 10px;
+      padding: 0.7rem 0.9rem;
+      text-align: center;
+      width: 110px;
+      position: relative;
+      z-index: 1;
+    }
+    .flow-node .step-num {
+      font-size: 0.6rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.2rem;
+    }
+    .flow-node .step-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      line-height: 1.3;
+    }
+    .flow-node .step-status {
+      margin-top: 0.35rem;
+      font-size: 0.62rem;
+      color: #3fb950;
+      background: #1a3a2a;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      display: inline-block;
+    }
+    .flow-node .step-status.yellow { color: #e3b341; background: #332a00; }
+    .flow-node .step-status.blue   { color: #58a6ff; background: #1b2a3d; }
+    .flow-node.active { border-color: #238636; background: #0d2016; }
+    .flow-node.warn   { border-color: #6e5300; background: #1a1500; }
+    .flow-node.info   { border-color: #1f5fa6; background: #0d1b2e; }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      flex-shrink: 0;
+      padding-top: 1.1rem;
+      color: #30363d;
+      font-size: 1.2rem;
+    }
+
+    .flow-sub {
+      margin-top: 0.5rem;
+      font-size: 0.62rem;
+      color: #8b949e;
+      text-align: center;
+      max-width: 110px;
+      line-height: 1.4;
+    }
+
+    /* ── Split paths ── */
+    .paths {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .path-card {
+      background: #161b22;
+      border: 1.5px solid #21262d;
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .path-card h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .path-card h3 .icon { font-size: 1rem; }
+    .path-step {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      align-items: flex-start;
+    }
+    .path-step .dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #21262d;
+      color: #8b949e;
+      font-size: 0.6rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .path-step .dot.green  { background: #1a3a2a; color: #3fb950; }
+    .path-step .dot.blue   { background: #1b2a3d; color: #58a6ff; }
+    .path-step .dot.yellow { background: #332a00; color: #e3b341; }
+    .path-step .text { font-size: 0.78rem; line-height: 1.5; }
+    .path-step .text strong { color: #f0f6fc; }
+    .path-step .text code {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 0.05rem 0.35rem;
+      font-size: 0.7rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: #79c0ff;
+    }
+    .stripe-path h3 { color: #58a6ff; }
+    .manual-path h3 { color: #e3b341; }
+    .stripe-path { border-color: #1f5fa6; }
+    .manual-path { border-color: #6e5300; }
+
+    /* ── State Machine ── */
+    .states {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .state-card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+    .state-card .state-name {
+      font-size: 0.7rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .state-card .state-desc { font-size: 0.75rem; color: #8b949e; line-height: 1.5; }
+    .state-card .state-next { margin-top: 0.5rem; font-size: 0.68rem; color: #30363d; }
+    .state-card .state-next span { color: #58a6ff; }
+
+    /* ── Database Tables ── */
+    .db-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .db-table {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .db-table-header {
+      background: #0d1117;
+      border-bottom: 1px solid #21262d;
+      padding: 0.6rem 1rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #79c0ff;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .db-table-header::before { content: "⬡"; font-size: 0.9rem; }
+    .db-field {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      padding: 0.35rem 1rem;
+      border-bottom: 1px solid #21262d;
+      font-size: 0.73rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+    .db-field:last-child { border-bottom: none; }
+    .db-field .fname { color: #c9d1d9; flex: 1; }
+    .db-field .ftype { color: #bc8cff; font-size: 0.65rem; }
+    .db-field .fnote { color: #8b949e; font-size: 0.65rem; font-family: sans-serif; }
+
+    /* ── API Endpoints ── */
+    .endpoints { display: flex; flex-direction: column; gap: 0.5rem; }
+    .endpoint {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+    }
+    .endpoint .method {
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+      min-width: 48px;
+      text-align: center;
+    }
+    .method-post   { background: #1a3a2a; color: #3fb950; }
+    .method-patch  { background: #2a1b3d; color: #bc8cff; }
+    .method-get    { background: #1b2a3d; color: #58a6ff; }
+    .endpoint .path {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.73rem;
+      color: #79c0ff;
+      flex: 1;
+    }
+    .endpoint .edesc { font-size: 0.73rem; color: #8b949e; margin-top: 0.15rem; }
+    .endpoint-body { flex: 3; }
+
+    /* ── Bug Fixes ── */
+    .fixes { display: flex; flex-direction: column; gap: 0.75rem; }
+    .fix-card {
+      background: #161b22;
+      border-left: 3px solid #238636;
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1.1rem;
+    }
+    .fix-card .fix-id {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #3fb950;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+    .fix-card .fix-title { font-size: 0.82rem; font-weight: 600; color: #f0f6fc; margin-bottom: 0.3rem; }
+    .fix-card .fix-desc { font-size: 0.75rem; color: #8b949e; line-height: 1.6; }
+    .fix-card .fix-desc code {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 3px;
+      padding: 0.05rem 0.3rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.68rem;
+      color: #79c0ff;
+    }
+
+    /* ── Notes ── */
+    .note-box {
+      background: #161b22;
+      border: 1px solid #6e5300;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.78rem;
+      color: #e3b341;
+      display: flex;
+      gap: 0.6rem;
+    }
+    .note-box .icon { flex-shrink: 0; }
+
+    /* ── Timeline (installments) ── */
+    .installment-timeline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .it-card {
+      background: #161b22;
+      border: 1.5px solid #21262d;
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .it-card h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 1rem;
+    }
+    .it-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+    }
+    .it-seq {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .it-seq.s1 { background: #1b2a3d; color: #58a6ff; }
+    .it-seq.s2 { background: #2a1b3d; color: #bc8cff; }
+    .it-info { flex: 1; }
+    .it-info .it-label { color: #c9d1d9; font-weight: 600; }
+    .it-info .it-method { color: #8b949e; font-size: 0.68rem; }
+    .it-pct { color: #e3b341; font-size: 0.7rem; font-weight: 600; }
+
+    @media (max-width: 640px) {
+      .paths, .installment-timeline { grid-template-columns: 1fr; }
+      .flow { min-width: 600px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <h1>Fluxo Financeiro — Quantum Technology Agency</h1>
+    <div class="meta">
+      <span>22 de Abril de 2026</span>
+      <span>Auditoria completa concluída</span>
+      <span>3 bugs corrigidos</span>
+      <span>222 testes · 218 passando</span>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- TESTES -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Resultado dos Testes — Suite Completa</h2>
+
+    <div class="test-summary">
+      <div class="test-card blue">
+        <div class="num">63</div>
+        <div class="label">ficheiros de teste</div>
+      </div>
+      <div class="test-card green">
+        <div class="num">218</div>
+        <div class="label">testes passando</div>
+      </div>
+      <div class="test-card yellow">
+        <div class="num">4</div>
+        <div class="label">flaky (timeout)</div>
+      </div>
+      <div class="test-card red">
+        <div class="num">0</div>
+        <div class="label">falhanços reais</div>
+      </div>
+    </div>
+
+    <div class="test-file-list">
+      <!-- Integração -->
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>integration /</strong> orders-checkout-route.test.ts</span>
+        <span class="cnt">5 testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>integration /</strong> orders-id-route.test.ts</span>
+        <span class="cnt">— testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>integration /</strong> admin-orders-id-route.test.ts</span>
+        <span class="cnt">— testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>components /</strong> PayOrderButton.test.tsx</span>
+        <span class="cnt">— testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>components /</strong> AdminOrdersPage.test.tsx <span style="color:#3fb950">← corrigido hoje</span></span>
+        <span class="cnt">2 testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>components /</strong> OrderDetailPage.test.tsx</span>
+        <span class="cnt">— testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file">
+        <span class="ico">✓</span>
+        <span class="name"><strong>components /</strong> InvoicePage.test.tsx</span>
+        <span class="cnt">— testes</span>
+        <span class="badge badge-green">PASS</span>
+      </div>
+      <div class="test-file fail">
+        <span class="ico">⚠</span>
+        <span class="name"><strong>components /</strong> AdminNewOrderForm.test.tsx</span>
+        <span class="cnt">3/7 passam</span>
+        <span class="badge badge-yellow">FLAKY</span>
+        <span class="note">timeout em suite completa — passa em isolado</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- FLUXO PRINCIPAL -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Fluxo Completo — Ciclo de Vida do Pedido</h2>
+
+    <div class="flow-wrap">
+      <div class="flow">
+        <!-- 1 -->
+        <div class="flow-step">
+          <div class="flow-node">
+            <div class="step-num">Passo 1</div>
+            <div class="step-title">Pedido Criado</div>
+            <div class="step-status yellow">NEW</div>
+          </div>
+          <div class="flow-sub">Admin cria o pedido para o cliente</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 2 -->
+        <div class="flow-step">
+          <div class="flow-node warn">
+            <div class="step-num">Passo 2</div>
+            <div class="step-title">Proposta Enviada</div>
+            <div class="step-status yellow">PROPOSAL_SENT</div>
+          </div>
+          <div class="flow-sub">Admin define valor, % entrada e método</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 3 -->
+        <div class="flow-step">
+          <div class="flow-node info">
+            <div class="step-num">Passo 3</div>
+            <div class="step-title">Cliente Aprova</div>
+            <div class="step-status blue">APPROVED</div>
+          </div>
+          <div class="flow-sub">OrderFinancial + Parcelas criadas automaticamente</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 4 -->
+        <div class="flow-step">
+          <div class="flow-node active">
+            <div class="step-num">Passo 4</div>
+            <div class="step-title">Pagamento</div>
+            <div class="step-status">STRIPE / MANUAL</div>
+          </div>
+          <div class="flow-sub">Cliente paga 1.ª parcela (entrada)</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 5 -->
+        <div class="flow-step">
+          <div class="flow-node active">
+            <div class="step-num">Passo 5</div>
+            <div class="step-title">Em Produção</div>
+            <div class="step-status">IN_PRODUCTION</div>
+          </div>
+          <div class="flow-sub">Trabalho inicia; 2.ª parcela pendente (se existir)</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 6 -->
+        <div class="flow-step">
+          <div class="flow-node">
+            <div class="step-num">Passo 6</div>
+            <div class="step-title">Entrega / Revisão</div>
+            <div class="step-status blue">IN_REVIEW</div>
+          </div>
+          <div class="flow-sub">Entrega para validação do cliente</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 7 -->
+        <div class="flow-step">
+          <div class="flow-node active">
+            <div class="step-num">Passo 7</div>
+            <div class="step-title">Pagamento Final</div>
+            <div class="step-status">2.ª parcela</div>
+          </div>
+          <div class="flow-sub">Cliente paga o saldo restante</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 8 -->
+        <div class="flow-step">
+          <div class="flow-node active">
+            <div class="step-num">Passo 8</div>
+            <div class="step-title">Concluído</div>
+            <div class="step-status">COMPLETED</div>
+          </div>
+          <div class="flow-sub">OrderFinancial.status = PAID; fatura disponível</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- PARCELAS -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Estrutura de Parcelas (PaymentInstallment)</h2>
+
+    <div class="installment-timeline">
+      <div class="it-card">
+        <h3>Pagamento único (sem entrada)</h3>
+        <div class="note-box" style="margin-bottom:1rem;border-color:#1f5fa6;color:#58a6ff;">
+          <span class="icon">ℹ</span>
+          <span>Configurar: <code style="background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:0.05rem 0.3rem;font-family:monospace;font-size:0.7rem">downPaymentPct = 0</code></span>
+        </div>
+        <div class="it-row">
+          <div class="it-seq s1">1</div>
+          <div class="it-info">
+            <div class="it-label">Parcela única</div>
+            <div class="it-method">STRIPE ou MANUAL_PIX</div>
+          </div>
+          <div class="it-pct">100%</div>
+        </div>
+        <p style="font-size:0.72rem;color:#8b949e;margin-top:0.75rem">Ao pagar: <strong style="color:#c9d1d9">OrderFinancial → PAID</strong> · <strong style="color:#c9d1d9">Order → IN_PRODUCTION</strong></p>
+      </div>
+
+      <div class="it-card">
+        <h3>Com entrada (2 parcelas)</h3>
+        <div class="note-box" style="margin-bottom:1rem;border-color:#6e5300;color:#e3b341;">
+          <span class="icon">ℹ</span>
+          <span>Configurar: <code style="background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:0.05rem 0.3rem;font-family:monospace;font-size:0.7rem">downPaymentPct = 30</code> (exemplo)</span>
+        </div>
+        <div class="it-row">
+          <div class="it-seq s1">1</div>
+          <div class="it-info">
+            <div class="it-label">Entrada</div>
+            <div class="it-method">STRIPE ou MANUAL_PIX</div>
+          </div>
+          <div class="it-pct">30%</div>
+        </div>
+        <div class="it-row">
+          <div class="it-seq s2">2</div>
+          <div class="it-info">
+            <div class="it-label">Saldo final</div>
+            <div class="it-method">STRIPE ou MANUAL_PIX</div>
+          </div>
+          <div class="it-pct">70%</div>
+        </div>
+        <p style="font-size:0.72rem;color:#8b949e;margin-top:0.75rem">
+          1.ª paga → <strong style="color:#c9d1d9">OrderFinancial → PARTIAL</strong> · <strong style="color:#c9d1d9">Order → IN_PRODUCTION</strong><br>
+          2.ª paga → <strong style="color:#c9d1d9">OrderFinancial → PAID</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- CAMINHOS DE PAGAMENTO -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Caminhos de Pagamento</h2>
+
+    <div class="paths">
+      <!-- Stripe -->
+      <div class="path-card stripe-path">
+        <h3><span class="icon">💳</span> Caminho Stripe</h3>
+
+        <div class="path-step">
+          <div class="dot blue">1</div>
+          <div class="text">
+            Portal mostra <strong>PayOrderButton</strong><br>
+            (quando <code>installment.method === "STRIPE"</code>)
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot blue">2</div>
+          <div class="text">
+            <code>POST /api/orders/[id]/checkout</code><br>
+            Cria sessão Stripe com <code>metadata: &#123; orderId, installmentId &#125;</code>
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot blue">3</div>
+          <div class="text">
+            Cliente paga no Stripe Checkout<br>
+            Redireccionado para <code>/payment/success</code>
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot green">4</div>
+          <div class="text">
+            <code>POST /api/webhooks/stripe</code><br>
+            Evento <code>checkout.session.completed</code><br>
+            → <strong>handleInstallmentPaid()</strong>
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot green">5</div>
+          <div class="text">
+            <strong>PaymentInstallment → PAID</strong><br>
+            <strong>OrderFinancial.paidCents</strong> actualizado<br>
+            Se 1.ª parcela paga → <strong>Order → IN_PRODUCTION</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual -->
+      <div class="path-card manual-path">
+        <h3><span class="icon">🏦</span> Caminho Manual (PIX/Transferência)</h3>
+
+        <div class="path-step">
+          <div class="dot yellow">1</div>
+          <div class="text">
+            Portal mostra <strong>card informativo amarelo</strong><br>
+            (quando <code>installment.method === "MANUAL_PIX"</code>)
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot yellow">2</div>
+          <div class="text">
+            Cliente realiza transferência/PIX<br>
+            e contacta o admin
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot yellow">3</div>
+          <div class="text">
+            Admin confirma no backoffice<br>
+            <code>PATCH /api/admin/financial/[orderId]/installments/[id]</code><br>
+            body: <code>&#123; action: "confirm_manual" &#125;</code>
+          </div>
+        </div>
+
+        <div class="path-step">
+          <div class="dot green">4</div>
+          <div class="text">
+            <strong>PaymentInstallment → PAID</strong><br>
+            <strong>OrderFinancial.paidCents</strong> actualizado<br>
+            Se sequência 1 → <strong>Order → IN_PRODUCTION</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <span class="icon">⚠</span>
+      <span><strong>Modo Mock (desenvolvimento):</strong> quando <code>STRIPE_SECRET_KEY</code> não está definida, o checkout simula o pagamento localmente — actualiza <code>Payment</code>, <code>OrderFinancial</code> e <code>PaymentInstallment</code> imediatamente, sem redireccionar para o Stripe.</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- ESTADOS -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Estados do Sistema</h2>
+
+    <p style="font-size:0.78rem;color:#8b949e;margin-bottom:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Order.status</p>
+    <div class="states" style="margin-bottom:1.5rem">
+      <div class="state-card">
+        <div class="state-name" style="background:#21262d;color:#8b949e">NEW</div>
+        <div class="state-desc">Pedido recém-criado pelo admin. Sem proposta ainda.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#332a00;color:#e3b341">PROPOSAL_SENT</div>
+        <div class="state-desc">Admin enviou proposta com valor, % entrada e método.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#1b2a3d;color:#58a6ff">APPROVED</div>
+        <div class="state-desc">Cliente aprovou. OrderFinancial + parcelas criadas. Aguarda pagamento da 1.ª parcela.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#1a3a2a;color:#3fb950">IN_PRODUCTION</div>
+        <div class="state-desc">1.ª parcela paga. Trabalho em curso. 2.ª parcela (se existir) ainda PENDING.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#2a1b3d;color:#bc8cff">IN_REVIEW</div>
+        <div class="state-desc">Entrega enviada. Cliente a rever.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#1a3a2a;color:#3fb950">COMPLETED</div>
+        <div class="state-desc">Aprovado pelo cliente. OrderFinancial.status = PAID.</div>
+      </div>
+    </div>
+
+    <p style="font-size:0.78rem;color:#8b949e;margin-bottom:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">OrderFinancial.status</p>
+    <div class="states" style="margin-bottom:1.5rem">
+      <div class="state-card">
+        <div class="state-name" style="background:#332a00;color:#e3b341">PENDING</div>
+        <div class="state-desc">Nenhuma parcela paga. paidCents = 0.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#1b2a3d;color:#58a6ff">PARTIAL</div>
+        <div class="state-desc">1.ª parcela paga. paidCents &lt; totalAmountCents.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#1a3a2a;color:#3fb950">PAID</div>
+        <div class="state-desc">Todas as parcelas pagas. paidCents = totalAmountCents. Fatura disponível.</div>
+      </div>
+    </div>
+
+    <p style="font-size:0.78rem;color:#8b949e;margin-bottom:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">PaymentInstallment.status</p>
+    <div class="states">
+      <div class="state-card">
+        <div class="state-name" style="background:#332a00;color:#e3b341">PENDING</div>
+        <div class="state-desc">Ainda não paga.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-name" style="background:#1a3a2a;color:#3fb950">PAID</div>
+        <div class="state-desc">Paga (Stripe webhook ou confirmação manual).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- API ENDPOINTS -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Endpoints do Fluxo Financeiro</h2>
+    <div class="endpoints">
+
+      <div class="endpoint">
+        <div>
+          <div class="method method-patch">PATCH</div>
+        </div>
+        <div class="endpoint-body">
+          <div class="path">/api/orders/[id]</div>
+          <div class="edesc">Admin envia proposta — define <code>estimatedValue</code>, <code>downPaymentPct</code>, <code>method</code>. Cria/substitui OrderFinancial e parcelas. Avança status para PROPOSAL_SENT.</div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div>
+          <div class="method method-post">POST</div>
+        </div>
+        <div class="endpoint-body">
+          <div class="path">/api/orders/[id]/checkout</div>
+          <div class="edesc">Cliente inicia pagamento Stripe. Busca parcela STRIPE pendente, inclui <code>installmentId</code> no metadata. Em modo mock, actualiza OrderFinancial imediatamente.</div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div>
+          <div class="method method-post">POST</div>
+        </div>
+        <div class="endpoint-body">
+          <div class="path">/api/webhooks/stripe</div>
+          <div class="edesc">Recebe <code>checkout.session.completed</code>. Se metadata contém <code>installmentId</code> → chama handleInstallmentPaid (marca PAID, recalcula paidCents, avança Order para IN_PRODUCTION na 1.ª parcela).</div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div>
+          <div class="method method-patch">PATCH</div>
+        </div>
+        <div class="endpoint-body">
+          <div class="path">/api/admin/financial/[orderId]/installments/[id]</div>
+          <div class="edesc">Admin confirma pagamento manual. Action: <code>confirm_manual</code>. Marca parcela PAID, recalcula paidCents, avança Order para IN_PRODUCTION se sequência 1.</div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div>
+          <div class="method method-get">GET</div>
+        </div>
+        <div class="endpoint-body">
+          <div class="path">/portal/orders/[id]</div>
+          <div class="edesc">Página do cliente. Mostra PayOrderButton (Stripe) ou card informativo (Manual) para parcelas PENDING. Query inclui <code>financial &#123; installments &#125;</code>.</div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div>
+          <div class="method method-get">GET</div>
+        </div>
+        <div class="endpoint-body">
+          <div class="path">/admin/financeiro/[orderId]</div>
+          <div class="edesc">Backoffice financeiro. Mostra resumo, barra de progresso e botões de confirmação manual por parcela.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- MODELOS DB -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Modelos de Base de Dados</h2>
+
+    <div class="db-grid">
+      <div class="db-table">
+        <div class="db-table-header">OrderFinancial</div>
+        <div class="db-field"><span class="fname">id</span><span class="ftype">String</span></div>
+        <div class="db-field"><span class="fname">orderId</span><span class="ftype">String</span><span class="fnote">1:1 com Order</span></div>
+        <div class="db-field"><span class="fname">totalAmountCents</span><span class="ftype">Int</span><span class="fnote">estimatedValue × 100</span></div>
+        <div class="db-field"><span class="fname">paidCents</span><span class="ftype">Int</span><span class="fnote">soma das parcelas PAID</span></div>
+        <div class="db-field"><span class="fname">downPaymentPct</span><span class="ftype">Int</span><span class="fnote">0 = parcela única</span></div>
+        <div class="db-field"><span class="fname">method</span><span class="ftype">String</span><span class="fnote">STRIPE | MANUAL_PIX</span></div>
+        <div class="db-field"><span class="fname">status</span><span class="ftype">String</span><span class="fnote">PENDING | PARTIAL | PAID</span></div>
+        <div class="db-field"><span class="fname">installments</span><span class="ftype">PaymentInstallment[]</span></div>
+      </div>
+
+      <div class="db-table">
+        <div class="db-table-header">PaymentInstallment</div>
+        <div class="db-field"><span class="fname">id</span><span class="ftype">String</span></div>
+        <div class="db-field"><span class="fname">orderFinancialId</span><span class="ftype">String</span></div>
+        <div class="db-field"><span class="fname">sequence</span><span class="ftype">Int</span><span class="fnote">1 = entrada, 2 = final</span></div>
+        <div class="db-field"><span class="fname">amountCents</span><span class="ftype">Int</span></div>
+        <div class="db-field"><span class="fname">method</span><span class="ftype">String</span><span class="fnote">STRIPE | MANUAL_PIX</span></div>
+        <div class="db-field"><span class="fname">status</span><span class="ftype">String</span><span class="fnote">PENDING | PAID</span></div>
+        <div class="db-field"><span class="fname">stripePaymentIntent</span><span class="ftype">String?</span></div>
+        <div class="db-field"><span class="fname">paidAt</span><span class="ftype">DateTime?</span></div>
+      </div>
+
+      <div class="db-table">
+        <div class="db-table-header">Payment (legacy)</div>
+        <div class="db-field"><span class="fname">orderId</span><span class="ftype">String</span><span class="fnote">1:1 com Order</span></div>
+        <div class="db-field"><span class="fname">stripeSessionId</span><span class="ftype">String</span></div>
+        <div class="db-field"><span class="fname">amountCents</span><span class="ftype">Int</span></div>
+        <div class="db-field"><span class="fname">status</span><span class="ftype">String</span><span class="fnote">PENDING | PAID</span></div>
+        <div class="db-field"><span class="fname">paidAt</span><span class="ftype">DateTime?</span></div>
+        <div class="db-field" style="border-top:1px solid #21262d;padding-top:0.5rem;background:#1a0f0f">
+          <span class="fname" style="color:#8b949e">⚠ retrocompatibilidade</span>
+          <span class="fnote">usado apenas em pedidos sem OrderFinancial</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- BUGS CORRIGIDOS -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Bugs Corrigidos — Auditoria 22/04/2026</h2>
+
+    <div class="fixes">
+      <div class="fix-card">
+        <div class="fix-id">B1 — checkout/route.ts · metadata incompleto</div>
+        <div class="fix-title">installmentId nunca era enviado ao Stripe → handleInstallmentPaid nunca era chamado</div>
+        <div class="fix-desc">
+          O checkout criava a sessão Stripe com apenas <code>metadata: &#123; orderId &#125;</code>.
+          O webhook verificava <code>session.metadata?.installmentId</code> — como estava sempre <code>undefined</code>,
+          caia no caminho legacy (<code>Payment</code> model) e o <code>OrderFinancial</code> permanecia <code>PENDING</code> para sempre.
+          <br><br>
+          <strong>Fix:</strong> antes de criar a sessão, busca a parcela <code>STRIPE PENDING</code> em <code>OrderFinancial</code>
+          e inclui <code>installmentId</code> no metadata quando existe.
+        </div>
+      </div>
+
+      <div class="fix-card">
+        <div class="fix-id">B2 — checkout/route.ts · modo mock ignorava OrderFinancial</div>
+        <div class="fix-title">Mock payment não actualizava OrderFinancial nem PaymentInstallment</div>
+        <div class="fix-desc">
+          Em modo desenvolvimento (<code>STRIPE_SECRET_KEY</code> ausente), o checkout fazia upsert do modelo <code>Payment</code>
+          e avançava o pedido para <code>IN_PRODUCTION</code>, mas ignorava completamente <code>OrderFinancial</code> e <code>PaymentInstallment</code>.
+          O portal continuava a mostrar o botão de pagamento indefinidamente.
+          <br><br>
+          <strong>Fix:</strong> quando existe <code>stripeInstallment</code>, o caminho mock agora
+          actualiza <code>PaymentInstallment.status = PAID</code> e
+          <code>OrderFinancial.paidCents / status = PAID</code> imediatamente.
+        </div>
+      </div>
+
+      <div class="fix-card">
+        <div class="fix-id">B3 — webhooks/stripe/route.ts · lógica morta em handleInstallmentPaid</div>
+        <div class="fix-title">Condição paid.length === 0 nunca era verdadeira após pagamento</div>
+        <div class="fix-desc">
+          O array <code>paid</code> é recalculado <em>depois</em> de o installment já ter sido marcado <code>PAID</code>,
+          portanto <code>paid.length</code> é sempre ≥ 1 após o primeiro pagamento.
+          A condição <code>if (paid.length === 0)</code> para avançar o pedido para <code>IN_PRODUCTION</code>
+          nunca disparava neste caminho.
+          <br><br>
+          <strong>Fix:</strong> alterado para <code>if (paid.length === 1)</code> — exactamente quando a
+          <em>primeira</em> parcela acaba de ser paga.
+        </div>
+      </div>
+
+      <div class="fix-card">
+        <div class="fix-id">B4 — tests/components/AdminOrdersPage.test.tsx · mocks incompletos (pré-existente)</div>
+        <div class="fix-title">db.user.findMany e useRouter não estavam mockados</div>
+        <div class="fix-desc">
+          Após adicionar o <code>ClientFilter</code> (commit 5399fe6), o componente passou a chamar
+          <code>db.user.findMany</code> e <code>useRouter()</code>, mas os mocks do ficheiro de teste
+          não incluíam essas dependências.
+          <br><br>
+          <strong>Fix:</strong> adicionado <code>userFindMany</code> ao mock do Prisma e mocks completos de
+          <code>useRouter</code>, <code>useSearchParams</code>, <code>usePathname</code> ao mock de <code>next/navigation</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- RETROCOMPATIBILIDADE -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>Retrocompatibilidade</h2>
+
+    <div class="note-box" style="border-color:#1f5fa6;color:#58a6ff;">
+      <span class="icon">ℹ</span>
+      <div>
+        <strong>Pedidos sem OrderFinancial</strong> continuam a funcionar via modelo <code>Payment</code> legado.
+        O webhook verifica <code>metadata.installmentId</code> — se ausente, actualiza apenas <code>Payment</code>.
+        O portal mostra o link de fatura se <code>order.financial?.status === "PAID"</code> <em>ou</em> <code>order.payment?.status === "PAID"</code>.
+        Nenhuma migração de dados é necessária.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="border-top:1px solid #21262d;padding-top:1.5rem;margin-top:1rem;font-size:0.72rem;color:#8b949e;display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+    <span>Quantum Technology Agency · Fluxo Financeiro</span>
+    <span>Gerado em 22 de Abril de 2026 · commit 5399fe6 + fixes</span>
+  </footer>
+
+</div>
+</body>
+</html>

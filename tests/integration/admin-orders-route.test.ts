@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
   createOrderWithRef: vi.fn(),
   sendMail: vi.fn().mockResolvedValue(undefined),
+  orderFinancialDeleteMany: vi.fn().mockResolvedValue(undefined),
+  orderFinancialCreate: vi.fn().mockResolvedValue({ id: "fin_1" }),
 }));
 
 vi.mock("@/auth", () => ({ auth: mocks.auth }));
@@ -18,6 +20,10 @@ vi.mock("@/lib/prisma", () => ({
     },
     order: {
       findMany: mocks.orderFindMany,
+    },
+    orderFinancial: {
+      deleteMany: mocks.orderFinancialDeleteMany,
+      create: mocks.orderFinancialCreate,
     },
   },
 }));
@@ -130,6 +136,8 @@ describe("GET /api/admin/orders", () => {
         productionInfo: "Desenvolvimento full-stack em 4 semanas.",
         estimatedValue: 2500,
         adminNote: "Arrancar em maio.",
+        downPaymentPct: 50,
+        paymentMethod: "STRIPE",
       }),
       headers: { "content-type": "application/json" },
     }));

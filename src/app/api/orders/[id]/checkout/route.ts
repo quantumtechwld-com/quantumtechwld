@@ -58,6 +58,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       : Math.round(order.estimatedValue * 100);
   const baseUrl = appUrl();
 
+  // Buscar parcela STRIPE pendente para ligar pagamento ao OrderFinancial
+  const financial = await db.orderFinancial.findUnique({
+    where: { orderId: id },
+    include: {
+      installments: {
+        where: { method: "STRIPE", status: "PENDING" },
+        orderBy: { sequence: "asc" },
+        take: 1,
+      },
+    },
+  });
+  const stripeInstallment = financial?.installments?.[0] ?? null;
+
   // SENSIVEL: cobranca real nao pode seguir idioma do usuario.
   // O valor persistido em estimatedValue e interpretado neste fluxo como EUR.
   // Para suportar multi-currency real, e obrigatorio persistir a moeda da proposta
@@ -83,6 +96,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         paidAt:  new Date(),
       },
     });
+    // Actualizar OrderFinancial e parcela STRIPE se existir
+    if (stripeInstallment && financial) {
+      await db.paymentInstallment.update({
+        where: { id: stripeInstallment.id },
+        data: { status: "PAID", paidAt: new Date() },
+      });
+      await db.orderFinancial.update({
+        where: { orderId: id },
+        data: { paidCents: financial.totalAmountCents, status: "PAID" },
+      });
+    }
     // Avança o pedido para IN_PRODUCTION
     await db.order.update({
       where: { id },
@@ -122,7 +146,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     ],
-    metadata: { orderId: id },
+    metadata: { orderId: id, ...(stripeInstallment ? { installmentId: stripeInstallment.id } : {}) },
     success_url: `${baseUrl}/portal/orders/${id}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url:  `${baseUrl}/portal/orders/${id}?payment=cancelled`,
   });

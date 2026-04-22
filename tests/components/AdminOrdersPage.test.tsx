@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   redirect: vi.fn(),
   userFindUnique: vi.fn(),
+  userFindMany: vi.fn(),
   orderFindMany: vi.fn(),
   orderGroupBy: vi.fn(),
   orderMessageReadFindMany: vi.fn(),
@@ -17,6 +18,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   redirect: mocks.redirect,
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/admin/orders",
 }));
 
 vi.mock("next/link", () => ({
@@ -31,6 +35,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: {
       findUnique: mocks.userFindUnique,
+      findMany: mocks.userFindMany,
     },
     order: {
       findMany: mocks.orderFindMany,
@@ -49,6 +54,7 @@ describe("AdminOrdersPage", () => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ user: { email: "admin@example.com", role: "ADMIN" } });
     mocks.userFindUnique.mockResolvedValue({ id: "admin_1" });
+    mocks.userFindMany.mockResolvedValue([]);
     mocks.orderFindMany.mockResolvedValue([]);
     mocks.orderGroupBy.mockResolvedValue([]);
     mocks.orderMessageReadFindMany.mockResolvedValue([]);
