@@ -593,3 +593,76 @@ para um estado:
 - docs/REFACTORING-PLAN.md
 - docs/DEPLOY.md
 - README.md
+
+---
+
+## 18. ⚠️ Registro de Incidentes de Alta Atenção
+
+Incidentes que causaram downtime real para clientes devem ser registados aqui.
+A cada análise mensal, este registo deve ser consultado para verificar recorrência e ação preventiva.
+
+---
+
+### INCIDENTE-001 — 22/04/2026 — 502 Bad Gateway em produção (~20 min de downtime)
+
+**Severidade:** CRÍTICA — clientes sem acesso ao serviço  
+**Duração:** ~20 minutos  
+**Ambiente:** EC2 produção (`i-0551c166546ff66e7`), `quantumtechwld.com`
+
+#### Causa raiz
+
+Rebuild manual de emergência executado na EC2 com comando incorreto:
+
+```bash
+# ❌ COMANDO ERRADO — causou o incidente
+npm ci --omit=dev && npm run build
+```
+
+O `--omit=dev` pula as devDependencies — postcss, tailwind, autoprefixer — que o Next.js
+**exige** na fase de compilação. O `npm run build` falhou com erros de módulo.
+
+O erro foi mascarado porque o output foi redirecionado para `| tail -20`, que consome o
+stdout mas não propaga o exit code não-zero para o `&&` seguinte. O `pm2 reload` executou
+sobre um `.next/` inválido (sem `BUILD_ID`), os processos crasharam com "Could not find a
+production build", atingiram `max_restarts: 5`, entraram em estado `errored`.
+
+#### Cadeia de falha
+
+```
+npm ci --omit=dev           → postcss/tailwind ausentes
+  → npm run build FALHA     → .next/ sem BUILD_ID
+    → | tail -20 mascarou   → exit code perdido
+      → pm2 reload executou → .next/ inválido carregado
+        → 20 restarts       → estado errored
+          → nginx 502        → clientes sem serviço
+```
+
+#### Resolução aplicada
+
+```bash
+# ✅ Rebuild correto executado via SSM
+npm ci && npm run build && pm2 reload ecosystem.config.cjs --update-env
+```
+
+Resultado: `✓ Compiled successfully in 38.2s` · `BUILD_OK` · `[quantum-agency](1) ✓ [quantum-agency](2) ✓`
+
+#### Acções preventivas implementadas
+
+1. **`scripts/deploy-remote.sh`** — comentário crítico adicionado explicando por que `--omit=dev`
+   é correto no deploy-remote (build já vem do CI) mas PROIBIDO em rebuilds na EC2.
+2. **`docs/DEPLOY.md`** — secção "⚠️ ALERTA DE ALTA ATENÇÃO — Rebuild de emergência na EC2"
+   adicionada com o comando correto, o comando proibido, e diagnóstico de 502.
+
+#### Lição aprendida
+
+> **Nunca usar `--omit=dev` antes de `npm run build`** — em qualquer ambiente.  
+> O pipeline CI já faz o build com todas as deps. O `--omit=dev` é válido **apenas**
+> para instalar deps de runtime depois de receber um `.next/` pré-compilado do CI.  
+> Em emergências que exijam rebuild na EC2: `npm ci` (sem flags) + `npm run build`.
+
+#### Checklist pós-incidente (para revisão mensal)
+
+- [ ] O incidente se repetiu desde 22/04/2026?
+- [ ] O `docs/DEPLOY.md` está sendo consultado antes de rebuilds manuais?
+- [ ] Existe smoke test automatizado que detectaria 502 em menos de 1 minuto?
+

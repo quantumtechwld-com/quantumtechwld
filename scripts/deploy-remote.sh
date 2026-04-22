@@ -39,7 +39,22 @@ echo "==> Instalando dependências de produção..."
 cd "$APP_DIR"
 # Remove node_modules completamente para instalação limpa
 rm -rf node_modules
-# npm install em vez de npm ci: evita falha de lock file mismatch entre versões do npm (CI usa Node 24, EC2 pode ter versão diferente)
+# ─────────────────────────────────────────────────────────────────────────────
+# ⚠️  ATENÇÃO — POR QUE --omit=dev ESTÁ CORRETO AQUI:
+#
+#  O .next/ já foi compilado no GitHub Actions (camada 2 do pipeline).
+#  Este script apenas instala as dependências de RUNTIME para rodar o servidor.
+#  devDependencies (postcss, tailwind, autoprefixer, etc.) NÃO são necessárias
+#  nesta etapa.
+#
+# ⛔ NUNCA use --omit=dev em um rebuild manual na EC2 (git pull + npm run build):
+#  O Next.js precisa de postcss/tailwind/autoprefixer (devDeps) para compilar.
+#  Se usar --omit=dev antes de 'npm run build', o build FALHA silenciosamente,
+#  o pm2 recarrega com .next/ quebrado, e o site retorna 502 Bad Gateway.
+#
+#  ✅ REBUILD DE EMERGÊNCIA CORRETO (quando precisar recompilar na EC2):
+#     Ver secção "Rebuild de emergência na EC2" em docs/DEPLOY.md
+# ─────────────────────────────────────────────────────────────────────────────
 NODE_OPTIONS="--max-old-space-size=384" npm install --omit=dev --prefer-offline
 
 echo "==> Gerando Prisma Client..."

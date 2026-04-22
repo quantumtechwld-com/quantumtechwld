@@ -218,6 +218,20 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
               <span className="text-slate-300">{urgencyLabel(order.urgency)}</span>
             </span>
           </div>
+          {order.referenceLinks?.length > 0 && (
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">{t("orderRefLinksTitle")}</p>
+              <ul className="space-y-1">
+                {(order.referenceLinks as string[]).map((link) => (
+                  <li key={link}>
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:text-accent-light underline underline-offset-2 break-all">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* Proposta do admin (visible when PROPOSAL_SENT or later) */}

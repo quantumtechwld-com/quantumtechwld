@@ -195,6 +195,7 @@ model Order {
   description     String      @db.Text
   urgency         String      @default("normal") // "low" | "normal" | "high" | "critical"
   attachments     String[]    // URLs dos ficheiros enviados
+  referenceLinks  String[]    // URLs de referência fornecidas pelo cliente (Google Drive, Figma, etc.)
   status          OrderStatus @default(PENDING)
   parentOrderId   String?     // referencia ao pedido original (para correction/alteration)
   parentOrder     Order?      @relation("OrderChildren", fields: [parentOrderId], references: [id], onDelete: SetNull)

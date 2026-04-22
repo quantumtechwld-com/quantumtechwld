@@ -20,6 +20,7 @@ export type CreateOrderInput = {
   description: string;
   urgency: string;
   attachments: string[];
+  referenceLinks?: string[];
   createdByAdminId?: string | null;
   /** ID do pedido original — apenas para tipos correction e alteration */
   parentOrderId?: string | null;
@@ -40,6 +41,7 @@ export async function createOrderWithRef(input: CreateOrderInput) {
     description: input.description,
     urgency: input.urgency,
     attachments: input.attachments,
+    referenceLinks: input.referenceLinks ?? [],
     deliveryLinks: [],
     status: hasProposal ? "PROPOSAL_SENT" : "PENDING",
     ...(input.createdByAdminId ? { createdByAdminId: input.createdByAdminId } : {}),

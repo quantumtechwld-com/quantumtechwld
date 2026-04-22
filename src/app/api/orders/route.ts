@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
       description?: string;
       urgency?: string;
       attachments?: string[];
+      referenceLinks?: string[];
     };
 
     if (!body.type || !VALID_ORDER_TYPES.includes(body.type as typeof VALID_ORDER_TYPES[number])) {
@@ -81,6 +82,13 @@ export async function POST(request: NextRequest) {
 
     // Gerar orderRef e incluir na criação — evita race condition entre workers
     const clientName = (user.company?.trim() || user.name?.trim() || user.email) ?? "CLIENT";
+    // Validar e sanitizar referenceLinks: apenas strings não-vazias com formato de URL
+    const rawLinks = Array.isArray(body.referenceLinks) ? body.referenceLinks : [];
+    const referenceLinks = rawLinks
+      .map((l: unknown) => (typeof l === "string" ? l.trim() : ""))
+      .filter((l) => l.length > 0 && l.length <= 2048)
+      .slice(0, 10); // máx 10 links
+
     const order = await createOrderWithRef(
       {
         clientId:         user.id,
@@ -90,6 +98,7 @@ export async function POST(request: NextRequest) {
         description:      body.description.trim(),
         urgency:          body.urgency ?? "normal",
         attachments:      body.attachments ?? [],
+        referenceLinks,
         createdByAdminId: null,
       },
     );

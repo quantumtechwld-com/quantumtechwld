@@ -150,6 +150,20 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
             )}
           </div>
           <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.description}</p>
+          {order.referenceLinks?.length > 0 && (
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Links de referência do cliente</p>
+              <ul className="space-y-1">
+                {(order.referenceLinks as string[]).map((link: string) => (
+                  <li key={link}>
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-sky-400 hover:text-sky-300 underline underline-offset-2 break-all">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* Proposta enviada (se existir) */}

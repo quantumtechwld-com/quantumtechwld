@@ -24,12 +24,13 @@ export function NewOrderForm() {
     { value: "critical", label: t("urgencyCritical") },
   ];
 
-  const [type,        setType]        = useState("new_feature");
-  const [title,       setTitle]       = useState("");
-  const [description, setDescription] = useState("");
-  const [urgency,     setUrgency]     = useState("normal");
-  const [loading,     setLoading]     = useState(false);
-  const [error,       setError]       = useState("");
+  const [type,           setType]           = useState("new_feature");
+  const [title,          setTitle]          = useState("");
+  const [description,    setDescription]    = useState("");
+  const [urgency,        setUrgency]        = useState("normal");
+  const [referenceLinks, setReferenceLinks] = useState("");
+  const [loading,        setLoading]        = useState(false);
+  const [error,          setError]          = useState("");
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -41,7 +42,16 @@ export function NewOrderForm() {
       const res = await fetch("/api/orders", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ type, title: title.trim(), description: description.trim(), urgency }),
+        body:    JSON.stringify({
+          type,
+          title: title.trim(),
+          description: description.trim(),
+          urgency,
+          referenceLinks: referenceLinks
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0),
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -103,6 +113,21 @@ export function NewOrderForm() {
           rows={6}
           placeholder={t("newOrderDescPlaceholder")}
           className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none resize-none"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="order-reference-links" className="block text-sm font-medium text-slate-300 mb-1">
+          {t("newOrderRefLinksLabel")}
+        </label>
+        <p className="mb-2 text-xs text-slate-500">{t("newOrderRefLinksHint")}</p>
+        <textarea
+          id="order-reference-links"
+          value={referenceLinks}
+          onChange={(e) => setReferenceLinks(e.target.value)}
+          rows={3}
+          placeholder={t("newOrderRefLinksPlaceholder")}
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-accent focus:outline-none resize-none font-mono text-sm"
         />
       </div>
 
