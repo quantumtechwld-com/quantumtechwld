@@ -1,4 +1,5 @@
 import { ORDER_TYPE_LABEL, URGENCY_LABEL } from "@/lib/constants";
+import { emailLogoHeader, emailFooterTeam, emailFooterSystem } from "./shared";
 
 export function tplOrderReceived(opts: {
   clientEmail: string;
@@ -10,6 +11,7 @@ export function tplOrderReceived(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Novo pedido recebido</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> submeteu um novo pedido.
@@ -26,7 +28,7 @@ export function tplOrderReceived(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver pedido no painel →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }
@@ -41,6 +43,7 @@ export function tplOrderProposalSent(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Proposta recebida ✦</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
@@ -56,7 +59,7 @@ export function tplOrderProposalSent(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver proposta e responder →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
+      ${emailFooterTeam()}
     </div>
   `;
 }
@@ -68,6 +71,7 @@ export function tplOrderApprovedAdmin(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido aprovado ✓</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a proposta
@@ -76,7 +80,7 @@ export function tplOrderApprovedAdmin(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver no painel admin →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }
@@ -89,6 +93,7 @@ export function tplOrderRevisionAdmin(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#f59e0b;margin:0 0 8px">Revisão solicitada</h1>
       <p style="color:#94a3b8;margin:0 0 16px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> pediu revisão ao pedido de
@@ -100,7 +105,7 @@ export function tplOrderRevisionAdmin(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver pedido →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }
@@ -113,6 +118,7 @@ export function tplOrderInProduction(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#8b5cf6;margin:0 0 8px">O seu pedido está em produção 🚀</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
@@ -122,7 +128,7 @@ export function tplOrderInProduction(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#8b5cf6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Acompanhar pedido →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
+      ${emailFooterTeam()}
     </div>
   `;
 }
@@ -136,6 +142,7 @@ export function tplOrderCompleted(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido concluído ✓</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
@@ -146,7 +153,7 @@ export function tplOrderCompleted(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver detalhes →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
+      ${emailFooterTeam()}
     </div>
   `;
 }
@@ -159,6 +166,7 @@ export function tplOrderInReview(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#0ea5e9;margin:0 0 8px">Entrega pronta para revisão 🔍</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
@@ -168,7 +176,7 @@ export function tplOrderInReview(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Avaliar entrega →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Equipe Quantum Technology</p>
+      ${emailFooterTeam()}
     </div>
   `;
 }
@@ -180,6 +188,7 @@ export function tplOrderReviewApprovedAdmin(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#14b8a6;margin:0 0 8px">Cliente aprovou a entrega ✅</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a entrega do pedido
@@ -189,7 +198,7 @@ export function tplOrderReviewApprovedAdmin(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#14b8a6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Finalizar pedido →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }
@@ -208,6 +217,7 @@ export function tplOrderNewMessage(opts: {
   const orderLabel = opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType);
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Nova mensagem no pedido 💬</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.recipientName ? ` ${opts.recipientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
@@ -220,7 +230,7 @@ export function tplOrderNewMessage(opts: {
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Responder →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }

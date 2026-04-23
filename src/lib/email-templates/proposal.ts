@@ -1,3 +1,5 @@
+import { emailLogoHeader, emailFooterTeam, emailFooterSystem } from "./shared";
+
 export function tplProposalSent(opts: {
   clientName: string;
   projectType: string;
@@ -8,9 +10,7 @@ export function tplProposalSent(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
-      <div style="margin-bottom:24px">
-        <img src="${process.env.NEXTAUTH_URL}/logo.png" alt="Quantum Technology" height="32" style="filter:brightness(2)" onerror="this.style.display='none'" />
-      </div>
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Sua proposta está pronta ✦</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
@@ -32,10 +32,8 @@ export function tplProposalSent(opts: {
       <a href="${opts.proposalUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver proposta completa →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">
-        Se tiver dúvidas, responda a este e-mail ou entre em contato conosco.<br/>
-        — Equipe Quantum Technology
-      </p>
+      <p style="color:#94a3b8;font-size:13px;margin-top:32px">Se tiver dúvidas, responda a este e-mail ou entre em contacto connosco.</p>
+      ${emailFooterTeam()}
     </div>
   `;
 }
@@ -48,6 +46,7 @@ export function tplProposalApproved(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada ✓</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a proposta 
@@ -56,7 +55,7 @@ export function tplProposalApproved(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver no painel admin →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }
@@ -67,6 +66,7 @@ export function tplProposalApprovedClient(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada — bem-vindo a bordo! 🚀</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
@@ -90,6 +90,7 @@ export function tplRevisionRequested(opts: {
 }) {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#f59e0b;margin:0 0 8px">Revisão solicitada</h1>
       <p style="color:#94a3b8;margin:0 0 16px">
         O cliente solicitou alterações à proposta do projeto 
@@ -101,7 +102,7 @@ export function tplRevisionRequested(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver e editar proposta →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }

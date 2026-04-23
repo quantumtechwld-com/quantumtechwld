@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { computeComplexity } from "@/lib/complexity";
 import { sendMail } from "@/lib/email";
+import { emailLogoHeader } from "@/lib/email-templates/shared";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { verifyCsrf } from "@/lib/csrf";
 
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
         subject: `🚀 Novo Lead: ${payload.name} — ${payload.service ?? payload.projectType}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+            ${emailLogoHeader("light")}
             <h2 style="color:#4f46e5">Novo Lead Recebido</h2>
             <table style="width:100%;border-collapse:collapse">
               <tr><td style="padding:8px;font-weight:bold;width:140px">Nome</td><td style="padding:8px">${escapeHtml(payload.name)}</td></tr>

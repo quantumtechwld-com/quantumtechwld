@@ -83,7 +83,7 @@
     "aiTitle": "✨ Briefing Inteligente",
     "aiHeading": "Describe tu proyecto en texto libre",
     "aiSubheading": "La IA analiza y rellena el formulario automáticamente. O salta y rellena manualmente.",
-    "aiPlaceholder": "Ej: Necesito una app móvil para delivery de comida. El cliente hace el pedido, el restaurante confirma y el repartidor rastrea en tiempo real. Necesita pago online, notificaciones push y panel administrativo. Presupuesto hasta €15.000, plazo de 4 meses.",
+    "aiPlaceholder": "Ej: Necesito una app móvil para delivery de comida. El cliente hace el pedido, el restaurante confirma y el repartidor rastrea en tiempo real. Necesita pago online, notificaciones push y panel administrativo. Presupuesto a discutir, plazo de 4 meses.",
     "btnManual": "Rellenar manualmente",
     "btnAnalyzing": "Analizando...",
     "btnAnalyze": "✨ Analizar con IA →",
@@ -163,7 +163,11 @@
   },
   "footer": {
     "rights": "© 2026 Todos los derechos reservados.",
-    "regions": "EE.UU. | América Latina | Europa"
+    "regions": "EE.UU. | Brasil | Europa",
+    "regionsLabel": "Regiones de operación: EE.UU., Brasil y Europa",
+    "regionUSA": "EE.UU.",
+    "regionBrazil": "Brasil",
+    "regionEurope": "Europa"
   },
   "briefing": {
     "navPortal": "Portal",

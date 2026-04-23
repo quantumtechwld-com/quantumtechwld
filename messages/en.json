@@ -83,7 +83,7 @@
     "aiTitle": "✨ Intelligent Briefing",
     "aiHeading": "Describe your project in free text",
     "aiSubheading": "AI analyzes and fills the form automatically. Or skip and fill manually.",
-    "aiPlaceholder": "E.g.: I need a mobile app for food delivery. The customer places the order, the restaurant confirms and the delivery person tracks in real time. Needs online payment, push notifications and admin panel. Budget up to €15,000, 4-month timeline.",
+    "aiPlaceholder": "E.g.: I need a mobile app for food delivery. The customer places the order, the restaurant confirms and the delivery person tracks in real time. Needs online payment, push notifications and admin panel. Budget to be discussed, 4-month timeline.",
     "btnManual": "Fill manually",
     "btnAnalyzing": "Analyzing...",
     "btnAnalyze": "✨ Analyze with AI →",
@@ -163,7 +163,11 @@
   },
   "footer": {
     "rights": "© 2026 All rights reserved.",
-    "regions": "USA | Latin America | Europe"
+    "regions": "USA | Brazil | Europe",
+    "regionsLabel": "Regions of operation: USA, Brazil and Europe",
+    "regionUSA": "USA",
+    "regionBrazil": "Brazil",
+    "regionEurope": "Europe"
   },
   "briefing": {
     "navPortal": "Portal",

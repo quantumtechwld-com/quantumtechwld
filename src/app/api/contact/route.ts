@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendMail } from "@/lib/email";
+import { emailLogoHeader } from "@/lib/email-templates/shared";
 import { prisma } from "@/lib/prisma";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { verifyCsrf } from "@/lib/csrf";
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
         subject: `[Contato] ${subject} — ${name}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+            ${emailLogoHeader("light")}
             <h2 style="color:#7c3aed">Nova mensagem de contato</h2>
             <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
               <tr><td style="padding:6px 0;color:#64748b;width:100px">Nome</td><td style="padding:6px 0;color:#1e293b">${name}</td></tr>

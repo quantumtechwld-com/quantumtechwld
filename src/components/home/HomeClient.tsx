@@ -170,12 +170,12 @@ export default function HomeClient() {
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <LangSwitcher current={locale} />
-            <a
+            <Link
               href="/portal"
               className="rounded-lg border border-white/15 px-3 py-2 text-xs font-bold text-slate-300 transition-all hover:border-white/30 hover:text-white sm:px-4 sm:text-sm"
             >
               {t("nav.clientArea")}
-            </a>
+            </Link>
             <a
               href="#lead"
               className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-light hover:shadow-[0_0_20px_var(--accent-glow)] sm:px-5 sm:text-sm"
@@ -599,12 +599,12 @@ export default function HomeClient() {
                 </li>
               ))}
             </ul>
-            <a
+            <Link
               href="/portal/contato"
               className="mt-6 inline-block text-sm text-slate-400 hover:text-accent transition-colors"
             >
               {t("lead.quickContact")}
-            </a>
+            </Link>
           </div>
           <div data-gsap="lead-form">
             <LeadForm />
@@ -638,7 +638,29 @@ export default function HomeClient() {
           </a>
         </div>
         <p>{t("footer.rights")}</p>
-        <p className="mt-2 text-slate-700">{t("footer.regions")}</p>
+        {/* Bandeiras das regiões de atuação — SVG local com alt text para SEO e acessibilidade */}
+        <div
+          className="mt-3 flex items-center justify-center gap-4 text-slate-500"
+          aria-label={t("footer.regionsLabel")}
+        >
+          <span className="flex items-center gap-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/flags/flag-us.svg" alt={t("footer.regionUSA")} width={24} height={16} className="rounded-xs shadow-sm" />
+            <span className="text-xs font-medium tracking-wide">{t("footer.regionUSA")}</span>
+          </span>
+          <span aria-hidden="true" className="text-slate-600">·</span>
+          <span className="flex items-center gap-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/flags/flag-br.svg" alt={t("footer.regionBrazil")} width={24} height={16} className="rounded-xs shadow-sm" />
+            <span className="text-xs font-medium tracking-wide">{t("footer.regionBrazil")}</span>
+          </span>
+          <span aria-hidden="true" className="text-slate-600">·</span>
+          <span className="flex items-center gap-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/flags/flag-eu.svg" alt={t("footer.regionEurope")} width={24} height={16} className="rounded-xs shadow-sm" />
+            <span className="text-xs font-medium tracking-wide">{t("footer.regionEurope")}</span>
+          </span>
+        </div>
       </footer>
 
     </div>

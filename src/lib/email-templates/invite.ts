@@ -1,3 +1,5 @@
+import { emailLogoHeader } from "./shared";
+
 export type InviteLocale = "pt" | "en" | "es";
 
 const INVITE_COPY: Record<InviteLocale, {
@@ -54,7 +56,7 @@ export function buildInviteEmail(
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#0a0a0f">
 <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:32px auto;background:#0f0f14;color:#e2e8f0;padding:40px;border-radius:16px;border:1px solid #ffffff15">
-  <p style="color:#0ea5e9;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0 0 16px">Quantum Tech</p>
+  ${emailLogoHeader()}
   <h1 style="color:#ffffff;font-size:24px;font-weight:700;margin:0 0 8px">${c.title}</h1>
   <p style="color:#94a3b8;margin:0 0 24px;font-size:15px">${c.greeting(name)}</p>
   <p style="color:#e2e8f0;margin:0 0 8px;font-size:14px">${c.body}</p>

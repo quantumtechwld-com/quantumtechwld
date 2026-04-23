@@ -1,4 +1,5 @@
 import { ORDER_TYPE_LABEL } from "@/lib/constants";
+import { emailLogoHeader, emailFooterSystem } from "./shared";
 
 export function tplOrderPaymentConfirmed(opts: {
   clientName: string;
@@ -9,6 +10,7 @@ export function tplOrderPaymentConfirmed(opts: {
   const amount = (opts.amountCents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pagamento confirmado ✓</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
@@ -36,6 +38,7 @@ export function tplOrderPaymentConfirmedAdmin(opts: {
   const amount = (opts.amountCents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pagamento recebido — pedido em produção ✓</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> efetuou o pagamento de
@@ -46,7 +49,7 @@ export function tplOrderPaymentConfirmedAdmin(opts: {
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver no painel admin →
       </a>
-      <p style="color:#475569;font-size:12px;margin-top:32px">— Sistema Quantum Technology</p>
+      ${emailFooterSystem()}
     </div>
   `;
 }
