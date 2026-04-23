@@ -11,8 +11,17 @@
  *   ${emailFooterSystem()}         → admin/internal signature
  */
 
-/** Absolute base URL for email asset paths (required — relative URLs don't work in email clients). */
-const BASE_URL = process.env.NEXTAUTH_URL ?? "";
+/**
+ * Absolute base URL for email asset paths.
+ * Must be the public production domain — localhost never works inside email clients.
+ * Priority: EMAIL_BASE_URL > AUTH_URL > NEXTAUTH_URL
+ */
+const BASE_URL = (
+  process.env.EMAIL_BASE_URL ??
+  process.env.AUTH_URL ??
+  process.env.NEXTAUTH_URL ??
+  ""
+).replace(/\/$/, "");
 
 /**
  * Branded logo header block for email templates.

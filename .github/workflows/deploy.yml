@@ -88,6 +88,7 @@ jobs:
           EMAIL_FROM:                  ${{ secrets.EMAIL_FROM }}
           EMAIL_ADMIN:                 ${{ secrets.EMAIL_ADMIN }}
           ADMIN_EMAIL:                 ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_BASE_URL:              ${{ secrets.EMAIL_BASE_URL }}
           STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           STRIPE_MOCK:                 "false"
@@ -130,6 +131,7 @@ jobs:
           EMAIL_FROM:                  ${{ secrets.EMAIL_FROM }}
           EMAIL_ADMIN:                 ${{ secrets.EMAIL_ADMIN }}
           ADMIN_EMAIL:                 ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_BASE_URL:              ${{ secrets.EMAIL_BASE_URL }}
           STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
@@ -146,8 +148,7 @@ jobs:
           printf 'EMAIL_SERVER_PASSWORD=%s\n' "$EMAIL_SERVER_PASSWORD"        >> env.production.local
           printf 'EMAIL_FROM=%s\n'            "$EMAIL_FROM"                   >> env.production.local
           printf 'EMAIL_ADMIN=%s\n'           "$EMAIL_ADMIN"                  >> env.production.local
-          printf 'ADMIN_EMAIL=%s\n'           "$ADMIN_EMAIL"                  >> env.production.local
-          printf 'STRIPE_SECRET_KEY=%s\n'     "$STRIPE_SECRET_KEY"            >> env.production.local
+          printf 'ADMIN_EMAIL=%s\n'           "$ADMIN_EMAIL"                  >> env.production.local          printf 'EMAIL_BASE_URL=%s\n'        "$EMAIL_BASE_URL"               >> env.production.local          printf 'STRIPE_SECRET_KEY=%s\n'     "$STRIPE_SECRET_KEY"            >> env.production.local
           printf 'STRIPE_WEBHOOK_SECRET=%s\n' "$STRIPE_WEBHOOK_SECRET"        >> env.production.local
           printf 'STRIPE_MOCK=false\n'                                         >> env.production.local
           printf 'GEMINI_API_KEY=%s\n'        "$GEMINI_API_KEY"               >> env.production.local
