@@ -85,6 +85,7 @@ export default function HomeClient() {
       desc: t("services.aiDesc"),
       gradient: SERVICE_ICONS[2][1],
       accent: SERVICE_ICONS[2][2],
+      tags: ["OpenAI", "n8n", "LLM"],
     },
   ];
 
@@ -135,7 +136,7 @@ export default function HomeClient() {
     {
       label: t("portfolio.aiLabel"),
       title: t("portfolio.aiTitle"),
-      tag: "OpenAI · n8n · WhatsApp",
+      tag: "OpenAI · n8n · WhatsApp · LLM",
       gradient: "from-emerald-600 via-teal-700 to-teal-900",
       bars: [55, 80, 40, 95, 65, 75, 50, 85, 45, 90, 60, 100],
       image: "/images/n8n-screenshot-readme.png",
@@ -430,6 +431,15 @@ export default function HomeClient() {
               </div>
               <h3 className="mb-3 text-xl font-bold text-white">{svc.title}</h3>
               <p className="text-sm leading-relaxed text-slate-300/90">{svc.desc}</p>
+              {svc.tags && (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {svc.tags.map((tag) => (
+                    <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-semibold text-slate-400">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className={`mt-6 flex items-center gap-1.5 text-xs font-bold ${svc.accent} opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100`}>
                 <a href="#lead" className="flex items-center gap-1.5">{t("services.cta")} <span>→</span></a>
               </div>
