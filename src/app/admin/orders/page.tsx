@@ -49,7 +49,8 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
     db.order.findMany({
       where,
       include: {
-        client: { select: { name: true, email: true } },
+        client:   { select: { name: true, email: true } },
+        organization: { select: { name: true } },
         messages: { where: { author: { role: "CLIENT" } }, select: { id: true, createdAt: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -187,7 +188,10 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
                         </span>
                       )}
                       <span className="text-slate-500 text-sm">·</span>
-                      <span className="text-sm text-slate-400">{o.client.name ?? o.client.email}</span>
+                      {o.organization
+                        ? <span className="inline-flex items-center gap-1 text-sm text-blue-300">🏢 {o.organization.name}</span>
+                        : <span className="text-sm text-slate-400">{o.client.name ?? o.client.email}</span>
+                      }
                       {unread > 0 && (
                         <span className="inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
                           {unread} nova{unread > 1 ? "s" : ""}
