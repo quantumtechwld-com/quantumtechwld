@@ -7,6 +7,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { OrderClientActions } from "./OrderClientActions";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import { PayOrderButton } from "./PayOrderButton";
+import { PixPaymentPanel } from "@/components/PixPaymentPanel";
 import { RatingWidget } from "./RatingWidget";
 import { convertAndFormatByLocale, getCurrencyForLocale } from "@/lib/currency";
 import {
@@ -134,6 +135,19 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
         </div>
       );
     }
+
+    if (inst.method === "MANUAL_PIX") {
+      return (
+        <PixPaymentPanel
+          orderId={order.id}
+          amountCents={amtCents}
+          installmentLabel={label}
+          dueDate={inst.dueDate}
+        />
+      );
+    }
+
+    // MANUAL_TRANSFER / MANUAL_OTHER
     return (
       <div className={`mt-4 rounded-2xl border p-5 ${isOverdue ? "border-red-500/40 bg-red-500/5" : "border-yellow-500/30 bg-yellow-500/5"}`}>
         <h2 className={`text-sm font-semibold mb-1 ${isOverdue ? "text-red-300" : "text-yellow-300"}`}>{label}</h2>

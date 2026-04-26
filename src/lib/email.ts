@@ -45,4 +45,4 @@ export async function sendMail({ to, subject, html, text, replyTo }: MailOptions
 // Re-export all templates so existing imports keep working
 export { tplProposalSent, tplProposalApproved, tplProposalApprovedClient, tplRevisionRequested } from "./email-templates/proposal";
 export { tplOrderReceived, tplOrderProposalSent, tplOrderApprovedAdmin, tplOrderRevisionAdmin, tplOrderInProduction, tplOrderCompleted, tplOrderInReview, tplOrderReviewApprovedAdmin, tplOrderNewMessage } from "./email-templates/orders";
-export { tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin } from "./email-templates/payments";
+export { tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin, tplPixNotifyAdmin } from "./email-templates/payments";

@@ -53,3 +53,42 @@ export function tplOrderPaymentConfirmedAdmin(opts: {
     </div>
   `;
 }
+
+/**
+ * Enviado ao admin quando o cliente declara que efetuou o pagamento via PIX.
+ * O admin deve confirmar manualmente no painel /admin/financeiro/[orderId].
+ */
+export function tplPixNotifyAdmin(opts: {
+  clientName: string;
+  clientEmail: string;
+  orderRef: string;
+  orderType: string;
+  adminFinanceiroUrl: string;
+  amountCents: number;
+}) {
+  const amount = (opts.amountCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return /* html */ `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
+      ${emailLogoHeader()}
+      <h1 style="font-size:20px;font-weight:700;color:#f59e0b;margin:0 0 8px">PIX declarado pelo cliente ⏳</h1>
+      <p style="color:#94a3b8;margin:0 0 20px">
+        O cliente <strong style="color:#fff">${opts.clientName || opts.clientEmail}</strong>
+        declarou que efetuou o pagamento via PIX de
+        <strong style="color:#fff">${amount}</strong>
+        para o pedido <strong style="color:#fff">${opts.orderRef}</strong>
+        (${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}).
+      </p>
+      <div style="background:#f59e0b15;border:1px solid #f59e0b30;border-radius:12px;padding:16px;margin-bottom:24px">
+        <p style="color:#fcd34d;font-size:13px;margin:0;font-weight:600">
+          Ação necessária: verifique o extrato PIX e confirme o pagamento manualmente no painel.
+        </p>
+      </div>
+      <a href="${opts.adminFinanceiroUrl}"
+         style="display:inline-block;background:#f59e0b;color:#000;font-weight:700;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
+        Confirmar no painel financeiro →
+      </a>
+      ${emailFooterSystem()}
+    </div>
+  `;
+}
+

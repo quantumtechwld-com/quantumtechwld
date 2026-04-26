@@ -98,6 +98,9 @@ jobs:
           GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
           N8N_WEBHOOK_URL:             ${{ secrets.N8N_WEBHOOK_URL }}
           NEXT_PUBLIC_SENTRY_DSN:      ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_PIX_KEY:         ${{ secrets.NEXT_PUBLIC_PIX_KEY }}
+          NEXT_PUBLIC_PIX_OWNER:       ${{ secrets.NEXT_PUBLIC_PIX_OWNER }}
+          NEXT_PUBLIC_PIX_BANK:        ${{ secrets.NEXT_PUBLIC_PIX_BANK }}
           NODE_ENV:                    production
         run: npm run build
 
@@ -140,6 +143,9 @@ jobs:
           GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
           N8N_WEBHOOK_URL:             ${{ secrets.N8N_WEBHOOK_URL }}
           NEXT_PUBLIC_SENTRY_DSN:      ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_PIX_KEY:         ${{ secrets.NEXT_PUBLIC_PIX_KEY }}
+          NEXT_PUBLIC_PIX_OWNER:       ${{ secrets.NEXT_PUBLIC_PIX_OWNER }}
+          NEXT_PUBLIC_PIX_BANK:        ${{ secrets.NEXT_PUBLIC_PIX_BANK }}
         run: |
           printf 'NODE_ENV=production\n'                                        > env.production.local
           printf 'DATABASE_URL=%s\n'          "$DATABASE_URL"                 >> env.production.local
@@ -157,6 +163,9 @@ jobs:
           printf 'GEMINI_API_KEY=%s\n'        "$GEMINI_API_KEY"               >> env.production.local
           printf 'N8N_WEBHOOK_URL=%s\n'       "$N8N_WEBHOOK_URL"              >> env.production.local
           printf 'NEXT_PUBLIC_SENTRY_DSN=%s\n' "$NEXT_PUBLIC_SENTRY_DSN"      >> env.production.local
+          printf 'NEXT_PUBLIC_PIX_KEY=%s\n'    "$NEXT_PUBLIC_PIX_KEY"         >> env.production.local
+          printf 'NEXT_PUBLIC_PIX_OWNER=%s\n'  "$NEXT_PUBLIC_PIX_OWNER"       >> env.production.local
+          printf 'NEXT_PUBLIC_PIX_BANK=%s\n'   "$NEXT_PUBLIC_PIX_BANK"        >> env.production.local
           chmod 600 env.production.local
 
           aws s3 cp deploy.tar.gz             s3://${{ secrets.DEPLOY_BUCKET }}/deploy.tar.gz
