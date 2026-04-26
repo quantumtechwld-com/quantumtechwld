@@ -489,7 +489,7 @@
     "payInstallmentFinal": "Final installment — complete your payment",
     "payDueDate": "Due date:",
     "payDueDateOverdue": "⚠ Due date:",
-    "payManualInstructions": "Please complete the payment following the instructions sent by our team (PIX, bank transfer, or other). Production will proceed automatically after confirmation.",
+    "payManualInstructions": "Please complete the payment following the instructions sent by our team (bank transfer or other). Production will proceed automatically after confirmation.",
     "pixTitle": "PIX Payment",
     "pixKeyLabel": "PIX Key",
     "pixOwnerLabel": "Beneficiary",

@@ -3,8 +3,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 import Link from "next/link";
+import Image from "next/image";
 import { PrintButton } from "./PrintButton";
 import { getTranslations, getLocale } from "next-intl/server";
+import { getCurrencyForLocale } from "@/lib/currency";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -74,9 +76,9 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   const paidAtRaw = isPaidViaStripe ? (order.payment?.paidAt ?? null) : (financialPaidAt ?? null);
   const paidAtDate = paidAtRaw ? new Date(paidAtRaw) : null;
 
-  // SENSIVEL: invoice deve sempre refletir a moeda gravada na transacao,
-  // nunca a moeda derivada do locale da interface.
-  const currency = (order.payment?.currency?.toUpperCase() ?? "BRL");
+  // Stripe: usa a moeda gravada na transação.
+  // Financial/PIX: não armazena moeda — deriva do locale do cliente (pt→BRL, en→USD, es→EUR).
+  const currency = order.payment?.currency?.toUpperCase() ?? getCurrencyForLocale(locale);
   const amount = (amountCents / 100).toLocaleString(locale, {
     style: "currency", currency,
   });
@@ -111,8 +113,24 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
           {/* Cabeçalho */}
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-white print:text-black">Quantum Technology</h1>
-              <p className="text-sm text-slate-400 print:text-gray-600">quantum.technology.agency</p>
+              {/* Logo na tela (fundo escuro) */}
+              <Image
+                src="/images/logo/logo-mono-white.svg"
+                alt="Quantum Technology"
+                width={155}
+                height={36}
+                className="print:hidden"
+                priority
+              />
+              {/* Logo na impressão/PDF (fundo branco) */}
+              <Image
+                src="/images/logo/logo-dark.svg"
+                alt="Quantum Technology"
+                width={155}
+                height={36}
+                className="hidden print:block"
+                priority
+              />
             </div>
             <div className="text-right">
               <p className="text-xs uppercase tracking-widest text-slate-500 print:text-gray-500">{t("invoiceLabel")}</p>

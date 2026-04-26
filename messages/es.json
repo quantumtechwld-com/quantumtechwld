@@ -489,7 +489,7 @@
     "payInstallmentFinal": "Cuota final — realiza el pago",
     "payDueDate": "Vencimiento:",
     "payDueDateOverdue": "⚠ Vencimiento:",
-    "payManualInstructions": "El pago deberá realizarse según las instrucciones enviadas por el equipo (PIX, transferencia u otro). La producción avanzará automáticamente tras la confirmación.",
+    "payManualInstructions": "El pago deberá realizarse según las instrucciones enviadas por el equipo (transferencia bancaria u otro). La producción avanzará automáticamente tras la confirmación.",
     "pixTitle": "Pago vía PIX",
     "pixKeyLabel": "Clave PIX",
     "pixOwnerLabel": "Beneficiario",
