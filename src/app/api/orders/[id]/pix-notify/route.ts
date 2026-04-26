@@ -77,9 +77,12 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
         adminFinanceiroUrl: financUrl,
         amountCents:        pendingInstallment.amountCents,
       }),
-    }).catch(() => {
-      // Email não-crítico — não bloquear a resposta se falhar
+    }).catch((err: unknown) => {
+      // Email não-crítico — não bloquear a resposta, mas logar para diagnóstico
+      console.error("[pix-notify] Falha ao enviar email ao admin:", err);
     });
+  } else {
+    console.error("[pix-notify] ADMIN_EMAIL não definida — notificação PIX não enviada. Pedido:", orderRef);
   }
 
   return NextResponse.json({ ok: true });
