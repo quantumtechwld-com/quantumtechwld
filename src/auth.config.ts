@@ -27,16 +27,16 @@ export const authConfig = {
   },
   session: { strategy: "jwt" as const },
   callbacks: {
-    // session edge-safe: mapeia claims do JWT → session.user
+    // session edge-safe: mapeia apenas os claims mínimos do JWT (id, role, status).
+    // organizationId e orgRole não estão no JWT — são buscados do banco no
+    // session callback do auth.ts (non-Edge). O middleware só precisa de role e status.
     session({ session, token }) {
       if (token) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const u = session.user as any;
-        u.id             = token.id;
-        u.role           = token.role           ?? "CLIENT";
-        u.status         = token.status         ?? "PENDING";
-        u.organizationId = token.organizationId ?? null;
-        u.orgRole        = token.orgRole        ?? null;
+        u.id     = token.id;
+        u.role   = token.role   ?? "CLIENT";
+        u.status = token.status ?? "PENDING";
       }
       return session;
     },

@@ -106,39 +106,50 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return true;
     },
-    // Chamado ao criar/renovar o JWT. `user` só existe no momento do signin.
+    // Chamado ao criar/renovar o JWT. Guarda apenas o mínimo necessário para o
+    // middleware Edge: id, role e status. Campos como organizationId e orgRole
+    // são buscados do banco no session callback (não-Edge), mantendo o cookie
+    // pequeníssimo (~250 bytes) e eliminando o erro 400/502 do Nginx.
     async jwt({ token, user }) {
       if (user) {
         token.id     = user.id;
         token.role   = (user as Record<string, unknown>).role   ?? "CLIENT";
         token.status = (user as Record<string, unknown>).status ?? "PENDING";
-
-        // Carregar organização do utilizador
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id as string },
-          select: {
-            organizationId: true,
-            orgMemberships: {
-              select: { role: true },
-              orderBy: { createdAt: "asc" },
-              take: 1,
-            },
-          },
-        });
-        token.organizationId = dbUser?.organizationId ?? null;
-        token.orgRole        = (dbUser?.orgMemberships?.[0]?.role ?? null) as "ADMIN" | "MEMBER" | null;
       }
+      // Remove claims padrão do NextAuth que inflam o cookie desnecessariamente.
+      // name, email, picture e sub são recuperados via DB no session callback.
+      delete (token as Record<string, unknown>).name;
+      delete (token as Record<string, unknown>).email;
+      delete (token as Record<string, unknown>).picture;
       return token;
     },
-    // Expõe id, role, status e organizationId na sessão client-side.
-    session({ session, token }) {
-      if (token) {
-        session.user.id             = token.id as string;
-        session.user.role           = token.role   as "CLIENT" | "ADMIN";
-        session.user.status         = token.status as "PENDING" | "ACTIVE" | "SUSPENDED";
-        session.user.organizationId = token.organizationId as string | null;
-        session.user.orgRole        = token.orgRole as "ADMIN" | "MEMBER" | null;
-      }
+    // Chamado em cada request autenticado no servidor (não-Edge).
+    // Busca do banco os campos que foram removidos do JWT para manter o cookie pequeno.
+    async session({ session, token }) {
+      if (!token.id) return session;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: token.id as string },
+        select: {
+          name: true,
+          email: true,
+          status: true,
+          organizationId: true,
+          orgMemberships: {
+            select: { role: true },
+            orderBy: { createdAt: "asc" },
+            take: 1,
+          },
+        },
+      });
+
+      session.user.id             = token.id as string;
+      session.user.role           = token.role as "CLIENT" | "ADMIN";
+      session.user.name           = dbUser?.name ?? null;
+      session.user.email          = dbUser?.email ?? "";
+      session.user.status         = (dbUser?.status ?? "PENDING") as "PENDING" | "ACTIVE" | "SUSPENDED";
+      session.user.organizationId = dbUser?.organizationId ?? null;
+      session.user.orgRole        = (dbUser?.orgMemberships?.[0]?.role ?? null) as "ADMIN" | "MEMBER" | null;
       return session;
     },
   },

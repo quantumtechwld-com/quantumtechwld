@@ -76,6 +76,10 @@ server {
     add_header X-Content-Type-Options "nosniff";
     add_header Referrer-Policy "strict-origin-when-cross-origin";
 
+    # Buffers para suportar JWT cookie do NextAuth v5 (request e response)
+    large_client_header_buffers 8 32k;
+    client_header_buffer_size   4k;
+
     # Logs
     access_log /var/log/nginx/quantum-agency.access.log;
     error_log  /var/log/nginx/quantum-agency.error.log;
@@ -92,6 +96,10 @@ server {
         proxy_set_header   X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
         proxy_read_timeout 60s;
+        # Buffers de resposta aumentados para headers grandes (ex: Set-Cookie JWT)
+        proxy_buffer_size          128k;
+        proxy_buffers              4 256k;
+        proxy_busy_buffers_size    256k;
     }
 
     # Cache de assets estáticos do Next.js

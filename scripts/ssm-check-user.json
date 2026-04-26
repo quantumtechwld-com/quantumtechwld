@@ -1,0 +1,10 @@
+{
+  "commands": [
+    "curl -s http://localhost:3000/api/health && echo ''",
+    "grep -c ' 502 \\| 400 ' /var/log/nginx/quantum-agency.access.log || echo '0 erros 502/400 total'",
+    "tail -3 /var/log/nginx/quantum-agency.error.log | grep -v '18:' && echo 'sem novos erros apos 19:04' || true",
+    "free -m | awk 'NR==2{printf \"RAM: %dMB usados / %dMB total (%.0f%%)\\n\", $3, $2, $3/$2*100}'",
+    "df -h / | awk 'NR==2{print \"Disco: \" $3 \" usados / \" $2 \" total \" $5}'",
+    "ps aux --sort=-%mem | awk 'NR<=4{print}'"
+  ]
+}
