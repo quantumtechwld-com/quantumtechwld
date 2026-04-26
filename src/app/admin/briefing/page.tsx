@@ -13,7 +13,7 @@ export const metadata = { title: "Briefings" };
 export default async function AdminBriefingsPage() {
   const session = await auth();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "DEVELOPER") {
     redirect("/portal");
   }
 

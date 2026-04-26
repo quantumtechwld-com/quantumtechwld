@@ -146,7 +146,9 @@ function isApiError(v: Record<string, unknown>): v is ApiError {
   return typeof v.error === "string" && typeof v.status === "number";
 }
 
-const ADMIN_ACTIONS = new Set(["propose", "start_production", "submit_review", "complete", "reopen", "admin_reject"]);
+const ADMIN_ONLY_ACTIONS  = new Set(["propose", "admin_reject"]);
+const DEVELOPER_ACTIONS   = new Set(["start_production", "submit_review", "complete", "reopen"]);
+const ALL_ADMIN_ACTIONS   = new Set([...ADMIN_ONLY_ACTIONS, ...DEVELOPER_ACTIONS]);
 
 /**
  * Valida autorização e devolve os dados a persistir (ou um ApiError).
@@ -157,12 +159,16 @@ function resolveActionData(
   order: { status: string },
   isAdmin: boolean,
   isOwner: boolean,
+  isDeveloper: boolean,
 ): Record<string, unknown> | ApiError {
-  if (!isAdmin && !isOwner) return { error: "Acesso negado.", status: 403 };
-  const isAdminAction = ADMIN_ACTIONS.has(body.action);
-  if (isAdminAction && !isAdmin)  return { error: "Apenas admin.", status: 403 };
-  if (!isAdminAction && !isOwner) return { error: "Apenas o dono do pedido.", status: 403 };
-  return isAdminAction ? buildAdminUpdateData(body) : buildClientUpdateData(body, order);
+  if (!isAdmin && !isDeveloper && !isOwner) return { error: "Acesso negado.", status: 403 };
+  const isAdminOnlyAction = ADMIN_ONLY_ACTIONS.has(body.action);
+  const isDevAction       = DEVELOPER_ACTIONS.has(body.action);
+  const isPrivilegedAction = ALL_ADMIN_ACTIONS.has(body.action);
+  if (isAdminOnlyAction && !isAdmin)             return { error: "Apenas admin.", status: 403 };
+  if (isDevAction && !isAdmin && !isDeveloper)   return { error: "Apenas admin ou developer.", status: 403 };
+  if (!isPrivilegedAction && !isOwner)           return { error: "Apenas o dono do pedido.", status: 403 };
+  return isPrivilegedAction ? buildAdminUpdateData(body) : buildClientUpdateData(body, order);
 }
 
 /**
@@ -311,10 +317,11 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     });
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
 
-    const isAdmin = session.user.role === "ADMIN";
-    const isOwner = canAccessOrder(order, session.user);
+    const isAdmin     = session.user.role === "ADMIN";
+    const isDeveloper = session.user.role === "DEVELOPER";
+    const isOwner     = canAccessOrder(order, session.user);
 
-    const result = resolveActionData(body, order, isAdmin, isOwner);
+    const result = resolveActionData(body, order, isAdmin, isOwner, isDeveloper);
     if (isApiError(result)) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }

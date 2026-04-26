@@ -20,7 +20,7 @@ export default async function AdminBriefingDetailPage({
 }>) {
   const session = await auth();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "DEVELOPER") {
     redirect("/portal");
   }
 

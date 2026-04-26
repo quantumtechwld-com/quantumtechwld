@@ -21,7 +21,7 @@ type RouteParams = { params: Promise<{ id: string }> };
 
 export default async function AdminOrderDetailPage({ params }: Readonly<RouteParams>) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") redirect("/portal");
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "DEVELOPER") redirect("/portal");
 
   const { id } = await params;
   const [order, me] = await Promise.all([

@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 const ALLOWED_STATUS = ["PENDING", "ACTIVE", "SUSPENDED"] as const;
-const ALLOWED_ROLE   = ["CLIENT", "ADMIN"]                 as const;
+const ALLOWED_ROLE   = ["CLIENT", "ADMIN", "DEVELOPER"]     as const;
 const MAX_IMAGE_BYTES = 300 * 1024;
 const IMAGE_MIME_RE   = /^data:image\/(jpeg|png|webp|gif);base64,/;
 
@@ -18,7 +18,7 @@ function validateStatus(status: string): string | null {
 function validateRole(role: string, userId: string, sessionId: string): string | null {
   if (!ALLOWED_ROLE.includes(role as (typeof ALLOWED_ROLE)[number]))
     return "Role inválida.";
-  if (userId === sessionId && role !== "ADMIN")
+  if (userId === sessionId && role !== "ADMIN" && role !== "DEVELOPER")
     return "Não pode remover a sua própria role de ADMIN.";
   return null;
 }

@@ -23,10 +23,13 @@ function fmtEur(cents: number) {
 
 export default async function AdminDashboardPage() {
   const session = await auth();
+  const role = session?.user?.role;
 
-  if (session?.user?.role !== "ADMIN") {
+  if (role !== "ADMIN" && role !== "DEVELOPER") {
     redirect("/portal");
   }
+
+  const isAdmin = role === "ADMIN";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dbAny = prisma as any;
@@ -106,10 +109,12 @@ export default async function AdminDashboardPage() {
 
         {/* Navegação rápida */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Link href="/admin/users" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
-            <Users size={18} className="text-accent-light group-hover:text-accent shrink-0" />
-            <span className="text-sm font-medium text-accent-light group-hover:text-accent">Utilizadores</span>
-          </Link>
+          {isAdmin && (
+            <Link href="/admin/users" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
+              <Users size={18} className="text-accent-light group-hover:text-accent shrink-0" />
+              <span className="text-sm font-medium text-accent-light group-hover:text-accent">Utilizadores</span>
+            </Link>
+          )}
           <Link href="/admin/orders" className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 hover:bg-accent/10 transition group">
             <Package size={18} className="text-accent-light group-hover:text-accent shrink-0" />
             <span className="text-sm font-medium text-accent-light group-hover:text-accent">Pedidos</span>
@@ -135,6 +140,7 @@ export default async function AdminDashboardPage() {
           monthRevenueCents={monthRevenueCents}
           monthLabel={monthLabel}
           fmtEur={fmtEur}
+          hideRevenue={!isAdmin}
         />
         <BriefingStats counts={counts} />
         <RecentOrdersTable

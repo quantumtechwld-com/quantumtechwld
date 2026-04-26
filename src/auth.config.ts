@@ -54,12 +54,12 @@ export const authConfig = {
 
       const user = auth?.user as Record<string, unknown> | undefined;
 
-      // /admin — apenas ADMIN
+      // /admin — ADMIN e DEVELOPER
       if (pathname.startsWith("/admin")) {
         if (!user) return false;
         const statusRedirect = getStatusRedirect(user, origin);
         if (statusRedirect) return statusRedirect;
-        return user?.role === "ADMIN";
+        return user?.role === "ADMIN" || user?.role === "DEVELOPER";
       }
 
       // /portal protegido — requer sessão e status ACTIVE

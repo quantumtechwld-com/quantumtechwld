@@ -18,7 +18,7 @@ type RefProject = {
 
 export default async function AdminBibliotecaPage() {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") redirect("/portal");
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "DEVELOPER") redirect("/portal");
 
   // Todos os briefings entregues para vincular ao projeto
   const deliveredBriefings = await prisma.briefing.findMany({

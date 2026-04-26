@@ -41,6 +41,9 @@ export function canAccessOrder(order: OrderForAuth, user: SessionUser): boolean 
   // Platform admin — acesso total
   if (user.role === "ADMIN") return true;
 
+  // Developer — acesso técnico a todos os pedidos
+  if (user.role === "DEVELOPER") return true;
+
   // Dono direto do pedido (retrocompatível — comportamento original)
   if (order.client?.email && order.client.email === user.email) return true;
 

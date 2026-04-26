@@ -17,7 +17,7 @@ type SearchParams = Promise<Record<string, string | undefined>>;
 
 export default async function AdminOrdersPage({ searchParams }: Readonly<{ searchParams: SearchParams }>) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") redirect("/portal");
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "DEVELOPER") redirect("/portal");
 
   const sp = await searchParams;
   const statusFilter = sp.status ?? "";

@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { Clock } from "lucide-react";
 
 type UserStatus = "PENDING" | "ACTIVE" | "SUSPENDED";
-type UserRole   = "CLIENT"  | "ADMIN";
+type UserRole   = "CLIENT"  | "ADMIN" | "DEVELOPER";
 
 interface UserRow {
   id:            string;
@@ -34,8 +34,9 @@ const STATUS_COLOR: Record<UserStatus, string> = {
 };
 
 const ROLE_COLOR: Record<UserRole, string> = {
-  ADMIN:  "bg-violet-500/15 text-violet-300 border-violet-500/30",
-  CLIENT: "bg-accent/15 text-accent-light border-accent/30",
+  ADMIN:     "bg-violet-500/15 text-violet-300 border-violet-500/30",
+  DEVELOPER: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+  CLIENT:    "bg-accent/15 text-accent-light border-accent/30",
 };
 
 // ── Helpers para normalização de imagem (escopo de módulo) ──────────────
@@ -527,7 +528,23 @@ function UserTable({
                         onClick={() => onRole(u.id, "ADMIN")}
                       />
                     )}
+                    {u.role === "CLIENT" && (
+                      <ActionBtn
+                        label="→ DEV"
+                        color="amber"
+                        busy={busy}
+                        onClick={() => onRole(u.id, "DEVELOPER")}
+                      />
+                    )}
                     {u.role === "ADMIN" && (
+                      <ActionBtn
+                        label="→ CLIENT"
+                        color="sky"
+                        busy={busy}
+                        onClick={() => onRole(u.id, "CLIENT")}
+                      />
+                    )}
+                    {u.role === "DEVELOPER" && (
                       <ActionBtn
                         label="→ CLIENT"
                         color="sky"

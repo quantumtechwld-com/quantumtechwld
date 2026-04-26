@@ -16,27 +16,30 @@ import {
   Building2,
 } from "lucide-react";
 
-type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; exact?: boolean };
+type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; exact?: boolean; adminOnly?: boolean };
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin",                   label: "Dashboard",      icon: LayoutDashboard, exact: true },
-  { href: "/admin/users",             label: "Utilizadores",   icon: Users            },
-  { href: "/admin/organizations",     label: "Organizações",    icon: Building2        },
+  { href: "/admin/users",             label: "Utilizadores",   icon: Users,           adminOnly: true },
+  { href: "/admin/organizations",     label: "Organizações",    icon: Building2,       adminOnly: true },
   { href: "/admin/orders",            label: "Pedidos",        icon: ShoppingBag      },
   { href: "/admin/briefing",          label: "Briefings",      icon: FileText         },
   { href: "/admin/biblioteca",        label: "Biblioteca",     icon: BookOpen         },
-  { href: "/admin/contacts",          label: "Contatos",       icon: MessageSquare    },
-  { href: "/admin/financeiro",        label: "Financeiro",     icon: Wallet           },
-  { href: "/admin/security-pipeline", label: "Segurança",      icon: ShieldCheck      },
+  { href: "/admin/contacts",          label: "Contatos",       icon: MessageSquare,   adminOnly: true },
+  { href: "/admin/financeiro",        label: "Financeiro",     icon: Wallet,          adminOnly: true },
+  { href: "/admin/security-pipeline", label: "Segurança",      icon: ShieldCheck,     adminOnly: true },
 ];
 
-export default function AdminHeader() {
+export default function AdminHeader({ role }: Readonly<{ role: string }>) {
   const pathname = usePathname();
+  const isAdmin = role === "ADMIN";
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
   }
+
+  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-background/90 backdrop-blur-md">
@@ -47,7 +50,7 @@ export default function AdminHeader() {
           className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
         >
           <LogoAnimated size={28} />
-          <span className="text-sm font-semibold text-white">Admin</span>
+          <span className="text-sm font-semibold text-white">{isAdmin ? "Admin" : "Dev"}</span>
           <span className="hidden text-xs text-white/25 lg:block">Quantum Technology</span>
         </Link>
 
@@ -56,7 +59,7 @@ export default function AdminHeader() {
 
         {/* Nav */}
         <nav className="flex flex-1 items-center gap-0.5 overflow-x-auto">
-          {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+          {visibleItems.map(({ href, label, icon: Icon, exact }) => {
             const active = isActive(href, exact);
             return (
               <Link

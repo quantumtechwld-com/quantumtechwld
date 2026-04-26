@@ -58,10 +58,12 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   setRequestLocale(locale);
   const messages = await loadMessages(locale);
 
+  const currentRole = session?.user?.role ?? "DEVELOPER";
+
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <div className="min-h-screen bg-background text-white">
-        <AdminHeader />
+        <AdminHeader role={currentRole} />
         <main className="mx-auto max-w-400 px-5 py-8">
           {children}
         </main>

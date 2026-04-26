@@ -98,6 +98,7 @@ model User {
 enum UserRole {
   CLIENT
   ADMIN
+  DEVELOPER
 }
 
 enum UserStatus {
