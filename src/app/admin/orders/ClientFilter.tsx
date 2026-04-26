@@ -7,11 +7,17 @@ interface Client {
   id: string;
   name: string | null;
   email: string;
+  organization: { name: string } | null;
 }
 
 interface Props {
   clients: Client[];
   currentClientId: string;
+}
+
+function clientLabel(c: Client): string {
+  if (c.organization) return `🏢 ${c.organization.name} — ${c.name ?? c.email}`;
+  return c.name ? `${c.name} (${c.email})` : c.email;
 }
 
 function ClientFilterInner({ clients, currentClientId }: Readonly<Props>) {
@@ -37,7 +43,7 @@ function ClientFilterInner({ clients, currentClientId }: Readonly<Props>) {
       <option value="">Todos os clientes</option>
       {clients.map((c) => (
         <option key={c.id} value={c.id}>
-          {c.name ? `${c.name} (${c.email})` : c.email}
+          {clientLabel(c)}
         </option>
       ))}
     </select>

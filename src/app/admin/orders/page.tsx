@@ -66,7 +66,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
     // Clientes únicos que têm pelo menos um pedido
     db.user.findMany({
       where: { role: "CLIENT", orders: { some: {} } },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, organization: { select: { name: true } } },
       orderBy: { name: "asc" },
     }) as Promise<unknown>,
   ]);
@@ -76,7 +76,7 @@ export default async function AdminOrdersPage({ searchParams }: Readonly<{ searc
   const orderList = orders as any[];
   const total = orderList.length;
   const readMap = new Map<string, Date>((reads as { orderId: string; lastReadAt: Date }[]).map((r) => [r.orderId, r.lastReadAt]));
-  const clients = clientsRaw as { id: string; name: string | null; email: string }[];
+  const clients = clientsRaw as { id: string; name: string | null; email: string; organization: { name: string } | null }[];
 
   function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
     const last = readMap.get(orderId);
