@@ -112,9 +112,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // pequeníssimo (~250 bytes) e eliminando o erro 400/502 do Nginx.
     async jwt({ token, user }) {
       if (user) {
+        // Login inicial: popula token com dados frescos do DB via PrismaAdapter.
         token.id     = user.id;
         token.role   = (user as Record<string, unknown>).role   ?? "CLIENT";
         token.status = (user as Record<string, unknown>).status ?? "PENDING";
+      } else if (token.id) {
+        // Renovação do token (sem novo login): re-sincroniza role e status do DB
+        // para garantir que o middleware Edge veja alterações feitas pelo admin.
+        const fresh = await prisma.user.findUnique({
+          where:  { id: token.id as string },
+          select: { role: true, status: true },
+        });
+        if (fresh) {
+          token.role   = fresh.role;
+          token.status = fresh.status;
+        }
       }
       // Remove claims padrão do NextAuth que inflam o cookie desnecessariamente.
       // name, email, picture e sub são recuperados via DB no session callback.
@@ -125,6 +137,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     // Chamado em cada request autenticado no servidor (não-Edge).
     // Busca do banco os campos que foram removidos do JWT para manter o cookie pequeno.
+    // role é lido SEMPRE do banco — nunca do token — para refletir alterações
+    // feitas pelo admin sem exigir novo login do utilizador.
     async session({ session, token }) {
       if (!token.id) return session;
 
@@ -133,6 +147,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         select: {
           name: true,
           email: true,
+          role: true,
           status: true,
           organizationId: true,
           orgMemberships: {
@@ -144,7 +159,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       });
 
       session.user.id             = token.id as string;
-      session.user.role           = token.role as "CLIENT" | "ADMIN";
+      session.user.role           = (dbUser?.role ?? token.role) as "CLIENT" | "ADMIN" | "DEVELOPER";
       session.user.name           = dbUser?.name ?? null;
       session.user.email          = dbUser?.email ?? "";
       session.user.status         = (dbUser?.status ?? "PENDING") as "PENDING" | "ACTIVE" | "SUSPENDED";
