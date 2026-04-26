@@ -14,18 +14,27 @@ export default async function PortalPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = prisma as any;
 
+  // Opção C: pedidos próprios OU da empresa (se tiver org)
+  const orgId = session.user.organizationId ?? null;
+  const orderWhere = orgId
+    ? { OR: [{ client: { email: session.user.email } }, { organizationId: orgId }], status: { notIn: ["DRAFT"] } }
+    : { client: { email: session.user.email }, status: { notIn: ["DRAFT"] } };
+  const countBase = orgId
+    ? { OR: [{ client: { email: session.user.email } }, { organizationId: orgId }] }
+    : { client: { email: session.user.email } };
+
   const [rawOrders, proposalSentCount, inProductionCount, inReviewCount, completedCount, rejectedCount] = await Promise.all([
     db.order.findMany({
-      where: { client: { email: session.user.email }, status: { notIn: ["DRAFT"] } },
+      where: orderWhere,
       orderBy: { createdAt: "desc" },
       take: 50,
       select: { id: true, title: true, type: true, status: true, createdAt: true, orderRef: true, estimatedValue: true },
     }),
-    db.order.count({ where: { client: { email: session.user.email }, status: "PROPOSAL_SENT" } }),
-    db.order.count({ where: { client: { email: session.user.email }, status: "IN_PRODUCTION" } }),
-    db.order.count({ where: { client: { email: session.user.email }, status: "IN_REVIEW" } }),
-    db.order.count({ where: { client: { email: session.user.email }, status: "COMPLETED" } }),
-    db.order.count({ where: { client: { email: session.user.email }, status: "REJECTED" } }),
+    db.order.count({ where: { ...countBase, status: "PROPOSAL_SENT" } }),
+    db.order.count({ where: { ...countBase, status: "IN_PRODUCTION" } }),
+    db.order.count({ where: { ...countBase, status: "IN_REVIEW" } }),
+    db.order.count({ where: { ...countBase, status: "COMPLETED" } }),
+    db.order.count({ where: { ...countBase, status: "REJECTED" } }),
   ]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

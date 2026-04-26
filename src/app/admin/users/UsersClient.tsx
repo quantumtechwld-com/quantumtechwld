@@ -102,7 +102,7 @@ async function normalizeToSquare(file: File): Promise<string> {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function UsersClient({ users: initial }: Readonly<{ users: UserRow[] }>) {
+export default function UsersClient({ users: initial, organizations }: Readonly<{ users: UserRow[]; organizations: { id: string; name: string }[] }>) {
   const [users, setUsers]               = useState<UserRow[]>(initial);
   const [loadingId, setLoadingId]       = useState<string | null>(null);
   const [resendingId, setResendingId]   = useState<string | null>(null);
@@ -111,6 +111,7 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
   const [inviteEmail, setInviteEmail]   = useState("");
   const [inviteName, setInviteName]     = useState("");
   const [inviteLocale, setInviteLocale] = useState<"pt" | "en" | "es">("pt");
+  const [inviteOrgId, setInviteOrgId]   = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteMsg, setInviteMsg]       = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -196,13 +197,21 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
       const res  = await fetch("/api/admin/users/invite", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ email: inviteEmail.trim(), name: inviteName.trim() || undefined, locale: inviteLocale }),
+        body:    JSON.stringify({
+          email:          inviteEmail.trim(),
+          name:           inviteName.trim() || undefined,
+          locale:         inviteLocale,
+          organizationId: inviteOrgId || undefined,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Falha no envio.");
-      setInviteMsg({ type: "ok", text: `Convite enviado para ${inviteEmail.trim()} (${inviteLocale.toUpperCase()})` });
+      const orgName = inviteOrgId ? organizations.find((o) => o.id === inviteOrgId)?.name : null;
+      const orgSuffix = orgName ? ` · org: ${orgName}` : "";
+      setInviteMsg({ type: "ok", text: `Convite enviado para ${inviteEmail.trim()} (${inviteLocale.toUpperCase()})${orgSuffix}` });
       setInviteEmail("");
       setInviteName("");
+      setInviteOrgId("");
     } catch (err) {
       setInviteMsg({ type: "err", text: err instanceof Error ? err.message : "Erro inesperado." });
     } finally {
@@ -299,6 +308,19 @@ export default function UsersClient({ users: initial }: Readonly<{ users: UserRo
               <option value="en">🇺🇸 English</option>
               <option value="es">🇪🇸 Español</option>
             </select>
+            {organizations.length > 0 && (
+              <select
+                value={inviteOrgId}
+                onChange={(e) => setInviteOrgId(e.target.value)}
+                aria-label="Organização (opcional)"
+                className="rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-accent"
+              >
+                <option value="">Sem organização</option>
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>{org.name}</option>
+                ))}
+              </select>
+            )}
             <button
               onClick={handleInvite}
               disabled={inviteLoading || !inviteEmail.trim()}

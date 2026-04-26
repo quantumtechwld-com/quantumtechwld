@@ -554,7 +554,11 @@
     "bibliotecaDetailHours": "Horas reales",
     "bibliotecaDetailBudget": "Rango de presupuesto",
     "bibliotecaPortalLink": "Portal",
-    "bibliotecaLibraryLink": "Biblioteca"
+    "bibliotecaLibraryLink": "Biblioteca",
+    "orgRoleAdmin": "Admin",
+    "orgRoleMember": "Miembro",
+    "profileOrgLabel": "Organización",
+    "ordersCreatedBy": "por {name}"
   },
   "obrigado": {
     "badge": "Lead recibido",

@@ -138,4 +138,45 @@ describe("/api/orders", () => {
     }));
     expect(mocks.sendMail).toHaveBeenCalledTimes(1);
   });
+
+  // ─── filtro de org no GET ─────────────────────────────────────────────────
+
+  it("GET lista pedidos proprios E da org quando utilizador tem organizationId", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "user_1", email: "member@company.com", role: "CLIENT", organizationId: "org_1" },
+    });
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(mocks.orderFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { OR: [{ clientId: "user_1" }, { organizationId: "org_1" }] },
+    }));
+    expect(body.orders).toBeDefined();
+  });
+
+  it("GET usa apenas clientId quando utilizador nao tem org", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "user_1", email: "solo@example.com", role: "CLIENT", organizationId: null },
+    });
+
+    await GET();
+
+    expect(mocks.orderFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { clientId: "user_1" },
+    }));
+  });
+
+  it("GET admin nao filtra por clientId nem org (ve todos os pedidos)", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "admin_1", email: "admin@example.com", role: "ADMIN", organizationId: null },
+    });
+
+    await GET();
+
+    expect(mocks.orderFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: {},
+    }));
+  });
 });

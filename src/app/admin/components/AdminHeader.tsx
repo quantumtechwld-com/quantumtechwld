@@ -13,6 +13,7 @@ import {
   MessageSquare,
   ShieldCheck,
   Wallet,
+  Building2,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; exact?: boolean };
@@ -20,6 +21,7 @@ type NavItem = { href: string; label: string; icon: React.ComponentType<{ size?:
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin",                   label: "Dashboard",      icon: LayoutDashboard, exact: true },
   { href: "/admin/users",             label: "Utilizadores",   icon: Users            },
+  { href: "/admin/organizations",     label: "Organizações",    icon: Building2        },
   { href: "/admin/orders",            label: "Pedidos",        icon: ShoppingBag      },
   { href: "/admin/briefing",          label: "Briefings",      icon: FileText         },
   { href: "/admin/biblioteca",        label: "Biblioteca",     icon: BookOpen         },

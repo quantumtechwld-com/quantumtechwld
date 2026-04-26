@@ -16,11 +16,18 @@ export default async function OrdersPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
+  // Opção C: pedidos próprios OU da empresa (se tiver org)
+  const orgId = session.user.organizationId ?? null;
+  const orderWhere = orgId
+    ? { OR: [{ client: { email: session.user.email } }, { organizationId: orgId }] }
+    : { client: { email: session.user.email } };
+
   const [me, orders] = await Promise.all([
     prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
     db.order.findMany({
-      where: { client: { email: session.user.email } },
+      where: orderWhere,
       include: {
+        client: { select: { name: true, email: true } },
         messages: { where: { author: { role: "ADMIN" } }, select: { id: true, createdAt: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -134,6 +141,11 @@ export default async function OrdersPage() {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-slate-400 line-clamp-2">{o.description}</p>
+                  {orgId && o.client?.email !== session.user.email && (
+                    <p className="mt-1 text-xs text-indigo-400/80">
+                      {t("ordersCreatedBy", { name: o.client?.name ?? o.client?.email })}
+                    </p>
+                  )}
                 </div>
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[o.status] ?? "bg-slate-500/20 text-slate-300"}`}

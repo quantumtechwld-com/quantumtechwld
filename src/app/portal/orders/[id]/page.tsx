@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
 import { OrderClientActions } from "./OrderClientActions";
@@ -46,7 +47,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
   ]);
 
   if (!order) notFound();
-  if (order.client.email !== session.user.email) notFound();
+
+  if (!canAccessOrder(order, session.user)) notFound();
 
   const t = await getTranslations("portal");
   const locale = await getLocale();

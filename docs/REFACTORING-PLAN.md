@@ -13,6 +13,8 @@ Antes de qualquer refactoring, consultar nesta ordem:
 3. `docs/QUALITY-EXECUTION-PLAN.md`
 4. `docs/DEVELOPER-GUIDE.md`
 5. `docs/REFACTORING-PLAN.md`
+6. `docs/COMPONENTIZATION-GUIDE.md` — limites de tamanho, Server vs Client
+7. `docs/API-FIRST-ANALYSIS.md` — extração para services, versionamento
 
 ### Regra de priorização
 

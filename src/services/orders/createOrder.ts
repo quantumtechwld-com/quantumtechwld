@@ -28,6 +28,8 @@ export type CreateOrderInput = {
   productionInfo?: string;
   estimatedValue?: number;
   adminNote?: string | null;
+  /** Empresa do criador (nullable — retrocompatível) */
+  organizationId?: string | null;
 };
 
 /** Cria o pedido com orderRef único num único INSERT — sem race condition. */
@@ -46,6 +48,7 @@ export async function createOrderWithRef(input: CreateOrderInput) {
     status: hasProposal ? "PROPOSAL_SENT" : "PENDING",
     ...(input.createdByAdminId ? { createdByAdminId: input.createdByAdminId } : {}),
     ...(input.parentOrderId ? { parentOrderId: input.parentOrderId } : {}),
+    ...(input.organizationId ? { organizationId: input.organizationId } : {}),
     ...(hasProposal
       ? {
           productionInfo: input.productionInfo!.trim(),

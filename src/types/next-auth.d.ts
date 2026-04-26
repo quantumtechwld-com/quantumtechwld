@@ -6,6 +6,8 @@ declare module "next-auth" {
       id: string;
       role: "CLIENT" | "ADMIN";
       status: "PENDING" | "ACTIVE" | "SUSPENDED";
+      organizationId: string | null;
+      orgRole: "ADMIN" | "MEMBER" | null;
     } & DefaultSession["user"];
   }
 }
@@ -15,5 +17,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: "CLIENT" | "ADMIN";
     status: "PENDING" | "ACTIVE" | "SUSPENDED";
+    organizationId: string | null;
+    orgRole: "OWNER" | "ADMIN" | "MEMBER" | null;
   }
 }

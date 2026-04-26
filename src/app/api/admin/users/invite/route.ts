@@ -2,6 +2,9 @@
 import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = prisma as any;
+
 type InviteLocale = "pt" | "en" | "es";
 
 // POST /api/admin/users/invite — cria utilizador como ACTIVE e envia magic link via Auth.js
@@ -11,10 +14,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
-  const body = (await request.json()) as { email?: string; name?: string; locale?: string };
+  const body = (await request.json()) as { email?: string; name?: string; locale?: string; organizationId?: string };
   const email  = body.email?.toLowerCase().trim();
   const name   = body.name?.trim() || null;
   const locale: InviteLocale = ["pt", "en", "es"].includes(body.locale ?? "") ? (body.locale as InviteLocale) : "pt";
+  const orgId  = body.organizationId?.trim() || null;
 
   if (!email) {
     return NextResponse.json({ error: "Email obrigatório." }, { status: 400 });
@@ -26,12 +30,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email inválido." }, { status: 400 });
   }
 
+  // Se organização fornecida, verificar que existe
+  if (orgId) {
+    const org = await db.organization.findUnique({ where: { id: orgId }, select: { id: true } });
+    if (!org) return NextResponse.json({ error: "Organização não encontrada." }, { status: 404 });
+  }
+
   // Cria ou ativa o utilizador como ACTIVE (bypass do fluxo PENDING)
-  await prisma.user.upsert({
+  const user = await prisma.user.upsert({
     where: { email },
-    update: { status: "ACTIVE", ...(name ? { name } : {}) },
-    create: { email, name, status: "ACTIVE", role: "CLIENT" },
+    update: { status: "ACTIVE", ...(name ? { name } : {}), ...(orgId ? { organizationId: orgId } : {}) },
+    create: { email, name, status: "ACTIVE", role: "CLIENT", ...(orgId ? { organizationId: orgId } : {}) },
   });
+
+  // Vincular como membro da org (idempotente via upsert)
+  if (orgId) {
+    await db.organizationMember.upsert({
+      where: { organizationId_userId: { organizationId: orgId, userId: user.id } },
+      update: {},
+      create: { organizationId: orgId, userId: user.id, role: "MEMBER" },
+    });
+  }
 
   // Auth.js gera o token, faz o hash, persiste no DB e chama sendVerificationRequest.
   // redirect: false evita que signIn() lance NEXT_REDIRECT neste Route Handler.

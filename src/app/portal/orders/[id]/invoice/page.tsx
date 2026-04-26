@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 import Link from "next/link";
 import { PrintButton } from "./PrintButton";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -38,7 +39,7 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   });
 
   if (!order) notFound();
-  if (order.client.email !== session.user.email) notFound();
+  if (!canAccessOrder(order, session.user)) notFound();
   if (order.payment?.status !== "PAID") redirect(`/portal/orders/${id}`);
 
   // SENSIVEL: invoice deve sempre refletir a moeda gravada na transacao,

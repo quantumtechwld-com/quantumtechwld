@@ -21,10 +21,18 @@ export async function GET() {
       return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
     }
 
-    const { id: userId, role } = session.user;
+    const { id: userId, role, organizationId } = session.user;
 
-    // Admin vê os últimos 100; cliente vê apenas os seus
-    const where = role === "ADMIN" ? {} : { clientId: userId };
+    // Admin vê os últimos 100; cliente vê os seus + da empresa (Opção C)
+    let where: Record<string, unknown>;
+    if (role === "ADMIN") {
+      where = {};
+    } else if (organizationId) {
+      // Opção C: pedidos próprios OU da empresa
+      where = { OR: [{ clientId: userId }, { organizationId }] };
+    } else {
+      where = { clientId: userId };
+    }
 
     const orders = await db.order.findMany({
       where,
@@ -54,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, email: true, company: true },
+      select: { id: true, name: true, email: true, company: true, organizationId: true },
     });
     if (!user) return NextResponse.json({ error: "Utilizador não encontrado." }, { status: 404 });
 
@@ -100,6 +108,7 @@ export async function POST(request: NextRequest) {
         attachments:      body.attachments ?? [],
         referenceLinks,
         createdByAdminId: null,
+        organizationId:   user.organizationId ?? null,
       },
     );
     if (!order) {

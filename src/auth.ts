@@ -112,15 +112,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id     = user.id;
         token.role   = (user as Record<string, unknown>).role   ?? "CLIENT";
         token.status = (user as Record<string, unknown>).status ?? "PENDING";
+
+        // Carregar organização do utilizador
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id as string },
+          select: {
+            organizationId: true,
+            orgMemberships: {
+              select: { role: true },
+              orderBy: { createdAt: "asc" },
+              take: 1,
+            },
+          },
+        });
+        token.organizationId = dbUser?.organizationId ?? null;
+        token.orgRole        = (dbUser?.orgMemberships?.[0]?.role ?? null) as "ADMIN" | "MEMBER" | null;
       }
       return token;
     },
-    // Expõe id, role e status na sessão client-side.
+    // Expõe id, role, status e organizationId na sessão client-side.
     session({ session, token }) {
       if (token) {
-        session.user.id     = token.id as string;
-        session.user.role   = token.role   as "CLIENT" | "ADMIN";
-        session.user.status = token.status as "PENDING" | "ACTIVE" | "SUSPENDED";
+        session.user.id             = token.id as string;
+        session.user.role           = token.role   as "CLIENT" | "ADMIN";
+        session.user.status         = token.status as "PENDING" | "ACTIVE" | "SUSPENDED";
+        session.user.organizationId = token.organizationId as string | null;
+        session.user.orgRole        = token.orgRole as "ADMIN" | "MEMBER" | null;
       }
       return session;
     },

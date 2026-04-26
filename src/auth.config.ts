@@ -32,9 +32,11 @@ export const authConfig = {
       if (token) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const u = session.user as any;
-        u.id     = token.id;
-        u.role   = token.role   ?? "CLIENT";
-        u.status = token.status ?? "PENDING";
+        u.id             = token.id;
+        u.role           = token.role           ?? "CLIENT";
+        u.status         = token.status         ?? "PENDING";
+        u.organizationId = token.organizationId ?? null;
+        u.orgRole        = token.orgRole        ?? null;
       }
       return session;
     },

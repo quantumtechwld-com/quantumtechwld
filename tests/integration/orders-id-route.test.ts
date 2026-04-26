@@ -925,4 +925,114 @@ describe("/api/orders/[id]", () => {
       }),
     );
   });
+
+  // ─── acesso via organização ────────────────────────────────────────────────
+
+  it("GET retorna 200 para membro da organização dona do pedido", async () => {
+    mocks.auth.mockResolvedValue({
+      user: {
+        email: "member@company.com",
+        role: "CLIENT",
+        organizationId: "org_1",
+      },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PROPOSAL_SENT",
+      estimatedValue: 5000,
+      productionInfo: "Entrega em 20 dias",
+      organizationId: "org_1",
+      client: {
+        id: "user_colega",
+        name: "Colega da Empresa",
+        email: "colega@company.com",
+      },
+    });
+
+    const response = await GET(new NextRequest("http://localhost/api/orders/ord_1"), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.order.id).toBe("ord_1");
+  });
+
+  it("GET retorna 403 para membro de outra organização", async () => {
+    mocks.auth.mockResolvedValue({
+      user: {
+        email: "rival@other.com",
+        role: "CLIENT",
+        organizationId: "org_2",
+      },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PROPOSAL_SENT",
+      estimatedValue: 5000,
+      productionInfo: "Entrega em 20 dias",
+      organizationId: "org_1",
+      client: {
+        id: "user_1",
+        name: "Joao Silva",
+        email: "client@example.com",
+      },
+    });
+
+    const response = await GET(new NextRequest("http://localhost/api/orders/ord_1"), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body.error).toBe("Acesso negado.");
+  });
+
+  it("PATCH approve retorna 200 para membro da org dona do pedido", async () => {
+    mocks.auth.mockResolvedValue({
+      user: {
+        email: "member@company.com",
+        role: "CLIENT",
+        organizationId: "org_1",
+      },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "PROPOSAL_SENT",
+      estimatedValue: 5000,
+      organizationId: "org_1",
+      client: {
+        id: "user_colega",
+        name: "Colega da Empresa",
+        email: "colega@company.com",
+      },
+    });
+    mocks.orderUpdate.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Nova funcionalidade",
+      status: "APPROVED",
+      organizationId: "org_1",
+      client: {
+        id: "user_colega",
+        name: "Colega da Empresa",
+        email: "colega@company.com",
+      },
+    });
+
+    const request = new NextRequest("http://localhost/api/orders/ord_1", {
+      method: "PATCH",
+      body: JSON.stringify({ action: "approve" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await PATCH(request, { params: Promise.resolve({ id: "ord_1" }) });
+    expect(response.status).toBe(200);
+  });
 });

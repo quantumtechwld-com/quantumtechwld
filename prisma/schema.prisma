@@ -35,25 +35,64 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Organization {
+  id        String               @id @default(cuid())
+  name      String
+  slug      String               @unique
+  logo      String?
+  plan      String               @default("FREE")
+  status    String               @default("ACTIVE")
+  members   OrganizationMember[]
+  users     User[]
+  orders    Order[]
+  briefings Briefing[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrgRole      @default(MEMBER)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+enum OrgRole {
+  ADMIN
+  MEMBER
+}
+
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String?    @unique
-  emailVerified DateTime?
-  image         String?
-  role          UserRole   @default(CLIENT)
-  status        UserStatus @default(PENDING)
-  phone         String?
-  company       String?
-  locale        String     @default("pt")
-  lastLoginAt   DateTime?
-  accounts      Account[]
-  sessions      Session[]
-  briefings     Briefing[]
-  comments      ProposalComment[]
-  orders        Order[]    @relation("OrderClient")
-  createdOrders Order[]    @relation("OrderCreatedByAdmin")
-  orderMessages OrderMessage[]
+  id             String               @id @default(cuid())
+  name           String?
+  email          String?              @unique
+  emailVerified  DateTime?
+  image          String?
+  role           UserRole             @default(CLIENT)
+  status         UserStatus           @default(PENDING)
+  phone          String?
+  company        String?
+  locale         String               @default("pt")
+  lastLoginAt    DateTime?
+  organizationId String?
+  organization   Organization?        @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  accounts       Account[]
+  sessions       Session[]
+  briefings      Briefing[]
+  comments       ProposalComment[]
+  orders         Order[]              @relation("OrderClient")
+  createdOrders  Order[]              @relation("OrderCreatedByAdmin")
+  orderMessages  OrderMessage[]
+  orgMemberships OrganizationMember[]
+
+  @@index([organizationId])
 }
 
 enum UserRole {
@@ -92,11 +131,15 @@ model Briefing {
   hoursMin         Int?
   hoursMax         Int?
   status           BriefingStatus @default(RECEIVED)
+  organizationId   String?        // empresa do cliente (nullable — retrocompatível)
+  organization     Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   scope            Scope?
   proposal         Proposal?
   referenceProject ReferenceProject?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 enum BriefingStatus {
@@ -196,6 +239,8 @@ model Order {
   urgency         String      @default("normal") // "low" | "normal" | "high" | "critical"
   attachments     String[]    // URLs dos ficheiros enviados
   referenceLinks  String[]    // URLs de referência fornecidas pelo cliente (Google Drive, Figma, etc.)
+  organizationId  String?     // empresa do cliente (nullable — retrocompatível)
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   status          OrderStatus @default(PENDING)
   parentOrderId   String?     // referencia ao pedido original (para correction/alteration)
   parentOrder     Order?      @relation("OrderChildren", fields: [parentOrderId], references: [id], onDelete: SetNull)
@@ -220,6 +265,7 @@ model Order {
 
   @@index([createdByAdminId])
   @@index([parentOrderId])
+  @@index([organizationId])
 }
 
 enum OrderStatus {

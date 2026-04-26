@@ -90,3 +90,105 @@ export function buildInviteEmail(
 
   return { html, text, subject: c.subject };
 }
+
+// ─── Org member invite ─────────────────────────────────────────────────────────
+
+const ORG_INVITE_COPY: Record<InviteLocale, {
+  subject:  (orgName: string) => string;
+  title:    (orgName: string) => string;
+  greeting: (name: string | null) => string;
+  body:     (orgName: string, role: string) => string;
+  roleLabel: (role: string) => string;
+  expiry:   string;
+  cta:      string;
+  footer:   string;
+  team:     string;
+}> = {
+  pt: {
+    subject:   (org) => `Você foi adicionado à ${org} — Portal Quantum Tech`,
+    title:     (org) => `Bem-vindo à organização ${org}`,
+    greeting:  (n) => n ? `Olá ${n},` : "Olá,",
+    body:      (org, role) => `Você foi adicionado como <strong>${role}</strong> da organização <strong>${org}</strong> no Portal Quantum Tech. Clique no botão abaixo para aceder ao portal.`,
+    roleLabel: (r) => r === "ADMIN" ? "Administrador" : "Membro",
+    expiry:    "O link expira em <strong>24 horas</strong>.",
+    cta:       "Aceder ao Portal",
+    footer:    "Se não esperava este convite, pode ignorar este e-mail.",
+    team:      "— Equipe Quantum Tech",
+  },
+  en: {
+    subject:   (org) => `You've been added to ${org} — Quantum Tech Portal`,
+    title:     (org) => `Welcome to ${org}`,
+    greeting:  (n) => n ? `Hello ${n},` : "Hello,",
+    body:      (org, role) => `You have been added as a <strong>${role}</strong> of the <strong>${org}</strong> organization on the Quantum Tech Portal. Click the button below to access the portal.`,
+    roleLabel: (r) => r === "ADMIN" ? "Administrator" : "Member",
+    expiry:    "The link expires in <strong>24 hours</strong>.",
+    cta:       "Access the Portal",
+    footer:    "If you didn't expect this invitation, you can safely ignore this email.",
+    team:      "— Quantum Tech Team",
+  },
+  es: {
+    subject:   (org) => `Has sido añadido a ${org} — Portal Quantum Tech`,
+    title:     (org) => `Bienvenido a la organización ${org}`,
+    greeting:  (n) => n ? `Hola ${n},` : "Hola,",
+    body:      (org, role) => `Has sido añadido como <strong>${role}</strong> de la organización <strong>${org}</strong> en el Portal Quantum Tech. Haz clic en el botón para acceder al portal.`,
+    roleLabel: (r) => r === "ADMIN" ? "Administrador" : "Miembro",
+    expiry:    "El enlace expira en <strong>24 horas</strong>.",
+    cta:       "Acceder al Portal",
+    footer:    "Si no esperabas esta invitación, puedes ignorar este correo.",
+    team:      "— Equipo Quantum Tech",
+  },
+};
+
+/**
+ * Email enviado quando um utilizador é adicionado a uma organização.
+ * Inclui o nome da org e o seu papel (ADMIN | MEMBER).
+ */
+export function buildOrgInviteEmail(
+  name: string | null,
+  orgName: string,
+  role: "ADMIN" | "MEMBER",
+  magicLink: string,
+  locale: InviteLocale = "pt",
+): { html: string; text: string; subject: string } {
+  const c = ORG_INVITE_COPY[locale];
+  const roleLabel = c.roleLabel(role);
+
+  const html = `<!DOCTYPE html>
+<html lang="${locale}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0f">
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:32px auto;background:#0f0f14;color:#e2e8f0;padding:40px;border-radius:16px;border:1px solid #ffffff15">
+  ${emailLogoHeader()}
+  <h1 style="color:#ffffff;font-size:24px;font-weight:700;margin:0 0 8px">${c.title(orgName)}</h1>
+  <p style="color:#94a3b8;margin:0 0 24px;font-size:15px">${c.greeting(name)}</p>
+  <p style="color:#e2e8f0;margin:0 0 8px;font-size:14px">${c.body(orgName, roleLabel)}</p>
+  <p style="color:#94a3b8;margin:0 0 28px;font-size:13px">${c.expiry}</p>
+  <a href="${magicLink}"
+     style="display:inline-block;background:#6366f1;color:#ffffff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
+    ${c.cta} →
+  </a>
+  <hr style="border:none;border-top:1px solid #ffffff10;margin:32px 0">
+  <p style="color:#475569;font-size:12px;margin:0 0 4px">${c.footer}</p>
+  <p style="color:#475569;font-size:12px;margin:0">${c.team}</p>
+</div>
+</body>
+</html>`;
+
+  const bodyPlain = c.body(orgName, roleLabel).split(/(<[^>]*>)/).filter((s) => !s.startsWith("<")).join("");
+  const expiryPlain = c.expiry.split(/(<[^>]*>)/).filter((s) => !s.startsWith("<")).join("");
+  const text = [
+    c.title(orgName),
+    "",
+    c.greeting(name),
+    "",
+    bodyPlain,
+    expiryPlain,
+    "",
+    `${c.cta}: ${magicLink}`,
+    "",
+    c.footer,
+    c.team,
+  ].join("\n");
+
+  return { html, text, subject: c.subject(orgName) };
+}

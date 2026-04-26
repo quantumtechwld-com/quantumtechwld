@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 import {
   sendMail,
   tplOrderProposalSent,
@@ -34,8 +35,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
 
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
 
-    // Só o dono ou admin pode ver
-    if (session.user.role !== "ADMIN" && order.client.email !== session.user.email) {
+    if (!canAccessOrder(order, session.user)) {
       return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
     }
 

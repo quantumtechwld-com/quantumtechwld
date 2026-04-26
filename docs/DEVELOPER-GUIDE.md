@@ -13,7 +13,9 @@ Antes de qualquer implementação, análise, refactoring, teste, release ou revi
 3. `docs/QUALITY-EXECUTION-PLAN.md`
 4. `docs/DEVELOPER-GUIDE.md`
 5. `docs/REFACTORING-PLAN.md`
-6. `README.md`
+6. `docs/COMPONENTIZATION-GUIDE.md` — tamanho, Server vs Client, padrões
+7. `docs/API-FIRST-ANALYSIS.md` — integração externa, escalabilidade
+8. `README.md`
 
 ### Regra de execução
 

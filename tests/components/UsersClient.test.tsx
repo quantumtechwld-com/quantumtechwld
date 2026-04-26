@@ -28,6 +28,7 @@ describe("UsersClient", () => {
 
     render(
       <UsersClient
+        organizations={[]}
         users={[
           {
             id: "u1",
@@ -92,6 +93,7 @@ describe("UsersClient", () => {
 
     render(
       <UsersClient
+        organizations={[]}
         users={[
           {
             id: "u1",
