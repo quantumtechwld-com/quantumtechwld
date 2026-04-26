@@ -62,9 +62,14 @@ echo "==> Gerando Prisma Client..."
 # Sem este passo o PrismaAdapter falha e o magic link não funciona
 npx prisma generate
 
-echo "==> Executando migrações do banco..."
+echo "==> Resolvendo migrations com falha (se houver)..."
 DATABASE_URL=$(grep '^DATABASE_URL=' "$APP_DIR/.env.production.local" | cut -d= -f2-)
 export DATABASE_URL
+# Se a migration 20260426100000_remove_owner_orgrole ficou marcada como falha (P3018),
+# marcar como rolled-back para que o migrate deploy possa reaplicar com o SQL corrigido.
+npx prisma migrate resolve --rolled-back 20260426100000_remove_owner_orgrole 2>/dev/null || true
+
+echo "==> Executando migrações do banco..."
 npx prisma migrate deploy
 
 echo "==> Recarregando PM2..."

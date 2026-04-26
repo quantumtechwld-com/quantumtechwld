@@ -49,6 +49,25 @@ Sempre que o pedido do utilizador contiver qualquer uma das palavras abaixo (em 
    - Opções ou recomendações possíveis
 5. **Aguardar aprovação explícita ("pode executar", "ok", "faz isso", etc.) antes de qualquer ação**
 
+### Critérios de verificação obrigatórios em análises:
+
+#### Componentização (`docs/COMPONENTIZATION-GUIDE.md`)
+- Componentes acima de 300 linhas?
+- `'use client'` aplicado apenas nas folhas?
+- Lógica de negócio em route handlers (deveria estar em `src/services/`)?
+- Mais de 3 `useState` ou > 7 props em algum componente?
+
+#### API-first (`docs/API-FIRST-ANALYSIS.md`)
+- Endpoints sem validação `zod`?
+- Lógica misturada em route handlers?
+- APIs públicas sem rate limiting ou CSRF?
+- Ausência de versionamento e documentação OpenAPI?
+
+#### Qualidade geral (`docs/QUALITY-EXECUTION-PLAN.md`)
+- Alinhamento com roadmap mensal?
+- Gaps de testes automatizados?
+- Conformidade com pipeline de segurança?
+
 ### Exemplos de frases que NÃO são aprovação:
 - "interessante", "entendi", "ok obrigado", "faz sentido" → **não executar**
 
