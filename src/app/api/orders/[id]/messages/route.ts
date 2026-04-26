@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { sendMail, tplOrderNewMessage } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
+import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -24,9 +25,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   });
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const isAdmin = session.user.role === "ADMIN";
-  const isOwner = order.client.email === session.user.email;
-  if (!isAdmin && !isOwner) {
+  if (!canAccessOrder(order, session.user)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -66,8 +65,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const isAdmin = session.user.role === "ADMIN";
-  const isOwner = order.client.email === session.user.email;
-  if (!isAdmin && !isOwner) {
+  if (!canAccessOrder(order, session.user)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

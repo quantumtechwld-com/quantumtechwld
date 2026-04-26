@@ -189,4 +189,50 @@ describe("POST /api/orders/[id]/checkout", () => {
     expect(mocks.stripeCreate).toHaveBeenCalledTimes(1);
     expect(mocks.paymentUpsert).toHaveBeenCalledTimes(1);
   });
+
+  // ── Acesso por organização ────────────────────────────────────────────────
+
+  it("membro da mesma org pode iniciar checkout (modo mock)", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { email: "member@org.com", role: "CLIENT", organizationId: "org_1" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      status: "APPROVED",
+      estimatedValue: 125,
+      organizationId: "org_1",
+      client: { email: "owner@org.com", name: "Dono" },
+      payment: null,
+    });
+    const { POST } = await importRoute();
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/checkout", {
+      method: "POST",
+    }), { params: Promise.resolve({ id: "ord_1" }) });
+
+    expect(response.status).toBe(200);
+  });
+
+  it("membro de org diferente recebe 403 no checkout", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { email: "outsider@other.com", role: "CLIENT", organizationId: "org_2" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      status: "APPROVED",
+      estimatedValue: 125,
+      organizationId: "org_1",
+      client: { email: "owner@org.com", name: "Dono" },
+      payment: null,
+    });
+    const { POST } = await importRoute();
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/checkout", {
+      method: "POST",
+    }), { params: Promise.resolve({ id: "ord_1" }) });
+
+    expect(response.status).toBe(403);
+  });
 });

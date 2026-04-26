@@ -137,4 +137,52 @@ describe("POST /api/orders/[id]/rating", () => {
     expect(body.id).toBe("rating_1");
     expect(mocks.orderRatingCreate).toHaveBeenCalledTimes(1);
   });
+
+  // ── Acesso por organização ────────────────────────────────────────────────
+
+  it("membro da mesma org pode avaliar pedido da org", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { email: "member@org.com", role: "CLIENT", organizationId: "org_1" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      status: "COMPLETED",
+      rating: null,
+      organizationId: "org_1",
+      client: { email: "owner@org.com" },
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/rating", {
+      method: "POST",
+      body: JSON.stringify({ score: 4 }),
+      headers: { "content-type": "application/json" },
+    }), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(201);
+  });
+
+  it("membro de org diferente recebe 403", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { email: "outsider@other.com", role: "CLIENT", organizationId: "org_2" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      status: "COMPLETED",
+      rating: null,
+      organizationId: "org_1",
+      client: { email: "owner@org.com" },
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/rating", {
+      method: "POST",
+      body: JSON.stringify({ score: 4 }),
+      headers: { "content-type": "application/json" },
+    }), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(403);
+  });
 });

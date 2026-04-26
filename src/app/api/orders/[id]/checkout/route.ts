@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { appUrl } from "@/lib/app-url";
+import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 
 const isMock =
   !process.env.STRIPE_SECRET_KEY ||
@@ -21,104 +22,65 @@ const ORDER_TYPE_LABEL: Record<string, string> = {
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-export async function POST(req: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+type CheckoutOrder = {
+  type: string;
+  description?: string | null;
+  client: { email: string; name: string };
+  payment?: { stripeSessionId: string; status: string } | null;
+};
 
-  const { id } = await params;
+// ── Helpers privados (reduzem complexidade cognitiva de POST) ─────────────────
 
-  // amountCents pode vir no body (parcela específica) — caso contrário usa estimatedValue
-  const body = await req.json().catch(() => ({})) as { amountCents?: number };
-
-  const order = await db.order.findUnique({
-    where: { id },
-    include: {
-      client: { select: { email: true, name: true } },
-      payment: true,
-    },
-  });
-
-  if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (order.client.email !== session.user.email) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  if (order.status !== "APPROVED") {
-    return NextResponse.json({ error: "Pedido deve estar Aprovado para pagamento" }, { status: 400 });
-  }
-  if (!order.estimatedValue || order.estimatedValue <= 0) {
-    return NextResponse.json({ error: "Valor estimado inválido" }, { status: 400 });
-  }
-
-  // Usar amountCents do body (parcela) se válido, caso contrário usar estimatedValue total
-  const amountCents =
-    body.amountCents && Number.isInteger(body.amountCents) && body.amountCents > 0
-      ? body.amountCents
-      : Math.round(order.estimatedValue * 100);
-  const baseUrl = appUrl();
-
-  // Buscar parcela STRIPE pendente para ligar pagamento ao OrderFinancial
-  const financial = await db.orderFinancial.findUnique({
+async function handleMockCheckout(
+  id: string,
+  amountCents: number,
+  baseUrl: string,
+  stripeInstallment: { id: string } | null,
+  financial: { totalAmountCents: number } | null,
+): Promise<NextResponse> {
+  const mockSessionId = `mock_${Date.now()}_${id}`;
+  await db.payment.upsert({
     where: { orderId: id },
-    include: {
-      installments: {
-        where: { method: "STRIPE", status: "PENDING" },
-        orderBy: { sequence: "asc" },
-        take: 1,
-      },
+    create: {
+      orderId:         id,
+      stripeSessionId: mockSessionId,
+      amountCents,
+      currency: "eur",
+      status:   "PAID",
+      paidAt:   new Date(),
+    },
+    update: {
+      stripeSessionId: mockSessionId,
+      amountCents,
+      status:  "PAID",
+      paidAt:  new Date(),
     },
   });
-  const stripeInstallment = financial?.installments?.[0] ?? null;
-
-  // SENSIVEL: cobranca real nao pode seguir idioma do usuario.
-  // O valor persistido em estimatedValue e interpretado neste fluxo como EUR.
-  // Para suportar multi-currency real, e obrigatorio persistir a moeda da proposta
-  // e aplicar conversao cambial explicita antes de criar a sessao Stripe.
-
-  // ── MODO MOCK: sem chave Stripe real ─────────────────────────────────────
-  if (isMock) {
-    const mockSessionId = `mock_${Date.now()}_${id}`;
-    await db.payment.upsert({
+  // Actualizar OrderFinancial e parcela STRIPE se existir
+  if (stripeInstallment && financial) {
+    await db.paymentInstallment.update({
+      where: { id: stripeInstallment.id },
+      data: { status: "PAID", paidAt: new Date() },
+    });
+    await db.orderFinancial.update({
       where: { orderId: id },
-      create: {
-        orderId:         id,
-        stripeSessionId: mockSessionId,
-        amountCents,
-        currency: "eur",
-        status:   "PAID",
-        paidAt:   new Date(),
-      },
-      update: {
-        stripeSessionId: mockSessionId,
-        amountCents,
-        status:  "PAID",
-        paidAt:  new Date(),
-      },
-    });
-    // Actualizar OrderFinancial e parcela STRIPE se existir
-    if (stripeInstallment && financial) {
-      await db.paymentInstallment.update({
-        where: { id: stripeInstallment.id },
-        data: { status: "PAID", paidAt: new Date() },
-      });
-      await db.orderFinancial.update({
-        where: { orderId: id },
-        data: { paidCents: financial.totalAmountCents, status: "PAID" },
-      });
-    }
-    // Avança o pedido para IN_PRODUCTION
-    await db.order.update({
-      where: { id },
-      data:  { status: "IN_PRODUCTION" },
-    });
-    return NextResponse.json({
-      url:  `${baseUrl}/portal/orders/${id}/payment/success?session_id=${mockSessionId}`,
-      mock: true,
+      data: { paidCents: financial.totalAmountCents, status: "PAID" },
     });
   }
-  // ─────────────────────────────────────────────────────────────────────────
+  await db.order.update({ where: { id }, data: { status: "IN_PRODUCTION" } });
+  return NextResponse.json({
+    url:  `${baseUrl}/portal/orders/${id}/payment/success?session_id=${mockSessionId}`,
+    mock: true,
+  });
+}
 
+async function buildStripeSession(
+  order: CheckoutOrder,
+  id: string,
+  amountCents: number,
+  baseUrl: string,
+  stripeInstallment: { id: string } | null,
+): Promise<NextResponse> {
   const { stripe } = await import("@/lib/stripe");
 
   // Reutiliza sessão existente se ainda válida
@@ -168,5 +130,65 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   });
 
   return NextResponse.json({ url: checkoutSession.url });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function POST(req: NextRequest, { params }: RouteParams) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  // amountCents pode vir no body (parcela específica) — caso contrário usa estimatedValue
+  const body = await req.json().catch(() => ({})) as { amountCents?: number };
+
+  const order = await db.order.findUnique({
+    where: { id },
+    include: {
+      client: { select: { email: true, name: true } },
+      payment: true,
+    },
+  });
+
+  if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!canAccessOrder(order, session.user)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  if (order.status !== "APPROVED") {
+    return NextResponse.json({ error: "Pedido deve estar Aprovado para pagamento" }, { status: 400 });
+  }
+  if (!order.estimatedValue || order.estimatedValue <= 0) {
+    return NextResponse.json({ error: "Valor estimado inválido" }, { status: 400 });
+  }
+
+  // SENSIVEL: cobranca real nao pode seguir idioma do usuario.
+  // O valor persistido em estimatedValue e interpretado neste fluxo como EUR.
+  // Para suportar multi-currency real, e obrigatorio persistir a moeda da proposta
+  // e aplicar conversao cambial explicita antes de criar a sessao Stripe.
+  const amountCents =
+    body.amountCents && Number.isInteger(body.amountCents) && body.amountCents > 0
+      ? body.amountCents
+      : Math.round(order.estimatedValue * 100);
+  const baseUrl = appUrl();
+
+  // Buscar parcela STRIPE pendente para ligar pagamento ao OrderFinancial
+  const financial = await db.orderFinancial.findUnique({
+    where: { orderId: id },
+    include: {
+      installments: {
+        where: { method: "STRIPE", status: "PENDING" },
+        orderBy: { sequence: "asc" },
+        take: 1,
+      },
+    },
+  });
+  const stripeInstallment = financial?.installments?.[0] ?? null;
+
+  if (isMock) return handleMockCheckout(id, amountCents, baseUrl, stripeInstallment, financial);
+
+  return buildStripeSession(order, id, amountCents, baseUrl, stripeInstallment);
 }
 

@@ -11,7 +11,7 @@ export default async function AdminUsersPage() {
   if (session?.user?.role !== "ADMIN") redirect("/portal");
 
   const [users, organizations] = await Promise.all([
-    prisma.user.findMany({
+    db.user.findMany({
       orderBy: [
         { role: "desc" },    // ADMIN primeiro
         { status: "asc" },   // PENDING primeiro dentro de CLIENT
@@ -26,6 +26,7 @@ export default async function AdminUsersPage() {
         company:       true,
         emailVerified: true,
         lastLoginAt:   true,
+        organization:  { select: { id: true, name: true } },
         _count:  { select: { briefings: true, orders: true, createdOrders: true } },
       },
     }),

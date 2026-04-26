@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createPayment } from '@/services/orders/paymentService';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { canAccessOrder } from '@/lib/auth/canAccessOrder';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,15 +18,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Parâmetro obrigatório: orderId.' }, { status: 422 });
     }
 
-    // Verificar que o pedido existe e pertence ao utilizador autenticado
+    // Verificar que o pedido existe e pertence ao utilizador autenticado (ou à sua organização)
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      select: { id: true, estimatedValue: true, client: { select: { email: true } } },
+      select: { id: true, estimatedValue: true, organizationId: true, client: { select: { email: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: 'Pedido não encontrado.' }, { status: 404 });
     }
-    if (order.client.email !== session.user.email) {
+    if (!canAccessOrder(order, session.user)) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
     }
     if (!order.estimatedValue) {

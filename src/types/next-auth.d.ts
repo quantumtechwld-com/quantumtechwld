@@ -18,6 +18,6 @@ declare module "next-auth/jwt" {
     role: "CLIENT" | "ADMIN";
     status: "PENDING" | "ACTIVE" | "SUSPENDED";
     organizationId: string | null;
-    orgRole: "OWNER" | "ADMIN" | "MEMBER" | null;
+    orgRole: "ADMIN" | "MEMBER" | null;
   }
 }

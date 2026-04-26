@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { canAccessOrder } from "@/lib/auth/canAccessOrder";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     });
 
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
-    if (order.client.email !== session.user.email) {
+    if (!canAccessOrder(order, session.user)) {
       return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
     }
     if (order.status !== "COMPLETED") {

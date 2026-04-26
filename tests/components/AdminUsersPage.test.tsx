@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   redirect: vi.fn(),
   userFindMany: vi.fn(),
+  organizationFindMany: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -21,6 +22,9 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: {
       findMany: mocks.userFindMany,
+    },
+    organization: {
+      findMany: mocks.organizationFindMany,
     },
   },
 }));
@@ -36,6 +40,7 @@ describe("AdminUsersPage", () => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ user: { role: "ADMIN" } });
     mocks.userFindMany.mockResolvedValue([{ id: "user_1" }, { id: "user_2" }]);
+    mocks.organizationFindMany.mockResolvedValue([]);
   });
 
   it("carrega utilizadores e renderiza o client component", async () => {

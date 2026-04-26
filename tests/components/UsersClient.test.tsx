@@ -40,6 +40,7 @@ describe("UsersClient", () => {
             company: "Empresa A",
             emailVerified: null,
             lastLoginAt: null,
+            organization: null,
             _count: { briefings: 1, orders: 2, createdOrders: 0 },
           },
           {
@@ -52,6 +53,7 @@ describe("UsersClient", () => {
             company: "Empresa C",
             emailVerified: new Date("2026-04-21T10:00:00.000Z"),
             lastLoginAt: null,
+            organization: null,
             _count: { briefings: 2, orders: 1, createdOrders: 0 },
           },
           {
@@ -64,6 +66,7 @@ describe("UsersClient", () => {
             company: "Empresa B",
             emailVerified: new Date("2026-04-21T10:00:00.000Z"),
             lastLoginAt: null,
+            organization: null,
             _count: { briefings: 3, orders: 4, createdOrders: 5 },
           },
         ]}
@@ -105,6 +108,7 @@ describe("UsersClient", () => {
             company: "Empresa A",
             emailVerified: null,
             lastLoginAt: null,
+            organization: null,
             _count: { briefings: 1, orders: 2, createdOrders: 0 },
           },
         ]}

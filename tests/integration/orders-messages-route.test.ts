@@ -168,4 +168,86 @@ describe("/api/orders/[id]/messages", () => {
     }));
     expect(mocks.sendMail).toHaveBeenCalledTimes(1);
   });
+
+  // ── Acesso por organização ────────────────────────────────────────────────
+
+  it("GET — membro da mesma org pode listar mensagens", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "user_2", email: "member@org.com", role: "CLIENT", organizationId: "org_1" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      organizationId: "org_1",
+      client: { id: "user_1", name: "Dono", email: "owner@org.com" },
+    });
+
+    const response = await GET(new NextRequest("http://localhost/api/orders/ord_1/messages"), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(200);
+  });
+
+  it("GET — membro de org diferente recebe 403", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "user_3", email: "outsider@other.com", role: "CLIENT", organizationId: "org_2" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      organizationId: "org_1",
+      client: { id: "user_1", name: "Dono", email: "owner@org.com" },
+    });
+
+    const response = await GET(new NextRequest("http://localhost/api/orders/ord_1/messages"), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(403);
+  });
+
+  it("POST — membro da mesma org pode enviar mensagem", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "user_2", email: "member@org.com", role: "CLIENT", organizationId: "org_1" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Feature da org",
+      organizationId: "org_1",
+      client: { id: "user_1", name: "Dono", email: "owner@org.com" },
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/messages", {
+      method: "POST",
+      body: JSON.stringify({ body: "Mensagem do membro" }),
+      headers: { "content-type": "application/json" },
+    }), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(201);
+  });
+
+  it("POST — membro de org diferente recebe 403", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: "user_3", email: "outsider@other.com", role: "CLIENT", organizationId: "org_2" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      type: "new_feature",
+      title: "Feature da org",
+      organizationId: "org_1",
+      client: { id: "user_1", name: "Dono", email: "owner@org.com" },
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/messages", {
+      method: "POST",
+      body: JSON.stringify({ body: "Mensagem indevida" }),
+      headers: { "content-type": "application/json" },
+    }), {
+      params: Promise.resolve({ id: "ord_1" }),
+    });
+
+    expect(response.status).toBe(403);
+  });
 });

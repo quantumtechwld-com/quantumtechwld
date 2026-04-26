@@ -17,6 +17,7 @@ interface UserRow {
   company:       string | null;
   emailVerified: Date | string | null;
   lastLoginAt:   Date | string | null;
+  organization:  { id: string; name: string } | null;
   _count: { briefings: number; orders: number; createdOrders: number };
 }
 
@@ -447,6 +448,13 @@ function UserTable({
                   <p className="font-medium text-white">{u.name ?? <span className="text-white/30 italic">sem nome</span>}</p>
                   <p className="text-white/40 text-xs mt-0.5">{u.email}</p>
                   {u.company && <p className="text-white/30 text-xs">{u.company}</p>}
+                  {u.organization && (
+                    <p className="text-xs mt-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-blue-300">
+                        🏢 {u.organization.name}
+                      </span>
+                    </p>
+                  )}
                   {(() => {
                     const accessDate = u.lastLoginAt ?? u.emailVerified;
                     if (accessDate) {

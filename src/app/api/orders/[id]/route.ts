@@ -312,7 +312,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
 
     const isAdmin = session.user.role === "ADMIN";
-    const isOwner = order.client.email === session.user.email;
+    const isOwner = canAccessOrder(order, session.user);
 
     const result = resolveActionData(body, order, isAdmin, isOwner);
     if (isApiError(result)) {

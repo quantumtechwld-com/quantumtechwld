@@ -106,4 +106,47 @@ describe("POST /api/orders/payment", () => {
     expect(body.payment.id).toBe("pay_1");
     expect(mocks.createPayment).toHaveBeenCalledWith("ord_1", 125);
   });
+
+  // ── Acesso por organização ────────────────────────────────────────────────
+
+  it("membro da mesma org pode criar pagamento", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { email: "member@org.com", role: "CLIENT", organizationId: "org_1" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      estimatedValue: 200,
+      organizationId: "org_1",
+      client: { email: "owner@org.com" },
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/payment", {
+      method: "POST",
+      body: JSON.stringify({ orderId: "ord_1" }),
+      headers: { "content-type": "application/json" },
+    }));
+
+    expect(response.status).toBe(201);
+    expect(mocks.createPayment).toHaveBeenCalledWith("ord_1", 200);
+  });
+
+  it("membro de org diferente recebe 403", async () => {
+    mocks.auth.mockResolvedValue({
+      user: { email: "outsider@other.com", role: "CLIENT", organizationId: "org_2" },
+    });
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      estimatedValue: 200,
+      organizationId: "org_1",
+      client: { email: "owner@org.com" },
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/payment", {
+      method: "POST",
+      body: JSON.stringify({ orderId: "ord_1" }),
+      headers: { "content-type": "application/json" },
+    }));
+
+    expect(response.status).toBe(403);
+  });
 });
