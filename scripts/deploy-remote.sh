@@ -72,8 +72,8 @@ npx prisma migrate resolve --rolled-back 20260426100000_remove_owner_orgrole 2>/
 echo "==> Executando migrações do banco..."
 npx prisma migrate deploy
 
-echo "==> Recarregando PM2..."
-pm2 reload ecosystem.config.cjs --update-env || pm2 start ecosystem.config.cjs
+echo "==> Reiniciando PM2..."
+pm2 restart ecosystem.config.cjs --update-env || pm2 start ecosystem.config.cjs
 pm2 save
 
 echo "==> Deploy concluído com sucesso!"

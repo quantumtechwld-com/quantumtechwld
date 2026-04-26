@@ -77,7 +77,7 @@ describe("InvoicePage", () => {
   it("renderiza a fatura paga com dados do cliente e pagamento", async () => {
     render(await InvoicePage({ params: Promise.resolve({ id: "ord_1" }) }));
 
-    expect(screen.getByText("Quantum Technology")).toBeInTheDocument();
+    expect(screen.getAllByAltText("Quantum Technology")).toHaveLength(2);
     expect(screen.getByText("Joao")).toBeInTheDocument();
     expect(screen.getByText("Quantum Client")).toBeInTheDocument();
     expect(screen.getByText("Retainer mensal de suporte")).toBeInTheDocument();
