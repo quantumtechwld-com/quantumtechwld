@@ -107,29 +107,14 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     });
   }
 
-  // PIX é exclusivo do Brasil — para outros locales exibe card informativo
+  // PIX é exclusivo do Brasil — oculto para outros locales
   function renderPixCard(opts: {
     orderId: string;
     amtCents: number;
     label: string;
-    dueBadge: React.ReactNode;
-    isOverdue: boolean;
     dueDate?: string | null;
   }) {
-    if (locale !== "pt") {
-      const borderCls = opts.isOverdue ? "border-red-500/40 bg-red-500/5" : "border-yellow-500/30 bg-yellow-500/5";
-      const titleCls  = opts.isOverdue ? "text-red-300" : "text-yellow-300";
-      return (
-        <div className={`mt-4 rounded-2xl border p-5 ${borderCls}`}>
-          <h2 className={`text-sm font-semibold mb-1 ${titleCls}`}>{t("pixUnavailableTitle")}</h2>
-          <p className="text-2xl font-bold text-white mb-3">
-            {(opts.amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
-          </p>
-          {opts.dueBadge}
-          <p className="text-xs text-slate-400">{t("pixUnavailableMsg")}</p>
-        </div>
-      );
-    }
+    if (locale !== "pt") return null;
     return (
       <PixPaymentPanel
         orderId={opts.orderId}
@@ -170,7 +155,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     }
 
     if (inst.method === "MANUAL_PIX") {
-      return renderPixCard({ orderId: order.id, amtCents, label, dueBadge, isOverdue, dueDate: inst.dueDate });
+      return renderPixCard({ orderId: order.id, amtCents, label, dueDate: inst.dueDate });
     }
 
     // MANUAL_TRANSFER / MANUAL_OTHER

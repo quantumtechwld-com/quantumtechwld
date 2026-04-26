@@ -502,8 +502,6 @@
     "pixNotifyLoading": "Sending notification…",
     "pixNotifyConfirm": "Notification sent! Our team will verify and confirm your payment shortly.",
     "pixNotifyErr": "Error sending notification. Please try again or contact support.",
-    "pixUnavailableTitle": "PIX not available in your country",
-    "pixUnavailableMsg": "PIX is a payment method exclusive to Brazil. Please contact our team to arrange an alternative payment method.",
     "payBtn": "Pay {amount} →",
     "payRedirecting": "Redirecting to Stripe…",
     "paySecure": "Processed securely via Stripe",
