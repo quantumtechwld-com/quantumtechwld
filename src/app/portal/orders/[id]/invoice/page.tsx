@@ -33,24 +33,57 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   const order = await db.order.findUnique({
     where: { id },
     include: {
-      client:  { select: { email: true, name: true, company: true, phone: true } },
-      payment: { select: { status: true, amountCents: true, currency: true, paidAt: true, stripePaymentIntent: true } },
+      client:   { select: { email: true, name: true, company: true, phone: true } },
+      payment:  { select: { status: true, amountCents: true, currency: true, paidAt: true, stripePaymentIntent: true } },
+      financial: {
+        select: {
+          status: true,
+          paidCents: true,
+          totalAmountCents: true,
+          installments: {
+            where: { status: "PAID" },
+            orderBy: { sequence: "asc" },
+            select: { paidAt: true, amountCents: true, method: true, stripePaymentIntent: true },
+          },
+        },
+      },
     },
   });
 
   if (!order) notFound();
   if (!canAccessOrder(order, session.user)) notFound();
-  if (order.payment?.status !== "PAID") redirect(`/portal/orders/${id}`);
+
+  // Suporta dois fluxos:
+  // 1. Stripe direto (order.payment.status === "PAID")
+  // 2. OrderFinancial manual/PIX (order.financial.status === "PAID")
+  const isPaidViaStripe   = order.payment?.status === "PAID";
+  const isPaidViaFinancial = order.financial?.status === "PAID";
+  if (!isPaidViaStripe && !isPaidViaFinancial) redirect(`/portal/orders/${id}`);
+
+  // Dados de pagamento unificados entre os dois fluxos
+  const financialPaidAt   = order.financial?.installments?.[0]?.paidAt ?? null;
+  const financialAmtCents = order.financial?.paidCents ?? order.financial?.totalAmountCents ?? 0;
+  const paymentRef        = isPaidViaStripe
+    ? order.payment?.stripePaymentIntent
+    : null;
+
+  const amountCents = isPaidViaStripe
+    ? (order.payment?.amountCents ?? 0)
+    : financialAmtCents;
+
+  const paidAtRaw = isPaidViaStripe ? (order.payment?.paidAt ?? null) : (financialPaidAt ?? null);
+  const paidAtDate = paidAtRaw ? new Date(paidAtRaw) : null;
 
   // SENSIVEL: invoice deve sempre refletir a moeda gravada na transacao,
   // nunca a moeda derivada do locale da interface.
-  const amount = (order.payment.amountCents / 100).toLocaleString(locale, {
-    style: "currency", currency: order.payment.currency?.toUpperCase() ?? "EUR",
+  const currency = (order.payment?.currency?.toUpperCase() ?? "BRL");
+  const amount = (amountCents / 100).toLocaleString(locale, {
+    style: "currency", currency,
   });
 
   const invoiceNumber = `QT-${id.slice(-8).toUpperCase()}`;
-  const paidAt = order.payment.paidAt
-    ? new Date(order.payment.paidAt).toLocaleDateString(locale, {
+  const paidAt = paidAtDate
+    ? paidAtDate.toLocaleDateString(locale, {
         day: "2-digit", month: "long", year: "numeric",
       })
     : "—";
@@ -143,8 +176,8 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
             <span>✓</span>
             <span>
             {t("invoicePaidAt", { date: paidAt })}
-              {order.payment.stripePaymentIntent && (
-                <span className="ml-2 text-xs opacity-60">· {order.payment.stripePaymentIntent}</span>
+              {paymentRef && (
+                <span className="ml-2 text-xs opacity-60">· {paymentRef}</span>
               )}
             </span>
           </div>
