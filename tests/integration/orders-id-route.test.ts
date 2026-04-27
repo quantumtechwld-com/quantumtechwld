@@ -177,6 +177,7 @@ describe("/api/orders/[id]", () => {
         action: "propose",
         productionInfo: "Entrega em 20 dias",
         estimatedValue: 5000,
+        selectedCurrency: "EUR",
       }),
       headers: { "content-type": "application/json" },
     });
@@ -702,6 +703,7 @@ describe("/api/orders/[id]", () => {
         action: "propose",
         productionInfo: "c".repeat(4001),
         estimatedValue: 1000,
+        selectedCurrency: "EUR",
       }),
       headers: { "content-type": "application/json" },
     });
@@ -870,6 +872,7 @@ describe("/api/orders/[id]", () => {
         action: "propose",
         productionInfo: "Detalhes.",
         estimatedValue: 1000,
+        selectedCurrency: "EUR",
         downPaymentPct: 50,
         paymentMethod: "STRIPE",
         entryDueDate: "2026-05-01",
@@ -925,6 +928,7 @@ describe("/api/orders/[id]", () => {
         action: "propose",
         productionInfo: "Detalhes.",
         estimatedValue: 2000,
+        selectedCurrency: "EUR",
         downPaymentPct: 0,
         paymentMethod: "STRIPE",
       }),
