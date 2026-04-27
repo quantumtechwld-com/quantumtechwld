@@ -15,6 +15,8 @@ const mocks = vi.hoisted(() => ({
   orderMessageReadUpsert: vi.fn(),
   convertAndFormatByLocale: vi.fn(),
   getCurrencyForLocale: vi.fn(),
+  getExchangeRate: vi.fn(),
+  formatCurrency: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -68,6 +70,8 @@ vi.mock("@/app/portal/orders/[id]/RatingWidget", () => ({
 vi.mock("@/lib/currency", () => ({
   convertAndFormatByLocale: mocks.convertAndFormatByLocale,
   getCurrencyForLocale: mocks.getCurrencyForLocale,
+  getExchangeRate: mocks.getExchangeRate,
+  formatCurrency: mocks.formatCurrency,
 }));
 
 import OrderDetailPage from "@/app/portal/orders/[id]/page";
@@ -96,6 +100,8 @@ describe("OrderDetailPage", () => {
     mocks.orderMessageReadUpsert.mockResolvedValue({});
     mocks.convertAndFormatByLocale.mockResolvedValue("R$ 720,00");
     mocks.getCurrencyForLocale.mockReturnValue("BRL");
+    mocks.getExchangeRate.mockResolvedValue(6.17);
+    mocks.formatCurrency.mockImplementation((value: number) => `R$ ${value.toFixed(2).replace(".", ",")}`);
   });
 
   it("renderiza os dados principais do pedido e CTA de pagamento", async () => {
