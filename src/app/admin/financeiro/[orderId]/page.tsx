@@ -174,7 +174,23 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
         <h2 className="text-sm font-semibold text-white">Parcelas</h2>
         <InstallmentActions
           orderId={orderId}
-          installments={financial.installments}
+          installments={financial.installments.map((inst: {
+            id: string;
+            sequence: number;
+            amountCents: number;
+            method: string;
+            status: string;
+            paidAt: Date | null;
+            dueDate: Date | null;
+            notes: string | null;
+          }) => ({
+            ...inst,
+            // Serializar Date → ISO string antes de cruzar a fronteira Server→Client.
+            // Next.js App Router não serializa objetos Date automaticamente;
+            // passar Date cru causa "Application error" no lado cliente.
+            paidAt:  inst.paidAt  ? inst.paidAt.toISOString()  : null,
+            dueDate: inst.dueDate ? inst.dueDate.toISOString() : null,
+          }))}
         />
       </div>
     </div>

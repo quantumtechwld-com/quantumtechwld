@@ -279,3 +279,83 @@ describe("PATCH set_due_date installment", () => {
     expect(mocks.installmentUpdate).not.toHaveBeenCalled();
   });
 });
+
+// ─── Serialização de datas (regressão) ──────────────────────────────────────
+// Reproduz o bug "Application error" causado por Date objects sendo passados
+// ao Client Component sem serialização prévia para ISO string.
+
+describe("PATCH confirm_manual — parcela com datas preenchidas", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const ctx = {
+    params: Promise.resolve({ orderId: ORDER_ID, installmentId: INSTALLMENT_ID }),
+  };
+
+  it("200 confirma parcela que já tinha dueDate definido (regressão serialização)", async () => {
+    mocks.auth.mockResolvedValue(ADMIN_SESSION);
+    mocks.installmentFindFirst.mockResolvedValue({
+      id: INSTALLMENT_ID,
+      sequence: 1,
+      amountCents: 50000,
+      method: "MANUAL_PIX",
+      status: "PENDING",
+      paidAt: null,
+      dueDate: new Date("2026-04-30"),   // ← dueDate preenchido (ISO no DB = Date object)
+      notes: null,
+      financial: {
+        ...SAMPLE_FINANCIAL,
+        paidCents: 0,
+        installments: [
+          { id: INSTALLMENT_ID, sequence: 1, amountCents: 50000, method: "MANUAL_PIX", status: "PENDING", paidAt: null, dueDate: new Date("2026-04-30"), notes: null },
+          { id: "inst_2",       sequence: 2, amountCents: 50000, method: "MANUAL_PIX", status: "PENDING", paidAt: null, dueDate: null,                    notes: null },
+        ],
+      },
+    });
+    mocks.installmentUpdate.mockResolvedValue({});
+    mocks.financialUpdate.mockResolvedValue({});
+    mocks.orderUpdate.mockResolvedValue({});
+
+    const res = await PATCH(makePatchReq({ action: "confirm_manual" }), ctx);
+    expect(res.status).toBe(200);
+
+    const body = await res.json() as { ok: boolean; paidCents: number };
+    expect(body.ok).toBe(true);
+    expect(body.paidCents).toBe(50000);
+  });
+
+  it("200 confirma parcela que já tinha paidAt preenchido em parcela anterior (2ª parcela)", async () => {
+    const INST2_ID = "inst_2";
+    const ctx2 = { params: Promise.resolve({ orderId: ORDER_ID, installmentId: INST2_ID }) };
+
+    mocks.auth.mockResolvedValue(ADMIN_SESSION);
+    mocks.installmentFindFirst.mockResolvedValue({
+      id: INST2_ID,
+      sequence: 2,
+      amountCents: 50000,
+      method: "MANUAL_PIX",
+      status: "PENDING",
+      paidAt: null,
+      dueDate: new Date("2026-06-01"),
+      notes: null,
+      financial: {
+        ...SAMPLE_FINANCIAL,
+        paidCents: 50000,
+        installments: [
+          { id: INSTALLMENT_ID, sequence: 1, amountCents: 50000, method: "MANUAL_PIX", status: "PAID",    paidAt: new Date("2026-04-01"), dueDate: null, notes: "entrada" },
+          { id: INST2_ID,       sequence: 2, amountCents: 50000, method: "MANUAL_PIX", status: "PENDING", paidAt: null,                  dueDate: new Date("2026-06-01"), notes: null },
+        ],
+      },
+    });
+    mocks.installmentUpdate.mockResolvedValue({});
+    mocks.financialUpdate.mockResolvedValue({});
+    mocks.orderUpdate.mockResolvedValue({});
+
+    const res = await PATCH(makePatchReq({ action: "confirm_manual", notes: "PIX final confirmado" }), ctx2);
+    expect(res.status).toBe(200);
+
+    const body = await res.json() as { ok: boolean; paidCents: number; status: string };
+    expect(body.ok).toBe(true);
+    expect(body.paidCents).toBe(100000); // ambas pagas
+    expect(body.status).toBe("PAID");    // financeiro totalmente pago
+  });
+});
