@@ -8,6 +8,9 @@
     "build": "prisma generate && next build",
     "postinstall": "prisma generate && (husky || true)",
     "migrate:deploy": "prisma migrate deploy",
+    "tool:gen-magic-link": "node --env-file=.env.local --experimental-strip-types scripts/gen-magic-link.ts",
+    "tool:migrate-order-proposals": "node --env-file=.env.local --experimental-strip-types scripts/migrate-order-proposals.ts",
+    "tool:migrate-order-proposals:sql": "node --env-file=.env.local --experimental-strip-types scripts/run-migrate-proposals.ts",
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:unit && npm run test:component && npm run test:integration",
@@ -24,10 +27,10 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix --max-warnings=0"
+      "eslint --fix --max-warnings=0 --no-warn-ignored"
     ],
     "*.{js,mjs,cjs}": [
-      "eslint --fix --max-warnings=0"
+      "eslint --fix --max-warnings=0 --no-warn-ignored"
     ]
   },
   "dependencies": {
