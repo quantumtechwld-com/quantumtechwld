@@ -2,11 +2,31 @@
 // e propostas. Eles NAO devem ser usados para Stripe, invoices ou qualquer fluxo
 // de cobranca real sem uma moeda persistida e, idealmente, conversao cambial.
 
+export const SUPPORTED_CURRENCIES = ["BRL", "EUR", "USD"] as const;
+
+export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
+
+export function normalizeSupportedCurrency(value?: string | null): SupportedCurrency | null {
+  if (!value) return null;
+  const normalized = value.toUpperCase();
+  return SUPPORTED_CURRENCIES.includes(normalized as SupportedCurrency)
+    ? (normalized as SupportedCurrency)
+    : null;
+}
+
 export function getCurrencyForLocale(locale: string): "BRL" | "USD" | "EUR" {
   const normalized = locale.toLowerCase();
   if (normalized.startsWith("en")) return "USD";
   if (normalized.startsWith("es")) return "EUR";
   return "BRL";
+}
+
+export function getNumberLocaleForCurrencyCode(currency: string): string {
+  switch (currency.toUpperCase()) {
+    case "BRL": return "pt-BR";
+    case "USD": return "en-US";
+    default: return "pt-PT";
+  }
 }
 
 export function getNumberLocaleForCurrency(locale: string): string {
@@ -37,6 +57,20 @@ export function formatCurrency(value: number, locale: string, currency: string):
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+export function formatCurrencyByCode(value: number, currency: string): string {
+  const numberLocale = getNumberLocaleForCurrencyCode(currency);
+  return value.toLocaleString(numberLocale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function formatCurrencyRangeByCode(min: number, max: number, currency: string): string {
+  return `${formatCurrencyByCode(min, currency)} - ${formatCurrencyByCode(max, currency)}`;
 }
 
 export function formatCurrencyRangeByLocale(min: number, max: number, locale: string): string {

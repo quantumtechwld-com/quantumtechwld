@@ -28,7 +28,7 @@ export default async function PortalPage() {
       where: orderWhere,
       orderBy: { createdAt: "desc" },
       take: 50,
-      select: { id: true, title: true, type: true, status: true, createdAt: true, orderRef: true, estimatedValue: true },
+      select: { id: true, title: true, type: true, status: true, createdAt: true, orderRef: true, estimatedValue: true, contractCurrency: true },
     }),
     db.order.count({ where: { ...countBase, status: "PROPOSAL_SENT" } }),
     db.order.count({ where: { ...countBase, status: "IN_PRODUCTION" } }),
@@ -42,6 +42,7 @@ export default async function PortalPage() {
     ...o,
     createdAt:      (o.createdAt as Date).toISOString(),
     estimatedValue: o.estimatedValue == null ? null : Number(o.estimatedValue),
+    contractCurrency: o.contractCurrency ?? null,
   }));
 
   return (

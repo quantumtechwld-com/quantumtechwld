@@ -283,4 +283,31 @@ describe("POST /api/orders/[id]/checkout", () => {
 
     expect(response.status).toBe(403);
   });
+
+  it("bloqueia checkout Stripe quando a parcela pendente e manual", async () => {
+    mocks.orderFinancialFindUnique.mockResolvedValue({
+      totalAmountCents: 12500,
+      paidCents: 0,
+      currency: "BRL",
+      installments: [
+        {
+          id: "inst_pix",
+          amountCents: 12500,
+          currency: "BRL",
+          method: "MANUAL_PIX",
+          status: "PENDING",
+        },
+      ],
+    });
+    const { POST } = await importRoute();
+
+    const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/checkout", {
+      method: "POST",
+    }), { params: Promise.resolve({ id: "ord_1" }) });
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toContain("método manual");
+    expect(mocks.paymentUpsert).not.toHaveBeenCalled();
+  });
 });

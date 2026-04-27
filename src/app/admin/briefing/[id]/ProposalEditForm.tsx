@@ -32,7 +32,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
           />
         </div>
         <div>
-          <label htmlFor="edit-cost-min" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Custo mín (€)</label>
+          <label htmlFor="edit-cost-min" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Custo mín</label>
           <input
             id="edit-cost-min"
             type="number"
@@ -42,7 +42,7 @@ export default function ProposalEditForm({ editForm, onChange, onRewrite, rewrit
           />
         </div>
         <div>
-          <label htmlFor="edit-cost-max" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Custo máx (€)</label>
+          <label htmlFor="edit-cost-max" className="text-xs text-white/30 uppercase tracking-wider block mb-1">Custo máx</label>
           <input
             id="edit-cost-max"
             type="number"

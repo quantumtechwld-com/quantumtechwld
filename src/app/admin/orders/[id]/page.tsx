@@ -6,6 +6,7 @@ import { OrderAdminActions } from "./OrderAdminActions";
 import { OrderEditForm } from "./OrderEditForm";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import LogoAnimated from "@/components/home/LogoAnimated";
+import { formatCurrencyByCode } from "@/lib/currency";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -32,7 +33,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
         organization: { select: { name: true } },
         createdByAdmin: { select: { id: true, name: true, email: true } },
         payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
-        financial: { select: { id: true, status: true, totalAmountCents: true, paidCents: true } },
+        financial: { select: { id: true, status: true, totalAmountCents: true, paidCents: true, currency: true } },
         rating:  true,
       },
     }),
@@ -151,9 +152,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
               <div>
                 <span className="text-slate-500 text-xs">Valor estimado</span>
                 <p className="mt-0.5 text-white font-semibold">
-                  {Number(order.estimatedValue).toLocaleString("pt-PT", {
-                    style: "currency", currency: "EUR",
-                  })}
+                  {formatCurrencyByCode(Number(order.estimatedValue), order.contractCurrency ?? order.financial?.currency ?? "EUR")}
                 </p>
               </div>
             )}
@@ -233,10 +232,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
               <div>
                 <span className="text-slate-500 text-xs">Valor</span>
                 <p className="mt-0.5 text-white font-semibold">
-                  {(order.payment.amountCents / 100).toLocaleString("pt-PT", {
-                    style: "currency",
-                    currency: order.payment.currency ?? "EUR",
-                  })}
+                  {formatCurrencyByCode(order.payment.amountCents / 100, order.payment.currency ?? order.financial?.currency ?? order.contractCurrency ?? "EUR")}
                 </p>
               </div>
               {order.payment.paidAt && (

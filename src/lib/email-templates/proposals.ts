@@ -4,6 +4,7 @@
 
 import { ORDER_TYPE_LABEL } from "@/lib/constants";
 import { emailLogoHeader, emailFooterTeam, emailFooterSystem } from "./shared";
+import { formatCurrencyByCode } from "@/lib/currency";
 
 /**
  * Notifica cliente que recebeu nova proposta (ou revisão)
@@ -13,6 +14,7 @@ export function tplProposalSentToClient(opts: {
   orderType: string;
   orderTitle?: string;
   estimatedValue: number;
+  estimatedCurrency: string;
   productionInfo: string;
   version: number;
   isRevision: boolean;
@@ -36,7 +38,7 @@ export function tplProposalSentToClient(opts: {
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Valor estimado</p>
-        <p style="color:#fff;font-weight:700;font-size:24px;margin:0 0 16px">€${opts.estimatedValue.toLocaleString("pt-PT", { minimumFractionDigits: 2 })}</p>
+        <p style="color:#fff;font-weight:700;font-size:24px;margin:0 0 16px">${formatCurrencyByCode(opts.estimatedValue, opts.estimatedCurrency)}</p>
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Informações de produção</p>
         <p style="color:#94a3b8;font-size:14px;margin:0">${opts.productionInfo.slice(0, 400)}${opts.productionInfo.length > 400 ? "…" : ""}</p>
       </div>
@@ -58,6 +60,7 @@ export function tplProposalApprovedByClient(opts: {
   orderTitle?: string;
   version: number;
   estimatedValue: number;
+  estimatedCurrency: string;
   adminUrl: string;
 }) {
   return /* html */ `
@@ -70,7 +73,7 @@ export function tplProposalApprovedByClient(opts: {
       </p>
       <div style="background:#10b98108;border:1px solid #10b98130;border-radius:12px;padding:20px;margin-bottom:24px">
         <p style="color:#34d399;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Valor aprovado</p>
-        <p style="color:#fff;font-weight:700;font-size:20px;margin:0">€${opts.estimatedValue.toLocaleString("pt-PT", { minimumFractionDigits: 2 })}</p>
+        <p style="color:#fff;font-weight:700;font-size:20px;margin:0">${formatCurrencyByCode(opts.estimatedValue, opts.estimatedCurrency)}</p>
       </div>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#0f0f14;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
         Ver pedido no painel →

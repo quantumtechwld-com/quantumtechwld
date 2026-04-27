@@ -8,10 +8,9 @@ type StatsGridProps = Readonly<{
   orderInProd: number;
   orderCompleted: number;
   orderRejected: number;
-  totalRevenueCents: number;
-  monthRevenueCents: number;
+  totalRevenueLabel: string;
+  monthRevenueLabel: string;
   monthLabel: string;
-  fmtEur: (cents: number) => string;
   hideRevenue?: boolean;
 }>;
 
@@ -25,7 +24,7 @@ const STATUS_ITEMS = (props: StatsGridProps) => [
 ];
 
 export default function StatsGrid(props: StatsGridProps) {
-  const { orderPending, totalRevenueCents, monthRevenueCents, monthLabel, fmtEur, hideRevenue } = props;
+  const { orderPending, totalRevenueLabel, monthRevenueLabel, monthLabel, hideRevenue } = props;
   const statusItems = STATUS_ITEMS(props);
 
   return (
@@ -49,14 +48,14 @@ export default function StatsGrid(props: StatsGridProps) {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
             <p className="text-xs text-emerald-400/70 uppercase tracking-wider mb-1">Receita total</p>
-            <p className="text-2xl font-bold text-emerald-300">{fmtEur(totalRevenueCents)}</p>
+            <p className="text-2xl font-bold text-emerald-300">{totalRevenueLabel}</p>
             <p className="text-xs text-slate-500 mt-0.5">pagamentos confirmados</p>
           </div>
           <div className="rounded-xl border border-accent/20 bg-accent/5 p-4">
             <p className="text-xs text-accent/70 uppercase tracking-wider mb-1">
               {monthLabel}
             </p>
-            <p className="text-2xl font-bold text-accent-light">{fmtEur(monthRevenueCents)}</p>
+            <p className="text-2xl font-bold text-accent-light">{monthRevenueLabel}</p>
             <p className="text-xs text-slate-500 mt-0.5">receita este mês</p>
           </div>
         </div>

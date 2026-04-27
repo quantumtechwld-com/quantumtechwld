@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { appUrl } from "@/lib/app-url";
 import { canAccessOrder } from "@/lib/auth/canAccessOrder";
+import { getPersistedCurrency } from "@/services/finance/contractCurrency";
 
 const isMock =
   !process.env.STRIPE_SECRET_KEY ||
@@ -25,6 +26,7 @@ type RouteParams = { params: Promise<{ id: string }> };
 type CheckoutOrder = {
   type: string;
   description?: string | null;
+  contractCurrency?: string | null;
   client: { email: string; name: string };
   payment?: { stripeSessionId: string; status: string } | null;
 };
@@ -34,9 +36,10 @@ type CheckoutOrder = {
 async function handleMockCheckout(
   id: string,
   amountCents: number,
+  currency: string,
   baseUrl: string,
-  stripeInstallment: { id: string } | null,
-  financial: { totalAmountCents: number } | null,
+  stripeInstallment: { id: string; amountCents: number } | null,
+  financial: { totalAmountCents: number; paidCents: number } | null,
 ): Promise<NextResponse> {
   const mockSessionId = `mock_${Date.now()}_${id}`;
   await db.payment.upsert({
@@ -45,26 +48,28 @@ async function handleMockCheckout(
       orderId:         id,
       stripeSessionId: mockSessionId,
       amountCents,
-      currency: "eur",
+      currency: currency.toLowerCase(),
       status:   "PAID",
       paidAt:   new Date(),
     },
     update: {
       stripeSessionId: mockSessionId,
       amountCents,
+      currency: currency.toLowerCase(),
       status:  "PAID",
       paidAt:  new Date(),
     },
   });
   // Actualizar OrderFinancial e parcela STRIPE se existir
   if (stripeInstallment && financial) {
+    const nextPaidCents = Math.min(financial.paidCents + stripeInstallment.amountCents, financial.totalAmountCents);
     await db.paymentInstallment.update({
       where: { id: stripeInstallment.id },
       data: { status: "PAID", paidAt: new Date() },
     });
     await db.orderFinancial.update({
       where: { orderId: id },
-      data: { paidCents: financial.totalAmountCents, status: "PAID" },
+      data: { paidCents: nextPaidCents, status: nextPaidCents >= financial.totalAmountCents ? "PAID" : "PARTIAL" },
     });
   }
   await db.order.update({ where: { id }, data: { status: "IN_PRODUCTION" } });
@@ -78,6 +83,7 @@ async function buildStripeSession(
   order: CheckoutOrder,
   id: string,
   amountCents: number,
+  currency: string,
   baseUrl: string,
   stripeInstallment: { id: string } | null,
 ): Promise<NextResponse> {
@@ -99,7 +105,7 @@ async function buildStripeSession(
       {
         quantity: 1,
         price_data: {
-          currency: "eur",
+          currency: currency.toLowerCase(),
           unit_amount: amountCents,
           product_data: {
             name: `${ORDER_TYPE_LABEL[order.type] ?? order.type} — Pedido #${id.slice(-8).toUpperCase()}`,
@@ -119,12 +125,13 @@ async function buildStripeSession(
       orderId:         id,
       stripeSessionId: checkoutSession.id,
       amountCents,
-      currency: "eur",
+      currency: currency.toLowerCase(),
       status: "PENDING",
     },
     update: {
       stripeSessionId: checkoutSession.id,
       amountCents,
+      currency: currency.toLowerCase(),
       status: "PENDING",
     },
   });
@@ -165,31 +172,32 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Valor estimado inválido" }, { status: 400 });
   }
 
-  // SENSIVEL: cobranca real nao pode seguir idioma do usuario.
-  // O valor persistido em estimatedValue e interpretado neste fluxo como EUR.
-  // Para suportar multi-currency real, e obrigatorio persistir a moeda da proposta
-  // e aplicar conversao cambial explicita antes de criar a sessao Stripe.
-  const amountCents =
-    body.amountCents && Number.isInteger(body.amountCents) && body.amountCents > 0
-      ? body.amountCents
-      : Math.round(order.estimatedValue * 100);
   const baseUrl = appUrl();
 
-  // Buscar parcela STRIPE pendente para ligar pagamento ao OrderFinancial
+  // Buscar parcela pendente para ligar pagamento ao OrderFinancial
   const financial = await db.orderFinancial.findUnique({
     where: { orderId: id },
     include: {
       installments: {
-        where: { method: "STRIPE", status: "PENDING" },
+        where: { status: "PENDING" },
         orderBy: { sequence: "asc" },
         take: 1,
       },
     },
   });
-  const stripeInstallment = financial?.installments?.[0] ?? null;
+  const pendingInstallment = financial?.installments?.[0] ?? null;
+  if (pendingInstallment && pendingInstallment.method !== "STRIPE") {
+    return NextResponse.json({ error: "A parcela pendente deve ser paga pelo método manual definido na proposta." }, { status: 422 });
+  }
+  const stripeInstallment = pendingInstallment;
+  const amountCents = stripeInstallment?.amountCents
+    ?? (body.amountCents && Number.isInteger(body.amountCents) && body.amountCents > 0
+      ? body.amountCents
+      : Math.round(order.estimatedValue * 100));
+  const chargeCurrency = getPersistedCurrency(stripeInstallment?.currency, financial?.currency, order.contractCurrency);
 
-  if (isMock) return handleMockCheckout(id, amountCents, baseUrl, stripeInstallment, financial);
+  if (isMock) return handleMockCheckout(id, amountCents, chargeCurrency, baseUrl, stripeInstallment, financial);
 
-  return buildStripeSession(order, id, amountCents, baseUrl, stripeInstallment);
+  return buildStripeSession(order, id, amountCents, chargeCurrency, baseUrl, stripeInstallment);
 }
 

@@ -58,6 +58,7 @@ export default async function AdminBriefingDetailPage({
     summary: string;
     content: string;
     hoursTotal: number;
+    costCurrency: string;
     costMin: number;
     costMax: number;
     clientNote: string | null;

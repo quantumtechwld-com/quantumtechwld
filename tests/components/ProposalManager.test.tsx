@@ -98,6 +98,7 @@ describe("ProposalManager", () => {
         summary: "Resumo executivo",
         content: "Conteudo da proposta",
         hoursTotal: 80,
+        costCurrency: "BRL",
         costMin: 4000,
         costMax: 7000,
         clientNote: null,

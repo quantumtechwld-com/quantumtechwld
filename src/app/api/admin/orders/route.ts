@@ -6,6 +6,12 @@ import {
   VALID_ORDER_TYPES,
   VALID_ORDER_URGENCIES,
 } from "@/services/orders/createOrder";
+import {
+  buildInstallments,
+  lockContractAmount,
+  resolveContractCurrency,
+  validatePaymentMethodCurrency,
+} from "@/services/finance/contractCurrency";
 import { sendMail, tplOrderProposalSent } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
 
@@ -103,18 +109,107 @@ function isValidationError(value: AdminOrderCreateInput | ValidationError): valu
   return "error" in value;
 }
 
+async function resolveProposalTerms(
+  clientUser: Awaited<ReturnType<typeof resolveAdminAndClient>>["clientUser"],
+  payload: AdminOrderCreateInput,
+) {
+  const paymentMethod = payload.paymentMethod ?? "STRIPE";
+  if (!payload.productionInfo || payload.estimatedValue == null || payload.estimatedValue <= 0) {
+    return { paymentMethod, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: null as string | null };
+  }
+
+  const contractCurrency = resolveContractCurrency({
+    organizationCurrency: clientUser.organization?.billingCurrency ?? null,
+    userCurrency: clientUser.billingCurrency ?? null,
+    locale: clientUser.locale ?? null,
+  });
+  const error = validatePaymentMethodCurrency(paymentMethod, contractCurrency);
+  if (error) {
+    return { paymentMethod, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error };
+  }
+
+  const lockedTerms = await lockContractAmount({
+    baseAmount: payload.estimatedValue,
+    contractCurrency,
+  });
+
+  return { paymentMethod, lockedTerms, error: null as string | null };
+}
+
+async function createFinancialForOrder(
+  orderId: string,
+  totalCents: number,
+  contractCurrency: string,
+  downPaymentPct: number,
+  paymentMethod: string,
+) {
+  await db.orderFinancial.deleteMany({ where: { orderId } });
+  const installments = buildInstallments(totalCents, contractCurrency as "BRL" | "EUR" | "USD", downPaymentPct, paymentMethod);
+  await db.orderFinancial.create({
+    data: {
+      orderId,
+      totalAmountCents: totalCents,
+      currency: contractCurrency,
+      downPaymentPct,
+      paidCents: 0,
+      status: "PENDING",
+      installments: {
+        create: installments.map(({ sequence, amountCents, currency, method }) => ({
+          sequence,
+          amountCents,
+          currency,
+          method,
+          status: "PENDING",
+        })),
+      },
+    },
+  });
+}
+
 async function resolveAdminAndClient(session: AdminSession, clientId: string) {
   const [adminUser, clientUser] = await Promise.all([
     session?.user?.id
       ? Promise.resolve({ id: session.user.id, email: session.user.email })
       : prisma.user.findUnique({ where: { email: session?.user?.email ?? "" }, select: { id: true, email: true } }),
-    prisma.user.findUnique({
+    db.user.findUnique({
       where: { id: clientId },
-      select: { id: true, name: true, email: true, company: true, role: true, status: true, organizationId: true, organization: { select: { name: true } } },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        company: true,
+        locale: true,
+        billingCurrency: true,
+        role: true,
+        status: true,
+        organizationId: true,
+        organization: { select: { name: true, billingCurrency: true } },
+      },
     }),
   ]);
 
   return { adminUser, clientUser };
+}
+
+function validateAdminAndClient(adminUser: { id?: string } | null | undefined, clientUser: {
+  email?: string | null;
+  role?: string | null;
+  status?: string | null;
+} | null | undefined): ValidationError | null {
+  if (!adminUser?.id) {
+    return { error: "Admin não encontrado.", status: 404 };
+  }
+  if (!clientUser?.email) {
+    return { error: "Cliente não encontrado.", status: 404 };
+  }
+  if (clientUser.role !== "CLIENT") {
+    return { error: "O utilizador selecionado não é um cliente.", status: 422 };
+  }
+  if (clientUser.status !== "ACTIVE") {
+    return { error: "Só é possível criar pedido para clientes ativos.", status: 422 };
+  }
+
+  return null;
 }
 
 // ─── GET /api/admin/orders ───────────────────────────────────────────────────
@@ -181,20 +276,18 @@ export async function POST(request: NextRequest) {
 
     const { adminUser, clientUser } = await resolveAdminAndClient(session, payload.clientId);
 
-    if (!adminUser?.id) {
-      return NextResponse.json({ error: "Admin não encontrado." }, { status: 404 });
+    const actorError = validateAdminAndClient(adminUser, clientUser);
+    if (actorError) {
+      return NextResponse.json({ error: actorError.error }, { status: actorError.status });
     }
-    if (!clientUser?.email) {
-      return NextResponse.json({ error: "Cliente não encontrado." }, { status: 404 });
-    }
-    if (clientUser.role !== "CLIENT") {
-      return NextResponse.json({ error: "O utilizador selecionado não é um cliente." }, { status: 422 });
-    }
-    if (clientUser.status !== "ACTIVE") {
-      return NextResponse.json({ error: "Só é possível criar pedido para clientes ativos." }, { status: 422 });
-    }
+    const adminId = (adminUser as { id: string }).id;
 
     const clientName = (clientUser.organization?.name?.trim() || clientUser.company?.trim() || clientUser.name?.trim() || clientUser.email) ?? "CLIENT";
+    const { paymentMethod, lockedTerms, error: proposalError } = await resolveProposalTerms(clientUser, payload);
+    if (proposalError) {
+      return NextResponse.json({ error: proposalError }, { status: 422 });
+    }
+
     const order = await createOrderWithRef({
       clientId: clientUser.id,
       clientName,
@@ -203,10 +296,13 @@ export async function POST(request: NextRequest) {
       description: payload.description,
       urgency: payload.urgency,
       attachments: payload.attachments,
-      createdByAdminId: adminUser.id,
+      createdByAdminId: adminId,
       parentOrderId: payload.parentOrderId,
       productionInfo: payload.productionInfo,
-      estimatedValue: payload.estimatedValue,
+      estimatedValue: lockedTerms?.estimatedValue ?? payload.estimatedValue,
+      contractCurrency: lockedTerms?.contractCurrency ?? null,
+      contractFxRate: lockedTerms?.contractFxRate ?? null,
+      contractFxLockedAt: lockedTerms?.contractFxLockedAt ?? null,
       adminNote: payload.adminNote,
       organizationId: clientUser.organizationId ?? null,
     });
@@ -217,34 +313,10 @@ export async function POST(request: NextRequest) {
 
     // Se criado em PROPOSAL_SENT com valor > 0, criar OrderFinancial + parcelas
     if (order.status === "PROPOSAL_SENT" && order.estimatedValue != null && order.estimatedValue > 0) {
-      const totalCents = Math.round(order.estimatedValue * 100);
+      const totalCents = lockedTerms?.totalAmountCents ?? Math.round(order.estimatedValue * 100);
       const pct = Math.max(0, Math.min(99, Math.round(payload.downPaymentPct ?? 0)));
-      const method = payload.paymentMethod ?? "STRIPE";
-      await db.orderFinancial.deleteMany({ where: { orderId: order.id } });
-      const entryCents = pct > 0 ? Math.round(totalCents * pct / 100) : totalCents;
-      const installments = pct > 0
-        ? [
-            { sequence: 1, amountCents: entryCents, method },
-            { sequence: 2, amountCents: totalCents - entryCents, method },
-          ]
-        : [{ sequence: 1, amountCents: totalCents, method }];
-      await db.orderFinancial.create({
-        data: {
-          orderId: order.id,
-          totalAmountCents: totalCents,
-          downPaymentPct: pct,
-          paidCents: 0,
-          status: "PENDING",
-          installments: {
-            create: installments.map(({ sequence, amountCents, method: m }) => ({
-              sequence,
-              amountCents,
-              method: m,
-              status: "PENDING",
-            })),
-          },
-        },
-      });
+      const contractCurrency = lockedTerms?.contractCurrency ?? order.contractCurrency ?? "EUR";
+      await createFinancialForOrder(order.id, totalCents, contractCurrency, pct, paymentMethod);
     }
 
     // Se o pedido foi criado directamente com proposta, notificar o cliente por email
@@ -258,6 +330,7 @@ export async function POST(request: NextRequest) {
           orderType: order.type,
           orderTitle: order.title ?? undefined,
           estimatedValue: order.estimatedValue ?? 0,
+          estimatedCurrency: order.contractCurrency ?? "EUR",
           productionInfo: order.productionInfo ?? "",
           orderUrl,
         }),

@@ -40,6 +40,7 @@ model Organization {
   name      String
   slug      String               @unique
   logo      String?
+  billingCurrency String?
   plan      String               @default("FREE")
   status    String               @default("ACTIVE")
   members   OrganizationMember[]
@@ -80,6 +81,7 @@ model User {
   phone          String?
   company        String?
   locale         String               @default("pt")
+  billingCurrency String?
   lastLoginAt    DateTime?
   organizationId String?
   organization   Organization?        @relation(fields: [organizationId], references: [id], onDelete: SetNull)
@@ -192,6 +194,7 @@ model Proposal {
   summary     String            @db.Text
   /// Total de horas e custo (copiados do Scope para histórico)
   hoursTotal  Int
+  costCurrency String           @default("EUR")
   costMin     Float
   costMax     Float
   /// Comentário do cliente ao solicitar alterações
@@ -250,6 +253,9 @@ model Order {
   /// Resposta do admin
   productionInfo  String?     @db.Text
   estimatedValue  Float?
+  contractCurrency String?
+  contractFxRate Float?
+  contractFxLockedAt DateTime?
   adminNote       String?     @db.Text
   respondedAt     DateTime?
   /// Entrega do dev (IN_PRODUCTION → IN_REVIEW)
@@ -358,7 +364,8 @@ model OrderFinancial {
   id              String          @id @default(cuid())
   orderId         String          @unique
   order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  totalAmountCents Int            // valor total acordado em EUR cents
+  totalAmountCents Int            // valor total acordado na moeda contratual persistida
+  currency         String         @default("EUR")
   downPaymentPct   Int            @default(0) // 0 = pagamento único; ex: 50 = 50% entrada
   paidCents        Int            @default(0) // soma do efectivamente pago (atualizado em cada confirmação)
   status          FinancialStatus @default(PENDING)
@@ -383,6 +390,7 @@ model PaymentInstallment {
   financial           OrderFinancial  @relation(fields: [financialId], references: [id], onDelete: Cascade)
   sequence            Int             // 1 = entrada, 2 = final (ou 1 se pagamento único)
   amountCents         Int
+  currency            String          @default("EUR")
   method              PaymentMethod   @default(STRIPE)
   status              PaymentStatus   @default(PENDING)
   /// Stripe (nullable — pagamentos manuais não têm)

@@ -1,5 +1,6 @@
 import { ORDER_TYPE_LABEL, URGENCY_LABEL } from "@/lib/constants";
 import { emailLogoHeader, emailFooterTeam, emailFooterSystem } from "./shared";
+import { formatCurrencyByCode } from "@/lib/currency";
 
 export function tplOrderReceived(opts: {
   clientEmail: string;
@@ -41,6 +42,7 @@ export function tplOrderProposalSent(opts: {
   orderType: string;
   orderTitle?: string;
   estimatedValue: number;
+  estimatedCurrency: string;
   productionInfo: string;
   orderUrl: string;
 }) {
@@ -55,7 +57,7 @@ export function tplOrderProposalSent(opts: {
       </p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Valor estimado</p>
-        <p style="color:#fff;font-weight:700;font-size:24px;margin:0 0 16px">€${opts.estimatedValue.toLocaleString("pt-PT", { minimumFractionDigits: 2 })}</p>
+        <p style="color:#fff;font-weight:700;font-size:24px;margin:0 0 16px">${formatCurrencyByCode(opts.estimatedValue, opts.estimatedCurrency)}</p>
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Informações de produção</p>
         <p style="color:#94a3b8;font-size:14px;margin:0">${opts.productionInfo.slice(0, 400)}${opts.productionInfo.length > 400 ? "…" : ""}</p>
       </div>

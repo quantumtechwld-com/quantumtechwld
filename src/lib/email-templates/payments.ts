@@ -1,13 +1,15 @@
 import { ORDER_TYPE_LABEL } from "@/lib/constants";
 import { emailLogoHeader, emailFooterSystem } from "./shared";
+import { formatCurrencyByCode } from "@/lib/currency";
 
 export function tplOrderPaymentConfirmed(opts: {
   clientName: string;
   orderType: string;
   orderUrl: string;
   amountCents: number;
+  currency: string;
 }) {
-  const amount = (opts.amountCents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+  const amount = formatCurrencyByCode(opts.amountCents / 100, opts.currency);
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
@@ -34,8 +36,9 @@ export function tplOrderPaymentConfirmedAdmin(opts: {
   orderType: string;
   adminUrl: string;
   amountCents: number;
+  currency: string;
 }) {
-  const amount = (opts.amountCents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+  const amount = formatCurrencyByCode(opts.amountCents / 100, opts.currency);
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}

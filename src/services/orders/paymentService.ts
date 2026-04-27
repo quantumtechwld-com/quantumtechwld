@@ -4,6 +4,7 @@ import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { sendMail, tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin } from '@/lib/email';
 import { appUrl } from '@/lib/app-url';
+import { getPersistedCurrency } from '@/services/finance/contractCurrency';
 
 export async function createPayment(orderId: string, amount: number): Promise<Payment | null> {
   // Busca o pedido
@@ -16,13 +17,15 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
   });
   if (!order) return null;
 
+  const paymentCurrency = getPersistedCurrency((order as { contractCurrency?: string | null }).contractCurrency);
+
   // Guard: impede criação de múltiplos pagamentos para o mesmo pedido
   const existing = await prisma.payment.findUnique({ where: { orderId } });
   if (existing) return existing;
   // Cria PaymentIntent no Stripe
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(amount * 100), // Stripe espera centavos
-    currency: 'eur',
+    currency: paymentCurrency.toLowerCase(),
     metadata: { orderId },
     receipt_email: order.client.email ?? undefined,
   });
@@ -34,6 +37,7 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
       stripePaymentIntent: paymentIntent.id,
       stripeSessionId: "",
       amountCents: Math.round(amount * 100),
+      currency: paymentCurrency,
       status: 'PENDING',
     },
   });
@@ -50,6 +54,7 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
         orderType: order.type,
         orderUrl: `${baseUrl}/portal/orders/${orderId}`,
         amountCents: payment.amountCents,
+        currency: paymentCurrency,
       }),
     }).catch(() => {});
   }
@@ -62,6 +67,7 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
         orderType: order.type,
         adminUrl: `${baseUrl}/admin/orders/${orderId}`,
         amountCents: payment.amountCents,
+        currency: paymentCurrency,
       }),
     }).catch(() => {});
   }

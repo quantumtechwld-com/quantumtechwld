@@ -8,11 +8,13 @@ interface PayOrderButtonProps {
   orderId: string;
   /** Valor em cêntimos a cobrar (parcela ou total). */
   amountCents: number;
+  /** Moeda contratual/persistida exibida e cobrada. */
+  currency?: string;
   /** Etiqueta opcional: "Entrada" ou "Parcela final" */
   installmentLabel?: string;
 }
 
-export function PayOrderButton({ orderId, amountCents, installmentLabel }: Readonly<PayOrderButtonProps>) {
+export function PayOrderButton({ orderId, amountCents, currency = "EUR", installmentLabel }: Readonly<PayOrderButtonProps>) {
   const t = useTranslations("portal");
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
@@ -40,9 +42,7 @@ export function PayOrderButton({ orderId, amountCents, installmentLabel }: Reado
     }
   }
 
-  // Sensivel: o CTA de pagamento deve mostrar a moeda real de cobranca.
-  // Hoje o checkout Stripe deste fluxo cobra em EUR; nao usar locale aqui.
-  const amount = formatCurrency(amountCents / 100, locale, "EUR");
+  const amount = formatCurrency(amountCents / 100, locale, currency);
   const title = installmentLabel ?? t("payTitle");
 
   return (

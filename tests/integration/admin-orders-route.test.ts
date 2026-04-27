@@ -238,4 +238,38 @@ describe("GET /api/admin/orders", () => {
     expect(response.status).toBe(422);
     expect(body.error).toBe("Só é possível criar pedido para clientes ativos.");
   });
+
+  it("retorna 422 quando PIX manual e usado para cliente com moeda contratual nao BRL", async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      id: "client_us",
+      name: "John",
+      email: "john@example.com",
+      company: null,
+      locale: "en-US",
+      billingCurrency: null,
+      role: "CLIENT",
+      status: "ACTIVE",
+      organizationId: null,
+      organization: null,
+    });
+
+    const response = await POST(new NextRequest("http://localhost/api/admin/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: "client_us",
+        type: "new_project",
+        title: "Projeto em USD",
+        description: "Pedido internacional",
+        productionInfo: "Execução em 3 semanas",
+        estimatedValue: 500,
+        paymentMethod: "MANUAL_PIX",
+      }),
+      headers: { "content-type": "application/json" },
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error).toContain("PIX manual");
+    expect(mocks.createOrderWithRef).not.toHaveBeenCalled();
+  });
 });

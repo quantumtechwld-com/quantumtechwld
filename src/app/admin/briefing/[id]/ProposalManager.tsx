@@ -5,6 +5,7 @@ import {
   PROPOSAL_STATUS_LABEL as STATUS_LABEL,
   PROPOSAL_STATUS_COLOR as STATUS_COLOR,
 } from "@/lib/constants";
+import { formatCurrencyRangeByCode } from "@/lib/currency";
 import type { ProposalRow } from "./proposal-types";
 import { useProposalActions } from "./useProposalActions";
 import ProposalEditForm from "./ProposalEditForm";
@@ -130,7 +131,7 @@ export default function ProposalManager({ briefingId, initialProposal, hasScope 
           <div>
             <p className="text-xs text-white/30 uppercase tracking-wider mb-0.5">Investimento</p>
             <p className="text-white font-semibold">
-              €{proposal.costMin.toLocaleString("pt-PT")}–{proposal.costMax.toLocaleString("pt-PT")}
+              {formatCurrencyRangeByCode(proposal.costMin, proposal.costMax, proposal.costCurrency)}
             </p>
           </div>
           <div>

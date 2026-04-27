@@ -39,13 +39,14 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
       payment:  { select: { status: true, amountCents: true, currency: true, paidAt: true, stripePaymentIntent: true } },
       financial: {
         select: {
+          currency: true,
           status: true,
           paidCents: true,
           totalAmountCents: true,
           installments: {
             where: { status: "PAID" },
             orderBy: { sequence: "asc" },
-            select: { paidAt: true, amountCents: true, method: true, stripePaymentIntent: true },
+            select: { paidAt: true, amountCents: true, currency: true, method: true, stripePaymentIntent: true },
           },
         },
       },
@@ -76,9 +77,10 @@ export default async function InvoicePage({ params }: Readonly<RouteParams>) {
   const paidAtRaw = isPaidViaStripe ? (order.payment?.paidAt ?? null) : (financialPaidAt ?? null);
   const paidAtDate = paidAtRaw ? new Date(paidAtRaw) : null;
 
-  // Stripe: usa a moeda gravada na transação.
-  // Financial/PIX: não armazena moeda — deriva do locale do cliente (pt→BRL, en→USD, es→EUR).
-  const currency = order.payment?.currency?.toUpperCase() ?? getCurrencyForLocale(locale);
+  const currency = order.payment?.currency?.toUpperCase()
+    ?? order.financial?.currency?.toUpperCase()
+    ?? order.financial?.installments?.[0]?.currency?.toUpperCase()
+    ?? getCurrencyForLocale(locale);
   const amount = (amountCents / 100).toLocaleString(locale, {
     style: "currency", currency,
   });

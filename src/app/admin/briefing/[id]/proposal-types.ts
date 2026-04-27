@@ -7,6 +7,7 @@ export type ProposalRow = {
   summary: string;
   content: string;
   hoursTotal: number;
+  costCurrency: string;
   costMin: number;
   costMax: number;
   clientNote: string | null;

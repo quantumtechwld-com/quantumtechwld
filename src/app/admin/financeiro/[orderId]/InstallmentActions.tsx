@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PAYMENT_METHOD_LABEL } from "@/lib/constants";
+import { formatCurrencyByCode } from "@/lib/currency";
 
 interface Installment {
   id:          string;
   sequence:    number;
   amountCents: number;
+  currency?:   string | null;
   method:      string;
   status:      string;
   paidAt?:     string | null;
@@ -19,10 +21,6 @@ interface Props {
   orderId:      string;
   installments: Installment[];
   onUpdated?:   () => void;
-}
-
-function fmtEur(cents: number) {
-  return (cents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 }
 
 export function InstallmentActions({ orderId, installments, onUpdated }: Readonly<Props>) {
@@ -93,7 +91,7 @@ export function InstallmentActions({ orderId, installments, onUpdated }: Readonl
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-sm font-semibold text-white">
-                Parcela {inst.sequence} — {fmtEur(inst.amountCents)}
+                Parcela {inst.sequence} — {formatCurrencyByCode(inst.amountCents / 100, inst.currency ?? "EUR")}
               </p>
               <p className="text-xs text-slate-400">{PAYMENT_METHOD_LABEL[inst.method] ?? inst.method}</p>
             </div>

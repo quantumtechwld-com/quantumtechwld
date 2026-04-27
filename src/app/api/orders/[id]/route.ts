@@ -13,6 +13,12 @@ import {
   tplOrderReviewApprovedAdmin,
 } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
+import {
+  buildInstallments,
+  lockContractAmount,
+  resolveContractCurrency,
+  validatePaymentMethodCurrency,
+} from "@/services/finance/contractCurrency";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -194,7 +200,7 @@ async function updateOrderWithLock(
 
 type EmailContext = {
   action: string;
-  updated: { type: string; title?: string | null; estimatedValue?: number | null; productionInfo?: string | null; finalDeliveryUrl?: string | null };
+  updated: { type: string; title?: string | null; estimatedValue?: number | null; productionInfo?: string | null; finalDeliveryUrl?: string | null; contractCurrency?: string | null };
   clientEmail: string;
   clientName: string;
   adminEmail: string;
@@ -210,7 +216,7 @@ function dispatchPostUpdateEmail(ctx: EmailContext) {
     propose: () => sendMail({
       to: clientEmail,
       subject: "[DevFlow] Proposta de produção recebida",
-      html: tplOrderProposalSent({ clientName, orderType: updated.type, orderTitle, estimatedValue: updated.estimatedValue ?? 0, productionInfo: updated.productionInfo ?? "", orderUrl }),
+      html: tplOrderProposalSent({ clientName, orderType: updated.type, orderTitle, estimatedValue: updated.estimatedValue ?? 0, estimatedCurrency: updated.contractCurrency ?? "EUR", productionInfo: updated.productionInfo ?? "", orderUrl }),
     }),
     start_production: () => sendMail({
       to: clientEmail,
@@ -258,6 +264,7 @@ function dispatchPostUpdateEmail(ctx: EmailContext) {
 async function createOrReplaceOrderFinancial(
   orderId: string,
   totalCents: number,
+  currency: string,
   downPaymentPct: number,
   method: string,
   dueDates?: { entry?: string | null; final?: string | null },
@@ -265,28 +272,21 @@ async function createOrReplaceOrderFinancial(
   // Remove financeiro anterior (re-proposta) — cascade apaga installments
   await db.orderFinancial.deleteMany({ where: { orderId } });
 
-  const entryCents = downPaymentPct > 0 ? Math.round(totalCents * downPaymentPct / 100) : totalCents;
-
-  type InstallmentDraft = { sequence: number; amountCents: number; method: string; dueDate?: Date | null };
-  const installments: InstallmentDraft[] =
-    downPaymentPct > 0
-      ? [
-          { sequence: 1, amountCents: entryCents,              method, dueDate: dueDates?.entry  ? new Date(dueDates.entry)  : null },
-          { sequence: 2, amountCents: totalCents - entryCents, method, dueDate: dueDates?.final ? new Date(dueDates.final) : null },
-        ]
-      : [{ sequence: 1, amountCents: totalCents, method }];
+  const installments = buildInstallments(totalCents, currency as "BRL" | "EUR" | "USD", downPaymentPct, method, dueDates);
 
   await db.orderFinancial.create({
     data: {
       orderId,
       totalAmountCents: totalCents,
+      currency,
       downPaymentPct,
       paidCents: 0,
       status: "PENDING",
       installments: {
-        create: installments.map(({ sequence, amountCents, method: m, dueDate }) => ({
+        create: installments.map(({ sequence, amountCents, currency: installmentCurrency, method: m, dueDate }) => ({
           sequence,
           amountCents,
+          currency: installmentCurrency,
           method: m,
           status: "PENDING",
           ...(dueDate ? { dueDate } : {}),
@@ -294,6 +294,81 @@ async function createOrReplaceOrderFinancial(
       },
     },
   });
+}
+
+async function resolveProposalPersistence(
+  order: {
+    client: { locale?: string | null; billingCurrency?: string | null };
+    organization?: { billingCurrency?: string | null } | null;
+  },
+  body: PatchBody,
+  result: Record<string, unknown>,
+) {
+  if (body.action !== "propose" || body.estimatedValue == null || body.estimatedValue <= 0) {
+    return { persistedUpdate: result, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: null as ApiError | null };
+  }
+
+  const method = body.paymentMethod ?? "STRIPE";
+  const contractCurrency = resolveContractCurrency({
+    organizationCurrency: order.organization?.billingCurrency ?? null,
+    userCurrency: order.client.billingCurrency ?? null,
+    locale: order.client.locale ?? null,
+  });
+  const currencyError = validatePaymentMethodCurrency(method, contractCurrency);
+  if (currencyError) {
+    return { persistedUpdate: result, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: { error: currencyError, status: 422 } };
+  }
+
+  const lockedTerms = await lockContractAmount({
+    baseAmount: body.estimatedValue,
+    contractCurrency,
+  });
+
+  return {
+    persistedUpdate: {
+      ...result,
+      estimatedValue: lockedTerms.estimatedValue,
+      contractCurrency: lockedTerms.contractCurrency,
+      contractFxRate: lockedTerms.contractFxRate,
+      contractFxLockedAt: lockedTerms.contractFxLockedAt,
+    },
+    lockedTerms,
+    error: null as ApiError | null,
+  };
+}
+
+async function handleProposalSideEffects(
+  id: string,
+  updated: { estimatedValue?: number | null; contractCurrency?: string | null },
+  body: PatchBody,
+  sessionUserId?: string,
+  lockedTerms?: Awaited<ReturnType<typeof lockContractAmount>> | null,
+) {
+  const { createProposal, sendProposal: sendProposalService } = await import("@/services/proposals/ProposalService");
+
+  const newProposal = await createProposal({
+    orderId: id,
+    productionInfo: body.productionInfo ?? "",
+    estimatedValue: updated.estimatedValue ?? 0,
+    adminNote: body.adminNote,
+    createdByAdminId: sessionUserId,
+  });
+
+  await sendProposalService({ proposalId: newProposal.id });
+
+  if (updated.estimatedValue != null && updated.estimatedValue > 0) {
+    const totalCents = lockedTerms?.totalAmountCents ?? Math.round(updated.estimatedValue * 100);
+    const pct = Math.max(0, Math.min(99, Math.round(body.downPaymentPct ?? 0)));
+    const method = body.paymentMethod ?? "STRIPE";
+    await createOrReplaceOrderFinancial(
+      id,
+      totalCents,
+      updated.contractCurrency ?? "EUR",
+      pct,
+      method,
+      { entry: body.entryDueDate, final: body.finalDueDate },
+    );
+  }
 }
 
 // ─── Financeiro: criar/substituir OrderFinancial + parcelas ─────────────────
@@ -314,8 +389,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     const order = await db.order.findUnique({
       where: { id },
       include: { 
-        client: { select: { id: true, name: true, email: true } },
-        organization: { select: { name: true } },
+        client: { select: { id: true, name: true, email: true, locale: true, billingCurrency: true } },
+        organization: { select: { name: true, billingCurrency: true } },
       },
     });
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
@@ -331,7 +406,12 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     // Optimistic lock: WHERE inclui o status atual — se outro worker já tiver
     // avançado o estado, updateOrderWithLock retorna null e devolvemos 409.
-    const updated = await updateOrderWithLock(id, order.status, result);
+    const proposalPersistence = await resolveProposalPersistence(order, body, result);
+    if (proposalPersistence.error) {
+      return NextResponse.json({ error: proposalPersistence.error.error }, { status: proposalPersistence.error.status });
+    }
+
+    const updated = await updateOrderWithLock(id, order.status, proposalPersistence.persistedUpdate);
     if (!updated) {
       return NextResponse.json(
         { error: "Estado do pedido foi alterado entretanto. Recarregue a página e tente novamente." },
@@ -357,27 +437,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     // Quando o admin envia proposta, criar OrderProposal versionada + OrderFinancial
     if (body.action === "propose") {
-      // Criar proposta versionada
-      const { createProposal, sendProposal: sendProposalService } = await import("@/services/proposals/ProposalService");
-      
-      const newProposal = await createProposal({
-        orderId: id,
-        productionInfo: body.productionInfo ?? "",
-        estimatedValue: body.estimatedValue ?? 0,
-        adminNote: body.adminNote,
-        createdByAdminId: session.user.id,
-      });
-
-      // Enviar proposta (atualiza status, mas Order já está com PROPOSAL_SENT do update anterior)
-      await sendProposalService({ proposalId: newProposal.id });
-
-      // Criar/actualizar OrderFinancial se houver valor
-      if (updated.estimatedValue != null && updated.estimatedValue > 0) {
-        const totalCents = Math.round(updated.estimatedValue * 100);
-        const pct = Math.max(0, Math.min(99, Math.round(body.downPaymentPct ?? 0)));
-        const method = body.paymentMethod ?? "STRIPE";
-        await createOrReplaceOrderFinancial(id, totalCents, pct, method, { entry: body.entryDueDate, final: body.finalDueDate });
-      }
+      await handleProposalSideEffects(id, updated, body, session.user.id, proposalPersistence.lockedTerms);
     }
 
     return NextResponse.json({ order: updated });

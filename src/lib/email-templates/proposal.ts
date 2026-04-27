@@ -1,4 +1,5 @@
 import { emailLogoHeader, emailFooterTeam, emailFooterSystem } from "./shared";
+import { formatCurrencyRangeByCode } from "@/lib/currency";
 
 export function tplProposalSent(opts: {
   clientName: string;
@@ -6,6 +7,7 @@ export function tplProposalSent(opts: {
   proposalUrl: string;
   costMin: number;
   costMax: number;
+  costCurrency: string;
   hoursTotal: number;
 }) {
   return /* html */ `
@@ -25,7 +27,7 @@ export function tplProposalSent(opts: {
           </tr>
           <tr>
             <td style="color:#fff;font-weight:600;font-size:18px">${opts.hoursTotal}h</td>
-            <td style="color:#fff;font-weight:600;font-size:18px">€${opts.costMin.toLocaleString("pt-PT")}–${opts.costMax.toLocaleString("pt-PT")}</td>
+            <td style="color:#fff;font-weight:600;font-size:18px">${formatCurrencyRangeByCode(opts.costMin, opts.costMax, opts.costCurrency)}</td>
           </tr>
         </table>
       </div>

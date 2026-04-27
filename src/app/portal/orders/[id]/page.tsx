@@ -9,7 +9,7 @@ import { MessagesPanel } from "@/components/MessagesPanel";
 import { PayOrderButton } from "./PayOrderButton";
 import { PixPaymentPanel } from "@/components/PixPaymentPanel";
 import { RatingWidget } from "./RatingWidget";
-import { convertAndFormatByLocale, getCurrencyForLocale, formatCurrency, getExchangeRate } from "@/lib/currency";
+import { formatCurrency, getCurrencyForLocale, normalizeSupportedCurrency } from "@/lib/currency";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -66,33 +66,21 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   const t = await getTranslations("portal");
   const locale = await getLocale();
+  const localCurrency = getCurrencyForLocale(locale);
+  const contractCurrency = normalizeSupportedCurrency(order.contractCurrency) ?? "EUR";
 
   // Membros de organização sem role ADMIN não veem dados financeiros
   const isOrgMember = !!session.user.organizationId && session.user.orgRole === "MEMBER";
 
-  // Valor estimado convertido para a moeda do locale (câmbio em tempo real, cache 1 h)
   const estimatedFormatted = order.estimatedValue == null
     ? null
-    : await convertAndFormatByLocale(Number(order.estimatedValue), "EUR", locale);
-  const isConverted = getCurrencyForLocale(locale) !== "EUR";
+    : formatCurrency(Number(order.estimatedValue), locale, contractCurrency);
 
-  // Pré-computar valor da parcela pendente — sempre na moeda do contrato (EUR)
-  // Não converter para BRL/USD: o cliente paga em EUR no Stripe, e o display
-  // deve coincidir com o valor cobrado no botão de pagamento.
   const pendingInst = order.financial?.installments?.find((i: { status: string }) => i.status === "PENDING");
+  const pendingInstCurrency = normalizeSupportedCurrency(pendingInst?.currency) ?? contractCurrency;
   const pendingInstFormatted = pendingInst
-    ? formatCurrency(pendingInst.amountCents / 100, locale, "EUR")
+    ? formatCurrency(pendingInst.amountCents / 100, locale, pendingInstCurrency)
     : null;
-
-  // Taxa de câmbio (EUR → moeda do locale) reutilizada no cronograma e no PIX. Cache 1 h.
-  const localCurrency = getCurrencyForLocale(locale);
-  const scheduleRate = localCurrency === "EUR" ? 1 : await getExchangeRate("EUR", localCurrency);
-
-  // PIX: amountCents no DB são EUR cents; exibir em BRL requer conversão.
-  const pendingInstPixBrlCents: number | null =
-    pendingInst?.method === "MANUAL_PIX" && locale === "pt"
-      ? Math.round(pendingInst.amountCents * scheduleRate)
-      : null;
   const orderTypeLabel = (type: string) => {
     const keyMap: Record<string, string> = {
       new_feature: "orderTypeNewFeature",
@@ -169,6 +157,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       id: string;
       sequence: number;
       amountCents: number;
+      currency?: string | null;
       method: string;
       status: string;
       dueDate?: string | null;
@@ -197,9 +186,9 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
             const dueDate = inst.dueDate ? new Date(inst.dueDate) : null;
             const isOverdue = !isPaid && dueDate ? dueDate < now : false;
             const amount = formatCurrency(
-              (inst.amountCents / 100) * scheduleRate,
+              inst.amountCents / 100,
               locale,
-              localCurrency,
+              normalizeSupportedCurrency(inst.currency) ?? contractCurrency,
             );
             return (
               <div
@@ -235,29 +224,22 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
             );
           })}
         </div>
-        {isConverted && (
-          <p className="mt-3 text-xs text-slate-600">{t("payScheduleApproxNote")}</p>
-        )}
       </section>
     );
   }
 
-  // PIX é exclusivo do Brasil — oculto para outros locales.
-  // Usa pendingInstPixBrlCents (EUR→BRL convertido) para exibir o valor correto em reais.
   function renderPixCard(opts: {
     orderId: string;
-    amtCents: number; // EUR cents (original, usado como fallback)
+    amtCents: number;
+    currency: string;
     label: string;
     dueDate?: string | null;
   }) {
-    if (locale !== "pt") return null;
-    // Priorizar valor já convertido para BRL; fallback para o valor EUR bruto caso a
-    // conversão não tenha sido pré-computada (ex: installment não é o pendingInst).
-    const brlCents = pendingInstPixBrlCents ?? opts.amtCents;
+    if (normalizeSupportedCurrency(opts.currency) !== "BRL" || localCurrency !== "BRL") return null;
     return (
       <PixPaymentPanel
         orderId={opts.orderId}
-        amountCents={brlCents}
+        amountCents={opts.amtCents}
         installmentLabel={opts.label}
         dueDate={opts.dueDate}
       />
@@ -266,7 +248,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   // ── Widget de pagamento de parcelas pendentes ─────────────────────────────
   function renderInstallmentCard(
-    inst: { method: string; amountCents: number; sequence: number; dueDate?: string | null },
+    inst: { method: string; amountCents: number; sequence: number; currency?: string | null; dueDate?: string | null },
     formattedValue: string,
   ) {
     const isEntry  = inst.sequence === 1;
@@ -289,13 +271,18 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
           <h2 className="text-sm font-semibold text-violet-300 mb-1">{label}</h2>
           <p className="text-2xl font-bold text-white mb-3">{formattedValue}</p>
           {dueBadge}
-          <PayOrderButton orderId={order.id} amountCents={amtCents} installmentLabel={label} />
+          <PayOrderButton
+            orderId={order.id}
+            amountCents={amtCents}
+            currency={normalizeSupportedCurrency(inst.currency) ?? contractCurrency}
+            installmentLabel={label}
+          />
         </div>
       );
     }
 
     if (inst.method === "MANUAL_PIX") {
-      return renderPixCard({ orderId: order.id, amtCents, label, dueDate: inst.dueDate });
+      return renderPixCard({ orderId: order.id, amtCents, currency: inst.currency ?? contractCurrency, label, dueDate: inst.dueDate });
     }
 
     // MANUAL_TRANSFER / MANUAL_OTHER
@@ -320,7 +307,11 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     if (!financial && order.payment?.status !== "PAID" && order.estimatedValue) {
       return (
         <div className="mt-4">
-          <PayOrderButton orderId={order.id} amountCents={Math.round(Number(order.estimatedValue) * 100)} />
+          <PayOrderButton
+            orderId={order.id}
+            amountCents={Math.round(Number(order.estimatedValue) * 100)}
+            currency={contractCurrency}
+          />
         </div>
       );
     }
@@ -415,9 +406,6 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
                 <p className="mb-2 text-sm text-slate-300">
                   <span className="text-slate-500">{t("orderEstValue")} </span>
                   <span className="font-semibold text-white">{estimatedFormatted}</span>
-                  {isConverted && (
-                    <span className="ml-1 text-xs text-slate-500">{t("orderValueApprox")}</span>
-                  )}
                 </p>
               )}
               <p className="text-sm text-slate-200 whitespace-pre-wrap">{order.productionInfo}</p>

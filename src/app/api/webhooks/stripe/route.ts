@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { sendMail, tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
 import type Stripe from "stripe";
+import { getPersistedCurrency } from "@/services/finance/contractCurrency";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -85,6 +86,7 @@ async function handleSessionCompleted(session: Stripe.Checkout.Session): Promise
         orderType:   order.type,
         orderUrl:    `${baseUrl}/portal/orders/${orderId}`,
         amountCents: session.amount_total ?? 0,
+        currency: getPersistedCurrency(session.currency ?? null),
       }),
     }).catch(() => null);
   }
@@ -97,6 +99,7 @@ async function handleSessionCompleted(session: Stripe.Checkout.Session): Promise
       orderType:   order.type,
       adminUrl:    `${baseUrl}/admin/orders/${orderId}`,
       amountCents: session.amount_total ?? 0,
+      currency: getPersistedCurrency(session.currency ?? null),
     }),
   }).catch(() => null);
 }

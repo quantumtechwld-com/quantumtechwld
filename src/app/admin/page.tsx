@@ -8,6 +8,7 @@ import RecentOrdersTable from "./components/RecentOrdersTable";
 import AllBriefingsTable from "./components/AllBriefingsTable";
 import Link from "next/link";
 import { Users, Package, FileText, BookOpen } from "lucide-react";
+import { formatCurrencyByCode } from "@/lib/currency";
 import {
   BRIEFING_STATUS_LABEL as STATUS_LABEL,
   BRIEFING_STATUS_COLOR as STATUS_COLOR,
@@ -17,8 +18,13 @@ import {
   PROJECT_TYPE_LABEL as PROJECT_LABEL,
 } from "@/lib/constants";
 
-function fmtEur(cents: number) {
-  return (cents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+function formatMoneyGroups(groups: Record<string, number>) {
+  const entries = Object.entries(groups).filter(([, cents]) => cents > 0);
+  if (entries.length === 0) return formatCurrencyByCode(0, "EUR");
+  return [...entries]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([currency, cents]) => formatCurrencyByCode(cents / 100, currency))
+    .join(" · ");
 }
 
 export default async function AdminDashboardPage() {
@@ -46,7 +52,7 @@ export default async function AdminDashboardPage() {
     updatedAt: Date;
     client: { name: string | null; email: string };
     organization: { name: string } | null;
-    payment: { status: string; amountCents: number } | null;
+    payment: { status: string; amountCents: number; currency?: string | null } | null;
   };
 
   // Todas as queries em paralelo — reduz latência no dashboard admin
@@ -59,8 +65,7 @@ export default async function AdminDashboardPage() {
     orderInProd,
     orderCompleted,
     orderRejected,
-    totalRevenue,
-    monthRevenue,
+    paidPayments,
     recentOrdersRaw,
   ] = await Promise.all([
     prisma.briefing.findMany({
@@ -74,10 +79,9 @@ export default async function AdminDashboardPage() {
     dbAny.order.count({ where: { status: "IN_PRODUCTION" } }),
     dbAny.order.count({ where: { status: "COMPLETED" } }),
     dbAny.order.count({ where: { status: "REJECTED" } }),
-    dbAny.payment.aggregate({ _sum: { amountCents: true }, where: { status: "PAID" } }),
-    dbAny.payment.aggregate({
-      _sum: { amountCents: true },
-      where: { status: "PAID", paidAt: { gte: startOfMonth } },
+    dbAny.payment.findMany({
+      where: { status: "PAID" },
+      select: { amountCents: true, currency: true, paidAt: true },
     }),
     dbAny.order.findMany({
       take: 6,
@@ -86,7 +90,7 @@ export default async function AdminDashboardPage() {
       include: {
         client: { select: { name: true, email: true } },
         organization: { select: { name: true } },
-        payment: { select: { status: true, amountCents: true } },
+        payment: { select: { status: true, amountCents: true, currency: true } },
       },
     }),
   ]);
@@ -94,10 +98,17 @@ export default async function AdminDashboardPage() {
   const scopeSet = new Set((scopesRaw as { briefingId: string }[]).map((s) => s.briefingId));
 
   const recentOrders = recentOrdersRaw as RecentOrder[];
-  const totalRevenueCents: number =
-    (totalRevenue as { _sum: { amountCents: number | null } })._sum.amountCents ?? 0;
-  const monthRevenueCents: number =
-    (monthRevenue as { _sum: { amountCents: number | null } })._sum.amountCents ?? 0;
+  const revenueByCurrency = (paidPayments as Array<{ amountCents: number; currency?: string | null; paidAt?: Date | null }>).reduce((acc: Record<string, number>, payment) => {
+    const currency = payment.currency ?? "EUR";
+    acc[currency] = (acc[currency] ?? 0) + payment.amountCents;
+    return acc;
+  }, {});
+  const monthRevenueByCurrency = (paidPayments as Array<{ amountCents: number; currency?: string | null; paidAt?: Date | null }>).reduce((acc: Record<string, number>, payment) => {
+    if (!payment.paidAt || payment.paidAt < startOfMonth) return acc;
+    const currency = payment.currency ?? "EUR";
+    acc[currency] = (acc[currency] ?? 0) + payment.amountCents;
+    return acc;
+  }, {});
 
   const counts = {
     total: briefings.length,
@@ -138,10 +149,9 @@ export default async function AdminDashboardPage() {
           orderInProd={orderInProd}
           orderCompleted={orderCompleted}
           orderRejected={orderRejected}
-          totalRevenueCents={totalRevenueCents}
-          monthRevenueCents={monthRevenueCents}
+          totalRevenueLabel={formatMoneyGroups(revenueByCurrency)}
+          monthRevenueLabel={formatMoneyGroups(monthRevenueByCurrency)}
           monthLabel={monthLabel}
-          fmtEur={fmtEur}
           hideRevenue={!isAdmin}
         />
         <BriefingStats counts={counts} />
@@ -150,7 +160,6 @@ export default async function AdminDashboardPage() {
           ORDER_TYPE_LABEL={ORDER_TYPE_LABEL}
           ORDER_STATUS_LABEL={ORDER_STATUS_LABEL}
           ORDER_STATUS_COLOR={ORDER_STATUS_COLOR}
-          fmtEur={fmtEur}
         />
         <div className="rounded-xl border border-white/8 bg-white/3 overflow-hidden">
           <div className="px-6 py-4 border-b border-white/5">

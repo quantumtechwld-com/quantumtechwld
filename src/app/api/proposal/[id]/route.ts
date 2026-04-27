@@ -16,6 +16,7 @@ type ProposalDoc = {
   id: string;
   briefingId: string;
   status: ProposalStatus;
+  costCurrency: string;
   costMin: number;
   costMax: number;
   hoursTotal: number;
@@ -91,6 +92,7 @@ async function handleSend(proposal: ProposalDoc) {
       proposalUrl,
       costMin: proposal.costMin,
       costMax: proposal.costMax,
+      costCurrency: proposal.costCurrency,
       hoursTotal: proposal.hoursTotal,
     }),
   }).catch(() => { /* falha silenciosa de e-mail não bloqueia a resposta */ });
@@ -104,6 +106,7 @@ async function handleSend(proposal: ProposalDoc) {
     proposalUrl,
     costMin: proposal.costMin,
     costMax: proposal.costMax,
+    costCurrency: proposal.costCurrency,
     hoursTotal: proposal.hoursTotal,
   });
 

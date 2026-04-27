@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { formatCurrencyByCode } from "@/lib/currency";
 import {
   FINANCIAL_STATUS_LABEL,
   FINANCIAL_STATUS_COLOR,
@@ -11,8 +12,13 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 
-function fmtEur(cents: number) {
-  return (cents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+function formatMoneyGroups(groups: Record<string, number>) {
+  const entries = Object.entries(groups).filter(([, cents]) => cents > 0);
+  if (entries.length === 0) return formatCurrencyByCode(0, "EUR");
+  const sortedEntries = [...entries].sort(([left], [right]) => left.localeCompare(right));
+  return sortedEntries
+    .map(([currency, cents]) => formatCurrencyByCode(cents / 100, currency))
+    .join(" · ");
 }
 
 export const metadata = { title: "Financeiro | Admin" };
@@ -38,16 +44,16 @@ export default async function AdminFinanceiroPage() {
     },
   });
 
-  // Totais
-  const totalReceived = financials.reduce(
-    (sum: number, f: { paidCents: number }) => sum + f.paidCents,
-    0,
-  );
-  const totalPending = financials.reduce(
-    (sum: number, f: { totalAmountCents: number; paidCents: number }) =>
-      sum + (f.totalAmountCents - f.paidCents),
-    0,
-  );
+  const totalReceivedByCurrency = financials.reduce((acc: Record<string, number>, f: { paidCents: number; currency?: string | null }) => {
+    const currency = f.currency ?? "EUR";
+    acc[currency] = (acc[currency] ?? 0) + f.paidCents;
+    return acc;
+  }, {});
+  const totalPendingByCurrency = financials.reduce((acc: Record<string, number>, f: { totalAmountCents: number; paidCents: number; currency?: string | null }) => {
+    const currency = f.currency ?? "EUR";
+    acc[currency] = (acc[currency] ?? 0) + (f.totalAmountCents - f.paidCents);
+    return acc;
+  }, {});
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-8">
@@ -60,11 +66,11 @@ export default async function AdminFinanceiroPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/8 bg-white/3 p-5">
           <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Total recebido</p>
-          <p className="text-2xl font-bold text-emerald-400">{fmtEur(totalReceived)}</p>
+          <p className="text-2xl font-bold text-emerald-400">{formatMoneyGroups(totalReceivedByCurrency)}</p>
         </div>
         <div className="rounded-2xl border border-white/8 bg-white/3 p-5">
           <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Por receber</p>
-          <p className="text-2xl font-bold text-yellow-400">{fmtEur(totalPending)}</p>
+          <p className="text-2xl font-bold text-yellow-400">{formatMoneyGroups(totalPendingByCurrency)}</p>
         </div>
         <div className="rounded-2xl border border-white/8 bg-white/3 p-5">
           <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Pedidos com financeiro</p>
@@ -101,8 +107,9 @@ export default async function AdminFinanceiroPage() {
                   orderId: string;
                   totalAmountCents: number;
                   paidCents: number;
+                  currency?: string | null;
                   status: string;
-                  installments: Array<{ id: string; sequence: number; amountCents: number; method: string; status: string }>;
+                  installments: Array<{ id: string; sequence: number; amountCents: number; currency?: string | null; method: string; status: string }>;
                   order: { id: string; orderRef?: string; type: string; client: { name?: string; email: string }; organization?: { name: string } | null };
                 }) => (
                   <tr key={f.id} className="border-b border-white/5 hover:bg-white/2 transition">
@@ -114,16 +121,16 @@ export default async function AdminFinanceiroPage() {
                       <div className="text-slate-500 text-[11px]">{f.order.client.email}</div>
                     </td>
                     <td className="px-5 py-3 text-right text-white font-semibold">
-                      {fmtEur(f.totalAmountCents)}
+                      {formatCurrencyByCode(f.totalAmountCents / 100, f.currency ?? "EUR")}
                     </td>
                     <td className="px-5 py-3 text-right text-emerald-400 font-semibold">
-                      {fmtEur(f.paidCents)}
+                      {formatCurrencyByCode(f.paidCents / 100, f.currency ?? "EUR")}
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex flex-col gap-0.5">
                         {f.installments.map((inst) => (
                           <span key={inst.id} className="text-[11px] text-slate-400">
-                            P{inst.sequence} · {fmtEur(inst.amountCents)} · {PAYMENT_METHOD_LABEL[inst.method] ?? inst.method} ·{" "}
+                            P{inst.sequence} · {formatCurrencyByCode(inst.amountCents / 100, inst.currency ?? f.currency ?? "EUR")} · {PAYMENT_METHOD_LABEL[inst.method] ?? inst.method} ·{" "}
                             <span className={inst.status === "PAID" ? "text-emerald-400" : "text-yellow-400"}>
                               {inst.status === "PAID" ? "Pago" : "Pendente"}
                             </span>

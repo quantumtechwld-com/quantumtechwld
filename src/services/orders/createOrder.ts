@@ -30,6 +30,9 @@ export type CreateOrderInput = {
   adminNote?: string | null;
   /** Empresa do criador (nullable — retrocompatível) */
   organizationId?: string | null;
+  contractCurrency?: string | null;
+  contractFxRate?: number | null;
+  contractFxLockedAt?: Date | null;
 };
 
 /** Cria o pedido com orderRef único num único INSERT — sem race condition. */
@@ -53,6 +56,9 @@ export async function createOrderWithRef(input: CreateOrderInput) {
       ? {
           productionInfo: input.productionInfo!.trim(),
           estimatedValue: input.estimatedValue,
+          contractCurrency: input.contractCurrency ?? null,
+          contractFxRate: input.contractFxRate ?? null,
+          contractFxLockedAt: input.contractFxLockedAt ?? null,
           adminNote: input.adminNote?.trim() ?? null,
           respondedAt: new Date(),
         }

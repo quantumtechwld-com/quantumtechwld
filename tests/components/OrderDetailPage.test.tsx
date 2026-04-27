@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   getCurrencyForLocale: vi.fn(),
   getExchangeRate: vi.fn(),
   formatCurrency: vi.fn(),
+  normalizeSupportedCurrency: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -63,6 +64,12 @@ vi.mock("@/app/portal/orders/[id]/PayOrderButton", () => ({
   PayOrderButton: ({ orderId }: { orderId: string }) => <div>PayOrderButtonMock:{orderId}</div>,
 }));
 
+vi.mock("@/components/PixPaymentPanel", () => ({
+  PixPaymentPanel: ({ amountCents, installmentLabel }: { amountCents: number; installmentLabel?: string }) => (
+    <div>PixPaymentPanelMock:{installmentLabel}:{amountCents}</div>
+  ),
+}));
+
 vi.mock("@/app/portal/orders/[id]/RatingWidget", () => ({
   RatingWidget: ({ orderId }: { orderId: string }) => <div>RatingWidgetMock:{orderId}</div>,
 }));
@@ -72,6 +79,7 @@ vi.mock("@/lib/currency", () => ({
   getCurrencyForLocale: mocks.getCurrencyForLocale,
   getExchangeRate: mocks.getExchangeRate,
   formatCurrency: mocks.formatCurrency,
+  normalizeSupportedCurrency: mocks.normalizeSupportedCurrency,
 }));
 
 import OrderDetailPage from "@/app/portal/orders/[id]/page";
@@ -89,7 +97,8 @@ describe("OrderDetailPage", () => {
       createdAt: new Date("2026-04-21T10:00:00.000Z"),
       description: "Descrição detalhada do pedido",
       urgency: "high",
-      estimatedValue: 120,
+      estimatedValue: 720,
+      contractCurrency: "BRL",
       productionInfo: "Entrega em 10 dias úteis",
       adminNote: "Priorizar integração",
       client: { email: "client@example.com", name: "Joao" },
@@ -102,6 +111,11 @@ describe("OrderDetailPage", () => {
     mocks.getCurrencyForLocale.mockReturnValue("BRL");
     mocks.getExchangeRate.mockResolvedValue(6.17);
     mocks.formatCurrency.mockImplementation((value: number) => `R$ ${value.toFixed(2).replace(".", ",")}`);
+    mocks.normalizeSupportedCurrency.mockImplementation((value?: string | null) => {
+      if (!value) return null;
+      const normalized = value.toUpperCase();
+      return ["BRL", "EUR", "USD"].includes(normalized) ? normalized : null;
+    });
   });
 
   it("renderiza os dados principais do pedido e CTA de pagamento", async () => {
@@ -132,7 +146,8 @@ describe("OrderDetailPage", () => {
       createdAt: new Date("2026-04-21T10:00:00.000Z"),
       description: "Descrição detalhada do pedido",
       urgency: "high",
-      estimatedValue: 120,
+      estimatedValue: 720,
+      contractCurrency: "BRL",
       productionInfo: "Entrega em 10 dias úteis",
       adminNote: null,
       client: { email: "client@example.com", name: "Joao" },
@@ -149,5 +164,46 @@ describe("OrderDetailPage", () => {
     expect(screen.getByRole("link", { name: "orderInvoice" })).toHaveAttribute("href", "/portal/orders/ord_1/invoice");
     expect(screen.getByText("Excelente")).toBeInTheDocument();
     expect(screen.queryByText("PayOrderButtonMock:ord_1")).not.toBeInTheDocument();
+  });
+
+  it("converte a parcela PIX para BRL quando o locale resolvido e pt-BR", async () => {
+    mocks.orderFindUnique.mockResolvedValue({
+      id: "ord_1",
+      title: "PIX manual",
+      type: "new_feature",
+      orderRef: "QTA-PIX",
+      status: "APPROVED",
+      createdAt: new Date("2026-04-21T10:00:00.000Z"),
+      description: "Pagamento via PIX",
+      urgency: "high",
+      estimatedValue: 720,
+      contractCurrency: "BRL",
+      productionInfo: "Entrega em 10 dias úteis",
+      adminNote: null,
+      client: { email: "client@example.com", name: "Joao" },
+      payment: { status: "PENDING", amountCents: 12000 },
+      financial: {
+        status: "PENDING",
+        installments: [
+          {
+            id: "inst_1",
+            sequence: 1,
+            amountCents: 9520,
+            currency: "BRL",
+            method: "MANUAL_PIX",
+            status: "PENDING",
+            dueDate: "2026-04-30T00:00:00.000Z",
+          },
+        ],
+      },
+      rating: null,
+    });
+
+    render(await OrderDetailPage({
+      params: Promise.resolve({ id: "ord_1" }),
+      searchParams: Promise.resolve({}),
+    }));
+
+    expect(screen.getByText("PixPaymentPanelMock:payInstallmentEntry:9520")).toBeInTheDocument();
   });
 });

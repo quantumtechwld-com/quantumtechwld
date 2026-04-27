@@ -2,15 +2,12 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { formatCurrencyByCode } from "@/lib/currency";
 import { FINANCIAL_STATUS_LABEL, FINANCIAL_STATUS_COLOR, ORDER_STATUS_LABEL } from "@/lib/constants";
 import { InstallmentActions } from "./InstallmentActions";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
-
-function fmtEur(cents: number) {
-  return (cents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
-}
 
 type RouteParams = { params: Promise<{ orderId: string }> };
 
@@ -33,6 +30,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
           type: true,
           status: true,
           estimatedValue: true,
+          contractCurrency: true,
           client: { select: { id: true, name: true, email: true } },
           organization: { select: { name: true } },
         },
@@ -133,16 +131,16 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
         <div className="grid grid-cols-3 gap-4">
           <div>
             <p className="text-xs text-slate-500 mb-0.5">Total</p>
-            <p className="text-lg font-bold text-white">{fmtEur(financial.totalAmountCents)}</p>
+            <p className="text-lg font-bold text-white">{formatCurrencyByCode(financial.totalAmountCents / 100, financial.currency ?? financial.order.contractCurrency ?? "EUR")}</p>
           </div>
           <div>
             <p className="text-xs text-slate-500 mb-0.5">Recebido</p>
-            <p className="text-lg font-bold text-emerald-400">{fmtEur(financial.paidCents)}</p>
+            <p className="text-lg font-bold text-emerald-400">{formatCurrencyByCode(financial.paidCents / 100, financial.currency ?? financial.order.contractCurrency ?? "EUR")}</p>
           </div>
           <div>
             <p className="text-xs text-slate-500 mb-0.5">Por receber</p>
             <p className="text-lg font-bold text-yellow-400">
-              {fmtEur(financial.totalAmountCents - financial.paidCents)}
+              {formatCurrencyByCode((financial.totalAmountCents - financial.paidCents) / 100, financial.currency ?? financial.order.contractCurrency ?? "EUR")}
             </p>
           </div>
         </div>
@@ -178,6 +176,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
             id: string;
             sequence: number;
             amountCents: number;
+            currency?: string | null;
             method: string;
             status: string;
             paidAt: Date | null;

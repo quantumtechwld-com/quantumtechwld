@@ -1,3 +1,4 @@
+import { formatCurrencyByCode } from "@/lib/currency";
 import Link from "next/link";
 
 export type RecentOrder = {
@@ -7,7 +8,7 @@ export type RecentOrder = {
   updatedAt: Date;
   client: { name: string | null; email: string };
   organization: { name: string } | null;
-  payment: { status: string; amountCents: number } | null;
+  payment: { status: string; amountCents: number; currency?: string | null } | null;
 };
 
 type RecentOrdersTableProps = Readonly<{
@@ -15,10 +16,9 @@ type RecentOrdersTableProps = Readonly<{
   ORDER_TYPE_LABEL: Record<string, string>;
   ORDER_STATUS_LABEL: Record<string, string>;
   ORDER_STATUS_COLOR: Record<string, string>;
-  fmtEur: (cents: number) => string;
 }>;
 
-export default function RecentOrdersTable({ recentOrders, ORDER_TYPE_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, fmtEur }: RecentOrdersTableProps) {
+export default function RecentOrdersTable({ recentOrders, ORDER_TYPE_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR }: RecentOrdersTableProps) {
   if (recentOrders.length === 0) return null;
   return (
     <div className="rounded-xl border border-white/8 bg-white/3 overflow-hidden">
@@ -67,7 +67,7 @@ export default function RecentOrdersTable({ recentOrders, ORDER_TYPE_LABEL, ORDE
                     if (o.payment?.status === "PAID") {
                       return (
                         <span className="text-emerald-300 text-xs font-medium">
-                          {fmtEur(o.payment.amountCents)} ✓
+                          {formatCurrencyByCode(o.payment.amountCents / 100, o.payment.currency ?? "EUR")} ✓
                         </span>
                       );
                     }

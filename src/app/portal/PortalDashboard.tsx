@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Bell, Zap, Eye, CheckCircle2, XCircle, X } from "lucide-react";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, ORDER_TYPE_LABEL } from "@/lib/constants";
+import { formatCurrencyByCode } from "@/lib/currency";
 
 type OrderRow = {
   id: string;
@@ -14,6 +15,7 @@ type OrderRow = {
   createdAt: string;
   orderRef: string | null;
   estimatedValue: number | null;
+  contractCurrency: string | null;
 };
 
 type Counts = {
@@ -189,7 +191,7 @@ export function PortalDashboard({ tagline, heading, userName, userEmail, locale,
                   <p className="text-sm text-slate-200 truncate">{o.title ?? (ORDER_TYPE_LABEL[o.type] ?? o.type)}</p>
                   {o.estimatedValue != null && o.estimatedValue > 0 && (
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {o.estimatedValue.toLocaleString("pt-PT", { style: "currency", currency: "EUR" })}
+                      {formatCurrencyByCode(o.estimatedValue, o.contractCurrency ?? "EUR")}
                     </p>
                   )}
                 </div>

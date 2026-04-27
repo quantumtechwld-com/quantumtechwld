@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   notFound: vi.fn(),
   briefingFindFirst: vi.fn(),
   proposalFindUnique: vi.fn(),
-  formatCurrencyRangeByLocale: vi.fn(),
+  formatCurrencyRangeByCode: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -45,7 +45,7 @@ vi.mock("next-intl/server", () => ({
 }));
 
 vi.mock("@/lib/currency", () => ({
-  formatCurrencyRangeByLocale: mocks.formatCurrencyRangeByLocale,
+  formatCurrencyRangeByCode: mocks.formatCurrencyRangeByCode,
 }));
 
 vi.mock("@/app/portal/briefing/[id]/proposta/ProposalActions", () => ({
@@ -65,7 +65,7 @@ describe("ProposalPage", () => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ user: { email: "client@example.com" } });
     mocks.briefingFindFirst.mockResolvedValue({ id: "brief_1", projectType: "Website institucional" });
-    mocks.formatCurrencyRangeByLocale.mockReturnValue("R$ 3.000,00–R$ 8.000,00");
+    mocks.formatCurrencyRangeByCode.mockReturnValue("R$ 3.000,00 - R$ 8.000,00");
   });
 
   it("renderiza estado indisponivel quando a proposta ainda nao foi publicada", async () => {
@@ -88,6 +88,7 @@ describe("ProposalPage", () => {
       summary: "Resumo comercial da proposta",
       content: "Escopo completo com milestones",
       hoursTotal: 80,
+      costCurrency: "BRL",
       costMin: 3000,
       costMax: 8000,
       clientNote: null,
@@ -99,7 +100,7 @@ describe("ProposalPage", () => {
     expect(screen.getByText("proposalTitle")).toBeInTheDocument();
     expect(screen.getByText("v2")).toBeInTheDocument();
     expect(screen.getByText("80h")).toBeInTheDocument();
-    expect(screen.getByText("R$ 3.000,00–R$ 8.000,00")).toBeInTheDocument();
+    expect(screen.getByText("R$ 3.000,00 - R$ 8.000,00")).toBeInTheDocument();
     expect(screen.getByText("Resumo comercial da proposta")).toBeInTheDocument();
     expect(screen.getByText("Escopo completo com milestones")).toBeInTheDocument();
     expect(screen.getByText("ProposalActionsMock:prop_1:brief_1")).toBeInTheDocument();

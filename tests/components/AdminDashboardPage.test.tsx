@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   briefingFindMany: vi.fn(),
   scopeFindMany: vi.fn(),
   orderCount: vi.fn(),
-  paymentAggregate: vi.fn(),
+  paymentFindMany: vi.fn(),
   orderFindMany: vi.fn(),
 }));
 
@@ -48,7 +48,7 @@ vi.mock("@/lib/prisma", () => ({
       findMany: mocks.orderFindMany,
     },
     payment: {
-      aggregate: mocks.paymentAggregate,
+      findMany: mocks.paymentFindMany,
     },
   },
 }));
@@ -95,7 +95,10 @@ describe("AdminDashboardPage", () => {
       .mockResolvedValueOnce(0)   // orderInProd
       .mockResolvedValueOnce(3)   // orderCompleted
       .mockResolvedValueOnce(0);  // orderRejected
-    mocks.paymentAggregate.mockResolvedValueOnce({ _sum: { amountCents: 500000 } }).mockResolvedValueOnce({ _sum: { amountCents: 200000 } });
+    mocks.paymentFindMany.mockResolvedValue([
+      { amountCents: 500000, currency: "EUR", paidAt: new Date("2026-04-12T00:00:00.000Z") },
+      { amountCents: 200000, currency: "BRL", paidAt: new Date("2026-04-18T00:00:00.000Z") },
+    ]);
     mocks.orderFindMany.mockResolvedValue([{ id: "ord_1" }, { id: "ord_2" }]);
   });
 
