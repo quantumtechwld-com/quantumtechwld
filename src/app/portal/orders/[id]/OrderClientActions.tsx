@@ -137,18 +137,18 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
       {/* IN_REVIEW block — cliente avalia entrega */}
       {order.status === "IN_REVIEW" && (
         <div className="mt-6 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
-          <p className="text-sm font-semibold text-sky-300 mb-4">Avalie a entrega</p>
+          <p className="text-sm font-semibold text-sky-300 mb-4">{t("orderActionsReviewTitle")}</p>
 
           <div className="mb-4">
             <label htmlFor="correction-note" className="block text-xs text-slate-400 mb-1">
-              Nota para o programador (obrigatória se pedir correção)
+              {t("orderActionsReviewCorrectionLabel")}
             </label>
             <textarea
               id="correction-note"
               value={correctionNote}
               onChange={(e) => setCorrectionNote(e.target.value)}
               rows={3}
-              placeholder="Descreva o que precisa de ser corrigido ou melhorado…"
+              placeholder={t("orderActionsReviewCorrectionPlaceholder")}
               className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-sky-500 focus:outline-none resize-none"
             />
           </div>
@@ -162,7 +162,7 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={async () => {
-                if (!correctionNote.trim()) { setError("A nota para o programador é obrigatória para pedir correção."); return; }
+                if (!correctionNote.trim()) { setError(t("orderActionsReviewCorrectionRequired")); return; }
                 setError("");
                 setLoading("request_correction");
                 try {
@@ -173,11 +173,11 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
                   });
                   if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    throw new Error((data as { error?: string }).error ?? "Erro inesperado.");
+                    throw new Error((data as { error?: string }).error ?? t("orderActionsErrUnexpected"));
                   }
                   router.refresh();
                 } catch (err) {
-                  setError(err instanceof Error ? err.message : "Erro inesperado.");
+                  setError(err instanceof Error ? err.message : t("orderActionsErrUnexpected"));
                 } finally {
                   setLoading(null);
                 }
@@ -185,7 +185,7 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
               disabled={!!loading}
               className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-60"
             >
-              {loading === "request_correction" ? "A enviar…" : "Pedir correção"}
+              {loading === "request_correction" ? t("orderActionsSending") : t("orderActionsReviewCorrectBtn")}
             </button>
             <button
               onClick={async () => {
@@ -199,11 +199,11 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
                   });
                   if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    throw new Error((data as { error?: string }).error ?? "Erro inesperado.");
+                    throw new Error((data as { error?: string }).error ?? t("orderActionsErrUnexpected"));
                   }
                   router.refresh();
                 } catch (err) {
-                  setError(err instanceof Error ? err.message : "Erro inesperado.");
+                  setError(err instanceof Error ? err.message : t("orderActionsErrUnexpected"));
                 } finally {
                   setLoading(null);
                 }
@@ -211,7 +211,7 @@ export function OrderClientActions({ order }: Readonly<{ order: Order }>) {
               disabled={!!loading}
               className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:opacity-60"
             >
-              {loading === "approve_review" ? "A aprovar…" : "Aprovar entrega"}
+              {loading === "approve_review" ? t("orderActionsReviewApproving") : t("orderActionsReviewApproveBtn")}
             </button>
           </div>
         </div>

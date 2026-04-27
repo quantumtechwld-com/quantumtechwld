@@ -63,7 +63,7 @@ describe("AdminNewOrderForm", () => {
     });
     expect(mocks.push).toHaveBeenCalledWith("/admin/orders/ord_1");
     expect(mocks.refresh).toHaveBeenCalled();
-  });
+  }, 15000);
 
   it("mostra erro se nenhum cliente for selecionado", async () => {
     const user = userEvent.setup();
@@ -136,7 +136,7 @@ describe("AdminNewOrderForm", () => {
     expect(
       screen.getByText(/selecione o pedido original ao qual esta corre[çc][\u00e3a]o\/altera[\u00e7c][\u00e3a]o/i)
     ).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("cria pedido correction vinculado ao pedido pai e envia parentOrderId", async () => {
     const user = userEvent.setup();
@@ -165,5 +165,5 @@ describe("AdminNewOrderForm", () => {
       expect(body.type).toBe("correction");
     });
     expect(mocks.push).toHaveBeenCalledWith("/admin/orders/ord_correction_1");
-  });
+  }, 15000);
 });

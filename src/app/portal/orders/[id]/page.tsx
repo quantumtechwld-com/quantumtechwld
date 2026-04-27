@@ -54,11 +54,20 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
   const t = await getTranslations("portal");
   const locale = await getLocale();
 
+  // Membros de organização sem role ADMIN não veem dados financeiros
+  const isOrgMember = !!session.user.organizationId && session.user.orgRole === "MEMBER";
+
   // Valor estimado convertido para a moeda do locale (câmbio em tempo real, cache 1 h)
   const estimatedFormatted = order.estimatedValue == null
     ? null
     : await convertAndFormatByLocale(Number(order.estimatedValue), "EUR", locale);
   const isConverted = getCurrencyForLocale(locale) !== "EUR";
+
+  // Pré-computar valor da parcela pendente na moeda do locale
+  const pendingInst = order.financial?.installments?.find((i: { status: string }) => i.status === "PENDING");
+  const pendingInstFormatted = pendingInst
+    ? await convertAndFormatByLocale(pendingInst.amountCents / 100, "EUR", locale)
+    : null;
   const orderTypeLabel = (type: string) => {
     const keyMap: Record<string, string> = {
       new_feature: "orderTypeNewFeature",
@@ -126,7 +135,10 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
   }
 
   // ── Widget de pagamento de parcelas pendentes ─────────────────────────────
-  function renderInstallmentCard(inst: { method: string; amountCents: number; sequence: number; dueDate?: string | null }) {
+  function renderInstallmentCard(
+    inst: { method: string; amountCents: number; sequence: number; dueDate?: string | null },
+    formattedValue: string,
+  ) {
     const isEntry  = inst.sequence === 1;
     const amtCents = inst.amountCents;
     const label    = isEntry ? t("payInstallmentEntry") : t("payInstallmentFinal");
@@ -145,9 +157,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       return (
         <div className="mt-4 rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5">
           <h2 className="text-sm font-semibold text-violet-300 mb-1">{label}</h2>
-          <p className="text-2xl font-bold text-white mb-3">
-            {(amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
-          </p>
+          <p className="text-2xl font-bold text-white mb-3">{formattedValue}</p>
           {dueBadge}
           <PayOrderButton orderId={order.id} amountCents={amtCents} installmentLabel={label} />
         </div>
@@ -162,9 +172,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     return (
       <div className={`mt-4 rounded-2xl border p-5 ${isOverdue ? "border-red-500/40 bg-red-500/5" : "border-yellow-500/30 bg-yellow-500/5"}`}>
         <h2 className={`text-sm font-semibold mb-1 ${isOverdue ? "text-red-300" : "text-yellow-300"}`}>{label}</h2>
-        <p className="text-2xl font-bold text-white mb-3">
-          {(amtCents / 100).toLocaleString(locale, { style: "currency", currency: "EUR" })}
-        </p>
+        <p className="text-2xl font-bold text-white mb-3">{formattedValue}</p>
         {dueBadge}
         <p className="text-xs text-slate-400">{t("payManualInstructions")}</p>
       </div>
@@ -172,13 +180,13 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
   }
 
   function renderPendingPayment() {
+    if (isOrgMember) return null;
     const POST_APPROVAL = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"];
     if (!POST_APPROVAL.includes(order.status)) return null;
     const financial   = order.financial;
     const isFullyPaid = financial ? financial.status === "PAID" : order.payment?.status === "PAID";
     if (isFullyPaid) return null;
-    const pending = financial?.installments?.find((i: { status: string }) => i.status === "PENDING");
-    if (financial && pending) return renderInstallmentCard(pending);
+    if (financial && pendingInst && pendingInstFormatted) return renderInstallmentCard(pendingInst, pendingInstFormatted);
     if (!financial && order.payment?.status !== "PAID" && order.estimatedValue) {
       return (
         <div className="mt-4">
@@ -268,7 +276,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
               <h2 className="text-xs font-semibold uppercase tracking-widest text-accent mb-3">
                 {t("orderProposalTitle")}
               </h2>
-              {estimatedFormatted && (
+              {!isOrgMember && estimatedFormatted && (
                 <p className="mb-2 text-sm text-slate-300">
                   <span className="text-slate-500">{t("orderEstValue")} </span>
                   <span className="font-semibold text-white">{estimatedFormatted}</span>
@@ -376,8 +384,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       {/* Pagamento: visível em qualquer status pós-aprovação quando há parcelas pendentes */}
       {renderPendingPayment()}
 
-      {/* Fatura: visível quando pagamento confirmado */}
-      {(order.financial?.status === "PAID" || order.payment?.status === "PAID") && (
+      {/* Fatura: visível quando pagamento confirmado — apenas para admin da org ou dono direto */}
+      {!isOrgMember && (order.financial?.status === "PAID" || order.payment?.status === "PAID") && (
         <div className="mt-4">
           <Link
             href={`/portal/orders/${order.id}/invoice`}
