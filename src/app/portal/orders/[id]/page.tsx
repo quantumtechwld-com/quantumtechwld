@@ -9,7 +9,7 @@ import { MessagesPanel } from "@/components/MessagesPanel";
 import { PayOrderButton } from "./PayOrderButton";
 import { PixPaymentPanel } from "@/components/PixPaymentPanel";
 import { RatingWidget } from "./RatingWidget";
-import { convertAndFormatByLocale, getCurrencyForLocale } from "@/lib/currency";
+import { convertAndFormatByLocale, getCurrencyForLocale, formatCurrency, getExchangeRate } from "@/lib/currency";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -63,11 +63,20 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     : await convertAndFormatByLocale(Number(order.estimatedValue), "EUR", locale);
   const isConverted = getCurrencyForLocale(locale) !== "EUR";
 
-  // Pré-computar valor da parcela pendente na moeda do locale
+  // Pré-computar valor da parcela pendente — sempre na moeda do contrato (EUR)
+  // Não converter para BRL/USD: o cliente paga em EUR no Stripe, e o display
+  // deve coincidir com o valor cobrado no botão de pagamento.
   const pendingInst = order.financial?.installments?.find((i: { status: string }) => i.status === "PENDING");
   const pendingInstFormatted = pendingInst
-    ? await convertAndFormatByLocale(pendingInst.amountCents / 100, "EUR", locale)
+    ? formatCurrency(pendingInst.amountCents / 100, locale, "EUR")
     : null;
+
+  // PIX é exclusivo do Brasil e cobra em BRL, mas amountCents no DB é sempre EUR cents.
+  // Converter EUR → BRL antes de exibir no PixPaymentPanel (câmbio com cache 1 h).
+  const pendingInstPixBrlCents: number | null =
+    pendingInst?.method === "MANUAL_PIX" && locale === "pt"
+      ? Math.round(pendingInst.amountCents * (await getExchangeRate("EUR", "BRL")))
+      : null;
   const orderTypeLabel = (type: string) => {
     const keyMap: Record<string, string> = {
       new_feature: "orderTypeNewFeature",
@@ -116,18 +125,22 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     });
   }
 
-  // PIX é exclusivo do Brasil — oculto para outros locales
+  // PIX é exclusivo do Brasil — oculto para outros locales.
+  // Usa pendingInstPixBrlCents (EUR→BRL convertido) para exibir o valor correto em reais.
   function renderPixCard(opts: {
     orderId: string;
-    amtCents: number;
+    amtCents: number; // EUR cents (original, usado como fallback)
     label: string;
     dueDate?: string | null;
   }) {
     if (locale !== "pt") return null;
+    // Priorizar valor já convertido para BRL; fallback para o valor EUR bruto caso a
+    // conversão não tenha sido pré-computada (ex: installment não é o pendingInst).
+    const brlCents = pendingInstPixBrlCents ?? opts.amtCents;
     return (
       <PixPaymentPanel
         orderId={opts.orderId}
-        amountCents={opts.amtCents}
+        amountCents={brlCents}
         installmentLabel={opts.label}
         dueDate={opts.dueDate}
       />

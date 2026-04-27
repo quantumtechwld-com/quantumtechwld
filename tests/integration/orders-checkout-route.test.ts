@@ -113,8 +113,56 @@ describe("POST /api/orders/[id]/checkout", () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toBe("Pedido deve estar Aprovado para pagamento");
+    expect(body.error).toBe("Pedido deve estar aprovado para pagamento");
   });
+
+  it.each(["PENDING", "EVALUATING", "DRAFT", "REVISION", "REJECTED"])(
+    "retorna 400 para status %s (nao pagavel)",
+    async (status) => {
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        status,
+        estimatedValue: 125,
+        client: { email: "client@example.com", name: "Joao Silva" },
+        payment: null,
+      });
+      const { POST } = await importRoute();
+
+      const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/checkout", {
+        method: "POST",
+      }), { params: Promise.resolve({ id: "ord_1" }) });
+
+      expect(response.status).toBe(400);
+    },
+  );
+
+  // ── Fix: parcela final pós-entrada (Bug 2) ───────────────────────────────
+  // Quando o cliente paga a entrada, o pedido avança para IN_PRODUCTION.
+  // A parcela final deve ser pagável mesmo com status != APPROVED.
+
+  it.each(["IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED"])(
+    "aceita checkout para parcela final com status %s (pos-aprovacao)",
+    async (status) => {
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        type: "new_feature",
+        status,
+        estimatedValue: 125,
+        description: "Descricao do pedido",
+        client: { email: "client@example.com", name: "Joao Silva" },
+        payment: null,
+      });
+      const { POST } = await importRoute();
+
+      const response = await POST(new NextRequest("http://localhost/api/orders/ord_1/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountCents: 6250 }),
+      }), { params: Promise.resolve({ id: "ord_1" }) });
+
+      expect(response.status).toBe(200);
+    },
+  );
 
   it("em modo mock marca pagamento como pago e avanca o pedido", async () => {
     const { POST } = await importRoute();

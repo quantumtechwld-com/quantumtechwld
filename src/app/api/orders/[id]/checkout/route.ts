@@ -157,8 +157,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   if (!canAccessOrder(order, session.user)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  if (order.status !== "APPROVED") {
-    return NextResponse.json({ error: "Pedido deve estar Aprovado para pagamento" }, { status: 400 });
+  const PAYABLE_STATUSES = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"];
+  if (!PAYABLE_STATUSES.includes(order.status)) {
+    return NextResponse.json({ error: "Pedido deve estar aprovado para pagamento" }, { status: 400 });
   }
   if (!order.estimatedValue || order.estimatedValue <= 0) {
     return NextResponse.json({ error: "Valor estimado inválido" }, { status: 400 });
