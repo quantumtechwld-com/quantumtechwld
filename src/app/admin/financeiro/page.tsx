@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrencyByCode } from "@/lib/currency";
+import { getPersistedCurrency } from "@/services/finance/contractCurrency";
 import {
   FINANCIAL_STATUS_LABEL,
   FINANCIAL_STATUS_COLOR,
@@ -37,6 +38,7 @@ export default async function AdminFinanceiroPage() {
           orderRef: true,
           type: true,
           status: true,
+          contractCurrency: true,
           client: { select: { name: true, email: true } },
           organization: { select: { name: true } },
         },
@@ -45,12 +47,12 @@ export default async function AdminFinanceiroPage() {
   });
 
   const totalReceivedByCurrency = financials.reduce((acc: Record<string, number>, f: { paidCents: number; currency?: string | null }) => {
-    const currency = f.currency ?? "EUR";
+    const currency = getPersistedCurrency(f.currency);
     acc[currency] = (acc[currency] ?? 0) + f.paidCents;
     return acc;
   }, {});
   const totalPendingByCurrency = financials.reduce((acc: Record<string, number>, f: { totalAmountCents: number; paidCents: number; currency?: string | null }) => {
-    const currency = f.currency ?? "EUR";
+    const currency = getPersistedCurrency(f.currency);
     acc[currency] = (acc[currency] ?? 0) + (f.totalAmountCents - f.paidCents);
     return acc;
   }, {});
@@ -110,9 +112,18 @@ export default async function AdminFinanceiroPage() {
                   currency?: string | null;
                   status: string;
                   installments: Array<{ id: string; sequence: number; amountCents: number; currency?: string | null; method: string; status: string }>;
-                  order: { id: string; orderRef?: string; type: string; client: { name?: string; email: string }; organization?: { name: string } | null };
+                  order: { id: string; orderRef?: string; type: string; contractCurrency?: string | null; client: { name?: string; email: string }; organization?: { name: string } | null };
                 }) => (
                   <tr key={f.id} className="border-b border-white/5 hover:bg-white/2 transition">
+                    {(() => {
+                      const displayCurrency = getPersistedCurrency(
+                        f.installments[0]?.currency,
+                        f.order.contractCurrency,
+                        f.currency,
+                      );
+
+                      return (
+                        <>
                     <td className="px-5 py-3 text-white font-mono text-xs">
                       {f.order.orderRef ?? f.order.id.slice(0, 8)}
                     </td>
@@ -121,16 +132,16 @@ export default async function AdminFinanceiroPage() {
                       <div className="text-slate-500 text-[11px]">{f.order.client.email}</div>
                     </td>
                     <td className="px-5 py-3 text-right text-white font-semibold">
-                      {formatCurrencyByCode(f.totalAmountCents / 100, f.currency ?? "EUR")}
+                      {formatCurrencyByCode(f.totalAmountCents / 100, displayCurrency)}
                     </td>
                     <td className="px-5 py-3 text-right text-emerald-400 font-semibold">
-                      {formatCurrencyByCode(f.paidCents / 100, f.currency ?? "EUR")}
+                      {formatCurrencyByCode(f.paidCents / 100, displayCurrency)}
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex flex-col gap-0.5">
                         {f.installments.map((inst) => (
                           <span key={inst.id} className="text-[11px] text-slate-400">
-                            P{inst.sequence} · {formatCurrencyByCode(inst.amountCents / 100, inst.currency ?? f.currency ?? "EUR")} · {PAYMENT_METHOD_LABEL[inst.method] ?? inst.method} ·{" "}
+                            P{inst.sequence} · {formatCurrencyByCode(inst.amountCents / 100, getPersistedCurrency(inst.currency, f.order.contractCurrency, f.currency))} · {PAYMENT_METHOD_LABEL[inst.method] ?? inst.method} ·{" "}
                             <span className={inst.status === "PAID" ? "text-emerald-400" : "text-yellow-400"}>
                               {inst.status === "PAID" ? "Pago" : "Pendente"}
                             </span>
@@ -151,6 +162,9 @@ export default async function AdminFinanceiroPage() {
                         Detalhes →
                       </Link>
                     </td>
+                        </>
+                      );
+                    })()}
                   </tr>
                 ))}
               </tbody>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrencyByCode } from "@/lib/currency";
+import { getPersistedCurrency } from "@/services/finance/contractCurrency";
 import { FINANCIAL_STATUS_LABEL, FINANCIAL_STATUS_COLOR, ORDER_STATUS_LABEL } from "@/lib/constants";
 import { InstallmentActions } from "./InstallmentActions";
 
@@ -99,6 +100,11 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
   const progress = financial.totalAmountCents > 0
     ? Math.round((financial.paidCents / financial.totalAmountCents) * 100)
     : 0;
+  const displayCurrency = getPersistedCurrency(
+    financial.installments[0]?.currency,
+    financial.order.contractCurrency,
+    financial.currency,
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10 space-y-6">
@@ -131,16 +137,16 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
         <div className="grid grid-cols-3 gap-4">
           <div>
             <p className="text-xs text-slate-500 mb-0.5">Total</p>
-            <p className="text-lg font-bold text-white">{formatCurrencyByCode(financial.totalAmountCents / 100, financial.currency ?? financial.order.contractCurrency ?? "EUR")}</p>
+            <p className="text-lg font-bold text-white">{formatCurrencyByCode(financial.totalAmountCents / 100, displayCurrency)}</p>
           </div>
           <div>
             <p className="text-xs text-slate-500 mb-0.5">Recebido</p>
-            <p className="text-lg font-bold text-emerald-400">{formatCurrencyByCode(financial.paidCents / 100, financial.currency ?? financial.order.contractCurrency ?? "EUR")}</p>
+            <p className="text-lg font-bold text-emerald-400">{formatCurrencyByCode(financial.paidCents / 100, displayCurrency)}</p>
           </div>
           <div>
             <p className="text-xs text-slate-500 mb-0.5">Por receber</p>
             <p className="text-lg font-bold text-yellow-400">
-              {formatCurrencyByCode((financial.totalAmountCents - financial.paidCents) / 100, financial.currency ?? financial.order.contractCurrency ?? "EUR")}
+              {formatCurrencyByCode((financial.totalAmountCents - financial.paidCents) / 100, displayCurrency)}
             </p>
           </div>
         </div>
