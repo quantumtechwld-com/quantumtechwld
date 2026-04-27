@@ -24,7 +24,14 @@ vi.mock("next/link", () => ({
 
 import { AdminNewOrderForm } from "@/app/admin/orders/new/AdminNewOrderForm";
 
-const CLIENTS = [{ id: "client_1", name: "Joao", email: "joao@example.com", company: "Empresa A" }];
+const CLIENTS = [{
+  id: "client_1",
+  name: "Joao",
+  email: "joao@example.com",
+  company: "Empresa A",
+  billingCurrency: "BRL",
+  organization: null,
+}];
 const OPEN_ORDER = { id: "ord_99", orderRef: "QT-0099", title: "Pedido existente", type: "support", status: "EVALUATING" };
 
 /** Fetch stub: GET devolve open orders; POST devolve postResponse */

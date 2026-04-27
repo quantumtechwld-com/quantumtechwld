@@ -6,7 +6,7 @@ import { OrderAdminActions } from "./OrderAdminActions";
 import { OrderEditForm } from "./OrderEditForm";
 import { MessagesPanel } from "@/components/MessagesPanel";
 import LogoAnimated from "@/components/home/LogoAnimated";
-import { formatCurrencyByCode } from "@/lib/currency";
+import { formatCurrencyByCode, normalizeSupportedCurrency } from "@/lib/currency";
 import {
   ORDER_STATUS_LABEL as STATUS_LABEL,
   ORDER_STATUS_COLOR as STATUS_COLOR,
@@ -29,8 +29,8 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
     db.order.findUnique({
       where: { id },
       include: {
-        client:  { select: { id: true, name: true, email: true } },
-        organization: { select: { name: true } },
+        client:  { select: { id: true, name: true, email: true, billingCurrency: true } },
+        organization: { select: { name: true, billingCurrency: true } },
         createdByAdmin: { select: { id: true, name: true, email: true } },
         payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
         financial: { select: { id: true, status: true, totalAmountCents: true, paidCents: true, currency: true } },
@@ -274,7 +274,17 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
 
         {/* Acções do admin */}
         <OrderAdminActions
-          order={{ id: order.id, status: order.status, type: order.type }}
+          order={{
+            id: order.id,
+            status: order.status,
+            type: order.type,
+            preferredProposalCurrency:
+              normalizeSupportedCurrency(order.contractCurrency)
+              ?? normalizeSupportedCurrency(order.financial?.currency)
+              ?? normalizeSupportedCurrency(order.organization?.billingCurrency)
+              ?? normalizeSupportedCurrency(order.client.billingCurrency)
+              ?? "BRL",
+          }}
           paymentPaid={order.payment?.status === "PAID"}
         />
 

@@ -16,6 +16,12 @@ vi.mock("next/navigation", () => ({
 
 import { OrderAdminActions } from "@/app/admin/orders/[id]/OrderAdminActions";
 
+const baseOrder = {
+  id: "ord_1",
+  type: "support",
+  preferredProposalCurrency: "BRL",
+} as const;
+
 describe("OrderAdminActions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,7 +29,7 @@ describe("OrderAdminActions", () => {
 
   it("nao renderiza quando o pedido nao tem acoes disponiveis", () => {
     const { container } = render(
-      <OrderAdminActions order={{ id: "ord_1", status: "COMPLETED", type: "support" }} />
+      <OrderAdminActions order={{ ...baseOrder, status: "COMPLETED" }} />
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -33,7 +39,7 @@ describe("OrderAdminActions", () => {
     const user = userEvent.setup();
 
     render(
-      <OrderAdminActions order={{ id: "ord_1", status: "EVALUATING", type: "support" }} />
+      <OrderAdminActions order={{ ...baseOrder, status: "EVALUATING" }} />
     );
 
     await user.click(screen.getByRole("button", { name: "Enviar proposta" }));
@@ -49,7 +55,7 @@ describe("OrderAdminActions", () => {
     }));
 
     render(
-      <OrderAdminActions order={{ id: "ord_1", status: "EVALUATING", type: "support" }} />
+      <OrderAdminActions order={{ ...baseOrder, status: "EVALUATING" }} />
     );
 
     await user.type(screen.getByLabelText(/Informações de produção/i), "Implementação e QA");
@@ -71,7 +77,7 @@ describe("OrderAdminActions", () => {
     }));
 
     render(
-      <OrderAdminActions order={{ id: "ord_1", status: "APPROVED", type: "support" }} />
+      <OrderAdminActions order={{ ...baseOrder, status: "APPROVED" }} />
     );
 
     await user.click(screen.getByRole("button", { name: "Marcar em produção" }));
@@ -85,7 +91,7 @@ describe("OrderAdminActions", () => {
 
   it("mostra mensagem automatica quando o pagamento ja foi confirmado", () => {
     render(
-      <OrderAdminActions order={{ id: "ord_1", status: "APPROVED", type: "support" }} paymentPaid={true} />
+      <OrderAdminActions order={{ ...baseOrder, status: "APPROVED" }} paymentPaid={true} />
     );
 
     expect(screen.getByText(/Pagamento confirmado pelo Stripe/i)).toBeInTheDocument();

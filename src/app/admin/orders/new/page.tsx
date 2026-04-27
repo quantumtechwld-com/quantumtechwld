@@ -20,7 +20,14 @@ export default async function AdminNewOrderPage({ searchParams }: Readonly<{ sea
       { name: "asc" },
       { email: "asc" },
     ],
-    select: { id: true, name: true, email: true, company: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      company: true,
+      billingCurrency: true,
+      organization: { select: { billingCurrency: true } },
+    },
   });
 
   return (

@@ -14,6 +14,7 @@ import {
 } from "@/services/finance/contractCurrency";
 import { sendMail, tplOrderProposalSent } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
+import { normalizeSupportedCurrency } from "@/lib/currency";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
@@ -45,6 +46,7 @@ type CreateOrderBody = {
   adminNote?: string;
   downPaymentPct?: number;
   paymentMethod?: string;
+  selectedCurrency?: string;
 };
 
 type AdminOrderCreateInput = {
@@ -60,6 +62,7 @@ type AdminOrderCreateInput = {
   adminNote?: string;
   downPaymentPct?: number;
   paymentMethod?: string;
+  selectedCurrency?: string;
 };
 
 type ValidationError = { error: string; status: number };
@@ -101,6 +104,7 @@ function validateCreateOrderBody(body: CreateOrderBody): AdminOrderCreateInput |
       adminNote: body.adminNote?.trim() || undefined,
       downPaymentPct: body.downPaymentPct,
       paymentMethod: body.paymentMethod,
+      selectedCurrency: body.selectedCurrency,
     } : {}),
   };
 }
@@ -114,11 +118,16 @@ async function resolveProposalTerms(
   payload: AdminOrderCreateInput,
 ) {
   const paymentMethod = payload.paymentMethod ?? "STRIPE";
-  if (!payload.productionInfo || payload.estimatedValue == null || payload.estimatedValue <= 0) {
+  if (!payload.productionInfo || payload.estimatedValue == null || payload.estimatedValue < 0) {
     return { paymentMethod, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: null as string | null };
   }
 
+  if (!normalizeSupportedCurrency(payload.selectedCurrency ?? null)) {
+    return { paymentMethod, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: "Moeda da proposta inválida." };
+  }
+
   const contractCurrency = resolveContractCurrency({
+    explicitCurrency: payload.selectedCurrency ?? null,
     organizationCurrency: clientUser.organization?.billingCurrency ?? null,
     userCurrency: clientUser.billingCurrency ?? null,
     locale: clientUser.locale ?? null,
@@ -166,6 +175,60 @@ async function createFinancialForOrder(
   });
 }
 
+async function handleCreatedOrderSideEffects(params: {
+  order: {
+    id: string;
+    status: string;
+    type: string;
+    title?: string | null;
+    estimatedValue?: number | null;
+    contractCurrency?: string | null;
+    productionInfo?: string | null;
+  };
+  clientUser: {
+    email?: string | null;
+    name?: string | null;
+    organizationId?: string | null;
+    organization?: { name?: string | null } | null;
+  };
+  lockedTerms: Awaited<ReturnType<typeof lockContractAmount>> | null;
+  payload: AdminOrderCreateInput;
+  paymentMethod: string;
+}) {
+  const { order, clientUser, lockedTerms, payload, paymentMethod } = params;
+
+  if (order.status === "PROPOSAL_SENT" && order.estimatedValue != null && order.estimatedValue > 0) {
+    const totalCents = lockedTerms?.totalAmountCents ?? Math.round(order.estimatedValue * 100);
+    const pct = Math.max(0, Math.min(99, Math.round(payload.downPaymentPct ?? 0)));
+    const contractCurrency = lockedTerms?.contractCurrency ?? order.contractCurrency ?? "EUR";
+    await createFinancialForOrder(order.id, totalCents, contractCurrency, pct, paymentMethod);
+  }
+
+  if (clientUser.organizationId && order.contractCurrency) {
+    await db.organization.updateMany({
+      where: { id: clientUser.organizationId, billingCurrency: null },
+      data: { billingCurrency: order.contractCurrency },
+    });
+  }
+
+  if (order.status === "PROPOSAL_SENT" && clientUser.email) {
+    const orderUrl = `${appUrl()}/portal/orders/${order.id}`;
+    sendMail({
+      to: clientUser.email,
+      subject: "Proposta recebida — Quantum Technology",
+      html: tplOrderProposalSent({
+        clientName: clientUser.organization?.name?.trim() ?? clientUser.name ?? "",
+        orderType: order.type,
+        orderTitle: order.title ?? undefined,
+        estimatedValue: order.estimatedValue ?? 0,
+        estimatedCurrency: order.contractCurrency ?? "EUR",
+        productionInfo: order.productionInfo ?? "",
+        orderUrl,
+      }),
+    }).catch((err: unknown) => console.error("[POST /api/admin/orders] email error", err));
+  }
+}
+
 async function resolveAdminAndClient(session: AdminSession, clientId: string) {
   const [adminUser, clientUser] = await Promise.all([
     session?.user?.id
@@ -183,7 +246,7 @@ async function resolveAdminAndClient(session: AdminSession, clientId: string) {
         role: true,
         status: true,
         organizationId: true,
-        organization: { select: { name: true, billingCurrency: true } },
+        organization: { select: { id: true, name: true, billingCurrency: true } },
       },
     }),
   ]);
@@ -311,31 +374,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Erro ao gerar referência do pedido. Tente novamente." }, { status: 500 });
     }
 
-    // Se criado em PROPOSAL_SENT com valor > 0, criar OrderFinancial + parcelas
-    if (order.status === "PROPOSAL_SENT" && order.estimatedValue != null && order.estimatedValue > 0) {
-      const totalCents = lockedTerms?.totalAmountCents ?? Math.round(order.estimatedValue * 100);
-      const pct = Math.max(0, Math.min(99, Math.round(payload.downPaymentPct ?? 0)));
-      const contractCurrency = lockedTerms?.contractCurrency ?? order.contractCurrency ?? "EUR";
-      await createFinancialForOrder(order.id, totalCents, contractCurrency, pct, paymentMethod);
-    }
-
-    // Se o pedido foi criado directamente com proposta, notificar o cliente por email
-    if (order.status === "PROPOSAL_SENT" && clientUser.email) {
-      const orderUrl = `${appUrl()}/portal/orders/${order.id}`;
-      sendMail({
-        to: clientUser.email,
-        subject: "Proposta recebida — Quantum Technology",
-        html: tplOrderProposalSent({
-          clientName: clientUser.organization?.name?.trim() ?? clientUser.name ?? "",
-          orderType: order.type,
-          orderTitle: order.title ?? undefined,
-          estimatedValue: order.estimatedValue ?? 0,
-          estimatedCurrency: order.contractCurrency ?? "EUR",
-          productionInfo: order.productionInfo ?? "",
-          orderUrl,
-        }),
-      }).catch((err: unknown) => console.error("[POST /api/admin/orders] email error", err));
-    }
+    await handleCreatedOrderSideEffects({ order, clientUser, lockedTerms, payload, paymentMethod });
 
     return NextResponse.json({ order }, { status: 201 });
   } catch (err) {

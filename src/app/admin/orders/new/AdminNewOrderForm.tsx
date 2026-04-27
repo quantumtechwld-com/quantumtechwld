@@ -3,13 +3,18 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ORDER_TYPE_LABEL, URGENCY_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, EUR_TO_BRL, EUR_TO_USD, FX_REFERENCE_DATE, PAYMENT_METHOD_OPTIONS, DOWN_PAYMENT_OPTIONS } from "@/lib/constants";
+import { normalizeSupportedCurrency } from "@/lib/currency";
+import { ORDER_TYPE_LABEL, URGENCY_LABEL, ORDER_STATUS_LABEL, ORDER_STATUS_COLOR, EUR_TO_BRL, EUR_TO_USD, FX_REFERENCE_DATE, PAYMENT_METHOD_OPTIONS, PROPOSAL_CURRENCY_OPTIONS, DOWN_PAYMENT_OPTIONS } from "@/lib/constants";
 
 type ClientOption = {
   id: string;
   name: string | null;
   email: string | null;
   company: string | null;
+  billingCurrency: string | null;
+  organization: {
+    billingCurrency: string | null;
+  } | null;
 };
 
 type OpenOrder = {
@@ -58,6 +63,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [adminNote, setAdminNote] = useState("");
   const [downPaymentPct, setDownPaymentPct] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("STRIPE");
+  const [selectedCurrency, setSelectedCurrency] = useState("BRL");
   const [entryDueDate, setEntryDueDate] = useState("");
   const [finalDueDate, setFinalDueDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -66,7 +72,18 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
   const [selectedParentOrderId, setSelectedParentOrderId] = useState<string | null>(null);
 
   const needsParent = PARENT_REQUIRED_TYPES.has(type);
-  const fxConversion = useMemo(() => calcFxConversion(estimatedValue), [estimatedValue]);
+  const fxConversion = useMemo(
+    () => (selectedCurrency === "EUR" ? calcFxConversion(estimatedValue) : null),
+    [estimatedValue, selectedCurrency],
+  );
+
+  useEffect(() => {
+    const selectedClient = clients.find((client) => client.id === clientId);
+    const preferredCurrency = normalizeSupportedCurrency(selectedClient?.organization?.billingCurrency)
+      ?? normalizeSupportedCurrency(selectedClient?.billingCurrency)
+      ?? "BRL";
+    setSelectedCurrency(preferredCurrency);
+  }, [clientId, clients]);
 
   // Buscar pedidos abertos apenas quando o tipo exige vinculação
   useEffect(() => {
@@ -138,6 +155,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           urgency,
           productionInfo: productionInfo.trim(),
           estimatedValue: parsedVal,
+          selectedCurrency,
           adminNote: adminNote.trim() || undefined,
           downPaymentPct,
           paymentMethod,
@@ -322,7 +340,7 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
           </div>
           <div>
             <label htmlFor="admin-estimated-value" className="block text-xs font-medium text-slate-400 mb-1">
-              Valor estimado (€){" "}
+              Valor estimado ({selectedCurrency}){" "}
               {needsParent
                 ? <span className="text-slate-500">(opcional — custo zero se vazio)</span>
                 : <span className="text-red-400">*</span>}
@@ -343,6 +361,21 @@ export function AdminNewOrderForm({ clients, initialClientId = "" }: Props) {
                 <span className="text-slate-600">(câmbio ref. {FX_REFERENCE_DATE})</span>
               </p>
             )}
+          </div>
+          <div>
+            <label htmlFor="admin-currency" className="block text-xs font-medium text-slate-400 mb-1">
+              Moeda da proposta <span className="text-red-400">*</span>
+            </label>
+            <select
+              id="admin-currency"
+              value={selectedCurrency}
+              onChange={(e) => setSelectedCurrency(e.target.value)}
+              className="w-full rounded-xl border border-white/15 bg-[#0f0f1a] px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+            >
+              {PROPOSAL_CURRENCY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

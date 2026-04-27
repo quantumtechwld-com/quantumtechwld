@@ -8,6 +8,7 @@ import {
 } from "@/lib/currency";
 
 type ResolveContractCurrencyInput = {
+  explicitCurrency?: string | null;
   organizationCurrency?: string | null;
   userCurrency?: string | null;
   locale?: string | null;
@@ -26,6 +27,9 @@ type FinancialDueDates = {
 };
 
 export function resolveContractCurrency(input: ResolveContractCurrencyInput): SupportedCurrency {
+  const explicitCurrency = normalizeSupportedCurrency(input.explicitCurrency);
+  if (explicitCurrency) return explicitCurrency;
+
   const organizationCurrency = normalizeSupportedCurrency(input.organizationCurrency);
   if (organizationCurrency) return organizationCurrency;
 

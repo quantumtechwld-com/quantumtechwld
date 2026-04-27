@@ -7,6 +7,7 @@ import {
   EUR_TO_USD,
   FX_REFERENCE_DATE,
   PAYMENT_METHOD_OPTIONS,
+  PROPOSAL_CURRENCY_OPTIONS,
   DOWN_PAYMENT_OPTIONS,
 } from "@/lib/constants";
 
@@ -14,6 +15,7 @@ type Order = {
   id:     string;
   status: string;
   type:   string;
+  preferredProposalCurrency: string;
 };
 
 async function patchOrder(
@@ -69,11 +71,15 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
   const [adminNote,       setAdminNote]       = useState("");
   const [downPaymentPct,  setDownPaymentPct]  = useState(0);
   const [paymentMethod,   setPaymentMethod]   = useState("STRIPE");
+  const [selectedCurrency, setSelectedCurrency] = useState(order.preferredProposalCurrency);
   const [entryDueDate,    setEntryDueDate]    = useState("");
   const [finalDueDate,    setFinalDueDate]    = useState("");
 
   // Conversão de moeda — informativa, client-side
-  const fxConversion = useMemo(() => calcFxConversion(estimatedValue), [estimatedValue]);
+  const fxConversion = useMemo(
+    () => (selectedCurrency === "EUR" ? calcFxConversion(estimatedValue) : null),
+    [estimatedValue, selectedCurrency],
+  );
 
   // Entrega para revisão
   const [deliveryNote,  setDeliveryNote]  = useState("");
@@ -101,6 +107,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
       action: "propose",
       productionInfo: productionInfo.trim(),
       estimatedValue: parsedValue,
+      selectedCurrency,
       adminNote: adminNote.trim() || undefined,
       downPaymentPct,
       paymentMethod,
@@ -178,7 +185,7 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
             </div>
             <div>
               <label htmlFor="admin-estimated-value" className="block text-xs text-slate-400 mb-1">
-                Valor estimado (€){" "}
+                Valor estimado ({selectedCurrency}){" "}
                 {isFreeOrderType
                   ? <span className="text-slate-500">(opcional — custo zero se vazio)</span>
                   : <span className="text-red-400">*</span>}
@@ -199,6 +206,21 @@ export function OrderAdminActions({ order, paymentPaid }: Readonly<{ order: Orde
                   <span className="text-slate-600">(referência BCE {FX_REFERENCE_DATE})</span>
                 </p>
               )}
+            </div>
+            <div>
+              <label htmlFor="admin-currency" className="block text-xs text-slate-400 mb-1">
+                Moeda da proposta <span className="text-red-400">*</span>
+              </label>
+              <select
+                id="admin-currency"
+                value={selectedCurrency}
+                onChange={(e) => setSelectedCurrency(e.target.value)}
+                className="w-full rounded-xl border border-white/15 bg-[#0f0f1a] px-3 py-2 text-sm text-white focus:border-violet-500 focus:outline-none"
+              >
+                {PROPOSAL_CURRENCY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

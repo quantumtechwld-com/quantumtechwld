@@ -152,6 +152,12 @@ export const PAYMENT_METHOD_OPTIONS = [
   { value: "MANUAL_OTHER",    label: "Outro (manual)" },
 ] as const;
 
+export const PROPOSAL_CURRENCY_OPTIONS = [
+  { value: "BRL", label: "Real brasileiro (BRL)" },
+  { value: "EUR", label: "Euro (EUR)" },
+  { value: "USD", label: "Dólar americano (USD)" },
+] as const;
+
 export const DOWN_PAYMENT_OPTIONS = [
   { value: 0,  label: "Pagamento único" },
   { value: 25, label: "25% entrada + 75% final" },

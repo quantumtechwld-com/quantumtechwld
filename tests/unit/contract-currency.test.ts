@@ -33,6 +33,10 @@ describe("contractCurrency service", () => {
     expect(resolveContractCurrency({ locale: "pt-BR", organizationCurrency: "USD" })).toBe("USD");
   });
 
+  it("prioritizes explicit proposal currency over organization defaults", () => {
+    expect(resolveContractCurrency({ explicitCurrency: "BRL", organizationCurrency: "USD", locale: "en-US" })).toBe("BRL");
+  });
+
   it("locks contract amount using FX and rounds to cents", async () => {
     const locked = await lockContractAmount({ baseAmount: 120, contractCurrency: "BRL" });
     expect(locked.contractCurrency).toBe("BRL");

@@ -13,6 +13,7 @@ import {
   tplOrderReviewApprovedAdmin,
 } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
+import { normalizeSupportedCurrency } from "@/lib/currency";
 import {
   buildInstallments,
   lockContractAmount,
@@ -69,6 +70,7 @@ type PatchBody = {
   finalDeliveryUrl?: string;
   downPaymentPct?: number;   // 0 = pagamento único; 1-99 = % de entrada
   paymentMethod?: string;    // STRIPE | MANUAL_PIX | MANUAL_TRANSFER | MANUAL_OTHER
+  selectedCurrency?: string;
   entryDueDate?: string | null;  // ISO 8601 — prazo da 1.ª parcela
   finalDueDate?: string | null;  // ISO 8601 — prazo da 2.ª parcela
 };
@@ -299,17 +301,22 @@ async function createOrReplaceOrderFinancial(
 async function resolveProposalPersistence(
   order: {
     client: { locale?: string | null; billingCurrency?: string | null };
-    organization?: { billingCurrency?: string | null } | null;
+    organization?: { id?: string; billingCurrency?: string | null } | null;
   },
   body: PatchBody,
   result: Record<string, unknown>,
 ) {
-  if (body.action !== "propose" || body.estimatedValue == null || body.estimatedValue <= 0) {
+  if (body.action !== "propose" || body.estimatedValue == null || body.estimatedValue < 0) {
     return { persistedUpdate: result, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: null as ApiError | null };
+  }
+
+  if (!normalizeSupportedCurrency(body.selectedCurrency ?? null)) {
+    return { persistedUpdate: result, lockedTerms: null as Awaited<ReturnType<typeof lockContractAmount>> | null, error: { error: "Moeda da proposta inválida.", status: 422 } };
   }
 
   const method = body.paymentMethod ?? "STRIPE";
   const contractCurrency = resolveContractCurrency({
+    explicitCurrency: body.selectedCurrency ?? null,
     organizationCurrency: order.organization?.billingCurrency ?? null,
     userCurrency: order.client.billingCurrency ?? null,
     locale: order.client.locale ?? null,
@@ -339,7 +346,7 @@ async function resolveProposalPersistence(
 
 async function handleProposalSideEffects(
   id: string,
-  updated: { estimatedValue?: number | null; contractCurrency?: string | null },
+  updated: { estimatedValue?: number | null; contractCurrency?: string | null; organizationId?: string | null },
   body: PatchBody,
   sessionUserId?: string,
   lockedTerms?: Awaited<ReturnType<typeof lockContractAmount>> | null,
@@ -369,11 +376,18 @@ async function handleProposalSideEffects(
       { entry: body.entryDueDate, final: body.finalDueDate },
     );
   }
+
+  if (updated.organizationId && updated.contractCurrency) {
+    await db.organization.updateMany({
+      where: { id: updated.organizationId, billingCurrency: null },
+      data: { billingCurrency: updated.contractCurrency },
+    });
+  }
 }
 
 // ─── Financeiro: criar/substituir OrderFinancial + parcelas ─────────────────
 // ─── PATCH /api/orders/[id] ──────────────────────────────────────────────────
-// Admin: { action: "propose", productionInfo, estimatedValue, adminNote? }
+// Admin: { action: "propose", productionInfo, estimatedValue, selectedCurrency, adminNote? }
 //        { action: "start_production" | "complete" | "admin_reject" }
 // Cliente: { action: "approve" | "revision" | "reject", adminNote? }
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
@@ -390,7 +404,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       where: { id },
       include: { 
         client: { select: { id: true, name: true, email: true, locale: true, billingCurrency: true } },
-        organization: { select: { name: true, billingCurrency: true } },
+        organization: { select: { id: true, name: true, billingCurrency: true } },
       },
     });
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
@@ -437,7 +451,16 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     // Quando o admin envia proposta, criar OrderProposal versionada + OrderFinancial
     if (body.action === "propose") {
-      await handleProposalSideEffects(id, updated, body, session.user.id, proposalPersistence.lockedTerms);
+      await handleProposalSideEffects(
+        id,
+        {
+          ...updated,
+          organizationId: order.organization?.id ?? null,
+        },
+        body,
+        session.user.id,
+        proposalPersistence.lockedTerms,
+      );
     }
 
     return NextResponse.json({ order: updated });
