@@ -110,7 +110,7 @@ async function resolveAdminAndClient(session: AdminSession, clientId: string) {
       : prisma.user.findUnique({ where: { email: session?.user?.email ?? "" }, select: { id: true, email: true } }),
     prisma.user.findUnique({
       where: { id: clientId },
-      select: { id: true, name: true, email: true, company: true, role: true, status: true, organizationId: true },
+      select: { id: true, name: true, email: true, company: true, role: true, status: true, organizationId: true, organization: { select: { name: true } } },
     }),
   ]);
 
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Só é possível criar pedido para clientes ativos." }, { status: 422 });
     }
 
-    const clientName = (clientUser.company?.trim() || clientUser.name?.trim() || clientUser.email) ?? "CLIENT";
+    const clientName = (clientUser.organization?.name?.trim() || clientUser.company?.trim() || clientUser.name?.trim() || clientUser.email) ?? "CLIENT";
     const order = await createOrderWithRef({
       clientId: clientUser.id,
       clientName,
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
         to: clientUser.email,
         subject: "Proposta recebida — Quantum Technology",
         html: tplOrderProposalSent({
-          clientName: clientUser.name ?? "",
+          clientName: clientUser.organization?.name?.trim() ?? clientUser.name ?? "",
           orderType: order.type,
           orderTitle: order.title ?? undefined,
           estimatedValue: order.estimatedValue ?? 0,

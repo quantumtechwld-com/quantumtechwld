@@ -67,7 +67,10 @@ async function handleSessionCompleted(session: Stripe.Checkout.Session): Promise
   const order = await db.order.update({
     where: { id: orderId },
     data:  { status: "IN_PRODUCTION" },
-    include: { client: { select: { name: true, email: true } } },
+    include: {
+      client:       { select: { name: true, email: true } },
+      organization: { select: { name: true } },
+    },
   });
 
   const baseUrl    = appUrl();
@@ -78,7 +81,7 @@ async function handleSessionCompleted(session: Stripe.Checkout.Session): Promise
       to: order.client.email,
       subject: "Pagamento confirmado — o seu pedido está em produção",
       html: tplOrderPaymentConfirmed({
-        clientName:  order.client.name ?? "",
+        clientName:  order.organization?.name?.trim() ?? order.client.name ?? "",
         orderType:   order.type,
         orderUrl:    `${baseUrl}/portal/orders/${orderId}`,
         amountCents: session.amount_total ?? 0,

@@ -9,7 +9,10 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
   // Busca o pedido
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { client: { select: { email: true, name: true } } },
+    include: {
+      client:       { select: { email: true, name: true } },
+      organization: { select: { name: true } },
+    },
   });
   if (!order) return null;
 
@@ -43,7 +46,7 @@ export async function createPayment(orderId: string, amount: number): Promise<Pa
       to: order.client.email,
       subject: '[DevFlow] Pagamento iniciado',
       html: tplOrderPaymentConfirmed({
-        clientName: order.client.name ?? '',
+        clientName: (order as { organization?: { name: string } | null }).organization?.name?.trim() ?? order.client.name ?? '',
         orderType: order.type,
         orderUrl: `${baseUrl}/portal/orders/${orderId}`,
         amountCents: payment.amountCents,

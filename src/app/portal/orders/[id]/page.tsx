@@ -46,9 +46,10 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     db.order.findUnique({
       where: { id },
       include: {
-        client:   { select: { email: true, name: true } },
-        payment:  { select: { status: true, amountCents: true } },
-        rating:   true,
+        client:       { select: { email: true, name: true } },
+        organization: { select: { name: true } },
+        payment:      { select: { status: true, amountCents: true } },
+        rating:       true,
         financial: {
           include: {
             installments: { orderBy: { sequence: "asc" } },
@@ -348,6 +349,11 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
               {order.title ?? orderTypeLabel(order.type)}
             </h1>
             <p className="mt-0.5 text-xs text-slate-500">{orderTypeLabel(order.type)}</p>
+            {order.organization?.name && (
+              <p className="mt-1 text-xs text-indigo-300/80 flex items-center gap-1">
+                🏢 {order.organization.name}
+              </p>
+            )}
             {order.orderRef && (
               <p className="mt-1 font-mono text-sm text-slate-400">
                 {t("orderRef")}{" "}
