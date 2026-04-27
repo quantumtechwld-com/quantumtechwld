@@ -10,10 +10,19 @@ const mocks = vi.hoisted(() => ({
   getProposalHistory: vi.fn(),
   getActiveProposal: vi.fn(),
   canAccessOrder: vi.fn(),
+  orderFindUnique: vi.fn(),
 }));
 
 vi.mock("@/auth", () => ({
   auth: mocks.auth,
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    order: {
+      findUnique: mocks.orderFindUnique,
+    },
+  },
 }));
 
 vi.mock("@/services/proposals/ProposalService", () => ({
@@ -255,7 +264,11 @@ describe("/api/orders/[id]/proposals/respond", () => {
       mocks.auth.mockResolvedValue({
         user: { id: "user_1", email: "client@example.com", role: "CLIENT" },
       });
-      mocks.canAccessOrder.mockResolvedValue(false);
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        client: { id: "user_1" },
+      });
+      mocks.canAccessOrder.mockReturnValue(false);
 
       const req = new NextRequest("http://localhost/api/orders/ord_1/proposals/respond", {
         method: "POST",
@@ -270,7 +283,11 @@ describe("/api/orders/[id]/proposals/respond", () => {
       mocks.auth.mockResolvedValue({
         user: { id: "user_1", email: "client@example.com", role: "CLIENT" },
       });
-      mocks.canAccessOrder.mockResolvedValue(true);
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        client: { id: "user_1" },
+      });
+      mocks.canAccessOrder.mockReturnValue(true);
 
       const mockActiveProposal = {
         id: "prop_1",
@@ -306,7 +323,11 @@ describe("/api/orders/[id]/proposals/respond", () => {
       mocks.auth.mockResolvedValue({
         user: { id: "user_1", email: "client@example.com", role: "CLIENT" },
       });
-      mocks.canAccessOrder.mockResolvedValue(true);
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        client: { id: "user_1" },
+      });
+      mocks.canAccessOrder.mockReturnValue(true);
 
       const mockActiveProposal = {
         id: "prop_1",
@@ -349,7 +370,11 @@ describe("/api/orders/[id]/proposals/respond", () => {
       mocks.auth.mockResolvedValue({
         user: { id: "user_1", email: "client@example.com", role: "CLIENT" },
       });
-      mocks.canAccessOrder.mockResolvedValue(true);
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        client: { id: "user_1" },
+      });
+      mocks.canAccessOrder.mockReturnValue(true);
       mocks.getActiveProposal.mockResolvedValue(null);
 
       const req = new NextRequest("http://localhost/api/orders/ord_1/proposals/respond", {
@@ -367,7 +392,11 @@ describe("/api/orders/[id]/proposals/respond", () => {
       mocks.auth.mockResolvedValue({
         user: { id: "user_1", email: "client@example.com", role: "CLIENT" },
       });
-      mocks.canAccessOrder.mockResolvedValue(true);
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        client: { id: "user_1" },
+      });
+      mocks.canAccessOrder.mockReturnValue(true);
 
       const mockProposal = {
         id: "prop_1",
@@ -395,7 +424,11 @@ describe("/api/orders/[id]/proposals/respond", () => {
       mocks.auth.mockResolvedValue({
         user: { id: "user_1", email: "client@example.com", role: "CLIENT" },
       });
-      mocks.canAccessOrder.mockResolvedValue(true);
+      mocks.orderFindUnique.mockResolvedValue({
+        id: "ord_1",
+        client: { id: "user_1" },
+      });
+      mocks.canAccessOrder.mockReturnValue(true);
 
       const mockDraftProposal = {
         id: "prop_1",
