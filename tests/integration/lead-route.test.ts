@@ -24,6 +24,10 @@ vi.mock("@/lib/complexity", () => ({
 
 vi.mock("@/lib/email", () => ({
   sendMail: mocks.sendMail,
+  tplLeadConfirmation: vi.fn(() => ({
+    subject: "✅ Recebemos sua solicitação",
+    html: "<div>Confirmação enviada</div>",
+  })),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -51,7 +55,12 @@ describe("POST /api/lead", () => {
       label: "Simples",
       color: "green",
     });
-    mocks.userUpsert.mockResolvedValue({ id: "user_1" });
+    mocks.userUpsert.mockResolvedValue({ 
+      id: "user_1", 
+      name: "Joao Silva", 
+      email: "joao@example.com", 
+      organization: null 
+    });
     mocks.briefingCreate.mockResolvedValue({ id: "brief_1" });
     mocks.sendMail.mockResolvedValue(undefined);
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
@@ -145,7 +154,7 @@ describe("POST /api/lead", () => {
     expect(body.ok).toBe(true);
     expect(mocks.userUpsert).toHaveBeenCalledTimes(1);
     expect(mocks.briefingCreate).toHaveBeenCalledTimes(1);
-    expect(mocks.sendMail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendMail).toHaveBeenCalledTimes(2); // Admin + confirmação ao lead
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
