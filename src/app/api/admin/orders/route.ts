@@ -110,7 +110,7 @@ async function resolveAdminAndClient(session: AdminSession, clientId: string) {
       : prisma.user.findUnique({ where: { email: session?.user?.email ?? "" }, select: { id: true, email: true } }),
     prisma.user.findUnique({
       where: { id: clientId },
-      select: { id: true, name: true, email: true, company: true, role: true, status: true },
+      select: { id: true, name: true, email: true, company: true, role: true, status: true, organizationId: true },
     }),
   ]);
 
@@ -208,6 +208,7 @@ export async function POST(request: NextRequest) {
       productionInfo: payload.productionInfo,
       estimatedValue: payload.estimatedValue,
       adminNote: payload.adminNote,
+      organizationId: clientUser.organizationId ?? null,
     });
 
     if (!order) {

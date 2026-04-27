@@ -57,6 +57,7 @@ describe("GET /api/admin/orders", () => {
       company: "Quantum Client",
       role: "CLIENT",
       status: "ACTIVE",
+      organizationId: null,
     });
     mocks.createOrderWithRef.mockResolvedValue({ id: "ord_2" });
   });
@@ -154,6 +155,63 @@ describe("GET /api/admin/orders", () => {
     await vi.waitFor(() => expect(mocks.sendMail).toHaveBeenCalled());
   });
 
+  it("propaga organizationId do cliente ao criar pedido pelo admin", async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      id: "client_1",
+      name: "Joao",
+      email: "joao@example.com",
+      company: "Empresa XYZ",
+      role: "CLIENT",
+      status: "ACTIVE",
+      organizationId: "org_123",
+    });
+    mocks.createOrderWithRef.mockResolvedValue({ id: "ord_org" });
+
+    await POST(new NextRequest("http://localhost/api/admin/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: "client_1",
+        type: "support",
+        title: "Pedido da empresa",
+        description: "Pedido criado pelo admin para cliente com organização",
+      }),
+      headers: { "content-type": "application/json" },
+    }));
+
+    // Garante que organizationId do cliente é propagado para o pedido
+    expect(mocks.createOrderWithRef).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: "org_123",
+    }));
+  });
+
+  it("cria pedido sem organizationId quando cliente nao tem organizacao", async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      id: "client_2",
+      name: "Maria",
+      email: "maria@example.com",
+      company: null,
+      role: "CLIENT",
+      status: "ACTIVE",
+      organizationId: null,
+    });
+    mocks.createOrderWithRef.mockResolvedValue({ id: "ord_no_org" });
+
+    await POST(new NextRequest("http://localhost/api/admin/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: "client_2",
+        type: "support",
+        title: "Pedido individual",
+        description: "Pedido de cliente sem organização",
+      }),
+      headers: { "content-type": "application/json" },
+    }));
+
+    expect(mocks.createOrderWithRef).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: null,
+    }));
+  });
+
   it("retorna 422 quando o cliente selecionado nao e ativo", async () => {
     mocks.userFindUnique.mockResolvedValue({
       id: "client_1",
@@ -162,6 +220,7 @@ describe("GET /api/admin/orders", () => {
       company: "Quantum Client",
       role: "CLIENT",
       status: "PENDING",
+      organizationId: null,
     });
 
     const response = await POST(new NextRequest("http://localhost/api/admin/orders", {
