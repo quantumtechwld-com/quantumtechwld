@@ -46,3 +46,4 @@ export async function sendMail({ to, subject, html, text, replyTo }: MailOptions
 export { tplProposalSent, tplProposalApproved, tplProposalApprovedClient, tplRevisionRequested } from "./email-templates/proposal";
 export { tplOrderReceived, tplOrderProposalSent, tplOrderApprovedAdmin, tplOrderRevisionAdmin, tplOrderInProduction, tplOrderCompleted, tplOrderInReview, tplOrderReviewApprovedAdmin, tplOrderNewMessage } from "./email-templates/orders";
 export { tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin, tplPixNotifyAdmin } from "./email-templates/payments";
+export { tplLeadConfirmation, tplLeadFollowUp3Days, tplLeadFollowUp7Days } from "./email-templates/lead";

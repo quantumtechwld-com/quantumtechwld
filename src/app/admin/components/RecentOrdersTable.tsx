@@ -6,6 +6,7 @@ export type RecentOrder = {
   status: string;
   updatedAt: Date;
   client: { name: string | null; email: string };
+  organization: { name: string } | null;
   payment: { status: string; amountCents: number } | null;
 };
 
@@ -46,7 +47,7 @@ export default function RecentOrdersTable({ recentOrders, ORDER_TYPE_LABEL, ORDE
             {recentOrders.map((o) => (
               <tr key={o.id} className="hover:bg-white/2 transition-colors">
                 <td className="px-6 py-4">
-                  <p className="text-white font-medium">{o.client.name ?? "—"}</p>
+                  <p className="text-white font-medium">{o.organization?.name ?? o.client.name ?? "—"}</p>
                   <p className="text-white/40 text-xs">{o.client.email}</p>
                 </td>
                 <td className="px-6 py-4 text-white/70">

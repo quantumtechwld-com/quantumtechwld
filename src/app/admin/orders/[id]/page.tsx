@@ -29,6 +29,7 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
       where: { id },
       include: {
         client:  { select: { id: true, name: true, email: true } },
+        organization: { select: { name: true } },
         createdByAdmin: { select: { id: true, name: true, email: true } },
         payment: { select: { status: true, amountCents: true, currency: true, paidAt: true } },
         financial: { select: { id: true, status: true, totalAmountCents: true, paidCents: true } },
@@ -109,10 +110,18 @@ export default async function AdminOrderDetailPage({ params }: Readonly<RoutePar
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Cliente</h2>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/20 text-sm font-semibold text-violet-300">
-              {((order.client.name ?? order.client.email)?.[0] ?? "?").toUpperCase()}
+              {((order.organization?.name ?? order.client.name ?? order.client.email)?.[0] ?? "?").toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-medium text-white">{order.client.name ?? "—"}</p>
+              <p className="text-sm font-medium text-white">
+                {order.organization ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    🏢 {order.organization.name}
+                  </span>
+                ) : (
+                  order.client.name ?? "—"
+                )}
+              </p>
               <p className="text-xs text-slate-400">{order.client.email}</p>
             </div>
           </div>

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, email: true, company: true, organizationId: true },
+      select: { id: true, name: true, email: true, company: true, organizationId: true, organization: { select: { name: true } } },
     });
     if (!user) return NextResponse.json({ error: "Utilizador não encontrado." }, { status: 404 });
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar orderRef e incluir na criação — evita race condition entre workers
-    const clientName = (user.company?.trim() || user.name?.trim() || user.email) ?? "CLIENT";
+    const clientName = user.organization?.name ?? user.company?.trim() ?? user.name?.trim() ?? user.email ?? "CLIENT";
     // Validar e sanitizar referenceLinks: apenas strings não-vazias com formato de URL
     const rawLinks = Array.isArray(body.referenceLinks) ? body.referenceLinks : [];
     const referenceLinks = rawLinks
@@ -119,11 +119,15 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
     const baseUrl = appUrl();
     if (adminEmail) {
+      const organizationName = user.organization?.name;
+      const displayName = organizationName ?? user.name ?? user.email!;
       sendMail({
         to: adminEmail,
-        subject: `[DevFlow] Novo pedido de ${user.email}: ${order.title ?? order.type}`,
+        subject: `[DevFlow] Novo pedido de ${displayName}: ${order.title ?? order.type}`,
         html: tplOrderReceived({
           clientEmail:  user.email!,
+          clientName:   displayName,
+          organizationName: organizationName ?? null,
           orderType:    order.type,
           orderTitle:   order.title ?? "",
           urgency:      order.urgency,

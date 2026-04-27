@@ -45,6 +45,7 @@ export default async function AdminDashboardPage() {
     status: string;
     updatedAt: Date;
     client: { name: string | null; email: string };
+    organization: { name: string } | null;
     payment: { status: string; amountCents: number } | null;
   };
 
@@ -84,6 +85,7 @@ export default async function AdminDashboardPage() {
       where: { status: { notIn: ["DRAFT"] } },
       include: {
         client: { select: { name: true, email: true } },
+        organization: { select: { name: true } },
         payment: { select: { status: true, amountCents: true } },
       },
     }),

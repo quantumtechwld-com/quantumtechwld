@@ -34,6 +34,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
           status: true,
           estimatedValue: true,
           client: { select: { id: true, name: true, email: true } },
+          organization: { select: { name: true } },
         },
       },
     },
@@ -50,6 +51,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
         status: true,
         estimatedValue: true,
         client: { select: { name: true, email: true } },
+        organization: { select: { name: true } },
       },
     });
 
@@ -66,7 +68,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
           {order ? (
             <p className="text-sm text-slate-400">
               O pedido <span className="text-white font-mono">{order.orderRef ?? orderId.slice(0, 8)}</span> de{" "}
-              <span className="text-white">{order.client.name ?? order.client.email}</span>{" "}
+              <span className="text-white">{order.organization?.name ?? order.client.name ?? order.client.email}</span>{" "}
               não tem financeiro associado.{" "}
               {order.status === "PROPOSAL_SENT" || order.status === "APPROVED"
                 ? "O financeiro é criado automaticamente quando a proposta é enviada com valor definido. Re-envie a proposta para gerar o registo."
@@ -116,7 +118,7 @@ export default async function AdminFinanceiroDetailPage({ params }: Readonly<Rou
             Pedido {financial.order.orderRef ?? orderId.slice(0, 8)}
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            {financial.order.client.name ?? "—"} · {financial.order.client.email}
+            {financial.order.organization?.name ?? financial.order.client.name ?? "—"} · {financial.order.client.email}
           </p>
         </div>
         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${FINANCIAL_STATUS_COLOR[financial.status as string] ?? ""}`}>

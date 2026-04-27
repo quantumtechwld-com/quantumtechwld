@@ -3,6 +3,8 @@ import { emailLogoHeader, emailFooterTeam, emailFooterSystem } from "./shared";
 
 export function tplOrderReceived(opts: {
   clientEmail: string;
+  clientName: string;
+  organizationName?: string | null;
   orderType: string;
   orderTitle: string;
   urgency: string;
@@ -14,8 +16,9 @@ export function tplOrderReceived(opts: {
       ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Novo pedido recebido</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
-        O cliente <strong style="color:#fff">${opts.clientEmail}</strong> submeteu um novo pedido.
+        ${opts.organizationName ? `A empresa <strong style="color:#fff">🏢 ${opts.organizationName}</strong>` : `O cliente <strong style="color:#fff">${opts.clientName}</strong>`} submeteu um novo pedido.
       </p>
+      <p style="color:#64748b;font-size:13px;margin:0 0 24px">Contacto: ${opts.clientEmail}</p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
         ${opts.orderTitle ? `<p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Título</p><p style="color:#fff;font-weight:700;font-size:16px;margin:0 0 16px">${opts.orderTitle}</p>` : ""}
         <p style="color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">Tipo</p>

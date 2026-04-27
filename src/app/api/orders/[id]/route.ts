@@ -313,7 +313,10 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     const order = await db.order.findUnique({
       where: { id },
-      include: { client: { select: { id: true, name: true, email: true } } },
+      include: { 
+        client: { select: { id: true, name: true, email: true } },
+        organization: { select: { name: true } },
+      },
     });
     if (!order) return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
 
@@ -339,7 +342,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     const baseUrl    = appUrl();
     const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_SERVER_USER ?? "";
     const clientEmail = updated.client.email as string;
-    const clientName  = (updated.client.name ?? "") as string;
+    const clientName  = (updated.organization?.name ?? updated.client.name ?? "") as string;
 
     dispatchPostUpdateEmail({
       action:       body.action,

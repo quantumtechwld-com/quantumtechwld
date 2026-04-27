@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { computeComplexity } from "@/lib/complexity";
-import { sendMail } from "@/lib/email";
+import { sendMail, tplLeadConfirmation } from "@/lib/email";
 import { emailLogoHeader } from "@/lib/email-templates/shared";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { verifyCsrf } from "@/lib/csrf";
@@ -129,6 +129,16 @@ export async function POST(request: NextRequest) {
         console.warn("Email de notificação de lead falhou:", emailErr instanceof Error ? emailErr.message : emailErr);
       });
     }
+
+    // ── Confirmação automática ao lead (resposta em até 2h úteis) ──
+    const confirmationTemplate = tplLeadConfirmation(payload.name, "pt");
+    sendMail({
+      to: payload.email,
+      subject: confirmationTemplate.subject,
+      html: confirmationTemplate.html,
+    }).catch((emailErr) => {
+      console.warn("Email de confirmação ao lead falhou:", emailErr instanceof Error ? emailErr.message : emailErr);
+    });
 
     const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
 

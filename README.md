@@ -14,6 +14,16 @@ Para evitar perda de contexto, execução fora do padrão ou falha de release, q
 
 O `README.md` é a visão geral do projeto, mas não substitui as instruções operacionais e de qualidade definidas nos documentos acima.
 
+## Documentação Comercial e Operacional
+
+Para atividades comerciais, divulgação e gestão de leads, consulte:
+
+- **`docs/COMMERCIAL-STRATEGY.md`** — Estratégia comercial completa (ICP, funil, KPIs, canais de divulgação)
+- **`docs/PRE-LAUNCH-CHECKLIST.md`** — Checklist operacional pré-divulgação (infraestrutura + processos)
+- **`docs/DIAGNOSTIC-SCRIPT.md`** — Roteiro de diagnóstico BANT para qualificação de leads
+- **`docs/PROPOSAL-TEMPLATE.md`** — Template padrão de proposta comercial
+- **`docs/FOLLOWUP-PROCESS.md`** — Processo de follow-up com SLAs e templates de e-mail
+
 ## Funcionalidades implementadas
 
 | Módulo | Descrição | Status |
