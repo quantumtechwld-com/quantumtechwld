@@ -18,6 +18,18 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 
+// Helpers de estilo para o cronograma de pagamentos (sem dependência de escopo)
+function instSlotClass(isPaid: boolean, isOverdue: boolean): string {
+  if (isPaid) return "bg-emerald-500/5 border border-emerald-500/20";
+  if (isOverdue) return "bg-red-500/5 border border-red-500/20";
+  return "bg-white/5 border border-white/10";
+}
+function instStatusClass(isPaid: boolean, isOverdue: boolean): string {
+  if (isPaid) return "text-emerald-400";
+  if (isOverdue) return "text-red-400";
+  return "text-yellow-400";
+}
+
 type RouteParams = {
   params:      Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string>>;
@@ -71,11 +83,14 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
     ? formatCurrency(pendingInst.amountCents / 100, locale, "EUR")
     : null;
 
-  // PIX é exclusivo do Brasil e cobra em BRL, mas amountCents no DB é sempre EUR cents.
-  // Converter EUR → BRL antes de exibir no PixPaymentPanel (câmbio com cache 1 h).
+  // Taxa de câmbio (EUR → moeda do locale) reutilizada no cronograma e no PIX. Cache 1 h.
+  const localCurrency = getCurrencyForLocale(locale);
+  const scheduleRate = localCurrency === "EUR" ? 1 : await getExchangeRate("EUR", localCurrency);
+
+  // PIX: amountCents no DB são EUR cents; exibir em BRL requer conversão.
   const pendingInstPixBrlCents: number | null =
     pendingInst?.method === "MANUAL_PIX" && locale === "pt"
-      ? Math.round(pendingInst.amountCents * (await getExchangeRate("EUR", "BRL")))
+      ? Math.round(pendingInst.amountCents * scheduleRate)
       : null;
   const orderTypeLabel = (type: string) => {
     const keyMap: Record<string, string> = {
@@ -123,6 +138,107 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       create: { orderId: id, userId: me.id, lastReadAt: new Date() },
       update: { lastReadAt: new Date() },
     });
+  }
+
+  // Helpers para exibição do cronograma — extraídos para cumprir limite de complexidade cognitiva.
+  function instStatusText(isPaid: boolean, isOverdue: boolean): string {
+    if (isPaid) return t("payScheduleStatusPaid");
+    if (isOverdue) return t("payScheduleStatusOverdue");
+    return t("payScheduleStatusPending");
+  }
+  function instLabel(sequence: number, isSinglePayment: boolean): string {
+    if (isSinglePayment) return t("payScheduleSinglePayment");
+    if (sequence === 1) return t("payScheduleEntry");
+    return `${t("payScheduleInstallment")} ${sequence}`;
+  }
+  function instMethodLabel(method: string): string {
+    const map: Record<string, string> = {
+      STRIPE: t("payScheduleMethodStripe"),
+      MANUAL_PIX: t("payScheduleMethodPix"),
+      MANUAL_TRANSFER: t("payScheduleMethodTransfer"),
+      MANUAL_OTHER: t("payScheduleMethodOther"),
+    };
+    return map[method] ?? method;
+  }
+
+  // Cronograma de pagamentos — exibe todas as parcelas, valores e datas.
+  function renderPaymentSchedule() {
+    if (isOrgMember) return null;
+    const insts = order.financial?.installments as Array<{
+      id: string;
+      sequence: number;
+      amountCents: number;
+      method: string;
+      status: string;
+      dueDate?: string | null;
+    }> | undefined;
+    if (!insts?.length) return null;
+    const POST_APPROVAL = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"];
+    if (!POST_APPROVAL.includes(order.status)) return null;
+    const now = new Date();
+    const isSinglePayment = insts.length === 1;
+    const paidCount = insts.filter((i) => i.status === "PAID").length;
+    return (
+      <section className="mt-6 rounded-2xl border border-white/10 bg-white/3 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+            {t("payScheduleTitle")}
+          </h2>
+          {insts.length > 1 && (
+            <span className="text-xs text-slate-500">
+              {paidCount}/{insts.length} {t("paySchedulePaidCount")}
+            </span>
+          )}
+        </div>
+        <div className="space-y-2">
+          {insts.map((inst) => {
+            const isPaid = inst.status === "PAID";
+            const dueDate = inst.dueDate ? new Date(inst.dueDate) : null;
+            const isOverdue = !isPaid && dueDate ? dueDate < now : false;
+            const amount = formatCurrency(
+              (inst.amountCents / 100) * scheduleRate,
+              locale,
+              localCurrency,
+            );
+            return (
+              <div
+                key={inst.id}
+                className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 ${instSlotClass(isPaid, isOverdue)}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{instLabel(inst.sequence, isSinglePayment)}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {instMethodLabel(inst.method)}
+                    {dueDate ? (
+                      <span className={isOverdue ? " text-red-400 font-medium" : ""}>
+                        {" · "}
+                        {t("payScheduleDue")}{" "}
+                        {dueDate.toLocaleDateString(locale, {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    ) : (
+                      <span>{" · "}{t("payScheduleNoDueDate")}</span>
+                    )}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-bold text-white">{amount}</p>
+                  <span className={`text-xs font-medium ${instStatusClass(isPaid, isOverdue)}`}>
+                    {instStatusText(isPaid, isOverdue)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {isConverted && (
+          <p className="mt-3 text-xs text-slate-600">{t("payScheduleApproxNote")}</p>
+        )}
+      </section>
+    );
   }
 
   // PIX é exclusivo do Brasil — oculto para outros locales.
@@ -393,6 +509,9 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
           deliveryLinks:  order.deliveryLinks,
         }}
       />
+
+      {/* Cronograma de pagamentos — visível a partir de APPROVED para clientes com parcelas */}
+      {renderPaymentSchedule()}
 
       {/* Pagamento: visível em qualquer status pós-aprovação quando há parcelas pendentes */}
       {renderPendingPayment()}
