@@ -16,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   tplOrderInReview: vi.fn(),
   tplOrderReviewApprovedAdmin: vi.fn(),
   appUrl: vi.fn(),
+  createProposal: vi.fn(),
+  sendProposal: vi.fn(),
 }));
 
 vi.mock("@/auth", () => ({
@@ -33,6 +35,11 @@ vi.mock("@/lib/prisma", () => ({
       create: mocks.orderFinancialCreate,
     },
   },
+}));
+
+vi.mock("@/services/proposals/ProposalService", () => ({
+  createProposal: mocks.createProposal,
+  sendProposal: mocks.sendProposal,
 }));
 
 vi.mock("@/lib/email", () => ({
@@ -96,6 +103,21 @@ describe("/api/orders/[id]", () => {
     mocks.tplOrderReviewApprovedAdmin.mockReturnValue("<html>review-approved-admin</html>");
     mocks.sendMail.mockResolvedValue(undefined);
     mocks.appUrl.mockReturnValue("https://quantumtechwld.com");
+    mocks.createProposal.mockResolvedValue({
+      id: "prop_1",
+      version: 1,
+      status: "DRAFT",
+      productionInfo: "Entrega em 20 dias",
+      estimatedValue: 5000,
+    });
+    mocks.sendProposal.mockResolvedValue({
+      id: "prop_1",
+      version: 1,
+      status: "SENT",
+      productionInfo: "Entrega em 20 dias",
+      estimatedValue: 5000,
+      sentAt: new Date("2026-04-27T10:00:00Z"),
+    });
     process.env.ADMIN_EMAIL = "admin@example.com";
   });
 

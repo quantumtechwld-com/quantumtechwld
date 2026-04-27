@@ -355,12 +355,29 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       adminNote:    body.adminNote ?? "",
     });
 
-    // Quando o admin envia proposta com valor estimado, criar/actualizar OrderFinancial
-    if (body.action === "propose" && updated.estimatedValue != null && updated.estimatedValue > 0) {
-      const totalCents = Math.round(updated.estimatedValue * 100);
-      const pct = Math.max(0, Math.min(99, Math.round(body.downPaymentPct ?? 0)));
-      const method = body.paymentMethod ?? "STRIPE";
-      await createOrReplaceOrderFinancial(id, totalCents, pct, method, { entry: body.entryDueDate, final: body.finalDueDate });
+    // Quando o admin envia proposta, criar OrderProposal versionada + OrderFinancial
+    if (body.action === "propose") {
+      // Criar proposta versionada
+      const { createProposal, sendProposal: sendProposalService } = await import("@/services/proposals/ProposalService");
+      
+      const newProposal = await createProposal({
+        orderId: id,
+        productionInfo: body.productionInfo ?? "",
+        estimatedValue: body.estimatedValue ?? 0,
+        adminNote: body.adminNote,
+        createdByAdminId: session.user.id,
+      });
+
+      // Enviar proposta (atualiza status, mas Order já está com PROPOSAL_SENT do update anterior)
+      await sendProposalService({ proposalId: newProposal.id });
+
+      // Criar/actualizar OrderFinancial se houver valor
+      if (updated.estimatedValue != null && updated.estimatedValue > 0) {
+        const totalCents = Math.round(updated.estimatedValue * 100);
+        const pct = Math.max(0, Math.min(99, Math.round(body.downPaymentPct ?? 0)));
+        const method = body.paymentMethod ?? "STRIPE";
+        await createOrReplaceOrderFinancial(id, totalCents, pct, method, { entry: body.entryDueDate, final: body.finalDueDate });
+      }
     }
 
     return NextResponse.json({ order: updated });

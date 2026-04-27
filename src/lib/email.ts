@@ -47,3 +47,4 @@ export { tplProposalSent, tplProposalApproved, tplProposalApprovedClient, tplRev
 export { tplOrderReceived, tplOrderProposalSent, tplOrderApprovedAdmin, tplOrderRevisionAdmin, tplOrderInProduction, tplOrderCompleted, tplOrderInReview, tplOrderReviewApprovedAdmin, tplOrderNewMessage } from "./email-templates/orders";
 export { tplOrderPaymentConfirmed, tplOrderPaymentConfirmedAdmin, tplPixNotifyAdmin } from "./email-templates/payments";
 export { tplLeadConfirmation, tplLeadFollowUp3Days, tplLeadFollowUp7Days } from "./email-templates/lead";
+export { tplProposalSentToClient, tplProposalApprovedByClient, tplProposalRevisionRequested, tplProposalRejectedByClient } from "./email-templates/proposals";

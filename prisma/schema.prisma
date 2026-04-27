@@ -91,6 +91,7 @@ model User {
   createdOrders  Order[]              @relation("OrderCreatedByAdmin")
   orderMessages  OrderMessage[]
   orgMemberships OrganizationMember[]
+  createdOrderProposals OrderProposal[] @relation("OrderProposalCreatedBy")
 
   @@index([organizationId])
 }
@@ -263,6 +264,7 @@ model Order {
   payment         Payment?
   financial       OrderFinancial?
   rating          OrderRating?
+  proposals       OrderProposal[]
 
   @@index([createdByAdminId])
   @@index([parentOrderId])
@@ -415,6 +417,50 @@ model OrderRating {
   score     Int      // 1–5 estrelas
   comment   String?  @db.Text
   createdAt DateTime @default(now())
+}
+
+// ─── M4.5: Versionamento de Propostas de Pedidos ────────────────────────────
+
+/// Proposta de execução e orçamento para um pedido (versionada).
+/// Cada edição cria uma nova versão. O histórico completo é mantido.
+model OrderProposal {
+  id               String              @id @default(cuid())
+  orderId          String
+  order            Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  version          Int                 // versão sequencial (1, 2, 3...)
+  status           OrderProposalStatus @default(DRAFT)
+  /// O que será produzido (escopo técnico resumido)
+  productionInfo   String              @db.Text
+  /// Valor estimado em EUR
+  estimatedValue   Float
+  /// Nota interna do admin (opcional)
+  adminNote        String?             @db.Text
+  /// Quando foi enviada ao cliente
+  sentAt           DateTime?
+  /// Quando o cliente respondeu (aprovou, pediu revisão ou rejeitou)
+  reviewedAt       DateTime?
+  /// Resposta do cliente: "approved" | "revision" | "rejected"
+  clientResponse   String?
+  /// Comentário do cliente ao pedir revisão ou rejeição
+  clientNote       String?             @db.Text
+  /// Admin que criou esta versão
+  createdByAdminId String?
+  createdByAdmin   User?               @relation("OrderProposalCreatedBy", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([orderId, version]) // garante unicidade de versão por pedido
+  @@index([orderId])
+  @@index([createdByAdminId])
+}
+
+enum OrderProposalStatus {
+  DRAFT      // rascunho (admin criando/editando)
+  SENT       // enviada ao cliente
+  APPROVED   // cliente aprovou
+  REVISION   // cliente pediu revisão (nova versão será criada)
+  REJECTED   // cliente rejeitou
+  SUPERSEDED // substituída por versão mais nova
 }
 
 // ─── Mensagens públicas (sem login) ─────────────────────────────────────────
