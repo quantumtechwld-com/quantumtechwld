@@ -20,7 +20,7 @@ import InstallPrompt from "./InstallPrompt";
 const CONTACT = {
   name: "QuantumTech",
   role: "Software Development Agency",
-  email: "leandro@quantumtechwld.com",
+  email: "rleandro@quantumtechwld.com",
   whatsapp: "https://wa.me/5511999999999",
   linkedin: "https://linkedin.com/company/quantumtechwld",
   website: "https://quantumtechwld.com",
