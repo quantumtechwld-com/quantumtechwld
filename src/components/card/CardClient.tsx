@@ -14,6 +14,7 @@ import {
   Check,
   RotateCcw,
 } from "lucide-react";
+import InstallPrompt from "./InstallPrompt";
 
 // ── Contatos (centralizar aqui para alterar facilmente) ────────────────────
 const CONTACT = {
@@ -130,16 +131,12 @@ export default function CardClient() {
         className="relative w-full max-w-sm"
         style={{ perspective: "1200px" }}
       >
-        <button
-          type="button"
-          className="relative h-115 w-full cursor-pointer transition-transform duration-700 ease-in-out"
+        <div
+          className="relative h-115 w-full transition-transform duration-700 ease-in-out"
           style={{
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
           }}
-          onClick={() => setFlipped((f) => !f)}
-          onKeyDown={(e) => e.key === "Enter" && setFlipped((f) => !f)}
-          aria-label={flipped ? t("flipBack") : t("flipHint")}
         >
           {/* ────────── FRENTE ────────── */}
           <div
@@ -206,10 +203,14 @@ export default function CardClient() {
                 ))}
               </div>
 
-              {/* Dica de flip */}
-              <p className="text-center text-[11px] text-white/25">
+              {/* Botão de flip */}
+              <button
+                type="button"
+                onClick={() => setFlipped(true)}
+                className="w-full text-center text-[11px] text-white/25 transition-colors hover:text-white/50"
+              >
                 {t("flipHint")}
-              </p>
+              </button>
             </div>
           </div>
 
@@ -252,10 +253,7 @@ export default function CardClient() {
               <div className="flex w-full flex-col gap-2">
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    downloadVCard();
-                  }}
+                  onClick={() => downloadVCard()}
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/10 py-3 text-sm font-semibold text-accent transition-all duration-200 hover:bg-accent/20 hover:shadow-[0_0_16px_rgba(155,89,255,0.3)]"
                 >
                   <Download size={16} />
@@ -264,10 +262,7 @@ export default function CardClient() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void handleShare();
-                  }}
+                  onClick={() => void handleShare()}
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-white/70 transition-all duration-200 hover:border-white/20 hover:bg-white/10"
                 >
                   {copied ? (
@@ -287,10 +282,7 @@ export default function CardClient() {
               {/* Dica de voltar */}
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFlipped(false);
-                }}
+                onClick={() => setFlipped(false)}
                 className="flex items-center gap-1 text-[11px] text-white/25 transition-colors hover:text-white/50"
               >
                 <RotateCcw size={11} />
@@ -298,13 +290,16 @@ export default function CardClient() {
               </button>
             </div>
           </div>
-        </button>
+        </div>
       </div>
 
       {/* ── Rodapé ────────────────────────────────────────────────────────── */}
       <p className="mt-8 text-center text-xs text-white/20">
         quantumtechwld.com
       </p>
+
+      {/* ── Prompt de instalação PWA ──────────────────────────────────────── */}
+      <InstallPrompt />
     </div>
   );
 }
