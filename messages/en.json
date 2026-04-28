@@ -599,5 +599,20 @@
     "title": "Thank you for reaching out!",
     "body": "Your request has been sent to our technical team. You will receive a reply by email shortly.",
     "back": "Back to home"
+  },
+  "card": {
+    "tagline": "We build digital products that grow.",
+    "role": "Software Development Agency",
+    "flipHint": "Tap to see QR Code",
+    "flipBack": "Back",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "linkedin": "LinkedIn",
+    "website": "Website",
+    "saveContact": "Save contact",
+    "share": "Share",
+    "qrLabel": "Scan to visit our website",
+    "copyLink": "Copy link",
+    "copied": "Link copied!"
   }
 }

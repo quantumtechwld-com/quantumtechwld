@@ -599,5 +599,20 @@
     "title": "Obrigado pelo contato!",
     "body": "Seu pedido já foi enviado para nosso time técnico. Em breve você receberá retorno por e-mail.",
     "back": "Voltar para a página inicial"
+  },
+  "card": {
+    "tagline": "Construímos produtos digitais que crescem.",
+    "role": "Agência de Desenvolvimento de Software",
+    "flipHint": "Toque para ver QR Code",
+    "flipBack": "Voltar",
+    "whatsapp": "WhatsApp",
+    "email": "E-mail",
+    "linkedin": "LinkedIn",
+    "website": "Website",
+    "saveContact": "Salvar contato",
+    "share": "Compartilhar",
+    "qrLabel": "Escaneie para visitar nosso site",
+    "copyLink": "Copiar link",
+    "copied": "Link copiado!"
   }
 }
