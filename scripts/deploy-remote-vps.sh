@@ -21,6 +21,18 @@ mkdir -p "$APP_DIR" "$STAGING"
 echo "==> Corrigindo permissões..."
 chown -R "$APP_USER:$APP_USER" "$APP_DIR" 2>/dev/null || true
 
+echo "==> Limpando build anterior (evita conflito de ownership)..."
+rm -rf \
+  "$APP_DIR/.next" \
+  "$APP_DIR/prisma" \
+  "$APP_DIR/public" \
+  "$APP_DIR/package.json" \
+  "$APP_DIR/package-lock.json" \
+  "$APP_DIR/next.config.ts" \
+  "$APP_DIR/next.config.js" \
+  "$APP_DIR/prisma.config.ts" \
+  "$APP_DIR/ecosystem.config.cjs"
+
 echo "==> Extraindo artefato de deploy..."
 tar -xzf "$STAGING/app.tar.gz" -C "$APP_DIR" --no-same-permissions --no-same-owner
 rm -f "$STAGING/app.tar.gz"
