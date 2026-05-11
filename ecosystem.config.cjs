@@ -22,15 +22,14 @@ module.exports = {
       name: "quantum-agency",
       script: "node_modules/.bin/next",
       args: "start",
-      cwd: "/home/ubuntu/quantum-agency",
+      cwd: "/home/deploy/quantum-agency",
 
       // Cluster mode: 2 instâncias fixas — equilíbrio entre throughput e uso de RAM
-      // Ajuste conforme o tipo de instância EC2 (t3.small=2, t3.medium=4)
+      // Ajuste conforme o tipo de instância VPS (VPS HostGator: 2 instâncias)
       instances: 2,
       exec_mode: "cluster",
 
       // Limita o heap V8 por worker: 2 workers × 350 MB = 700 MB max heap.
-      // Previne que o Node.js aloque heap ilimitado e esgote os 2 GB do t3.small.
       node_args: "--max-old-space-size=350",
 
       // Não reiniciar infinitamente se travar logo ao iniciar
@@ -45,8 +44,8 @@ module.exports = {
       },
 
       // Logs
-      out_file: "/home/ubuntu/logs/quantum-agency.out.log",
-      error_file: "/home/ubuntu/logs/quantum-agency.err.log",
+      out_file: "/home/deploy/logs/quantum-agency.out.log",
+      error_file: "/home/deploy/logs/quantum-agency.err.log",
       merge_logs: true,
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
 
