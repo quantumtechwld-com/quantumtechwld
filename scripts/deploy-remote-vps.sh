@@ -22,8 +22,8 @@ echo "==> Corrigindo permissões..."
 chown -R "$APP_USER:$APP_USER" "$APP_DIR" 2>/dev/null || true
 
 echo "==> Extraindo artefato de deploy..."
-tar -xzf "$STAGING/deploy.tar.gz" -C "$APP_DIR" --no-same-permissions --no-same-owner
-rm -f "$STAGING/deploy.tar.gz"
+tar -xzf "$STAGING/app.tar.gz" -C "$APP_DIR" --no-same-permissions --no-same-owner
+rm -f "$STAGING/app.tar.gz"
 
 echo "==> Instalando dependências de produção..."
 cd "$APP_DIR"

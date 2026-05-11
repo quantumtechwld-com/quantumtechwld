@@ -1,8 +1,10 @@
 ﻿name: Deploy → EC2 Production
 
 on:
-  push:
-    branches: [main]
+  # Deploy AWS desativado — migração para VPS em andamento
+  # push:
+  #   branches: [main]
+  workflow_dispatch:
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PIPELINE DE 3 CAMADAS

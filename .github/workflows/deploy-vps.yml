@@ -107,7 +107,7 @@ jobs:
 
       - name: Create deploy package
         run: |
-          tar -czf deploy.tar.gz \
+          tar -czf app.tar.gz \
             --exclude='.next/cache' \
             .next \
             public \
@@ -122,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: deploy-package
-          path: deploy.tar.gz
+          path: app.tar.gz
           retention-days: 1
 
   # ──────────────────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: deploy-package
-          path: .
+          path: ./pkg
 
       - name: Setup SSH
         run: |
@@ -206,7 +206,7 @@ jobs:
           ssh $SSH_OPTS "$VPS" "mkdir -p ~/app-deploy ~/quantum-agency"
 
           # Enviar artefatos
-          scp $SSH_OPTS deploy.tar.gz               "$VPS:~/app-deploy/deploy.tar.gz"
+          scp $SSH_OPTS pkg/app.tar.gz               "$VPS:~/app-deploy/app.tar.gz"
           scp $SSH_OPTS env.production.local        "$VPS:~/quantum-agency/.env.production.local"
           scp $SSH_OPTS scripts/deploy-remote-vps.sh "$VPS:~/app-deploy/deploy-remote-vps.sh"
 
