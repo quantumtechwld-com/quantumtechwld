@@ -7,7 +7,7 @@ set -euo pipefail
 
 APP_USER="deploy"
 APP_DIR="/home/$APP_USER/quantum-agency"
-STAGING="/home/$APP_USER/app-deploy"
+STAGING="/home/$APP_USER/app-staging"
 ENV_FILE="$APP_DIR/.env.production.local"
 
 echo "==> Verificando ferramentas..."

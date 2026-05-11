@@ -149,6 +149,18 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+
+          # SSH config — evita -p vs -P e expansão de variáveis em cada comando
+          cat > ~/.ssh/config << 'SSHEOF'
+          Host vps
+            HostName ${{ secrets.VPS_HOST }}
+            Port ${{ secrets.VPS_PORT }}
+            User ${{ secrets.VPS_USER }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          SSHEOF
+          chmod 600 ~/.ssh/config
+
           ssh-keyscan -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
           chmod 644 ~/.ssh/known_hosts
 
@@ -199,26 +211,28 @@ jobs:
 
       - name: Send deploy package to VPS
         run: |
-          SSH_OPTS="-i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no"
-          VPS="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          # Verificar artefatos presentes (debug)
+          echo "==> Arquivos em pkg/:"
+          ls -lh pkg/ 2>/dev/null || echo "VAZIO"
+          echo "==> env.production.local:"
+          ls -lh env.production.local 2>/dev/null || echo "NAO ENCONTRADO"
+          echo "==> script de deploy:"
+          ls -lh scripts/deploy-remote-vps.sh 2>/dev/null || echo "NAO ENCONTRADO"
 
-          # Criar diretório de staging no VPS
-          ssh $SSH_OPTS "$VPS" "mkdir -p ~/app-deploy ~/quantum-agency"
+          # Criar diretórios no VPS
+          ssh vps "mkdir -p ~/app-staging ~/quantum-agency"
 
-          # Enviar artefatos
-          scp $SSH_OPTS pkg/app.tar.gz               "$VPS:~/app-deploy/app.tar.gz"
-          scp $SSH_OPTS env.production.local        "$VPS:~/quantum-agency/.env.production.local"
-          scp $SSH_OPTS scripts/deploy-remote-vps.sh "$VPS:~/app-deploy/deploy-remote-vps.sh"
+          # Enviar artefatos (scp sem -p/-P — usa SSH config)
+          scp pkg/app.tar.gz               vps:~/app-staging/app.tar.gz
+          scp env.production.local         vps:~/quantum-agency/.env.production.local
+          scp scripts/deploy-remote-vps.sh vps:~/app-staging/deploy-remote-vps.sh
 
           # Proteger o arquivo de env no VPS
-          ssh $SSH_OPTS "$VPS" "chmod 600 ~/quantum-agency/.env.production.local"
+          ssh vps "chmod 600 ~/quantum-agency/.env.production.local"
 
       - name: Run deploy script on VPS
         run: |
-          SSH_OPTS="-i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no"
-          VPS="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-
-          ssh $SSH_OPTS "$VPS" "bash ~/app-deploy/deploy-remote-vps.sh"
+          ssh vps "bash ~/app-staging/deploy-remote-vps.sh"
 
       - name: Health check post-deploy
         run: |
