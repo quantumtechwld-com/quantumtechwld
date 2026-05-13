@@ -59,6 +59,19 @@ Se houver conflito entre refactor desejável e risco operacional atual, o risco 
   - `src/lib/email-templates/payments.ts`
   - `src/lib/email-templates/shared.ts` — layout base e estilos
 
+### 4. Corrigir bug de moeda em `contractCurrency.ts`
+- **Arquivo:** `src/services/finance/contractCurrency.ts`, função `lockContractAmount`
+- **Problema:** `baseCurrency` usa `"EUR"` como fallback fixo. Quando o admin insere um
+  valor em BRL pelo painel e envia proposta, o sistema interpreta o valor como EUR e
+  converte para BRL (ex: 850 → R$4.883,17). Pedido JACOB26-3QX6E foi afetado em
+  produção (13/05/2026) e exigiu correção manual via SQL + reenvio de script tsx.
+- **Solução:** Quando `contractCurrency === "BRL"` e nenhum `baseCurrency` é passado,
+  usar `baseCurrency = contractCurrency` (sem conversão). Expor `baseCurrency` no
+  `PatchBody` do handler `PATCH /api/orders/[id]` para que o admin possa informar
+  explicitamente a moeda de entrada.
+- **Impacto se não corrigido:** qualquer pedido novo criado em BRL pelo painel terá
+  o valor multiplicado pela cotação EUR/BRL.
+
 ---
 
 ## P2 — ALTO

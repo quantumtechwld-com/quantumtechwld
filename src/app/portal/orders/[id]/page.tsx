@@ -71,6 +71,8 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   // Membros de organização sem role ADMIN não veem dados financeiros
   const isOrgMember = !!session.user.organizationId && session.user.orgRole === "MEMBER";
+  // Developer não vê nenhum dado financeiro
+  const isDeveloper = session.user.role === "DEVELOPER";
 
   const estimatedFormatted = order.estimatedValue == null
     ? null
@@ -152,7 +154,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   // Cronograma de pagamentos — exibe todas as parcelas, valores e datas.
   function renderPaymentSchedule() {
-    if (isOrgMember) return null;
+    if (isOrgMember || isDeveloper) return null;
     const insts = order.financial?.installments as Array<{
       id: string;
       sequence: number;
@@ -297,7 +299,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
   }
 
   function renderPendingPayment() {
-    if (isOrgMember) return null;
+    if (isOrgMember || isDeveloper) return null;
     const POST_APPROVAL = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW", "REVIEW_APPROVED", "COMPLETED"];
     if (!POST_APPROVAL.includes(order.status)) return null;
     const financial   = order.financial;
@@ -320,12 +322,12 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
-      {paymentCancelled && (
+      {!isDeveloper && paymentCancelled && (
         <div className="mb-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-300">
           {t("orderPayCancelled")}
         </div>
       )}
-      {order.payment?.status === "FAILED" && (
+      {!isDeveloper && order.payment?.status === "FAILED" && (
         <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {t("orderPayFailed")}
         </div>
@@ -402,7 +404,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
               <h2 className="text-xs font-semibold uppercase tracking-widest text-accent mb-3">
                 {t("orderProposalTitle")}
               </h2>
-              {!isOrgMember && estimatedFormatted && (
+              {!isOrgMember && !isDeveloper && estimatedFormatted && (
                 <p className="mb-2 text-sm text-slate-300">
                   <span className="text-slate-500">{t("orderEstValue")} </span>
                   <span className="font-semibold text-white">{estimatedFormatted}</span>
@@ -511,7 +513,7 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       {renderPendingPayment()}
 
       {/* Fatura: visível quando pagamento confirmado — apenas para admin da org ou dono direto */}
-      {!isOrgMember && (order.financial?.status === "PAID" || order.payment?.status === "PAID") && (
+      {!isOrgMember && !isDeveloper && (order.financial?.status === "PAID" || order.payment?.status === "PAID") && (
         <div className="mt-4">
           <Link
             href={`/portal/orders/${order.id}/invoice`}
@@ -523,14 +525,14 @@ export default async function OrderDetailPage({ params, searchParams }: Readonly
       )}
 
       {/* Avaliação: visível quando concluído e sem rating */}
-      {order.status === "COMPLETED" && !order.rating && (
+      {!isDeveloper && order.status === "COMPLETED" && !order.rating && (
         <div className="mt-6">
           <RatingWidget orderId={order.id} />
         </div>
       )}
 
       {/* Rating já submetido */}
-      {order.rating && (
+      {!isDeveloper && order.rating && (
         <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4">
           <p className="text-xs font-semibold text-yellow-300 mb-1">{t("orderRatingTitle")}</p>
           <p className="text-lg">

@@ -16,11 +16,18 @@ export default async function OrdersPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
+  const isDeveloper = session.user.role === "DEVELOPER";
+
   // Opção C: pedidos próprios OU da empresa (se tiver org)
   const orgId = session.user.organizationId ?? null;
-  const orderWhere = orgId
-    ? { OR: [{ client: { email: session.user.email } }, { organizationId: orgId }] }
-    : { client: { email: session.user.email } };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let orderWhere: Record<string, any> = { client: { email: session.user.email } };
+  if (isDeveloper) {
+    orderWhere = {};
+  } else if (orgId) {
+    orderWhere = { OR: [{ client: { email: session.user.email } }, { organizationId: orgId }] };
+  }
 
   const [me, orders] = await Promise.all([
     prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } }),
@@ -40,6 +47,18 @@ export default async function OrdersPage() {
   const readMap = new Map<string, Date>(reads.map((r) => [r.orderId, r.lastReadAt]));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orderList = orders as any[];
+
+  // Developer: priorizar APPROVED > IN_PRODUCTION > IN_REVIEW, depois por updatedAt
+  const DEVELOPER_PRIORITY = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW"];
+  if (isDeveloper) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    orderList.sort((a: any, b: any) => {
+      const ai = DEVELOPER_PRIORITY.indexOf(a.status);
+      const bi = DEVELOPER_PRIORITY.indexOf(b.status);
+      if (ai !== bi) return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+  }
 
   function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
     const last = readMap.get(orderId);
