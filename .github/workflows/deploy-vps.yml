@@ -14,9 +14,10 @@ name: Deploy → VPS HostGator
 # =============================================================================
 
 on:
-  workflow_dispatch:   # ← Ativação MANUAL enquanto AWS ainda está em produção
-  # push:
-  #   branches: [main]  # ← Descomentar após corte de DNS e validação completa
+  push:
+    branches: [main]    # ← Deploy automático a cada push em main
+  workflow_dispatch:   # ← Mantido para deploy manual quando necessário
+  # (VPS HostGator é a infraestrutura de produção desde 11/05/2026)
 
 jobs:
 
@@ -239,9 +240,7 @@ jobs:
           echo "Aguardando aplicação inicializar..."
           sleep 15
 
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "http://${{ secrets.VPS_HOST }}/api/health" \
-            --max-time 30 || echo "000")
+          HTTP_CODE=$(ssh vps "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health --max-time 30 || echo 000")
 
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✅ Health check OK — aplicação respondendo"
