@@ -1,9 +1,8 @@
-﻿name: Deploy → EC2 Production
+﻿name: Deploy → EC2 (LEGADO - AWS)
 
 on:
-  # Deploy AWS desativado — migração para VPS em andamento
-  # push:
-  #   branches: [main]
+  # DESATIVADO — migração concluída em 11/05/2026, produção no VPS HostGator
+  # NÃO ATIVAR sem necessidade explícita
   workflow_dispatch:
 
 # ─────────────────────────────────────────────────────────────────────────────

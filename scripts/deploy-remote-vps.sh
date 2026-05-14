@@ -54,8 +54,15 @@ export DATABASE_URL
 npx prisma migrate deploy
 
 echo "==> Reiniciando PM2..."
-pm2 reload ecosystem.config.cjs --update-env 2>/dev/null || pm2 start ecosystem.config.cjs
+if pm2 list | grep -q "quantum-agency"; then
+  pm2 reload ecosystem.config.cjs --update-env
+else
+  pm2 start ecosystem.config.cjs
+fi
 pm2 save
+
+# Garante que www-data (Nginx) pode atravessar /home/deploy para servir estáticos do disco
+chmod 751 /home/deploy
 
 echo "==> Deploy concluído com sucesso!"
 pm2 list

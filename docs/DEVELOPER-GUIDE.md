@@ -137,40 +137,41 @@ Antes de qualquer implementação, análise, refactoring, teste, release ou revi
 
 ## 3. Infraestrutura de Produção
 
+> **Migração concluída em 11/05/2026.** Produção agora roda no VPS HostGator. AWS EC2 e RDS ainda estão ativos como backup — desligar após ~18/05/2026.
+
 ```
-Internet → Route 53 → EC2 (Nginx) → PM2 (Next.js cluster) → RDS PostgreSQL
-                                                          → S3 (backups)
-                                                          → Sentry (erros)
-                                                          → Stripe (pagamentos)
+Internet → Route 53 (AWS) → VPS HostGator (Nginx) → PM2 (Next.js cluster) → PostgreSQL local
+                                                                            → Sentry (erros)
+                                                                            → Stripe (pagamentos)
 ```
 
-### EC2
+### VPS HostGator
 
 | Item | Valor |
 |---|---|
-| **Instance ID** | `i-0551c166546ff66e7` |
-| **Tipo** | t3.small (2 vCPU, 2 GB RAM) |
-| **Região** | `sa-east-1` (São Paulo) |
-| **IAM Role** | `QuantumEC2SSMRole` |
-| **Acesso** | Via AWS SSM (sem SSH, sem chave pública) |
-| **App path** | `/home/ubuntu/quantum-agency/` |
-| **Env file** | `/home/ubuntu/quantum-agency/.env.production.local` |
-| **Logs PM2** | `/home/ubuntu/logs/` |
+| **IP** | `69.6.243.198` |
+| **SSH** | `ssh -p 22022 root@69.6.243.198` |
+| **OS** | Ubuntu 22.04 LTS |
+| **App path** | `/home/deploy/quantum-agency/` |
+| **Env file** | `/home/deploy/quantum-agency/.env.production.local` |
+| **Logs PM2** | `pm2 logs quantum-agency` |
 
-### RDS PostgreSQL
+### PostgreSQL (VPS local)
 
 | Item | Valor |
 |---|---|
-| **Endpoint** | `quantum-agency-db.cbkaa6ma6nx6.sa-east-1.rds.amazonaws.com` |
+| **Host** | `localhost` / `127.0.0.1` |
 | **Porta** | `5432` |
-| **Database** | `quantum_devflow` |
-| **User** | `quantum_admin` |
+| **Database** | `quantumagency` |
+| **User** | `quantum` |
+| **Conexão** | `psql -U quantum -d quantumagency -h 127.0.0.1` |
 
 ### Nginx
 
 - Proxy reverso: `443 → localhost:3000`
-- Certificado TLS gerenciado via Let's Encrypt / ACM
+- Certificado TLS gerenciado via Let's Encrypt / certbot
 - Config em: `/etc/nginx/sites-enabled/quantum-agency`
+- Estáticos servidos direto do disco: `alias /home/deploy/quantum-agency/.next/static/`
 
 ### PM2 (`ecosystem.config.cjs`)
 
@@ -184,13 +185,14 @@ min_uptime: "10s",
 
 - **Deploy zero-downtime:** `pm2 reload ecosystem.config.cjs --update-env`
 
-### S3
+### S3 (legado AWS — desativar após 18/05/2026)
 
 | Item | Valor |
 |---|---|
 | **Bucket** | `quantumtechwld-deploy` |
 | **Backups** | `s3://quantumtechwld-deploy/db-backups/` |
-| **Deploy artifacts** | `s3://quantumtechwld-deploy/` |
+
+> Backups do banco agora são feitos localmente no VPS via cron.
 
 ---
 
@@ -658,7 +660,7 @@ Mesmo conjunto de variáveis com valores de produção. Localização: `/home/ub
 
 | Proibido | Motivo |
 |---|---|
-| SSH direto ao EC2 | Acesso é apenas via AWS SSM |
+| SSH direto ao VPS | `ssh -p 22022 root@69.6.243.198` (senha em `Acesso.txt`) |
 | Editar migrations já aplicadas em produção | Corrompe o histórico do banco |
 | `prisma db push` em produção | Bypassa o sistema de migrations |
 | Deletar arquivos de log sem backup | Perde rastreabilidade de incidentes |

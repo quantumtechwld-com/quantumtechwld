@@ -51,7 +51,6 @@ export const config = {
   // para análise estática do Turbopack (String.raw causaria "Invalid segment configuration")
   matcher: [
     // Turbopack requer string literal aqui — String.raw causaria "Invalid segment configuration"
-    // eslint-disable-next-line unicorn/prefer-string-raw
-    "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|webmanifest|xml|txt)$).*)",
   ],
 };

@@ -48,9 +48,11 @@ server {
         proxy_busy_buffers_size    256k;
     }
 
+    # Assets estáticos servidos direto do disco (retorna 404, não 500, para chunks obsoletos)
     location /_next/static/ {
-        proxy_pass http://127.0.0.1:3000;
+        alias /home/deploy/quantum-agency/.next/static/;
         add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
     }
 }
 NGINX

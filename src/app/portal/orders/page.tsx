@@ -45,20 +45,23 @@ export default async function OrdersPage() {
     ? (await db.orderMessageRead.findMany({ where: { userId: me.id }, select: { orderId: true, lastReadAt: true } }) as { orderId: string; lastReadAt: Date }[])
     : [];
   const readMap = new Map<string, Date>(reads.map((r) => [r.orderId, r.lastReadAt]));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orderList = orders as any[];
 
   // Developer: priorizar APPROVED > IN_PRODUCTION > IN_REVIEW, depois por updatedAt
+  // Usa spread para criar novo array (evita mutação in-place e shadowing de variáveis)
   const DEVELOPER_PRIORITY = ["APPROVED", "IN_PRODUCTION", "IN_REVIEW"];
-  if (isDeveloper) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orderList: any[] = isDeveloper
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    orderList.sort((a: any, b: any) => {
-      const ai = DEVELOPER_PRIORITY.indexOf(a.status);
-      const bi = DEVELOPER_PRIORITY.indexOf(b.status);
-      if (ai !== bi) return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    });
-  }
+    ? [...(orders as any[])].sort((orderA: any, orderB: any) => {
+        const indexA = DEVELOPER_PRIORITY.indexOf(orderA.status);
+        const indexB = DEVELOPER_PRIORITY.indexOf(orderB.status);
+        const priorityA = indexA === -1 ? 99 : indexA;
+        const priorityB = indexB === -1 ? 99 : indexB;
+        if (priorityA !== priorityB) return priorityA - priorityB;
+        return new Date(orderB.updatedAt).getTime() - new Date(orderA.updatedAt).getTime();
+      })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    : (orders as any[]);
 
   function unreadCount(orderId: string, messages: { createdAt: Date }[]): number {
     const last = readMap.get(orderId);
