@@ -15,11 +15,11 @@ vi.mock("next-intl", () => ({
   useLocale: () => "pt",
 }));
 
-vi.mock("@/app/portal/login/actions", () => ({
+vi.mock("@/app/portal/(public)/login/actions", () => ({
   sendMagicLink: mocks.sendMagicLink,
 }));
 
-import LoginPage from "@/app/portal/login/page";
+import LoginPage from "@/app/portal/(public)/login/page";
 
 describe("LoginPage", () => {
   beforeEach(() => {

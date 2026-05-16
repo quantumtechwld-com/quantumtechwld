@@ -18,7 +18,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));
 
-import { OrderClientActions } from "@/app/portal/orders/[id]/OrderClientActions";
+import { OrderClientActions } from "@/app/portal/(app)/orders/[id]/OrderClientActions";
 
 describe("OrderClientActions", () => {
   beforeEach(() => {

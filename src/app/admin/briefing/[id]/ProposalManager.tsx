@@ -1,6 +1,6 @@
 "use client";
 
-import ProposalComments from "@/app/portal/briefing/[id]/proposta/ProposalComments";
+import ProposalComments from "@/app/portal/(app)/briefing/[id]/proposta/ProposalComments";
 import {
   PROPOSAL_STATUS_LABEL as STATUS_LABEL,
   PROPOSAL_STATUS_COLOR as STATUS_COLOR,

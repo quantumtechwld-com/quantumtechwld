@@ -52,7 +52,7 @@ vi.mock("next-intl/server", () => ({
   getLocale: async () => "pt-BR",
 }));
 
-vi.mock("@/app/portal/orders/[id]/OrderClientActions", () => ({
+vi.mock("@/app/portal/(app)/orders/[id]/OrderClientActions", () => ({
   OrderClientActions: ({ order }: { order: { id: string } }) => <div>OrderClientActionsMock:{order.id}</div>,
 }));
 
@@ -60,7 +60,7 @@ vi.mock("@/components/MessagesPanel", () => ({
   MessagesPanel: ({ orderId }: { orderId: string }) => <div>MessagesPanelMock:{orderId}</div>,
 }));
 
-vi.mock("@/app/portal/orders/[id]/PayOrderButton", () => ({
+vi.mock("@/app/portal/(app)/orders/[id]/PayOrderButton", () => ({
   PayOrderButton: ({ orderId }: { orderId: string }) => <div>PayOrderButtonMock:{orderId}</div>,
 }));
 
@@ -70,7 +70,7 @@ vi.mock("@/components/PixPaymentPanel", () => ({
   ),
 }));
 
-vi.mock("@/app/portal/orders/[id]/RatingWidget", () => ({
+vi.mock("@/app/portal/(app)/orders/[id]/RatingWidget", () => ({
   RatingWidget: ({ orderId }: { orderId: string }) => <div>RatingWidgetMock:{orderId}</div>,
 }));
 
@@ -82,7 +82,7 @@ vi.mock("@/lib/currency", () => ({
   normalizeSupportedCurrency: mocks.normalizeSupportedCurrency,
 }));
 
-import OrderDetailPage from "@/app/portal/orders/[id]/page";
+import OrderDetailPage from "@/app/portal/(app)/orders/[id]/page";
 
 describe("OrderDetailPage", () => {
   beforeEach(() => {

@@ -16,7 +16,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
 }));
 
-import PaymentSuccessPage from "@/app/portal/orders/[id]/payment/success/page";
+import PaymentSuccessPage from "@/app/portal/(app)/orders/[id]/payment/success/page";
 
 describe("PaymentSuccessPage", () => {
   it("renderiza mensagem de sucesso e link de retorno ao pedido", async () => {

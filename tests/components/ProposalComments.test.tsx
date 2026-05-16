@@ -16,7 +16,7 @@ vi.mock("next-intl", () => ({
   useLocale: () => "pt-PT",
 }));
 
-import ProposalComments from "@/app/portal/briefing/[id]/proposta/ProposalComments";
+import ProposalComments from "@/app/portal/(app)/briefing/[id]/proposta/ProposalComments";
 
 describe("ProposalComments", () => {
   beforeEach(() => {

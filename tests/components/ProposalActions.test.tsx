@@ -18,7 +18,7 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-import ProposalActions from "@/app/portal/briefing/[id]/proposta/ProposalActions";
+import ProposalActions from "@/app/portal/(app)/briefing/[id]/proposta/ProposalActions";
 
 describe("ProposalActions", () => {
   beforeEach(() => {

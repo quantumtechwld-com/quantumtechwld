@@ -16,7 +16,7 @@ vi.mock("next-intl", () => ({
   useLocale: () => "pt-BR",
 }));
 
-import { PayOrderButton } from "@/app/portal/orders/[id]/PayOrderButton";
+import { PayOrderButton } from "@/app/portal/(app)/orders/[id]/PayOrderButton";
 
 describe("PayOrderButton", () => {
   beforeEach(() => {

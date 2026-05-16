@@ -20,7 +20,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-import { RatingWidget } from "@/app/portal/orders/[id]/RatingWidget";
+import { RatingWidget } from "@/app/portal/(app)/orders/[id]/RatingWidget";
 
 describe("RatingWidget", () => {
   beforeEach(() => {

@@ -1,0 +1,8 @@
+Saúde	Doctor Appointment System	- Papéis: Sistema multi-nível (Paciente/Médico/Admin)
+- Agendamento: Busca e reserva de consultas
+- Arquivos: Upload de imagens
+
+
+Serviços Locais	Smart Local Life	- IA: Recomendação inteligente de prestadores (Google Gemini)
+- Geolocalização: Busca baseada em localização
+- Marketplace: Sistema de avaliações e agendamentos

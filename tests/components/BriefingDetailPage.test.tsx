@@ -46,13 +46,13 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
 }));
 
-vi.mock("@/app/portal/briefing/[id]/ScopeGenerator", () => ({
+vi.mock("@/app/portal/(app)/briefing/[id]/ScopeGenerator", () => ({
   default: ({ briefingId, initialScope }: { briefingId: string; initialScope: unknown }) => (
     <div>ScopeGeneratorMock:{briefingId}:{initialScope ? "with-scope" : "empty"}</div>
   ),
 }));
 
-import BriefingDetailPage from "@/app/portal/briefing/[id]/page";
+import BriefingDetailPage from "@/app/portal/(app)/briefing/[id]/page";
 
 describe("BriefingDetailPage", () => {
   beforeEach(() => {

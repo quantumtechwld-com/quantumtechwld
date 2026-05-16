@@ -20,7 +20,7 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-import { ProfileForm } from "@/app/portal/profile/ProfileForm";
+import { ProfileForm } from "@/app/portal/(app)/profile/ProfileForm";
 
 describe("ProfileForm", () => {
   beforeEach(() => {

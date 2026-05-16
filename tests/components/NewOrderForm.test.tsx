@@ -22,7 +22,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-import { NewOrderForm } from "@/app/portal/orders/new/NewOrderForm";
+import { NewOrderForm } from "@/app/portal/(app)/orders/new/NewOrderForm";
 
 describe("NewOrderForm", () => {
   beforeEach(() => {

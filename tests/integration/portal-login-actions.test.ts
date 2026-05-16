@@ -24,7 +24,7 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-import { sendMagicLink } from "@/app/portal/login/actions";
+import { sendMagicLink } from "@/app/portal/(public)/login/actions";
 
 describe("sendMagicLink", () => {
   beforeEach(() => {

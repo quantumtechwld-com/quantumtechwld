@@ -54,7 +54,7 @@ vi.mock("next-intl/server", () => ({
   getLocale: async () => "pt-BR",
 }));
 
-import OrdersPage from "@/app/portal/orders/page";
+import OrdersPage from "@/app/portal/(app)/orders/page";
 
 describe("OrdersPage", () => {
   beforeEach(() => {

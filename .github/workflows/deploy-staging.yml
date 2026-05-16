@@ -1,0 +1,243 @@
+name: Deploy → Staging (VPS)
+
+# =============================================================================
+# PIPELINE DE DEPLOY PARA AMBIENTE DE STAGING
+#
+# Trigger: push na branch "staging"
+# Servidor: mesmo VPS HostGator (69.6.243.198)
+# Porta da app: 3001  (produção usa 3000)
+# Banco: quantumagency_staging  (isolado de produção)
+# URL: https://staging.quantumtechwld.com
+#
+# GitHub Environment: "staging"
+#  → Configurar em: Settings → Environments → staging
+#  → Adicionar os mesmos secrets de produção com valores de teste/staging:
+#       DATABASE_URL          → postgresql://quantum:SENHA@localhost:5432/quantumagency_staging
+#       AUTH_URL              → https://staging.quantumtechwld.com
+#       STRIPE_SECRET_KEY     → sk_test_... (chave de teste)
+#       STRIPE_WEBHOOK_SECRET → whsec_... (webhook de teste)
+#       VPS_HOST / VPS_PORT / VPS_USER / VPS_SSH_KEY → mesmos do prod
+#       (demais secrets podem ser os mesmos ou ter valores de sandbox)
+# =============================================================================
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+jobs:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # CAMADA 1 — Qualidade & Segurança
+  # ──────────────────────────────────────────────────────────────────────────
+  quality:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint (security + no-secrets)
+        run: npx eslint src/app/api/ src/lib/ --max-warnings=0
+
+      - name: npm audit (bloqueia em Critical)
+        run: npm audit --audit-level=critical
+
+      - name: Tests with coverage
+        run: npm run test:coverage
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # CAMADA 2 — Build & Empacotamento
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build Next.js (staging)
+        env:
+          DATABASE_URL:                ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET:                 ${{ secrets.AUTH_SECRET }}
+          AUTH_URL:                    ${{ secrets.AUTH_URL }}
+          EMAIL_SERVER_HOST:           ${{ secrets.EMAIL_SERVER_HOST }}
+          EMAIL_SERVER_PORT:           ${{ secrets.EMAIL_SERVER_PORT }}
+          EMAIL_SERVER_USER:           ${{ secrets.EMAIL_SERVER_USER }}
+          EMAIL_SERVER_PASSWORD:       ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          EMAIL_FROM:                  ${{ secrets.EMAIL_FROM }}
+          EMAIL_ADMIN:                 ${{ secrets.EMAIL_ADMIN }}
+          ADMIN_EMAIL:                 ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_BASE_URL:              ${{ secrets.EMAIL_BASE_URL }}
+          STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_MOCK:                 "true"
+          GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
+          N8N_WEBHOOK_URL:             ${{ secrets.N8N_WEBHOOK_URL }}
+          NEXT_PUBLIC_SENTRY_DSN:      ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_PIX_KEY:         ${{ secrets.NEXT_PUBLIC_PIX_KEY }}
+          NEXT_PUBLIC_PIX_OWNER:       ${{ secrets.NEXT_PUBLIC_PIX_OWNER }}
+          NEXT_PUBLIC_PIX_BANK:        ${{ secrets.NEXT_PUBLIC_PIX_BANK }}
+          NODE_ENV:                    production
+        run: npm run build
+
+      - name: Create deploy package
+        run: |
+          tar -czf app.tar.gz \
+            --exclude='.next/cache' \
+            .next \
+            public \
+            package.json \
+            package-lock.json \
+            next.config.* \
+            prisma \
+            prisma.config.ts \
+            ecosystem.staging.config.cjs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-package
+          path: app.tar.gz
+          retention-days: 1
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # CAMADA 3 — Deploy VPS via SSH (path isolado do prod)
+  # ──────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy → Staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-package
+          path: ./pkg
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          cat > ~/.ssh/config << 'SSHEOF'
+          Host vps
+            HostName ${{ secrets.VPS_HOST }}
+            Port ${{ secrets.VPS_PORT }}
+            User ${{ secrets.VPS_USER }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          SSHEOF
+          chmod 600 ~/.ssh/config
+
+          ssh-keyscan -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Generate .env.production.local (staging)
+        env:
+          DATABASE_URL:                ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET:                 ${{ secrets.AUTH_SECRET }}
+          AUTH_URL:                    ${{ secrets.AUTH_URL }}
+          EMAIL_SERVER_HOST:           ${{ secrets.EMAIL_SERVER_HOST }}
+          EMAIL_SERVER_PORT:           ${{ secrets.EMAIL_SERVER_PORT }}
+          EMAIL_SERVER_USER:           ${{ secrets.EMAIL_SERVER_USER }}
+          EMAIL_SERVER_PASSWORD:       ${{ secrets.EMAIL_SERVER_PASSWORD }}
+          EMAIL_FROM:                  ${{ secrets.EMAIL_FROM }}
+          EMAIL_ADMIN:                 ${{ secrets.EMAIL_ADMIN }}
+          ADMIN_EMAIL:                 ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_BASE_URL:              ${{ secrets.EMAIL_BASE_URL }}
+          STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
+          N8N_WEBHOOK_URL:             ${{ secrets.N8N_WEBHOOK_URL }}
+          NEXT_PUBLIC_SENTRY_DSN:      ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_PIX_KEY:         ${{ secrets.NEXT_PUBLIC_PIX_KEY }}
+          NEXT_PUBLIC_PIX_OWNER:       ${{ secrets.NEXT_PUBLIC_PIX_OWNER }}
+          NEXT_PUBLIC_PIX_BANK:        ${{ secrets.NEXT_PUBLIC_PIX_BANK }}
+        run: |
+          printf 'NODE_ENV=production\n'                                           > env.production.local
+          printf 'DATABASE_URL=%s\n'          "$DATABASE_URL"                    >> env.production.local
+          printf 'AUTH_SECRET=%s\n'           "$AUTH_SECRET"                     >> env.production.local
+          printf 'AUTH_URL=%s\n'              "$AUTH_URL"                        >> env.production.local
+          printf 'EMAIL_SERVER_HOST=%s\n'     "$EMAIL_SERVER_HOST"               >> env.production.local
+          printf 'EMAIL_SERVER_PORT=%s\n'     "$EMAIL_SERVER_PORT"               >> env.production.local
+          printf 'EMAIL_SERVER_USER=%s\n'     "$EMAIL_SERVER_USER"               >> env.production.local
+          printf 'EMAIL_SERVER_PASSWORD=%s\n' "$EMAIL_SERVER_PASSWORD"           >> env.production.local
+          printf 'EMAIL_FROM=%s\n'            "$EMAIL_FROM"                      >> env.production.local
+          printf 'EMAIL_ADMIN=%s\n'           "$EMAIL_ADMIN"                     >> env.production.local
+          printf 'ADMIN_EMAIL=%s\n'           "$ADMIN_EMAIL"                     >> env.production.local
+          printf 'EMAIL_BASE_URL=%s\n'        "$EMAIL_BASE_URL"                  >> env.production.local
+          printf 'STRIPE_SECRET_KEY=%s\n'     "$STRIPE_SECRET_KEY"               >> env.production.local
+          printf 'STRIPE_WEBHOOK_SECRET=%s\n' "$STRIPE_WEBHOOK_SECRET"           >> env.production.local
+          printf 'STRIPE_MOCK=true\n'                                             >> env.production.local
+          printf 'GEMINI_API_KEY=%s\n'        "$GEMINI_API_KEY"                  >> env.production.local
+          printf 'N8N_WEBHOOK_URL=%s\n'       "$N8N_WEBHOOK_URL"                 >> env.production.local
+          printf 'NEXT_PUBLIC_SENTRY_DSN=%s\n' "$NEXT_PUBLIC_SENTRY_DSN"         >> env.production.local
+          printf 'NEXT_PUBLIC_PIX_KEY=%s\n'    "$NEXT_PUBLIC_PIX_KEY"            >> env.production.local
+          printf 'NEXT_PUBLIC_PIX_OWNER=%s\n'  "$NEXT_PUBLIC_PIX_OWNER"          >> env.production.local
+          printf 'NEXT_PUBLIC_PIX_BANK=%s\n'   "$NEXT_PUBLIC_PIX_BANK"           >> env.production.local
+          chmod 600 env.production.local
+
+      - name: Send deploy package to VPS (staging path)
+        run: |
+          ssh vps "mkdir -p ~/app-staging-pkg ~/quantum-agency-staging"
+
+          scp pkg/app.tar.gz                    vps:~/app-staging-pkg/app.tar.gz
+          scp env.production.local              vps:~/quantum-agency-staging/.env.production.local
+          scp scripts/deploy-remote-staging.sh  vps:~/app-staging-pkg/deploy-remote-staging.sh
+
+          ssh vps "chmod 600 ~/quantum-agency-staging/.env.production.local"
+
+      - name: Run deploy script on VPS (staging)
+        run: |
+          ssh vps "bash ~/app-staging-pkg/deploy-remote-staging.sh"
+
+      - name: Health check post-deploy (porta 3001)
+        run: |
+          echo "Aguardando staging inicializar..."
+          sleep 15
+
+          HTTP_CODE=$(ssh vps "curl -s -o /dev/null -w '%{http_code}' http://localhost:3001/api/health --max-time 30" || echo "000")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Health check OK — staging respondendo na porta 3001"
+          else
+            echo "❌ Health check FALHOU — HTTP $HTTP_CODE"
+            ssh vps "pm2 logs quantum-agency-staging --lines 30 --nostream" || true
+            exit 1
+          fi

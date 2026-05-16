@@ -48,17 +48,17 @@ vi.mock("@/lib/currency", () => ({
   formatCurrencyRangeByCode: mocks.formatCurrencyRangeByCode,
 }));
 
-vi.mock("@/app/portal/briefing/[id]/proposta/ProposalActions", () => ({
+vi.mock("@/app/portal/(app)/briefing/[id]/proposta/ProposalActions", () => ({
   default: ({ proposalId, briefingId }: { proposalId: string; briefingId: string }) => (
     <div>ProposalActionsMock:{proposalId}:{briefingId}</div>
   ),
 }));
 
-vi.mock("@/app/portal/briefing/[id]/proposta/ProposalComments", () => ({
+vi.mock("@/app/portal/(app)/briefing/[id]/proposta/ProposalComments", () => ({
   default: ({ proposalId }: { proposalId: string }) => <div>ProposalCommentsMock:{proposalId}</div>,
 }));
 
-import ProposalPage from "@/app/portal/briefing/[id]/proposta/page";
+import ProposalPage from "@/app/portal/(app)/briefing/[id]/proposta/page";
 
 describe("ProposalPage", () => {
   beforeEach(() => {

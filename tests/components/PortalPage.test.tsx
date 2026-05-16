@@ -54,7 +54,7 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-import PortalPage from "@/app/portal/page";
+import PortalPage from "@/app/portal/(app)/page";
 
 describe("PortalPage", () => {
   beforeEach(() => {

@@ -44,11 +44,11 @@ vi.mock("next-intl/server", () => ({
   getLocale: async () => "pt-PT",
 }));
 
-vi.mock("@/app/portal/orders/[id]/invoice/PrintButton", () => ({
+vi.mock("@/app/portal/(app)/orders/[id]/invoice/PrintButton", () => ({
   PrintButton: () => <button type="button">PrintButtonMock</button>,
 }));
 
-import InvoicePage from "@/app/portal/orders/[id]/invoice/page";
+import InvoicePage from "@/app/portal/(app)/orders/[id]/invoice/page";
 
 describe("InvoicePage", () => {
   beforeEach(() => {

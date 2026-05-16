@@ -21,7 +21,7 @@ vi.mock("@/app/admin/briefing/[id]/useProposalActions", () => ({
   useProposalActions: vi.fn(),
 }));
 
-vi.mock("@/app/portal/briefing/[id]/proposta/ProposalComments", () => ({
+vi.mock("@/app/portal/(app)/briefing/[id]/proposta/ProposalComments", () => ({
   default: () => <div>ProposalCommentsMock</div>,
 }));
 

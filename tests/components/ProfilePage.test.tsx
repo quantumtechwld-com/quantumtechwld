@@ -44,13 +44,13 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
 }));
 
-vi.mock("@/app/portal/profile/ProfileForm", () => ({
+vi.mock("@/app/portal/(app)/profile/ProfileForm", () => ({
   ProfileForm: ({ user }: { user: { email: string | null; company: string | null } }) => (
     <div>ProfileFormMock:{user.email}:{user.company}</div>
   ),
 }));
 
-import ProfilePage from "@/app/portal/profile/page";
+import ProfilePage from "@/app/portal/(app)/profile/page";
 
 describe("ProfilePage", () => {
   beforeEach(() => {

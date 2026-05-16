@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import PortalShell from "@/components/portal/PortalShell";
 
 const VALID_LOCALES = ["pt", "en", "es"] as const;
 type Locale = (typeof VALID_LOCALES)[number];
@@ -84,9 +83,7 @@ export default async function PortalLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <PortalShell>
-        {children}
-      </PortalShell>
+      {children}
     </NextIntlClientProvider>
   );
 }
