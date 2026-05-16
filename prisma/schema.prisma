@@ -80,7 +80,7 @@ model User {
   status         UserStatus           @default(PENDING)
   phone          String?
   company        String?
-  locale         String               @default("pt")
+  locale         String?
   billingCurrency String?
   lastLoginAt    DateTime?
   organizationId String?

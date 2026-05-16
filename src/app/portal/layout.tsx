@@ -35,7 +35,7 @@ export default async function PortalLayout({
 }>) {
   const session = await auth();
 
-  let locale: Locale = "pt";
+  let locale: Locale;
 
   if (session?.user?.email) {
     const user = await prisma.user.findUnique({
@@ -59,19 +59,31 @@ export default async function PortalLayout({
         });
       }
     } else if (isValid(dbLocale)) {
+      // locale explicitamente salvo na DB (via switcher)
       locale = dbLocale;
     } else {
-      // 2. Sem cookie nem locale na DB — detectar pelo Accept-Language
+      // 2. locale = null (novo usuário) ou inválido — detectar pelo Accept-Language
       const headersList = await headers();
       const acceptLang = headersList.get("accept-language") ?? "";
       const detected = detectLocaleFromHeader(acceptLang);
       locale = detected;
-      if (detected !== "pt") {
-        await prisma.user.update({
-          where: { email: session.user.email },
-          data: { locale: detected },
-        });
-      }
+      // Persistir somente se diferente de null para não sobrescrever futura escolha explícita
+      await prisma.user.update({
+        where: { email: session.user.email },
+        data: { locale: detected },
+      });
+    }
+  } else {
+    // Visitante não autenticado (páginas públicas: /portal/contact, /portal/contato, /portal/contacto)
+    // Usa NEXT_LOCALE cookie (definido pelo LangSwitcher) ou detecta pelo Accept-Language
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
+    if (isValid(cookieLocale)) {
+      locale = cookieLocale;
+    } else {
+      const headersList = await headers();
+      const acceptLang = headersList.get("accept-language") ?? "";
+      locale = detectLocaleFromHeader(acceptLang);
     }
   }
 
