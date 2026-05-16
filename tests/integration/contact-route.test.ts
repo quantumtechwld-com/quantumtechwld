@@ -115,7 +115,56 @@ describe("POST /api/contact", () => {
     expect(response.status).toBe(200);
     expect(body.ok).toBe(true);
     expect(mocks.contactCreate).toHaveBeenCalledTimes(1);
-    expect(mocks.sendMail).toHaveBeenCalledTimes(1);
+    // 2 emails: notificação ao admin + confirmação ao utilizador
+    expect(mocks.sendMail).toHaveBeenCalledTimes(2);
+    expect(mocks.sendMail).toHaveBeenCalledWith(expect.objectContaining({ to: "admin@example.com" }));
+    expect(mocks.sendMail).toHaveBeenCalledWith(expect.objectContaining({ to: "joao@example.com" }));
+  });
+
+  it("envia email ao admin com assunto em ingles quando locale e en", async () => {
+    const request = new NextRequest("http://localhost/api/contact", {
+      method: "POST",
+      body: JSON.stringify({
+        name: "John",
+        email: "john@example.com",
+        subject: "Pricing question",
+        message: "How much does it cost?",
+        locale: "en",
+      }),
+      headers: { "content-type": "application/json", "x-forwarded-for": "127.0.0.2" },
+    });
+
+    await POST(request);
+
+    expect(mocks.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "[Contact] Pricing question — John" })
+    );
+    expect(mocks.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "✅ We received your message" })
+    );
+  });
+
+  it("envia email ao admin com assunto em espanhol quando locale e es", async () => {
+    const request = new NextRequest("http://localhost/api/contact", {
+      method: "POST",
+      body: JSON.stringify({
+        name: "Juan",
+        email: "juan@example.com",
+        subject: "Consulta de precios",
+        message: "¿Cuánto cuesta?",
+        locale: "es",
+      }),
+      headers: { "content-type": "application/json", "x-forwarded-for": "127.0.0.3" },
+    });
+
+    await POST(request);
+
+    expect(mocks.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "[Contacto] Consulta de precios — Juan" })
+    );
+    expect(mocks.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "✅ Recibimos tu mensaje" })
+    );
   });
 
   it("retorna sucesso mesmo quando o email falha", async () => {
