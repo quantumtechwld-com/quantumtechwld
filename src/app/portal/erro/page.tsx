@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { getContactUrl } from "@/lib/contact-url";
 
 type SearchParams = Promise<Record<string, string | undefined>>;
 
@@ -11,6 +12,7 @@ export default async function AuthErrorPage({
   const reason = sp.reason;
   const errorKey = sp.error ?? "Default";
   const t = await getTranslations("portal");
+  const locale = await getLocale();
 
   const reasonErrors: Record<string, { title: string; body: string }> = {
     pending: { title: t("erroPendingTitle"), body: t("erroPendingBody") },
@@ -44,7 +46,7 @@ export default async function AuthErrorPage({
           </Link>
           {(reason === "pending" || reason === "suspended") && (
             <Link
-              href="/portal/contato"
+              href={getContactUrl(locale)}
               className="text-sm text-slate-400 hover:text-accent transition-colors"
             >
               {t("navContact")}

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 
 export function ContactForm() {
   const t = useTranslations("portal");
+  const locale = useLocale();
 
   const [name,    setName]    = useState("");
   const [email,   setEmail]   = useState("");
@@ -32,7 +34,7 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method:  "POST",
         headers: { "Content-Type": "application/json", "x-csrf-token": csrf },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), subject: subject.trim(), message: message.trim() }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), subject: subject.trim(), message: message.trim(), locale }),
       });
 
       if (!res.ok) {
@@ -58,12 +60,12 @@ export function ContactForm() {
         </div>
         <h2 className="text-xl font-bold text-white mb-2">{t("contactSuccessTitle")}</h2>
         <p className="text-sm text-slate-400 mb-6">{t("contactSuccessBodyPublic")}</p>
-        <a
+        <Link
           href="/"
           className="rounded-xl bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
         >
           {t("contactSuccessBackHome")}
-        </a>
+        </Link>
       </div>
     );
   }

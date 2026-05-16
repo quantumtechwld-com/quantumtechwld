@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ContactForm } from "../contact/ContactForm";
+import { ContactForm } from "./ContactForm";
 
 export default async function ContatoPage() {
   const t = await getTranslations("portal");

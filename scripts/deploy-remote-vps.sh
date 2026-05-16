@@ -42,7 +42,8 @@ cd "$APP_DIR"
 rm -rf node_modules
 
 # O .next/ já foi compilado no GitHub Actions. Aqui instala apenas runtime deps.
-NODE_OPTIONS="--max-old-space-size=384" npm install --omit=dev --prefer-offline
+# --prefer-offline removido: causa falha quando o cache npm local está vazio após rm -rf node_modules
+NODE_OPTIONS="--max-old-space-size=384" npm install --omit=dev
 
 echo "==> Gerando Prisma Client..."
 npx prisma generate

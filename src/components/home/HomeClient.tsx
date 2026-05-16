@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { Zap, BrainCircuit, Bot, Rocket } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import NextLink from "next/link";
+import { getContactUrl } from "@/lib/contact-url";
 import { Link } from "@/i18n/navigation";
 import GsapAnimations from "./GsapAnimations";
 import LogoAnimated from "./LogoAnimated";
@@ -171,12 +173,12 @@ export default function HomeClient() {
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <LangSwitcher current={locale} />
-            <Link
+            <NextLink
               href="/portal"
               className="rounded-lg border border-white/15 px-3 py-2 text-xs font-bold text-slate-300 transition-all hover:border-white/30 hover:text-white sm:px-4 sm:text-sm"
             >
               {t("nav.clientArea")}
-            </Link>
+            </NextLink>
             <a
               href="#lead"
               className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-light hover:shadow-[0_0_20px_var(--accent-glow)] sm:px-5 sm:text-sm"
@@ -609,12 +611,12 @@ export default function HomeClient() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/portal/contato"
+            <NextLink
+              href={getContactUrl(locale)}
               className="mt-6 inline-block text-sm text-slate-400 hover:text-accent transition-colors"
             >
               {t("lead.quickContact")}
-            </Link>
+            </NextLink>
           </div>
           <div data-gsap="lead-form">
             <LeadForm />

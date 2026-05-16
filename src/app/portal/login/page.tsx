@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { sendMagicLink } from "./actions";
+import { getContactUrl } from "@/lib/contact-url";
 import { MailCheck } from "lucide-react";
 
 export default function LoginPage() {
   const t = useTranslations("portal");
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -70,7 +72,7 @@ export default function LoginPage() {
                     {errorMsg}
                   </p>
                   <a
-                    href="/portal/contato"
+                    href={getContactUrl(locale)}
                     className="mt-2 block text-center text-xs text-accent hover:text-accent-light transition-colors"
                   >
                     {t("loginContactLink")}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ContactForm } from "../contact/ContactForm";
 
-export default async function ContatoPage() {
+export default async function ContactoPage() {
   const t = await getTranslations("portal");
 
   return (

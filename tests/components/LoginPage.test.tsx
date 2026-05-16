@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "pt",
 }));
 
 vi.mock("@/app/portal/login/actions", () => ({

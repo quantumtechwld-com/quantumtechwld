@@ -48,7 +48,7 @@ export const authConfig = {
         ?.nextUrl?.origin ?? "";
 
       // Páginas públicas do portal — sempre acessíveis
-      const isPublicPortal = ["/portal/login", "/portal/verificar", "/portal/erro", "/portal/contato"]
+      const isPublicPortal = ["/portal/login", "/portal/verificar", "/portal/erro", "/portal/contact", "/portal/contato", "/portal/contacto"]
         .some((p) => pathname.startsWith(p));
       if (isPublicPortal) return true;
 
