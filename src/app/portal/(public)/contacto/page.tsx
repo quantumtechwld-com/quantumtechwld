@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 import { ContactForm } from "../contact/ContactForm";
 
 export default async function ContactoPage() {
+  setRequestLocale("es");
   const t = await getTranslations("portal");
+  const messages = (await import("../../../../../messages/es.json")).default;
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
@@ -16,7 +19,9 @@ export default async function ContactoPage() {
       </div>
 
       <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-        <ContactForm />
+        <NextIntlClientProvider locale="es" messages={messages}>
+          <ContactForm />
+        </NextIntlClientProvider>
       </div>
     </main>
   );
