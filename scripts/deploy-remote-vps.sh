@@ -18,11 +18,23 @@ command -v pm2  || { echo "ERRO: pm2 não encontrado"; exit 1; }
 echo "==> Preparando diretórios..."
 mkdir -p "$APP_DIR" "$STAGING"
 
-echo "==> Corrigindo permissões..."
-chown -R "$APP_USER:$APP_USER" "$APP_DIR" 2>/dev/null || true
+echo "==> Corrigindo permissões (inclui arquivos root-owned de deploys manuais)..."
+chown -R "$APP_USER:$APP_USER" "$APP_DIR" 2>/dev/null \
+  || sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR" 2>/dev/null \
+  || echo "AVISO: chown falhou — tentando remover com sudo diretamente"
 
 echo "==> Limpando build anterior (evita conflito de ownership)..."
 rm -rf \
+  "$APP_DIR/.next" \
+  "$APP_DIR/prisma" \
+  "$APP_DIR/public" \
+  "$APP_DIR/package.json" \
+  "$APP_DIR/package-lock.json" \
+  "$APP_DIR/next.config.ts" \
+  "$APP_DIR/next.config.js" \
+  "$APP_DIR/prisma.config.ts" \
+  "$APP_DIR/ecosystem.config.cjs" \
+|| sudo rm -rf \
   "$APP_DIR/.next" \
   "$APP_DIR/prisma" \
   "$APP_DIR/public" \
