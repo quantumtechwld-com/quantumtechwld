@@ -34,10 +34,14 @@ cd "$STAGING/unpack"
 NODE_OPTIONS="--max-old-space-size=384" npm install --omit=dev
 
 echo "==> Swap atômico de .next/ (zero-downtime)..."
-# 1. Renomear o .next antigo para .next-old (operação rápida no mesmo FS)
-# 2. Mover o novo .next para $APP_DIR (igualmente rápida, mesmo FS)
-# O processo PM2 em execução continua servindo de $APP_DIR/.next até pm2 reload
-rm -rf "$APP_DIR/.next-old" 2>/dev/null || true
+# 1. Arquivar .next-old anterior (se existir) com timestamp
+#    mv (rename) não precisa de permissão nos filhos — apenas no diretório pai.
+#    Isso evita falha ao tentar rm -rf arquivos root-owned criados pelo PM2 (cache/).
+if [ -d "$APP_DIR/.next-old" ]; then
+  mv "$APP_DIR/.next-old" "$APP_DIR/.next-gc-$(date +%s)" 2>/dev/null || true
+fi
+# 2. Renomear o .next atual para .next-old (rápido, mesmo FS)
+# 3. Mover o novo .next para $APP_DIR
 [ -d "$APP_DIR/.next" ] && mv "$APP_DIR/.next" "$APP_DIR/.next-old"
 mv "$STAGING/unpack/.next" "$APP_DIR/.next"
 
