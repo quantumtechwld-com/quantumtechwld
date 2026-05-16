@@ -67,12 +67,17 @@ export DATABASE_URL
 npx prisma migrate deploy
 
 echo "==> Reiniciando PM2..."
-if pm2 list | grep -q "quantum-agency"; then
-  pm2 reload ecosystem.config.cjs --update-env
+# PM2 pode estar rodando sob root — tenta sem sudo primeiro, fallback para sudo
+if pm2 list 2>/dev/null | grep -q "quantum-agency"; then
+  pm2 reload ecosystem.config.cjs --update-env \
+    || sudo pm2 reload ecosystem.config.cjs --update-env
+elif sudo pm2 list 2>/dev/null | grep -q "quantum-agency"; then
+  sudo pm2 reload ecosystem.config.cjs --update-env
 else
-  pm2 start ecosystem.config.cjs
+  pm2 start ecosystem.config.cjs \
+    || sudo pm2 start ecosystem.config.cjs
 fi
-pm2 save
+pm2 save 2>/dev/null || sudo pm2 save
 
 # Garante que www-data (Nginx) pode atravessar /home/deploy para servir estáticos do disco
 chmod 751 /home/deploy
