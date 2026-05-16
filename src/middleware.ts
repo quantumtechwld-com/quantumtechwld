@@ -21,11 +21,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Injeta x-pathname nos request headers para que Server Components
+  // (ex: portal/layout.tsx) possam ler o pathname atual sem acesso ao URL.
+  // Padrão documentado: https://nextjs.org/docs/app/building-your-application/routing/middleware#setting-headers
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+
   let response: Response | NextResponse;
 
   if (isAuthRoute) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    response = await (auth as any)(request) ?? NextResponse.next();
+    const authResult = await (auth as any)(request) as NextResponse | Response | undefined | null;
+    if (authResult) {
+      // Auth retornou redirect (login) ou erro — encaminhar sem modificação
+      response = authResult;
+    } else {
+      // Auth liberou o acesso — encaminhar com x-pathname injetado
+      response = NextResponse.next({ request: { headers: requestHeaders } });
+    }
   } else {
     // Tudo o resto (landing page e rotas públicas) → i18n routing
     response = intlMiddleware(request);
