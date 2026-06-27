@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         : "—";
       sendMail({
         to: adminEmail,
-        subject: `🚀 Novo Lead: ${payload.name} — ${payload.service ?? payload.projectType}`,
+        subject: `Novo Lead: ${payload.name} — ${payload.service ?? payload.projectType}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
             ${emailLogoHeader("light")}
