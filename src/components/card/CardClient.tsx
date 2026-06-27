@@ -21,7 +21,7 @@ const CONTACT = {
   name: "QuantumTech",
   role: "Software Development Agency",
   email: "rleandro@quantumtechwld.com",
-  whatsapp: "https://wa.me/5511999999999",
+  whatsapp: "https://wa.me/351912091197",
   linkedin: "https://www.linkedin.com/company/quantumtech-software-agency",
   website: "https://quantumtechwld.com",
   cardUrl: "https://quantumtechwld.com/card",
