@@ -62,10 +62,13 @@
     "heading": "Projetos que entregamos",
     "saasLabel": "SaaS B2B",
     "saasTitle": "Portal de Gestão Empresarial",
+    "saasDesc": "Centralize e otimize a operação do seu negócio com um portal sob medida. Ele oferece a performance e a escalabilidade que seu B2B precisa para tomar decisões mais ágeis e integrar seus processos em uma única plataforma.",
     "ecommerceLabel": "E-commerce",
     "ecommerceTitle": "Plataforma de Vendas Omnichannel",
+    "ecommerceDesc": "Venda em todos os canais com uma experiência unificada. Utilize uma plataforma robusta com integração de pagamentos para garantir alta performance, segurança e conversão, do checkout ao pós-venda, com gerenciamento inteligente via Redis.",
     "aiLabel": "IA + Automação",
-    "aiTitle": "Agente de Atendimento Inteligente"
+    "aiTitle": "Agente de Atendimento Inteligente",
+    "aiDesc": "Revolucione o suporte ao cliente com um agente autônomo que aprende e resolve. Use o poder da OpenAI e RAG para oferecer respostas precisas e contextuais 24/7, automatizando seu atendimento e liberando sua equipe para tarefas estratégicas."
   },
   "cta": {
     "label": "Pronto para começar?",

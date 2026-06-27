@@ -62,10 +62,13 @@
     "heading": "Projects we've delivered",
     "saasLabel": "SaaS B2B",
     "saasTitle": "Business Management Portal",
+    "saasDesc": "Centralize and optimize your business operations with a tailor-made portal. It delivers the performance and scalability your B2B needs to make faster decisions and integrate your processes into a single platform.",
     "ecommerceLabel": "E-commerce",
     "ecommerceTitle": "Omnichannel Sales Platform",
+    "ecommerceDesc": "Sell across all channels with a unified experience. Use a robust platform with payment integration to ensure high performance, security and conversion — from checkout to post-sale — with intelligent Redis-powered management.",
     "aiLabel": "AI + Automation",
-    "aiTitle": "Intelligent Customer Service Agent"
+    "aiTitle": "Intelligent Customer Service Agent",
+    "aiDesc": "Revolutionize customer support with an autonomous agent that learns and resolves. Harness the power of OpenAI and RAG to deliver accurate, contextual answers 24/7, automating your service and freeing your team for strategic tasks."
   },
   "cta": {
     "label": "Ready to start?",

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 import { Zap, BrainCircuit, Bot, Rocket } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import NextLink from "next/link";
@@ -120,29 +120,23 @@ export default function HomeClient() {
     {
       label: t("portfolio.saasLabel"),
       title: t("portfolio.saasTitle"),
+      desc: t("portfolio.saasDesc"),
       tag: "React · Node · PostgreSQL",
       gradient: "from-blue-600 via-indigo-700 to-violet-800",
-      bars: [40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100],
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-      imgPosition: "50% 20%",
     },
     {
       label: t("portfolio.ecommerceLabel"),
       title: t("portfolio.ecommerceTitle"),
+      desc: t("portfolio.ecommerceDesc"),
       tag: "Next.js · Stripe · Redis",
       gradient: "from-violet-600 via-purple-700 to-fuchsia-800",
-      bars: [70, 45, 80, 55, 95, 60, 85, 40, 100, 75, 65, 90],
-      image: "/images/dashboard-ecommerce.png",
-      imgPosition: "0% 40%",
     },
     {
       label: t("portfolio.aiLabel"),
       title: t("portfolio.aiTitle"),
+      desc: t("portfolio.aiDesc"),
       tag: "OpenAI · n8n · WhatsApp · LLM",
       gradient: "from-emerald-600 via-teal-700 to-teal-900",
-      bars: [55, 80, 40, 95, 65, 75, 50, 85, 45, 90, 60, 100],
-      image: "/images/n8n-screenshot-readme.png",
-      imgPosition: "50% 30%",
     },
   ];
 
@@ -511,42 +505,16 @@ export default function HomeClient() {
               key={p.title}
               className="group cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-white/2 transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl"
             >
-              <div className={`relative h-48 overflow-hidden sm:h-52 md:h-48 lg:h-56 ${p.image ? "bg-black" : "bg-linear-to-br " + p.gradient}`}>
+              <div className={`relative h-48 overflow-hidden sm:h-52 md:h-48 lg:h-56 bg-linear-to-br ${p.gradient}`}>
                 <div className="absolute inset-x-0 top-0 z-10 flex h-8 items-center gap-1.5 bg-black/25 px-4 backdrop-blur-sm">
                   <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
                   <div className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
                   <div className="mx-auto h-4 w-32 rounded-full bg-white/15" />
                 </div>
-                {p.image ? (
-                  <Image
-                    src={p.image}
-                    alt={p.title}
-                    fill
-                    className="object-cover"
-                    style={{ objectPosition: p.imgPosition ?? "50% 0%" }}
-                    sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 768px) calc(100vw - 48px), (max-width: 1200px) calc(33vw - 32px), 368px"
-                  />
-                ) : (
-                  <div className="absolute inset-x-4 bottom-4 top-12 space-y-2.5 overflow-hidden rounded-xl bg-black/20 p-4 backdrop-blur-sm">
-                    <div className="h-2 w-3/4 rounded-full bg-white/30" />
-                    <div className="h-2 w-1/2 rounded-full bg-white/20" />
-                    <div className="flex h-10 items-end gap-0.5 rounded-lg bg-white/5 px-2 py-1.5">
-                      {p.bars.map((h) => (
-                        <div
-                          key={h}
-                          className="flex-1 rounded-t-xs bg-white/40"
-                          style={{ height: `${h}%` }}
-                        />
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="h-9 rounded-lg bg-white/20" />
-                      <div className="h-9 rounded-lg bg-white/12" />
-                      <div className="h-9 rounded-lg bg-white/20" />
-                    </div>
-                  </div>
-                )}
+                <div className="absolute inset-x-4 bottom-4 top-10 flex items-center rounded-xl bg-black/20 p-5 backdrop-blur-sm">
+                  <p className="text-sm leading-relaxed text-white/90">{p.desc}</p>
+                </div>
               </div>
 
               <div className="p-6">
