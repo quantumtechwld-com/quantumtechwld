@@ -27,7 +27,7 @@ export function tplProposalSentToClient(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 12px">${opts.isRevision ? "Proposta revista ✦" : "Proposta recebida ✦"}</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 12px">${opts.isRevision ? "Proposta revista" : "Proposta recebida"}</h1>
       <div style="margin-bottom:24px">${versionText}</div>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
@@ -43,7 +43,7 @@ export function tplProposalSentToClient(opts: {
         <p style="color:#94a3b8;font-size:14px;margin:0">${opts.productionInfo.slice(0, 400)}${opts.productionInfo.length > 400 ? "…" : ""}</p>
       </div>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver proposta e responder →
+        Ver proposta e responder
       </a>
       ${emailFooterTeam()}
     </div>
@@ -66,7 +66,7 @@ export function tplProposalApprovedByClient(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada ✓</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         ${opts.clientName ? `<strong style="color:#fff">${opts.clientName}</strong>` : `O cliente <strong style="color:#fff">${opts.clientEmail}</strong>`} 
         aprovou a proposta v${opts.version} para <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>.
@@ -76,7 +76,7 @@ export function tplProposalApprovedByClient(opts: {
         <p style="color:#fff;font-weight:700;font-size:20px;margin:0">${formatCurrencyByCode(opts.estimatedValue, opts.estimatedCurrency)}</p>
       </div>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#0f0f14;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver pedido no painel →
+        Ver pedido no painel
       </a>
       ${emailFooterSystem()}
     </div>
@@ -98,7 +98,7 @@ export function tplProposalRevisionRequested(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#f59e0b;margin:0 0 8px">Revisão solicitada ⚠️</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#f59e0b;margin:0 0 8px">Revisão solicitada</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         ${opts.clientName ? `<strong style="color:#fff">${opts.clientName}</strong>` : `O cliente <strong style="color:#fff">${opts.clientEmail}</strong>`} 
         solicitou revisão da proposta v${opts.version} para <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>.
@@ -110,7 +110,7 @@ export function tplProposalRevisionRequested(opts: {
         </div>
       ` : ""}
       <a href="${opts.adminUrl}" style="display:inline-block;background:#f59e0b;color:#0f0f14;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Revisar proposta →
+        Revisar proposta
       </a>
       ${emailFooterSystem()}
     </div>

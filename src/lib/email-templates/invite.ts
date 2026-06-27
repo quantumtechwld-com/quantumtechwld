@@ -63,7 +63,7 @@ export function buildInviteEmail(
   <p style="color:#94a3b8;margin:0 0 28px;font-size:13px">${c.expiry}</p>
   <a href="${magicLink}"
      style="display:inline-block;background:#0ea5e9;color:#ffffff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-    ${c.cta} →
+    ${c.cta}
   </a>
   <hr style="border:none;border-top:1px solid #ffffff10;margin:32px 0">
   <p style="color:#475569;font-size:12px;margin:0 0 4px">${c.footer}</p>
@@ -165,7 +165,7 @@ export function buildOrgInviteEmail(
   <p style="color:#94a3b8;margin:0 0 28px;font-size:13px">${c.expiry}</p>
   <a href="${magicLink}"
      style="display:inline-block;background:#6366f1;color:#ffffff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-    ${c.cta} →
+    ${c.cta}
   </a>
   <hr style="border:none;border-top:1px solid #ffffff10;margin:32px 0">
   <p style="color:#475569;font-size:12px;margin:0 0 4px">${c.footer}</p>

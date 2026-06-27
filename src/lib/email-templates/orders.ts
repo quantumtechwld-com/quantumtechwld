@@ -17,7 +17,7 @@ export function tplOrderReceived(opts: {
       ${emailLogoHeader()}
       <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Novo pedido recebido</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
-        ${opts.organizationName ? `A empresa <strong style="color:#fff">🏢 ${opts.organizationName}</strong>` : `O cliente <strong style="color:#fff">${opts.clientName}</strong>`} submeteu um novo pedido.
+        ${opts.organizationName ? `A empresa <strong style="color:#fff">${opts.organizationName}</strong>` : `O cliente <strong style="color:#fff">${opts.clientName}</strong>`} submeteu um novo pedido.
       </p>
       <p style="color:#64748b;font-size:13px;margin:0 0 24px">Contacto: ${opts.clientEmail}</p>
       <div style="background:#ffffff08;border:1px solid #ffffff15;border-radius:12px;padding:20px;margin-bottom:24px">
@@ -30,7 +30,7 @@ export function tplOrderReceived(opts: {
         <p style="color:#94a3b8;margin:0;font-size:14px">${opts.description.slice(0, 300)}${opts.description.length > 300 ? "…" : ""}</p>
       </div>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver pedido no painel →
+        Ver pedido no painel
       </a>
       ${emailFooterSystem()}
     </div>
@@ -49,7 +49,7 @@ export function tplOrderProposalSent(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Proposta recebida ✦</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Proposta recebida</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         A equipe avaliou o seu pedido de <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
@@ -62,7 +62,7 @@ export function tplOrderProposalSent(opts: {
         <p style="color:#94a3b8;font-size:14px;margin:0">${opts.productionInfo.slice(0, 400)}${opts.productionInfo.length > 400 ? "…" : ""}</p>
       </div>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver proposta e responder →
+        Ver proposta e responder
       </a>
       ${emailFooterTeam()}
     </div>
@@ -77,13 +77,13 @@ export function tplOrderApprovedAdmin(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido aprovado ✓</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido aprovado</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a proposta
         para o pedido de <strong style="color:#fff">${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}</strong>.
       </p>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver no painel admin →
+        Ver no painel admin
       </a>
       ${emailFooterSystem()}
     </div>
@@ -108,7 +108,7 @@ export function tplOrderRevisionAdmin(opts: {
         <p style="color:#fbbf24;font-size:13px;margin:0">${opts.adminNote || "Sem nota adicional."}</p>
       </div>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver pedido →
+        Ver pedido
       </a>
       ${emailFooterSystem()}
     </div>
@@ -124,14 +124,14 @@ export function tplOrderInProduction(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#8b5cf6;margin:0 0 8px">O seu pedido está em produção 🚀</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#8b5cf6;margin:0 0 8px">O seu pedido está em produção</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         entrou em produção. Você pode acompanhar o estado no seu portal.
       </p>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#8b5cf6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Acompanhar pedido →
+        Acompanhar pedido
       </a>
       ${emailFooterTeam()}
     </div>
@@ -148,15 +148,15 @@ export function tplOrderCompleted(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido concluído ✓</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Pedido concluído</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         foi concluído com sucesso. Obrigado pela confiança!
       </p>
-      ${opts.finalDeliveryUrl ? `<p style="color:#94a3b8;margin:0 0 16px">Aceda ao resultado final:</p><a href="${opts.finalDeliveryUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px;margin-bottom:16px">Ver resultado final →</a><br/>` : ""}
+      ${opts.finalDeliveryUrl ? `<p style="color:#94a3b8;margin:0 0 16px">Aceda ao resultado final:</p><a href="${opts.finalDeliveryUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px;margin-bottom:16px">Ver resultado final</a><br/>` : ""}
       <a href="${opts.orderUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver detalhes →
+        Ver detalhes
       </a>
       ${emailFooterTeam()}
     </div>
@@ -172,14 +172,14 @@ export function tplOrderInReview(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#0ea5e9;margin:0 0 8px">Entrega pronta para revisão 🔍</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#0ea5e9;margin:0 0 8px">Entrega pronta para revisão</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         O seu pedido <strong style="color:#fff">${opts.orderTitle || (ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType)}</strong>
         foi entregue e está aguardando a sua avaliação. Aceda ao portal para revisar o trabalho realizado e aprovar ou pedir correções.
       </p>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Avaliar entrega →
+        Avaliar entrega
       </a>
       ${emailFooterTeam()}
     </div>
@@ -194,14 +194,14 @@ export function tplOrderReviewApprovedAdmin(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#14b8a6;margin:0 0 8px">Cliente aprovou a entrega ✅</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#14b8a6;margin:0 0 8px">Cliente aprovou a entrega</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a entrega do pedido
         (${ORDER_TYPE_LABEL[opts.orderType] ?? opts.orderType}).
       </p>
       <p style="color:#94a3b8;margin:0 0 24px">Pode agora marcar o pedido como <strong style="color:#fff">Concluído</strong> e adicionar o link do resultado final.</p>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#14b8a6;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Finalizar pedido →
+        Finalizar pedido
       </a>
       ${emailFooterSystem()}
     </div>
@@ -223,7 +223,7 @@ export function tplOrderNewMessage(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Nova mensagem no pedido 💬</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Nova mensagem no pedido</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.recipientName ? ` ${opts.recipientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
         Você recebeu uma nova mensagem de ${senderLabel} no pedido
@@ -233,7 +233,7 @@ export function tplOrderNewMessage(opts: {
         <p style="color:#e2e8f0;font-size:14px;margin:0;white-space:pre-wrap">${opts.body.slice(0, 500)}${opts.body.length > 500 ? "…" : ""}</p>
       </div>
       <a href="${opts.orderUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Responder →
+        Responder
       </a>
       ${emailFooterSystem()}
     </div>

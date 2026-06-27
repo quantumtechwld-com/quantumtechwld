@@ -13,7 +13,7 @@ export function tplProposalSent(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Sua proposta está pronta ✦</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#fff;margin:0 0 8px">Sua proposta está pronta</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 24px">
         A proposta comercial para o projeto <strong style="color:#fff">${opts.projectType}</strong> 
@@ -32,7 +32,7 @@ export function tplProposalSent(opts: {
         </table>
       </div>
       <a href="${opts.proposalUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver proposta completa →
+        Ver proposta completa
       </a>
       <p style="color:#94a3b8;font-size:13px;margin-top:32px">Se tiver dúvidas, responda a este e-mail ou entre em contacto connosco.</p>
       ${emailFooterTeam()}
@@ -49,13 +49,13 @@ export function tplProposalApproved(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada ✓</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada</h1>
       <p style="color:#94a3b8;margin:0 0 24px">
         O cliente <strong style="color:#fff">${opts.clientEmail}</strong> aprovou a proposta 
         para o projeto <strong style="color:#fff">${opts.projectType}</strong>.
       </p>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#10b981;color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver no painel admin →
+        Ver no painel admin
       </a>
       ${emailFooterSystem()}
     </div>
@@ -69,7 +69,7 @@ export function tplProposalApprovedClient(opts: {
   return /* html */ `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f14;color:#e2e8f0;padding:32px;border-radius:16px">
       ${emailLogoHeader()}
-      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada — bem-vindo a bordo! 🚀</h1>
+      <h1 style="font-size:22px;font-weight:700;color:#10b981;margin:0 0 8px">Proposta aprovada — bem-vindo a bordo!</h1>
       <p style="color:#94a3b8;margin:0 0 24px">Olá${opts.clientName ? ` ${opts.clientName}` : ""},</p>
       <p style="color:#94a3b8;margin:0 0 16px">
         Sua aprovação foi registrada para o projeto <strong style="color:#fff">${opts.projectType}</strong>.
@@ -102,7 +102,7 @@ export function tplRevisionRequested(opts: {
         <p style="color:#fbbf24;font-size:13px;margin:0">${opts.clientNote || "Sem nota adicional."}</p>
       </div>
       <a href="${opts.adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:14px">
-        Ver e editar proposta →
+        Ver e editar proposta
       </a>
       ${emailFooterSystem()}
     </div>

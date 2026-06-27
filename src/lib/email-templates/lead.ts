@@ -8,7 +8,7 @@ import type { InviteLocale } from "./invite";
 export function tplLeadConfirmation(name: string, locale: InviteLocale = "pt") {
   const copy = {
     pt: {
-      subject: "✅ Recebemos sua solicitação — Diagnóstico em até 24h",
+      subject: "Recebemos sua solicitação — Diagnóstico em até 24h",
       greeting: `Olá ${name},`,
       intro: "Obrigado por entrar em contato com a Quantum Technology Agency!",
       received: "Recebemos sua solicitação de diagnóstico e nosso time já está analisando seu projeto.",
@@ -20,7 +20,7 @@ export function tplLeadConfirmation(name: string, locale: InviteLocale = "pt") {
       closing: "Estamos empolgados para ajudar você a tirar esse projeto do papel!",
     },
     en: {
-      subject: "✅ We received your request — Diagnosis within 24h",
+      subject: "We received your request — Diagnosis within 24h",
       greeting: `Hi ${name},`,
       intro: "Thank you for reaching out to Quantum Technology Agency!",
       received: "We received your diagnosis request and our team is already analyzing your project.",
@@ -32,7 +32,7 @@ export function tplLeadConfirmation(name: string, locale: InviteLocale = "pt") {
       closing: "We're excited to help you bring this project to life!",
     },
     es: {
-      subject: "✅ Recibimos tu solicitud — Diagnóstico en hasta 24h",
+      subject: "Recibimos tu solicitud — Diagnóstico en hasta 24h",
       greeting: `Hola ${name},`,
       intro: "¡Gracias por contactar con Quantum Technology Agency!",
       received: "Recibimos tu solicitud de diagnóstico y nuestro equipo ya está analizando tu proyecto.",
