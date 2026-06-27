@@ -505,16 +505,8 @@ export default function HomeClient() {
               key={p.title}
               className="group cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-white/2 transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl"
             >
-              <div className={`relative h-48 overflow-hidden sm:h-52 md:h-48 lg:h-56 bg-linear-to-br ${p.gradient}`}>
-                <div className="absolute inset-x-0 top-0 z-10 flex h-8 items-center gap-1.5 bg-black/25 px-4 backdrop-blur-sm">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
-                  <div className="mx-auto h-4 w-32 rounded-full bg-white/15" />
-                </div>
-                <div className="absolute inset-x-4 bottom-4 top-10 flex items-center rounded-xl bg-black/20 p-5 backdrop-blur-sm">
-                  <p className="text-sm leading-relaxed text-white/90">{p.desc}</p>
-                </div>
+              <div className="flex h-48 items-center bg-slate-50 px-6 sm:h-52 md:h-48 lg:h-56">
+                <p className="text-sm font-semibold leading-relaxed text-slate-600">{p.desc}</p>
               </div>
 
               <div className="p-6">
