@@ -22,7 +22,7 @@ const CONTACT = {
   role: "Software Development Agency",
   email: "rleandro@quantumtechwld.com",
   whatsapp: "https://wa.me/5511999999999",
-  linkedin: "https://linkedin.com/company/quantumtechwld",
+  linkedin: "https://www.linkedin.com/company/quantumtech-software-agency",
   website: "https://quantumtechwld.com",
   cardUrl: "https://quantumtechwld.com/card",
 } as const;
