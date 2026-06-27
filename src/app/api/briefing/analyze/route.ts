@@ -16,10 +16,7 @@ const AnalyzeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const reqBody = await request.json().catch((err: unknown) => {
-    console.error("[analyze] request.json() falhou:", err instanceof Error ? err.message : String(err));
-    return null;
-  });
+  const reqBody = await request.json().catch(() => null);
   const zodResult = AnalyzeSchema.safeParse(reqBody);
   if (!zodResult.success) {
     return NextResponse.json({ errorCode: "errEmptyText" }, { status: 400 });
