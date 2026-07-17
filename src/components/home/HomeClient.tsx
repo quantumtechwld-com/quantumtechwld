@@ -524,16 +524,19 @@ export default function HomeClient() {
               key={p.title}
               className="group cursor-pointer overflow-hidden rounded-2xl border border-white/8 bg-white/2 transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl"
             >
-              <div className="flex h-48 items-center bg-slate-50 px-6 sm:h-52 md:h-48 lg:h-56">
-                <p className="text-sm font-semibold leading-relaxed text-slate-600">{p.desc}</p>
+              <div className={`relative flex h-48 flex-col justify-between p-5 bg-linear-to-br ${p.gradient} sm:h-52 md:h-48 lg:h-56`}>
+                <div className="absolute inset-0 bg-black/35" />
+                <span className="relative inline-flex w-fit items-center rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                  {p.label}
+                </span>
+                <p className="relative text-[13px] font-medium leading-snug text-white/90">{p.desc}</p>
               </div>
 
               <div className="p-6">
-                <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-slate-500">{p.label}</p>
                 <h3 className="mb-2 text-lg font-bold text-white transition-colors group-hover:text-violet-300">
                   {p.title}
                 </h3>
-                <p className="text-xs text-slate-500">{p.tag}</p>
+                <p className="text-xs font-medium text-slate-400">{p.tag}</p>
               </div>
             </div>
           ))}
