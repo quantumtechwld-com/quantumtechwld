@@ -64,6 +64,15 @@ function LangSwitcher({ current }: Readonly<{ current: string }>) {
 export default function HomeClient() {
   const t = useTranslations();
   const locale = useLocale();
+  const websitesSolutionHref = locale === "pt"
+    ? "/solutions/websites-landing-pages"
+    : `/${locale}/solutions/websites-landing-pages`;
+  const systemsSolutionHref = locale === "pt"
+    ? "/solutions/sistemas-sob-medida"
+    : `/${locale}/solutions/sistemas-sob-medida`;
+  const aiSolutionHref = locale === "pt"
+    ? "/solutions/ia-automacao"
+    : `/${locale}/solutions/ia-automacao`;
 
   // Dados traduzíveis construídos dentro do componente
   const SERVICES = [
@@ -73,6 +82,8 @@ export default function HomeClient() {
       desc: t("services.websitesDesc"),
       gradient: SERVICE_ICONS[0][1],
       accent: SERVICE_ICONS[0][2],
+      href: websitesSolutionHref,
+      ctaLabel: t("services.websiteCta"),
     },
     {
       Icon: SERVICE_ICONS[1][0],
@@ -80,6 +91,8 @@ export default function HomeClient() {
       desc: t("services.systemsDesc"),
       gradient: SERVICE_ICONS[1][1],
       accent: SERVICE_ICONS[1][2],
+      href: systemsSolutionHref,
+      ctaLabel: t("services.websiteCta"),
     },
     {
       Icon: SERVICE_ICONS[2][0],
@@ -88,6 +101,8 @@ export default function HomeClient() {
       gradient: SERVICE_ICONS[2][1],
       accent: SERVICE_ICONS[2][2],
       tags: ["OpenAI", "n8n", "LLM"],
+      href: aiSolutionHref,
+      ctaLabel: t("services.websiteCta"),
     },
   ];
 
@@ -437,7 +452,11 @@ export default function HomeClient() {
                 </div>
               )}
               <div className={`mt-6 flex items-center gap-1.5 text-xs font-bold ${svc.accent} opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100`}>
-                <a href="#lead" className="flex items-center gap-1.5">{t("services.cta")} <span>→</span></a>
+                {svc.href.startsWith("/") ? (
+                  <NextLink href={svc.href} className="flex items-center gap-1.5">{svc.ctaLabel} <span>→</span></NextLink>
+                ) : (
+                  <a href={svc.href} className="flex items-center gap-1.5">{svc.ctaLabel} <span>→</span></a>
+                )}
               </div>
             </article>
           ))}

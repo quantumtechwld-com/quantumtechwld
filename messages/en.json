@@ -4,7 +4,8 @@
     "projects": "Projects",
     "contact": "Contact",
     "clientArea": "Client Area",
-    "talkToUs": "Talk to us"
+    "talkToUs": "Talk to us",
+    "backToSite": "Site"
   },
   "hero": {
     "badge": "Software agency for growing businesses",
@@ -33,6 +34,7 @@
     "heading": "Services that transform businesses",
     "subheading": "From strategy to code: technology born from your business vision that delivers results with agility and precision",
     "cta": "Talk to us",
+    "websiteCta": "View solution",
     "websitesTitle": "Websites & Landing Pages",
     "websitesDesc": "High-performance pages with technical SEO and conversion focus. From design to deploy in days. Start building your online presence.",
     "systemsTitle": "Custom Systems",
@@ -163,6 +165,406 @@
     "errInvalidAiResponse": "Invalid AI response. Please try again.",
     "errInvalidAiJson": "Could not process AI response.",
     "errGeneric": "Something went wrong. Please try again."
+  },
+  "solutionWebsite": {
+    "meta": {
+      "serviceName": "Websites, Landing Pages & Corporate Sites",
+      "serviceType": "Website and landing page development with technical SEO"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "current": "Websites & Landing Pages"
+    },
+    "hero": {
+      "badge": "Solution 01 · Digital presence with performance and conversion",
+      "title": "Websites, landing pages and corporate sites designed to generate visibility and qualified opportunities.",
+      "subtitle": "Pages combining technical SEO, performance, conversion copy and a structure ready for campaigns, lead capture and continuous organic growth.",
+      "primaryCta": "Request a diagnosis for this solution",
+      "secondaryCta": "Back to homepage",
+      "proof1": {
+        "value": "SEO",
+        "title": "Technical foundation ready for discovery",
+        "description": "Architecture, headings, metadata and content structure designed for organic search."
+      },
+      "proof2": {
+        "value": "UX",
+        "title": "Corporate design with commercial intent",
+        "description": "Premium layout, clear hierarchy and pages prepared to present service, proof and CTA."
+      },
+      "proof3": {
+        "value": "CRO",
+        "title": "Conversion beyond aesthetics",
+        "description": "Forms, proof sections and narrative designed to capture more qualified leads."
+      }
+    },
+    "problems": {
+      "eyebrow": "Business problem",
+      "heading": "When the site is generic, slow or poorly structured, it does not support sales or organic discovery.",
+      "intro": "Companies that rely only on referrals, social profiles or paid traffic usually lose authority, clicks and opportunities when their web presence does not match user intent.",
+      "card1": {
+        "title": "Weak presence for buyers still researching",
+        "description": "The potential client searches on Google, lands on the site and still cannot clearly understand service, differentiation, proof or the next step."
+      },
+      "card2": {
+        "title": "Landing pages that fail to convert campaigns",
+        "description": "Paid or organic traffic arrives, but the page does not sustain the promise, qualify the offer or drive a concrete action."
+      },
+      "card3": {
+        "title": "Corporate website that blocks commercial growth",
+        "description": "Without a proper CMS, solution pages and a content structure, the site becomes a static asset that does not scale marketing."
+      }
+    },
+    "solution": {
+      "eyebrow": "What we deliver",
+      "heading": "A digital presence that combines positioning, technical SEO and conversion.",
+      "intro": "This solution is designed for brands that need a strong corporate website, service pages with semantic depth, campaign landing pages and a structure optimized to appear in both traditional search results and new AI-powered search engines (GEO).",
+      "deliverable1": {
+        "title": "Corporate website with commercial architecture",
+        "description": "We define sitemap, narrative, key pages, proof blocks, service sections and FAQs to turn the website into an authority and acquisition asset."
+      },
+      "deliverable2": {
+        "title": "Landing pages with technical SEO and conversion focus",
+        "description": "We create pages for campaigns, solutions or offers with performance, search-intent-aligned copy and a clear CTA for diagnosis or proposal."
+      },
+      "deliverable3": {
+        "title": "GEO — Optimization for AI-powered search engines",
+        "description": "We structure content, schema markup and page architecture so the website is cited as a source by Google AI Overviews, Perplexity, Bing Copilot and ChatGPT Search. Includes HowTo schema, FAQPage, AggregateRating and high-density semantic prose."
+      }
+    },
+    "useCases": {
+      "eyebrow": "Use cases",
+      "heading": "Where this solution usually creates the most impact.",
+      "card1": {
+        "title": "Premium corporate website",
+        "description": "For companies that need to present positioning, services, method, proof and contact channels with more clarity."
+      },
+      "card2": {
+        "title": "Landing page for campaigns or lead capture",
+        "description": "For ads, launches, free diagnosis, briefing generation or commercial offer pages."
+      },
+      "card3": {
+        "title": "Service and solution pages for SEO",
+        "description": "To rank for commercial intent and stop depending on a generic homepage."
+      },
+      "card4": {
+        "title": "Multilingual structure for expansion",
+        "description": "For brands that want to operate in PT, EN and ES without losing content consistency or international SEO."
+      },
+      "card5": {
+        "title": "Professional services, consulting and law firms",
+        "description": "For independent professionals, law firms, accounting, consulting or healthcare practices that need a solid digital presence with credibility, expertise proof and qualified contact generation."
+      },
+      "card6": {
+        "title": "Startups in validation phase and product launches",
+        "description": "For product teams that need a validation landing page, waitlist page or launch site with conversion tracking and integration with lead qualification automations."
+      },
+      "card7": {
+        "title": "Visibility in AI-generated search results (GEO)",
+        "description": "For brands that want to appear as a cited source in Google AI Overviews, Perplexity and ChatGPT Search. We structure content, schema and architecture so the site is referenced by the main AI search engines."
+      }
+    },
+    "process": {
+      "eyebrow": "How we implement",
+      "heading": "From diagnosis to deploy with clarity of scope and business intent.",
+      "step1": {
+        "step": "Step 01",
+        "title": "Audit of the current presence",
+        "description": "We evaluate positioning, competition, conversion bottlenecks, content architecture and the brand's goals."
+      },
+      "step2": {
+        "step": "Step 02",
+        "title": "Page architecture and wireframe",
+        "description": "We define key pages, reading flow, semantic hierarchy, proof blocks and high-fidelity layout."
+      },
+      "step3": {
+        "step": "Step 03",
+        "title": "Copy, design and implementation",
+        "description": "We build the front-end focused on performance, offer clarity, lead capture integration and visual consistency."
+      },
+      "step4": {
+        "step": "Step 04",
+        "title": "Launch and continuous evolution",
+        "description": "We deliver the foundation ready for new pages, campaigns, SEO monitoring and conversion optimization."
+      }
+    },
+    "stack": {
+      "eyebrow": "Stack and technical scope",
+      "heading": "Technology, content and structure oriented to real performance.",
+      "intro": "The delivery can include full implementation in Next.js, lead form integrations and automation, SEO structure and continuous content evolution.",
+      "items": {
+        "item1": "High-performance implementation with Next.js, TypeScript and TailwindCSS — PageSpeed 90+ and Core Web Vitals approved",
+        "item2": "Per-page metadata, canonical, hreflang, Open Graph and sitemap",
+        "item3": "Structure ready for service pages, case studies and strategic content",
+        "item4": "Integration with forms, lead automation and n8n webhook",
+        "item5": "Social proof sections, FAQs, commercial CTA and modular narrative",
+        "item6": "Foundation ready for multilingual expansion and future campaigns",
+        "item7": "Responsive, accessible website compatible with all devices — mobile-first by default",
+        "item8": "GEO: HowTo schema, FAQPage, AggregateRating and structured content for citation by Google AI, Perplexity and Bing Copilot"
+      }
+    },
+    "proof": {
+      "eyebrow": "What makes the approach different",
+      "heading": "We do not deliver just a pretty page. We deliver an evolving commercial asset.",
+      "description": "The goal is to create a structure that works for branding, organic search, paid traffic and commercial operations, without separating design from business function.",
+      "caseLabel": "Application example",
+      "caseTitle": "Corporate website + solution pages + campaign landing page",
+      "caseDescription": "A brand can have a strong corporate site for credibility, specific pages to rank for services and standalone landing pages for campaigns and offer validation.",
+      "checklist": {
+        "item1": "Structure ready to grow without rebuilding the entire website",
+        "item2": "Pages designed for discovery, reading and commercial action",
+        "item3": "Stack compatible with campaigns, SEO and content evolution",
+        "item4": "Native integration with lead capture and automation"
+      }
+    },
+    "faq": {
+      "eyebrow": "Frequently asked questions",
+      "heading": "Common questions before starting a website or landing page project",
+      "item1": {
+        "question": "What is the difference between a corporate website and a landing page?",
+        "answer": "A corporate website presents the brand, services, proof and a broader navigation structure. A landing page is more focused and built for a specific offer, campaign or conversion objective."
+      },
+      "item2": {
+        "question": "Can a landing page also rank on Google?",
+        "answer": "Yes, as long as it has the right technical structure, search-intent-aligned content and a relevant enough offer. Not every landing page exists only for paid media."
+      },
+      "item3": {
+        "question": "Do you deliver only design or also content strategy and SEO?",
+        "answer": "The scope includes architecture definition, business-oriented content, technical SEO, conversion copy and implementation. Design is only one part of the delivery."
+      },
+      "item4": {
+        "question": "Can this solution already launch with lead capture integrated?",
+        "answer": "Yes. We can connect forms, n8n automation, CRM, email and qualification flows so the website already operates as a commercial channel from launch."
+      },
+      "item5": {
+        "question": "How much does a professional website cost?",
+        "answer": "The investment depends on the scope: a focused campaign or diagnostic landing page starts at a lower cost, while a full corporate website with solution pages, technical SEO and integrations requires proportional investment. We recommend requesting a diagnosis so we can present a proposal aligned with your goals and budget."
+      },
+      "item6": {
+        "question": "How long does it take to build a website or landing page?",
+        "answer": "A focused landing page can be delivered in 5 to 10 business days. A full corporate website with multiple pages, content architecture and integrations typically takes 3 to 6 weeks, depending on the number of pages and project complexity."
+      },
+      "item7": {
+        "question": "What are Core Web Vitals and why do they affect my site's ranking?",
+        "answer": "Core Web Vitals are Google's performance metrics that assess load speed (LCP), interactivity (INP) and visual stability (CLS). Sites with good scores tend to have an organic ranking advantage. Every QuantumTech delivery is optimized to achieve PageSpeed 90+ and Core Web Vitals approval."
+      },
+      "item8": {
+        "question": "Next.js or WordPress: which is the better choice for a business website?",
+        "answer": "It depends on the objective. WordPress is a solid choice for editorial content with frequent updates by non-technical teams. Next.js is the ideal choice when the project demands high performance, advanced technical SEO, external system integrations, multilingual structure and scalability without plugin limitations. For brands that need digital authority, conversion and continuous technical evolution, Next.js is our recommendation."
+      },
+      "item9": {
+        "question": "What is GEO and why does my website need it in 2026?",
+        "answer": "GEO (Generative Engine Optimization) is the practice of optimizing content to appear as a cited source in AI-generated answers — Google AI Overviews, Perplexity, Bing Copilot and ChatGPT Search. In 2026, a growing share of commercial searches results in synthetic responses where Google or AI lists agencies, services and solutions. Appearing in those citations requires specific technical structure: FAQPage, HowTo schema, AggregateRating, citeable prose and E-E-A-T signals. Every website delivered by QuantumTech already includes this foundational structure."
+      }
+    },
+    "cta": {
+      "eyebrow": "Next step",
+      "heading": "If your brand needs a digital presence that positions, ranks and converts, this is the right foundation to start with.",
+      "description": "We map the current scenario, define the ideal architecture and deliver a solution that can evolve into new pages, campaigns and commercial automations.",
+      "primaryCta": "I want a diagnosis for this solution",
+      "secondaryCta": "View main website"
+    }
+  },
+  "solutionSystems": {
+    "meta": {
+      "serviceName": "Custom Software Development, CRM, ERP and SaaS",
+      "serviceType": "Custom systems and platform development"
+    },
+    "breadcrumb": { "home": "Home", "current": "Custom Systems" },
+    "hero": {
+      "badge": "Solution 02 · Custom systems, portals and SaaS",
+      "title": "Custom systems, portals and SaaS built for your real business process.",
+      "subtitle": "CRMs, ERPs, B2B portals and SaaS platforms built with a modern stack, precise data modeling and UX that teams actually adopt.",
+      "primaryCta": "Request a diagnosis for this solution",
+      "secondaryCta": "Back to homepage",
+      "proof1": { "value": "API", "title": "Integrations with existing systems", "description": "We connect the new system to the tools you already use via REST, webhooks and n8n automation." },
+      "proof2": { "value": "SaaS", "title": "Architecture ready to scale", "description": "Multi-tenant, granular permissions and modules that evolve without rewriting the platform core." },
+      "proof3": { "value": "UX", "title": "Interface the team actually adopts", "description": "Functional design, flow aligned with the process and onboarding that reduces internal resistance." }
+    },
+    "problems": {
+      "eyebrow": "Business problem",
+      "heading": "Spreadsheets, generic tools and disconnected systems block operational growth.",
+      "intro": "Growing companies reach a point where available tools no longer fit the real process. The result is rework, fragmented data and teams operating outside the system.",
+      "card1": { "title": "Manual processes that do not scale", "description": "What works in spreadsheets or a generic CRM creates bottlenecks as operation volume increases and the team grows." },
+      "card2": { "title": "Systems the business works around, not with", "description": "Generic tools force the company to adapt to the software. The result is parallel processes outside the system." },
+      "card3": { "title": "Fragmented data with no unified view", "description": "Information scattered across ERPs, CRMs and spreadsheets prevents fast decisions and reliable reporting." }
+    },
+    "solution": {
+      "eyebrow": "What we deliver",
+      "heading": "A system built from the company's real process, not a template.",
+      "intro": "The solution starts with business process mapping. We build systems that fit the operation, integrate existing channels and scale with growth.",
+      "deliverable1": { "title": "Custom system or portal with process modeling", "description": "We map business rules, flows, roles and permissions to build a system that reflects how the company operates — with an interface the team adopts without resistance." },
+      "deliverable2": { "title": "SaaS platform or scalable MVP", "description": "For startups and companies launching a digital product: SaaS architecture with multi-tenancy, authentication, billing and modules ready to grow without rewriting the core." }
+    },
+    "useCases": {
+      "eyebrow": "Use cases",
+      "heading": "Where this solution usually creates the most impact.",
+      "card1": { "title": "Custom commercial CRM", "description": "For sales teams with pipeline, customer history, follow-up automation and reports aligned to the real commercial process." },
+      "card2": { "title": "B2B portal or client area", "description": "For companies that need structured access for clients, partners or suppliers with approvals and centralized communication." },
+      "card3": { "title": "Simplified ERP for operations", "description": "For companies that need to unify finance, inventory, orders and team in a single platform without enterprise complexity." },
+      "card4": { "title": "SaaS platform MVP", "description": "For startups that need to validate their business model with a functional, secure product ready for the first paying customers." }
+    },
+    "process": {
+      "eyebrow": "How we implement",
+      "heading": "From process mapping to deploy with focus on real adoption.",
+      "step1": { "step": "Step 01", "title": "Process mapping and business rules", "description": "We map flows, roles, exceptions and required integrations before writing a single line of code." },
+      "step2": { "step": "Step 02", "title": "Data modeling and technical architecture", "description": "We define the data model, technical stack and structure that allows growth without rewriting." },
+      "step3": { "step": "Step 03", "title": "Incremental development with weekly deliveries", "description": "We build in short cycles with real demos, team feedback and continuous adjustments." },
+      "step4": { "step": "Step 04", "title": "Deploy, documentation and continuous evolution", "description": "We deliver to production with technical documentation, training and an evolution plan for new features." }
+    },
+    "stack": {
+      "eyebrow": "Stack and technical scope",
+      "heading": "Modern technology oriented to maintainability and scale.",
+      "intro": "Each system is built with the appropriate stack for the context: performance, security, integration and the ability to evolve without accumulating technical debt.",
+      "items": {
+        "item1": "Next.js, React and Node.js with TypeScript — modular architecture and strict typing",
+        "item2": "PostgreSQL and Prisma with data modeling oriented to the business process",
+        "item3": "Authentication, role-based permission control and audit of critical actions",
+        "item4": "Integrations via REST, GraphQL, webhooks and automations with n8n",
+        "item5": "Dashboards, reports and real-time data export",
+        "item6": "Cloud deploy with CI/CD, error monitoring and continuous technical support"
+      }
+    },
+    "proof": {
+      "eyebrow": "What makes the approach different",
+      "heading": "We do not deliver code. We deliver a system the team uses and the business trusts.",
+      "description": "The difference between a well-built system and an abandoned one lies in process modeling, interface quality and alignment with those who use it daily.",
+      "caseLabel": "Application example",
+      "caseTitle": "B2B management portal with financial dashboard and order control",
+      "caseDescription": "A service company needed to replace spreadsheets and emails with a centralized portal. We delivered an orders module, financials, approvals and role-based access — with 100% team adoption in 30 days.",
+      "checklist": {
+        "item1": "Architecture ready for new features without rewriting the core",
+        "item2": "Interface aligned to the real process, not a generic template",
+        "item3": "Native integrations with tools and channels already used by the team",
+        "item4": "Source code, technical documentation and support included in the delivery"
+      }
+    },
+    "faq": {
+      "eyebrow": "Frequently asked questions",
+      "heading": "Common questions before starting a custom system project",
+      "item1": { "question": "What is the difference between a custom system and a generic SaaS?", "answer": "A generic SaaS solves 80% of cases through configuration. A custom system is built exactly for your company's process — with the rules, flows and integrations that make sense for your business. The choice depends on process complexity and how much it is a competitive differentiator." },
+      "item2": { "question": "How long does it take to deliver a system MVP?", "answer": "A functional MVP with core features can generally be delivered in 4 to 10 weeks. Simpler systems (portals, basic CRMs) are closer to 4 weeks. SaaS platforms with billing and multi-tenancy, closer to 10 weeks." },
+      "item3": { "question": "Can the system grow with the business without rewriting everything?", "answer": "Yes, as long as the initial architecture supports that growth. We build with module separation, extensible data modeling and well-defined APIs so new features can be added without impacting what is already in production." },
+      "item4": { "question": "How much does it cost to develop a custom system?", "answer": "The investment depends on scope, number of modules and integrations involved. Lower-complexity projects start at a lower cost; full SaaS platforms require proportional investment. We offer a free technical diagnosis to present a proposal with detailed scope and estimate." },
+      "item5": { "question": "Do you deliver the source code and technical documentation?", "answer": "Yes. The client receives the full source code, technical architecture documentation and full access to the repository. There is no lock-in: the project is yours and can be evolved by any future technical team." }
+    },
+    "cta": {
+      "eyebrow": "Next step",
+      "heading": "If your process demands more than a generic SaaS delivers, this is the right foundation to start.",
+      "description": "We map the process, assess the technical scope and deliver a proposal with stack, timeline and investment — no commitment required.",
+      "primaryCta": "I want a diagnosis of my process",
+      "secondaryCta": "View main website"
+    }
+  },
+  "solutionAI": {
+    "meta": {
+      "serviceName": "Generative AI, Autonomous Agents, RAG and Automation with LLM and n8n",
+      "serviceType": "AI agent, RAG and LLM automation development"
+    },
+    "breadcrumb": { "home": "Home", "current": "AI & Automation" },
+    "hero": {
+      "badge": "Solution 03 · Generative AI, agents and process automation",
+      "title": "AI agents, RAG and LLM automation for operations that scale without growing the team.",
+      "subtitle": "We build autonomous agents, RAG systems over internal documents and automations with n8n and LLMs that eliminate manual work, qualify leads and respond to clients 24/7.",
+      "primaryCta": "Request a diagnosis for this solution",
+      "secondaryCta": "Back to homepage",
+      "proof1": { "value": "LLM", "title": "OpenAI, Claude and Gemini", "description": "We select the right model for each use case — GPT-4o, Claude 3.5, Gemini 1.5 or local models like Llama and Mistral." },
+      "proof2": { "value": "RAG", "title": "Proprietary knowledge base", "description": "The agent accesses documents, contracts and internal bases via embeddings without leaking data to the external model." },
+      "proof3": { "value": "Agent", "title": "Agents that execute real actions", "description": "Beyond answering, the agent executes real actions 24/7 — typical results include 3-6x ROI in 12 months and continuous operation without variable headcount cost." }
+    },
+    "problems": {
+      "eyebrow": "Business problem",
+      "heading": "Slow support, repetitive processes and knowledge locked in documents drain the team without generating results.",
+      "intro": "Growing companies reach a point where hiring more people for repetitive tasks does not scale. Generative AI and autonomous agents solve this with precision and predictable cost.",
+      "card1": { "title": "Support that does not scale with volume", "description": "Answering repetitive questions, qualifying leads and collecting information via WhatsApp or chat consumes team time that could be spent on strategic tasks." },
+      "card2": { "title": "Knowledge locked in documents without fast access", "description": "Contracts, manuals, policies and FAQs exist, but the team wastes time searching. RAG transforms documents into a base queryable in natural language." },
+      "card3": { "title": "Manual processes that could be automated with AI", "description": "Email triage, data extraction from PDFs and report generation are still done manually in many companies — and can be eliminated with LLM + n8n." }
+    },
+    "stats": {
+      "label": "Results with AI automation",
+      "stat1": { "value": "70%+", "label": "Of queries resolved automatically without human intervention" },
+      "stat2": { "value": "−65%", "label": "Reduction in document base search time with RAG" },
+      "stat3": { "value": "4-8h", "label": "Saved per employee per week on document tasks" },
+      "stat4": { "value": "3-6x", "label": "Average ROI on AI automation in the first 12 months" }
+    },
+    "solution": {
+      "eyebrow": "What we deliver",
+      "heading": "Agents, RAG and automations that work 24/7 with your business intelligence.",
+      "intro": "We build AI systems that integrate with the real operation: support agents, RAG pipelines over proprietary documents and agentic flows that make decisions and execute actions without human intervention.",
+      "deliverable1": { "title": "AI agents with LLM, memory and action execution", "description": "We develop agents with access to tools (APIs, databases, email, WhatsApp), conversation memory, decision logic and the ability to escalate to humans. We use OpenAI (GPT-4o), Anthropic (Claude 3.5) or local models based on context." },
+      "deliverable2": { "title": "RAG and process automation with n8n", "description": "We implement RAG pipelines with LangChain or LlamaIndex over internal documents, integrated with n8n flows that orchestrate LLMs, webhooks, CRMs and external systems to eliminate manual processes." }
+    },
+    "useCases": {
+      "eyebrow": "Use cases",
+      "heading": "Where generative AI and automation create immediate impact.",
+      "card1": { "title": "Intelligent support agent", "description": "LLM-powered chatbot that understands context, accesses customer history, responds accurately and executes real actions — WhatsApp, website chat or internal channel." },
+      "card2": { "title": "Agentic AI — autonomous agents", "description": "Agents that receive objectives and execute multiple steps autonomously: research, query APIs, make decisions and deliver results without human intervention at each step." },
+      "card3": { "title": "RAG over documents and internal bases", "description": "Natural language queries over contracts, manuals, policies and proprietary knowledge bases — without leaking data to the external model. Powered by LangChain and LlamaIndex." },
+      "card4": { "title": "Process automation with n8n + LLM", "description": "Flows combining triggers (email, form, CRM), LLM processing (triage, classification, extraction) and automatic actions in downstream systems." },
+      "card5": { "title": "Data extraction and analysis with AI", "description": "Structured data extraction from PDFs, invoices and contracts. Automatic generation of reports, summaries and insights with language models." },
+      "card6": { "title": "Autonomous commercial agent", "description": "Automatic lead qualification via WhatsApp or form, context-based intelligent follow-up and escalation to a human sales rep at the right moment." }
+    },
+    "demo": {
+      "imageAlt": "Example of AI agent dashboard developed by QuantumTech",
+      "imageCaption": "Example of support agent monitoring panel — conversations, detected intents and actions executed in real time.",
+      "imageSoon": "Project image coming soon"
+    },
+    "process": {
+      "eyebrow": "How we implement",
+      "heading": "From process diagnosis to production agent with measurable results.",
+      "step1": { "step": "Step 01", "title": "Process diagnosis and use case identification", "description": "We identify which problem has the highest ROI for AI automation: support, documents, internal processes or data analysis." },
+      "step2": { "step": "Step 02", "title": "Agent architecture and model selection", "description": "We define the stack: LLM (OpenAI, Claude, Gemini or local), framework (LangChain, LlamaIndex), orchestrator (n8n) and required integrations." },
+      "step3": { "step": "Step 03", "title": "Development, testing and fine-tuning", "description": "We build the agent in short cycles, test with real data, adjust prompts and tools until the expected result is achieved." },
+      "step4": { "step": "Step 04", "title": "Deploy, monitoring and evolution", "description": "We deploy to production with audit logs, response quality monitoring and an evolution plan for new capabilities." }
+    },
+    "stack": {
+      "eyebrow": "Stack and technical scope",
+      "heading": "Models, frameworks and orchestration oriented to business outcomes.",
+      "intro": "We select each layer based on the use case: latency, cost, data privacy and integration capability with existing systems.",
+      "items": {
+        "item1": "LLMs: OpenAI (GPT-4o), Anthropic (Claude 3.5 Sonnet), Google (Gemini 1.5) and local models (Llama 3, Mistral)",
+        "item2": "RAG: LangChain and LlamaIndex with vector stores — pgvector, Pinecone and Chroma",
+        "item3": "Agentic AI: agents with tools, persistent memory and multi-step action execution",
+        "item4": "Automation: n8n for flow orchestration, webhooks, CRMs and external systems",
+        "item5": "Integrations: WhatsApp (official API), Slack, email, REST APIs and databases",
+        "item6": "Security: tenant isolation, no unnecessary PII sending and audit logs",
+        "item7": "Monitoring: conversation tracking, failure detection and continuous feedback loop"
+      }
+    },
+    "proof": {
+      "eyebrow": "What makes the approach different",
+      "heading": "We do not deliver a chatbot. We deliver an agent that works alongside your business.",
+      "description": "The difference between an AI agent that works and one that creates frustration lies in tool architecture, prompt quality, context management and alignment with the real process.",
+      "caseLabel": "Application example",
+      "caseTitle": "Support agent with RAG over product base + CRM integration",
+      "caseDescription": "A B2B company deployed an agent that answers technical questions via RAG, qualifies customer interest and automatically creates opportunities in the CRM — handling 400+ contacts per day without an SDR team, with a 68% reduction in support costs and response time dropping from 8 hours to 30 seconds.",
+      "checklist": {
+        "item1": "Agent with access to real company data via RAG and integrated tools",
+        "item2": "Model selection by use case: cost, latency and privacy considered",
+        "item3": "n8n orchestration to connect AI to the systems the company already uses",
+        "item4": "Logs, monitoring and feedback loop for continuous quality improvement"
+      }
+    },
+    "faq": {
+      "eyebrow": "Frequently asked questions",
+      "heading": "Common questions before implementing generative AI and agents",
+      "item1": { "question": "What is an AI agent and how does it differ from a simple chatbot?", "answer": "A simple chatbot follows a fixed flow of questions and answers. An LLM-powered AI agent understands natural language, accesses external tools (APIs, databases, email) and can execute multi-step actions autonomously. An agentic system goes further: it receives an objective and decides on its own which tools to use and in what sequence to achieve it." },
+      "item2": { "question": "What is RAG and when should I use it?", "answer": "RAG (Retrieval-Augmented Generation) connects an LLM to a proprietary document base so it answers accurately about your content — without retraining the model. Use RAG when your company has documents, manuals, contracts or knowledge bases that the model does not know by default. This ensures precise answers without hallucinations about your specific context." },
+      "item3": { "question": "What is the difference between n8n automation and generative AI?", "answer": "n8n is a flow orchestration tool that connects systems, APIs and triggers. Generative AI (LLMs) adds reasoning, natural language and semantic decision-making. The two work together: n8n orchestrates the flow (when to trigger, what to connect), the LLM processes and decides (classify, summarize, generate, respond). The combination eliminates brittle automations based on fixed rules." },
+      "item4": { "question": "Does my company need GPT-4o, Claude or can I use smaller models?", "answer": "It depends on the use case. For simple tasks (classification, extraction, summarization), smaller models like GPT-4o mini, Claude Haiku or Llama 3 have much lower cost with equivalent results. For complex reasoning or legal analysis, GPT-4o or Claude 3.5 Sonnet are more appropriate. We always evaluate cost, latency and privacy to recommend the right model." },
+      "item5": { "question": "Is company data secure when using LLMs?", "answer": "Yes, with the correct architecture. We use RAG so proprietary data stays in your infrastructure and only relevant excerpts are sent to the model. We configure with no training data storage (OpenAI Enterprise, Claude API with zero data retention). For high sensitivity, we deploy local models (Llama, Mistral) that never leave your environment." },
+      "item6": { "question": "How long does it take to implement an AI agent?", "answer": "A basic support agent with RAG can be implemented in 2 to 4 weeks. n8n + LLM automations for internal processes generally take 1 to 3 weeks per flow. More complex agentic systems with multiple tools and integrations take 6 to 12 weeks depending on scope." },
+      "item7": { "question": "What is Agentic AI and why is it different from a common assistant?", "answer": "Agentic AI is an architecture where the LLM acts as an autonomous orchestrator: it receives an objective, plans the necessary steps, calls tools, evaluates intermediate results and adjusts the plan until the task is complete. Unlike an assistant that answers questions, an agentic system can search the web, query a database, send an email and update a CRM — all autonomously." },
+      "item8": { "question": "Is it possible to integrate the agent with WhatsApp, internal systems and CRM?", "answer": "Yes. We integrate via WhatsApp Business API (official), REST APIs from CRMs (Salesforce, HubSpot, Pipedrive), ERPs, databases and any system with an available API. n8n acts as integration orchestrator, connecting the agent to the tool ecosystem the company already uses without replacing what works." },
+      "item9": { "question": "What is the real ROI of implementing AI in my company?", "answer": "The ROI depends on the use case and operation volume, but AI automation projects in support, qualification and document processes typically return 3 to 6 times the investment in 12 months. The main factors: 30-70% reduction in support costs, 4-8 hours saved per employee per week on document tasks and the ability to handle more demand without growing the team. Our free technical diagnosis maps the processes with the highest return potential before any investment." },
+      "item10": { "question": "How quickly does AI automation start paying for itself?", "answer": "For support and lead qualification automations, the typical payback is 60 to 120 days. n8n + LLM flows for triage and data extraction generally pay back in 30 to 60 days. RAG systems over internal documents usually show visible return in under 30 days from the immediate reduction in time the team spends searching for information — before any other optimization." }
+    },
+    "cta": {
+      "eyebrow": "Next step",
+      "heading": "If your operation can gain scale, speed or quality with AI, the diagnosis shows where to start.",
+      "description": "We map the process with the highest ROI for AI automation, define the architecture and deliver a proposal with stack, timeline and investment.",
+      "primaryCta": "I want an AI automation diagnosis",
+      "secondaryCta": "View main website"
+    }
   },
   "footer": {
     "rights": "© 2026 All rights reserved.",

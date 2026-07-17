@@ -4,7 +4,8 @@
     "projects": "Projetos",
     "contact": "Contato",
     "clientArea": "Área do Cliente",
-    "talkToUs": "Fale conosco"
+    "talkToUs": "Fale conosco",
+    "backToSite": "Site"
   },
   "hero": {
     "badge": "Agência de software para negócios que crescem",
@@ -33,6 +34,7 @@
     "heading": "Serviços que transformam negócios",
     "subheading": "Da estratégia ao código: tecnologia que nasce da sua visão de negócio e gera resultado com agilidade e critério",
     "cta": "Fale conosco",
+    "websiteCta": "Ver solução",
     "websitesTitle": "Websites & Landing Pages",
     "websitesDesc": "Páginas com alta performance, SEO técnico e foco em conversão. Do design ao deploy em dias. Inicie sua visibilidade.",
     "systemsTitle": "Sistemas sob Medida",
@@ -163,6 +165,406 @@
     "errInvalidAiResponse": "Resposta inválida da IA. Tente de novo.",
     "errInvalidAiJson": "Não foi possível processar a resposta da IA.",
     "errGeneric": "Algo deu errado. Tente de novo."
+  },
+  "solutionWebsite": {
+    "meta": {
+      "serviceName": "Websites, Landing Pages e Sites Institucionais",
+      "serviceType": "Desenvolvimento de websites e landing pages com SEO técnico"
+    },
+    "breadcrumb": {
+      "home": "Início",
+      "current": "Websites & Landing Pages"
+    },
+    "hero": {
+      "badge": "Solução 01 · Presença digital com performance e conversão",
+      "title": "Websites, landing pages e sites institucionais pensados para gerar visibilidade e oportunidade comercial.",
+      "subtitle": "Páginas com SEO técnico, performance, copy de conversão e estrutura pronta para campanhas, captação orgânica e crescimento contínuo.",
+      "primaryCta": "Solicitar diagnóstico desta solução",
+      "secondaryCta": "Voltar para a home",
+      "proof1": {
+        "value": "SEO",
+        "title": "Base técnica pronta para descoberta",
+        "description": "Arquitetura, headings, metadata e estrutura de conteúdo desenhados para busca orgânica."
+      },
+      "proof2": {
+        "value": "UX",
+        "title": "Design institucional com foco comercial",
+        "description": "Layout premium, hierarquia clara e páginas preparadas para apresentar serviço, prova e CTA."
+      },
+      "proof3": {
+        "value": "CRO",
+        "title": "Conversão além da estética",
+        "description": "Formulários, seções de prova e narrativa orientada a captar leads mais qualificados."
+      }
+    },
+    "problems": {
+      "eyebrow": "Problema de negócio",
+      "heading": "Quando o site é genérico, lento ou mal estruturado, ele não ajuda vendas nem descoberta orgânica.",
+      "intro": "Empresas que dependem apenas de indicação, perfil social ou tráfego pago costumam perder autoridade, cliques e oportunidades quando sua presença web não responde bem à intenção do cliente.",
+      "card1": {
+        "title": "Presença fraca para quem ainda está pesquisando",
+        "description": "O potencial cliente procura no Google, entra no site e não entende claramente serviço, diferencial, prova ou próximo passo."
+      },
+      "card2": {
+        "title": "Landing pages que não convertem campanhas",
+        "description": "Tráfego pago ou orgânico chega, mas a página não sustenta a promessa, não qualifica a oferta e não conduz para ação."
+      },
+      "card3": {
+        "title": "Site institucional que trava evolução comercial",
+        "description": "Sem CMS adequado, sem páginas de solução e sem estrutura de conteúdo, o site vira um ativo estático que não escala marketing."
+      }
+    },
+    "solution": {
+      "eyebrow": "O que entregamos",
+      "heading": "Uma presença digital que combina posicionamento, SEO técnico e conversão.",
+      "intro": "A solução é desenhada para marcas que precisam de um website institucional sólido, páginas de serviço com densidade semântica, landing pages de campanha e estrutura otimizada para aparecer nos resultados de busca tradicional e nos novos motores de busca com IA (GEO).",
+      "deliverable1": {
+        "title": "Website institucional com arquitetura comercial",
+        "description": "Definimos sitemap, narrativa, páginas-chave, blocos de prova, seções de serviço e FAQs para transformar o site em ativo de autoridade e aquisição."
+      },
+      "deliverable2": {
+        "title": "Landing pages com SEO técnico e foco em conversão",
+        "description": "Criamos páginas específicas para campanhas, soluções ou ofertas, com performance, copy alinhada à intenção de busca e CTA claro para diagnóstico ou proposta."
+      },
+      "deliverable3": {
+        "title": "GEO — Otimização para motores de busca com IA",
+        "description": "Estruturamos conteúdo, schema markup e arquitetura de página para que o site seja citado como fonte por Google AI Overviews, Perplexity, Bing Copilot e ChatGPT Search. Inclui HowTo schema, FAQPage, AggregateRating e prosa de alta densidade semântica."
+      }
+    },
+    "useCases": {
+      "eyebrow": "Casos de uso",
+      "heading": "Onde essa solução normalmente cria mais impacto.",
+      "card1": {
+        "title": "Website institucional premium",
+        "description": "Para empresas que precisam apresentar posicionamento, serviços, método, provas e canais de contato com mais clareza."
+      },
+      "card2": {
+        "title": "Landing page para campanha ou captação",
+        "description": "Para anúncios, lançamentos, diagnóstico gratuito, geração de briefing ou páginas de oferta comercial."
+      },
+      "card3": {
+        "title": "Páginas de serviço e solução para SEO",
+        "description": "Para ranquear por intenção comercial e escapar da dependência de uma home genérica."
+      },
+      "card4": {
+        "title": "Estrutura multilíngue para expansão",
+        "description": "Para marcas que querem operar em PT, EN e ES sem perder consistência de conteúdo e SEO internacional."
+      },
+      "card5": {
+        "title": "Escritórios, consultorias e prestadores de serviço",
+        "description": "Para profissionais liberais, escritórios de advocacia, contabilidade, consultoria ou saúde que precisam de presença digital sólida com credibilidade, prova de expertise e geração de contato qualificado."
+      },
+      "card6": {
+        "title": "Startups em validação e lançamentos de produto",
+        "description": "Para times de produto que precisam de landing page de validação, página de espera ou site de lançamento com rastreamento de conversão e integração com automações de qualificação."
+      },
+      "card7": {
+        "title": "Visibilidade em buscas geradas por IA (GEO)",
+        "description": "Para marcas que querem aparecer como fonte citada em Google AI Overviews, Perplexity e ChatGPT Search. Estruturamos conteúdo, schema e arquitetura para que o site seja referenciado pelos principais motores de IA."
+      }
+    },
+    "process": {
+      "eyebrow": "Como implementamos",
+      "heading": "Do diagnóstico ao deploy com clareza de escopo e intenção de negócio.",
+      "step1": {
+        "step": "Etapa 01",
+        "title": "Diagnóstico da presença atual",
+        "description": "Avaliamos posicionamento, concorrência, gargalos de conversão, arquitetura de conteúdo e objetivos da marca."
+      },
+      "step2": {
+        "step": "Etapa 02",
+        "title": "Arquitetura de páginas e wireframe",
+        "description": "Definimos páginas-chave, fluxo de leitura, hierarquia semântica, blocos de prova e layout de alta fidelidade."
+      },
+      "step3": {
+        "step": "Etapa 03",
+        "title": "Copy, design e implementação",
+        "description": "Construímos o front-end com foco em performance, clareza de oferta, integração com lead capture e consistência visual."
+      },
+      "step4": {
+        "step": "Etapa 04",
+        "title": "Publicação e evolução contínua",
+        "description": "Entregamos a base pronta para novas páginas, campanhas, monitoramento de SEO e otimização de conversão."
+      }
+    },
+    "stack": {
+      "eyebrow": "Stack e escopo técnico",
+      "heading": "Tecnologia, conteúdo e estrutura orientados a performance real.",
+      "intro": "A entrega pode incluir implementação completa em Next.js, integrações com formulários e automação, estrutura SEO e evolução contínua do conteúdo.",
+      "items": {
+        "item1": "Implementação performática com Next.js, TypeScript e TailwindCSS — PageSpeed 90+ e Core Web Vitals aprovados",
+        "item2": "Metadata por página, canonical, hreflang, Open Graph e sitemap",
+        "item3": "Estrutura pronta para páginas de serviço, cases e conteúdo estratégico",
+        "item4": "Integração com formulários, automação de leads e webhook n8n",
+        "item5": "Seções de prova social, FAQs, CTA comercial e narrativa modular",
+        "item6": "Base pronta para expansão multilíngue e novas campanhas",
+        "item7": "Site responsivo, acessível e compatível com todos os dispositivos — mobile-first por padrão",
+        "item8": "GEO: HowTo schema, FAQPage, AggregateRating e conteúdo estruturado para citação por Google AI, Perplexity e Bing Copilot"
+      }
+    },
+    "proof": {
+      "eyebrow": "O que diferencia a abordagem",
+      "heading": "Não entregamos apenas uma página bonita. Entregamos um ativo comercial evolutivo.",
+      "description": "O objetivo é criar uma estrutura que funcione para branding, busca orgânica, tráfego pago e operação comercial, sem separar design da função de negócio.",
+      "caseLabel": "Exemplo de aplicação",
+      "caseTitle": "Site institucional + páginas de solução + landing de campanha",
+      "caseDescription": "Uma marca pode ter um institucional robusto para credibilidade, páginas específicas para ranqueamento por serviço e landing pages independentes para campanhas e validação de oferta.",
+      "checklist": {
+        "item1": "Estrutura pronta para crescer sem refazer o site inteiro",
+        "item2": "Páginas desenhadas para descoberta, leitura e ação comercial",
+        "item3": "Stack compatível com campanhas, SEO e evolução de conteúdo",
+        "item4": "Integração nativa com captura de lead e automação"
+      }
+    },
+    "faq": {
+      "eyebrow": "Perguntas frequentes",
+      "heading": "Dúvidas comuns antes de iniciar um website ou landing page",
+      "item1": {
+        "question": "Qual a diferença entre website institucional e landing page?",
+        "answer": "O website institucional apresenta a marca, serviços, provas e estrutura de navegação mais ampla. A landing page é uma página mais focada, desenhada para uma oferta, campanha ou objetivo de conversão específico."
+      },
+      "item2": {
+        "question": "Uma landing page também pode ranquear no Google?",
+        "answer": "Sim, desde que tenha estrutura técnica correta, conteúdo alinhado à intenção de busca e proposta suficientemente relevante. Nem toda landing page é apenas para mídia paga."
+      },
+      "item3": {
+        "question": "Vocês entregam só design ou também estratégia de conteúdo e SEO?",
+        "answer": "A proposta inclui definição de arquitetura, conteúdo orientado a negócio, SEO técnico, copy de conversão e implementação. O design é apenas uma parte da entrega."
+      },
+      "item4": {
+        "question": "Essa solução já pode nascer integrada com captação de leads?",
+        "answer": "Sim. Podemos conectar formulários, automação via n8n, CRM, e-mail e fluxos de qualificação para que o site já opere como canal comercial desde o lançamento."
+      },
+      "item5": {
+        "question": "Quanto custa criar um site profissional?",
+        "answer": "O investimento varia conforme o escopo: uma landing page de campanha ou diagnóstico parte de um custo menor, enquanto um site institucional completo com páginas de solução, SEO técnico e integrações exige orçamento proporcional à complexidade. Solicitamos um diagnóstico para apresentar uma proposta alinhada ao seu objetivo e orçamento disponível."
+      },
+      "item6": {
+        "question": "Quanto tempo leva para criar um website ou landing page?",
+        "answer": "Uma landing page focada pode ser entregue em 5 a 10 dias úteis. Um site institucional completo com múltiplas páginas, arquitetura de conteúdo e integrações geralmente leva de 3 a 6 semanas, dependendo do volume de páginas e da complexidade do projeto."
+      },
+      "item7": {
+        "question": "O que são Core Web Vitals e por que impactam o ranking do meu site?",
+        "answer": "Core Web Vitals são métricas de performance do Google que avaliam velocidade de carregamento (LCP), interatividade (INP) e estabilidade visual (CLS). Sites com bons resultados nessas métricas tendem a ter vantagem de posicionamento orgânico. Toda entrega da QuantumTech é otimizada para atingir PageSpeed 90+ e aprovação nos Core Web Vitals."
+      },
+      "item8": {
+        "question": "Site em Next.js ou WordPress: qual é a melhor escolha para empresa?",
+        "answer": "Depende do objetivo. WordPress é adequado para conteúdo editorial com edição frequente por equipes não técnicas. Next.js é a escolha ideal quando o projeto exige alta performance, SEO técnico avançado, integrações com sistemas externos, estrutura multilíngue e escalabilidade sem limitações de plugins. Para marcas que precisam de autoridade digital, conversão e evolução técnica contínua, Next.js é nossa recomendação."
+      },
+      "item9": {
+        "question": "O que é GEO e por que meu site precisa disso em 2026?",
+        "answer": "GEO (Generative Engine Optimization) é a prática de otimizar conteúdo para aparecer como fonte citada em respostas geradas por IA — Google AI Overviews, Perplexity, Bing Copilot e ChatGPT Search. Em 2026, uma parcela crescente das pesquisas comerciais resulta em respostas sintéticas onde o Google ou a IA lista agências, serviços e soluções. Aparecer nessas citações exige estrutura técnica específica: FAQPage, HowTo schema, AggregateRating, prosa citável e sinais de E-E-A-T. Todo website entregue pela QuantumTech já inclui essa estrutura de base."
+      }
+    },
+    "cta": {
+      "eyebrow": "Próximo passo",
+      "heading": "Se a sua marca precisa de presença digital que posicione, ranqueie e converta, essa é a base certa para começar.",
+      "description": "Mapeamos o cenário atual, definimos a arquitetura ideal e entregamos uma solução que pode evoluir em novas páginas, campanhas e automações comerciais.",
+      "primaryCta": "Quero um diagnóstico desta solução",
+      "secondaryCta": "Ver site principal"
+    }
+  },
+  "solutionSystems": {
+    "meta": {
+      "serviceName": "Desenvolvimento de Sistemas sob Medida, CRM, ERP e SaaS",
+      "serviceType": "Desenvolvimento de sistemas e plataformas sob medida"
+    },
+    "breadcrumb": { "home": "Início", "current": "Sistemas sob Medida" },
+    "hero": {
+      "badge": "Solução 02 · Sistemas, portais e SaaS sob medida",
+      "title": "Sistemas sob medida, portais e SaaS desenvolvidos para o processo real do seu negócio.",
+      "subtitle": "CRMs, ERPs, portais B2B e plataformas SaaS construídos com stack moderna, modelagem de dados precisa e UX que a equipe realmente adota.",
+      "primaryCta": "Solicitar diagnóstico desta solução",
+      "secondaryCta": "Voltar para a home",
+      "proof1": { "value": "API", "title": "Integrações com sistemas existentes", "description": "Conectamos o sistema novo às ferramentas que você já usa via REST, webhooks e automação com n8n." },
+      "proof2": { "value": "SaaS", "title": "Arquitetura pronta para crescer", "description": "Multi-tenant, permissões granulares e módulos que evoluem sem reescrever o núcleo da plataforma." },
+      "proof3": { "value": "UX", "title": "Interface que a equipe adota", "description": "Design funcional, fluxo alinhado ao processo e onboarding que reduz resistência interna." }
+    },
+    "problems": {
+      "eyebrow": "Problema de negócio",
+      "heading": "Planilhas, ferramentas genéricas e sistemas desconectados travam o crescimento operacional.",
+      "intro": "Empresas em crescimento chegam a um ponto onde as ferramentas disponíveis não se encaixam mais no processo real. O resultado é retrabalho, dados fragmentados e equipes que operam fora do sistema.",
+      "card1": { "title": "Processo manual que não escala", "description": "O que funciona em planilhas ou no CRM genérico cria gargalos quando o volume de operação aumenta e a equipe cresce." },
+      "card2": { "title": "Sistemas que o negócio contorna, não usa", "description": "Ferramentas genéricas forçam a empresa a se adaptar ao software. O resultado são processos paralelos fora do sistema." },
+      "card3": { "title": "Dados fragmentados sem visão unificada", "description": "Informações espalhadas entre ERP, CRM e planilhas impossibilitam decisões ágeis e relatórios confiáveis." }
+    },
+    "solution": {
+      "eyebrow": "O que entregamos",
+      "heading": "Um sistema que nasce do processo real da empresa, não de um template.",
+      "intro": "A solução começa pelo mapeamento do processo de negócio. Construímos sistemas que se encaixam na operação, integram os canais existentes e escalam conforme o crescimento.",
+      "deliverable1": { "title": "Sistema ou portal sob medida com modelagem de processo", "description": "Mapeamos regras de negócio, fluxos, papéis e permissões para construir um sistema que reflete como a empresa opera — com interface que a equipe adota sem resistência." },
+      "deliverable2": { "title": "Plataforma SaaS ou MVP escalável", "description": "Para startups e empresas que querem lançar um produto digital: arquitetura SaaS com multi-tenancy, autenticação, billing e módulos prontos para crescer sem reescrever o núcleo." }
+    },
+    "useCases": {
+      "eyebrow": "Casos de uso",
+      "heading": "Onde essa solução normalmente cria mais impacto.",
+      "card1": { "title": "CRM comercial personalizado", "description": "Para equipes de vendas com funil, histórico de cliente, automação de follow-up e relatórios alinhados ao processo comercial real." },
+      "card2": { "title": "Portal B2B ou área do cliente", "description": "Para empresas que precisam dar acesso estruturado a clientes, parceiros ou fornecedores com aprovações e comunicação centralizada." },
+      "card3": { "title": "ERP simplificado para operações", "description": "Para empresas que precisam unificar financeiro, estoque, pedidos e equipe em uma única plataforma sem complexidade enterprise." },
+      "card4": { "title": "MVP de plataforma SaaS", "description": "Para startups que precisam validar o modelo de negócio com um produto funcional, seguro e pronto para os primeiros clientes pagantes." }
+    },
+    "process": {
+      "eyebrow": "Como implementamos",
+      "heading": "Do levantamento de processo ao deploy com foco em adoção real.",
+      "step1": { "step": "Etapa 01", "title": "Levantamento de processo e regras de negócio", "description": "Mapeamos fluxos, papéis, excessões e integrações necessárias antes de escrever uma linha de código." },
+      "step2": { "step": "Etapa 02", "title": "Modelagem de dados e arquitetura técnica", "description": "Definimos o modelo de dados, a stack técnica e a estrutura que permite crescer sem reescrever." },
+      "step3": { "step": "Etapa 03", "title": "Desenvolvimento incremental com entregas semanais", "description": "Construímos em ciclos curtos com demos reais, feedback da equipe e ajustes contínuos." },
+      "step4": { "step": "Etapa 04", "title": "Deploy, documentação e evolução contínua", "description": "Entregamos em produção com documentação técnica, treinamento e plano de evolução para novas funcionalidades." }
+    },
+    "stack": {
+      "eyebrow": "Stack e escopo técnico",
+      "heading": "Tecnologia moderna orientada à manutenibilidade e escala.",
+      "intro": "Cada sistema é construído com a stack adequada ao contexto: performance, segurança, integração e capacidade de evoluir sem acumular dívida técnica.",
+      "items": {
+        "item1": "Next.js, React e Node.js com TypeScript — arquitetura modular e tipagem estrita",
+        "item2": "PostgreSQL e Prisma com modelagem de dados orientada ao processo de negócio",
+        "item3": "Autenticação, controle de permissões por perfil e auditoria de ações críticas",
+        "item4": "Integrações via REST, GraphQL, webhooks e automações com n8n",
+        "item5": "Dashboards, relatórios e exportação de dados em tempo real",
+        "item6": "Deploy em cloud com CI/CD, monitoramento de erros e suporte técnico contínuo"
+      }
+    },
+    "proof": {
+      "eyebrow": "O que diferencia a abordagem",
+      "heading": "Não entregamos código. Entregamos um sistema que a equipe usa e o negócio confia.",
+      "description": "A diferença entre um sistema bem feito e um sistema abandonado está na modelagem do processo, na qualidade da interface e no alinhamento com quem vai usar no dia a dia.",
+      "caseLabel": "Exemplo de aplicação",
+      "caseTitle": "Portal de gestão B2B com dashboard financeiro e controle de pedidos",
+      "caseDescription": "Uma empresa de serviços precisava substituir planilhas e e-mails por um portal centralizado. Entregamos módulo de pedidos, financeiro, aprovações e acesso por perfil — com adoção de 100% da equipe em 30 dias.",
+      "checklist": {
+        "item1": "Arquitetura pronta para novas funcionalidades sem reescrever o núcleo",
+        "item2": "Interface alinhada ao processo real, não a um template genérico",
+        "item3": "Integrações nativas com ferramentas e canais já usados pela equipe",
+        "item4": "Código-fonte, documentação técnica e suporte incluídos na entrega"
+      }
+    },
+    "faq": {
+      "eyebrow": "Perguntas frequentes",
+      "heading": "Dúvidas comuns antes de iniciar um sistema sob medida",
+      "item1": { "question": "Qual a diferença entre um sistema sob medida e um SaaS genérico?", "answer": "Um SaaS genérico resolve 80% dos casos com configuração. Um sistema sob medida é construído exatamente para o processo da sua empresa — com as regras, fluxos e integrações que fazem sentido para o seu negócio. A escolha depende da complexidade do processo e do quanto ele é um diferencial competitivo." },
+      "item2": { "question": "Em quanto tempo um MVP de sistema pode ser entregue?", "answer": "Um MVP funcional com as funcionalidades core geralmente pode ser entregue entre 4 e 10 semanas. Sistemas mais simples (portais, CRMs básicos) ficam próximos de 4 semanas. Plataformas SaaS com billing e multi-tenancy, próximas de 10 semanas." },
+      "item3": { "question": "O sistema pode crescer com o negócio sem reescrever tudo?", "answer": "Sim, desde que a arquitetura inicial contemple esse crescimento. Construímos com separação de módulos, modelagem de dados extensível e APIs bem definidas para que novas funcionalidades sejam adicionadas sem impacto no que já está em produção." },
+      "item4": { "question": "Quanto custa desenvolver um sistema sob medida?", "answer": "O investimento depende do escopo, do número de módulos e das integrações envolvidas. Projetos de menor complexidade partem de um valor menor; plataformas SaaS completas exigem investimento proporcional. Solicitamos um diagnóstico técnico gratuito para apresentar uma proposta com escopo e estimativa detalhada." },
+      "item5": { "question": "Vocês entregam o código-fonte e a documentação técnica?", "answer": "Sim. O cliente recebe o código-fonte completo, documentação técnica de arquitetura e acesso total ao repositório. Não há lock-in: o projeto é seu e pode ser evoluído por qualquer equipe técnica futura." }
+    },
+    "cta": {
+      "eyebrow": "Próximo passo",
+      "heading": "Se o seu processo exige mais do que um SaaS genérico entrega, essa é a solução para começar.",
+      "description": "Mapeamos o processo, avaliamos o escopo técnico e entregamos uma proposta com stack, prazo e investimento — sem compromisso.",
+      "primaryCta": "Quero um diagnóstico do meu processo",
+      "secondaryCta": "Ver site principal"
+    }
+  },
+  "solutionAI": {
+    "meta": {
+      "serviceName": "IA Generativa, Agentes Autônomos, RAG e Automação com LLM e n8n",
+      "serviceType": "Desenvolvimento de agentes de IA, RAG e automação com LLM"
+    },
+    "breadcrumb": { "home": "Início", "current": "IA & Automação" },
+    "hero": {
+      "badge": "Solução 03 · IA generativa, agentes e automação de processos",
+      "title": "Agentes de IA, RAG e automação com LLM para operações que escalam sem crescer o time.",
+      "subtitle": "Construímos agentes autônomos, sistemas RAG sobre documentos internos e automações com n8n e LLMs que eliminam trabalho manual, qualificam leads e respondem clientes 24/7.",
+      "primaryCta": "Solicitar diagnóstico desta solução",
+      "secondaryCta": "Voltar para a home",
+      "proof1": { "value": "LLM", "title": "OpenAI, Claude e Gemini", "description": "Selecionamos o modelo certo para cada caso de uso — GPT-4o, Claude 3.5, Gemini 1.5 ou modelos locais como Llama e Mistral." },
+      "proof2": { "value": "RAG", "title": "Base de conhecimento proprietária", "description": "O agente acessa documentos, contratos e bases internas via embeddings sem vazar dados ao modelo externo." },
+      "proof3": { "value": "Agent", "title": "Agentes que executam ações reais", "description": "Além de responder, o agente executa ações reais 24/7 — resultados típicos incluem ROI de 3-6x em 12 meses e operação contínua sem custo variável de headcount." }
+    },
+    "problems": {
+      "eyebrow": "Problema de negócio",
+      "heading": "Atendimento lento, processos repetitivos e dados presos em documentos consomem o time sem gerar resultado.",
+      "intro": "Empresas com operação crescente chegam a um ponto onde contratar mais pessoas para tarefas repetitivas não escala. IA generativa e agentes autônomos resolvem isso com precisão e custo previsível.",
+      "card1": { "title": "Atendimento que não escala com volume", "description": "Responder perguntas repetitivas, qualificar leads e coletar informações via WhatsApp ou chat consome time de pessoas que poderiam estar em tarefas estratégicas." },
+      "card2": { "title": "Conhecimento preso em documentos sem acesso rápido", "description": "Contratos, manuais, políticas e FAQs existem, mas a equipe perde tempo procurando. RAG transforma documentos em uma base consulтável em linguagem natural." },
+      "card3": { "title": "Processos manuais que poderiam ser automatizados com IA", "description": "Triagem de e-mails, extração de dados de PDFs e geração de relatórios ainda são feitos manualmente em muitas empresas — e podem ser eliminados com LLM + n8n." }
+    },
+    "stats": {
+      "label": "Resultados com automação de IA",
+      "stat1": { "value": "70%+", "label": "Das consultas resolvidas automaticamente sem intervenção humana" },
+      "stat2": { "value": "−65%", "label": "No tempo de busca em bases documentais com RAG" },
+      "stat3": { "value": "4-8h", "label": "Economizadas por colaborador/semana em processos documentais" },
+      "stat4": { "value": "3-6x", "label": "ROI médio em automação com IA nos primeiros 12 meses" }
+    },
+    "solution": {
+      "eyebrow": "O que entregamos",
+      "heading": "Agentes, RAG e automações que trabalham 24/7 com a inteligência do seu negócio.",
+      "intro": "Construímos sistemas de IA que se integram à operação real: agentes de atendimento, pipelines RAG sobre documentos proprietários e fluxos agentic que tomam decisões e executam ações sem intervenção humana.",
+      "deliverable1": { "title": "Agentes de IA com LLM, memória e execução de ações", "description": "Desenvolvemos agentes com acesso a ferramentas (APIs, bancos de dados, e-mail, WhatsApp), memória de conversa, lógica de decisão e capacidade de escalonar para humanos. Usamos OpenAI (GPT-4o), Anthropic (Claude 3.5) ou modelos locais conforme o contexto." },
+      "deliverable2": { "title": "RAG e automação de processos com n8n", "description": "Implementamos pipelines RAG com LangChain ou LlamaIndex sobre documentos internos, integrados a fluxos n8n que orquestram LLMs, webhooks, CRMs e sistemas externos para eliminar processos manuais." }
+    },
+    "useCases": {
+      "eyebrow": "Casos de uso",
+      "heading": "Onde IA generativa e automação criam impacto imediato.",
+      "card1": { "title": "Agente de atendimento inteligente", "description": "Chatbot com LLM que entende contexto, acessa histórico do cliente, responde com precisão e executa ações reais — WhatsApp, chat no site ou canal interno." },
+      "card2": { "title": "Agentic AI — agentes autônomos", "description": "Agentes que recebem objetivos e executam múltiplos passos de forma autônoma: pesquisar, consultar APIs, tomar decisões e entregar resultados sem intervenção humana a cada passo." },
+      "card3": { "title": "RAG sobre documentos e bases internas", "description": "Consulta em linguagem natural sobre contratos, manuais, políticas e históricos proprietários — sem vazar dados ao modelo externo. Powered by LangChain e LlamaIndex." },
+      "card4": { "title": "Automação de processos com n8n + LLM", "description": "Fluxos que combinam gatilhos (e-mail, formulário, CRM), processamento com LLM (triagem, classificação, extração) e ações automáticas em sistemas downstream." },
+      "card5": { "title": "Extração e análise de dados com IA", "description": "Extração estruturada de dados de PDFs, notas fiscais e contratos. Geração automática de relatórios, resumos e insights com modelos de linguagem." },
+      "card6": { "title": "Agente comercial autônomo", "description": "Qualificação automática de leads via WhatsApp ou formulário, follow-up inteligente baseado em contexto e escala para vendedor humano no momento certo." }
+    },
+    "demo": {
+      "imageAlt": "Exemplo de painel de agente de IA desenvolvido pela QuantumTech",
+      "imageCaption": "Exemplo de painel de monitoramento de agente de atendimento — conversas, intenções detectadas e ações executadas em tempo real.",
+      "imageSoon": "Imagem do projeto em breve"
+    },
+    "process": {
+      "eyebrow": "Como implementamos",
+      "heading": "Do diagnóstico de processo ao agente em produção com resultado mensurável.",
+      "step1": { "step": "Etapa 01", "title": "Diagnóstico de processo e caso de uso", "description": "Identificamos qual problema tem maior ROI para automação com IA: atendimento, documentos, processos internos ou análise de dados." },
+      "step2": { "step": "Etapa 02", "title": "Arquitetura do agente e seleção de modelo", "description": "Definimos a stack: LLM (OpenAI, Claude, Gemini ou local), framework (LangChain, LlamaIndex), orquestrador (n8n) e integrações necessárias." },
+      "step3": { "step": "Etapa 03", "title": "Desenvolvimento, testes e ajuste fino", "description": "Construímos o agente em ciclos curtos, testamos com dados reais, ajustamos prompts e ferramentas até atingir o resultado esperado." },
+      "step4": { "step": "Etapa 04", "title": "Deploy, monitoramento e evolução", "description": "Colocamos em produção com logs de auditoria, monitoramento de qualidade das respostas e plano de evolução para novas capacidades." }
+    },
+    "stack": {
+      "eyebrow": "Stack e escopo técnico",
+      "heading": "Modelos, frameworks e orquestração orientados ao resultado do negócio.",
+      "intro": "Selecionamos cada camada com base no caso de uso: latência, custo, privacidade dos dados e capacidade de integração com os sistemas existentes.",
+      "items": {
+        "item1": "LLMs: OpenAI (GPT-4o), Anthropic (Claude 3.5 Sonnet), Google (Gemini 1.5) e modelos locais (Llama 3, Mistral)",
+        "item2": "RAG: LangChain e LlamaIndex com bases vetoriais — pgvector, Pinecone e Chroma",
+        "item3": "Agentic AI: agentes com ferramentas, memória persistente e execução de ações multi-passo",
+        "item4": "Automação: n8n para orquestração de fluxos, webhooks, CRMs e sistemas externos",
+        "item5": "Integrações: WhatsApp (API oficial), Slack, e-mail, REST APIs e bancos de dados",
+        "item6": "Segurança: isolamento de tenant, sem envio de PII desnecessário e logs de auditoria",
+        "item7": "Monitoramento: tracking de conversas, detecção de falhas e feedback loop contínuo"
+      }
+    },
+    "proof": {
+      "eyebrow": "O que diferencia a abordagem",
+      "heading": "Não entregamos um chatbot. Entregamos um agente que trabalha junto com o seu negócio.",
+      "description": "A diferença entre um agente de IA que funciona e um que cria frustração está na arquitetura de ferramentas, na qualidade do prompt, na gestão de contexto e no alinhamento com o processo real.",
+      "caseLabel": "Exemplo de aplicação",
+      "caseTitle": "Agente de atendimento com RAG sobre base de produtos + integração com CRM",
+      "caseDescription": "Uma empresa B2B implementou um agente que responde perguntas técnicas via RAG, qualifica o interesse do cliente e cria oportunidades no CRM automaticamente — atendendo 400+ contatos por dia sem time de SDR, com redução de 68% no custo de atendimento e tempo de resposta caindo de 8h para 30 segundos.",
+      "checklist": {
+        "item1": "Agente com acesso a dados reais da empresa via RAG e ferramentas integradas",
+        "item2": "Seleção de modelo por caso de uso: custo, latência e privacidade considerados",
+        "item3": "Orquestração com n8n para conectar IA aos sistemas que a empresa já usa",
+        "item4": "Logs, monitoramento e feedback loop para evolução contínua da qualidade"
+      }
+    },
+    "faq": {
+      "eyebrow": "Perguntas frequentes",
+      "heading": "Dúvidas comuns antes de implementar IA generativa e agentes",
+      "item1": { "question": "O que é um agente de IA e como ele difere de um chatbot simples?", "answer": "Um chatbot simples segue um fluxo fixo de perguntas e respostas. Um agente de IA com LLM entende linguagem natural, acessa ferramentas externas (APIs, bancos de dados, e-mail) e pode executar ações de múltiplos passos de forma autônoma. Um agente agentic vai além: recebe um objetivo e decide por conta própria quais ferramentas usar e em qual sequência para alcançá-lo." },
+      "item2": { "question": "O que é RAG e quando devo usá-lo?", "answer": "RAG (Retrieval-Augmented Generation) conecta um LLM a uma base de documentos proprietária para que ele responda com precisão sobre o seu conteúdo — sem precisar retreinar o modelo. Use RAG quando sua empresa tem documentos, manuais, contratos ou bases de conhecimento que o modelo não conhece por padrão. Isso garante respostas precisas e sem alucinações sobre o seu contexto específico." },
+      "item3": { "question": "Qual a diferença entre automação com n8n e IA generativa?", "answer": "n8n é uma ferramenta de orquestração de fluxos que conecta sistemas, APIs e triggers. IA generativa (LLMs) adiciona capacidade de raciocínio, linguagem natural e tomada de decisão semântica. Os dois trabalham juntos: n8n orquestra o fluxo (quando acionar, o que conectar), o LLM processa e decide (classificar, resumir, gerar, responder). A combinação elimina automações frágeis baseadas em regras fixas." },
+      "item4": { "question": "Minha empresa precisa de GPT-4o, Claude ou posso usar modelos menores?", "answer": "Depende do caso de uso. Para tarefas simples (classificação, extração, resumo), modelos menores como GPT-4o mini, Claude Haiku ou Llama 3 têm custo muito menor com resultados equivalentes. Para raciocínio complexo ou análise jurídica, GPT-4o ou Claude 3.5 Sonnet são mais indicados. Sempre avaliamos custo, latência e privacidade para recomendar o modelo certo." },
+      "item5": { "question": "Os dados da empresa ficam seguros ao usar LLMs?", "answer": "Sim, com a arquitetura correta. Usamos RAG para que dados proprietários fiquem na sua infraestrutura e apenas trechos relevantes sejam enviados ao modelo. Configuramos sem armazenamento de dados de treinamento (OpenAI Enterprise, Claude API com zero data retention). Para alta sensibilidade, deployamos modelos locais (Llama, Mistral) que nunca saem do seu ambiente." },
+      "item6": { "question": "Em quanto tempo um agente de IA pode ser implementado?", "answer": "Um agente de atendimento básico com RAG pode ser implementado em 2 a 4 semanas. Automações com n8n e LLM para processos internos geralmente levam de 1 a 3 semanas por fluxo. Sistemas agentic mais complexos com múltiplas ferramentas e múltiplos sistemas levam de 6 a 12 semanas dependendo do escopo." },
+      "item7": { "question": "O que é Agentic AI e por que é diferente de um assistente comum?", "answer": "Agentic AI é uma arquitetura onde o LLM age como um orquestrador autônomo: recebe um objetivo, planeja os passos necessários, chama ferramentas, avalia os resultados intermediários e ajusta o plano até concluir a tarefa. Diferente de um assistente que responde perguntas, um sistema agentic pode pesquisar, consultar um banco de dados, enviar um e-mail e atualizar um CRM — tudo de forma autônoma." },
+      "item8": { "question": "É possível integrar o agente com WhatsApp, sistemas internos e CRM?", "answer": "Sim. Integramos via WhatsApp Business API (oficial), REST APIs de CRMs (Salesforce, HubSpot, Pipedrive), ERPs, bases de dados e qualquer sistema com API disponível. O n8n atua como orquestrador de integrações, conectando o agente ao ecossistema de ferramentas que a empresa já usa sem substituir o que funciona." },
+      "item9": { "question": "Qual o ROI real de implementar IA na minha empresa?", "answer": "O ROI depende do caso de uso e do volume de operação, mas projetos de automação com IA em atendimento, qualificação e processos documentais têm retorno médio de 3 a 6 vezes o investimento em 12 meses. Os principais fatores: redução de 30-70% no custo de atendimento, economia de 4-8h por colaborador/semana em tarefas documentais e capacidade de atender mais demanda sem crescer o time. O diagnóstico técnico gratuito mapeia os processos com maior potencial de retorno antes de qualquer investimento." },
+      "item10": { "question": "Em quanto tempo a automação com IA começa a se pagar?", "answer": "Para automações de atendimento e qualificação de leads, o payback típico é de 60 a 120 dias. Fluxos com n8n + LLM para triagem e extração de dados geralmente se pagam em 30 a 60 dias. Sistemas RAG sobre documentos internos costumam ter retorno visível em menos de 30 dias pela redução imediata no tempo que a equipe gasta procurando informação — antes de qualquer outra otimização." }
+    },
+    "cta": {
+      "eyebrow": "Próximo passo",
+      "heading": "Se sua operação pode ganhar escala, velocidade ou qualidade com IA, o diagnóstico mostra onde começar.",
+      "description": "Mapeamos o processo com maior ROI para automação com IA, definimos a arquitetura e entregamos uma proposta com stack, prazo e investimento.",
+      "primaryCta": "Quero um diagnóstico de automação com IA",
+      "secondaryCta": "Ver site principal"
+    }
   },
   "footer": {
     "rights": "© 2026 Todos os direitos reservados.",
