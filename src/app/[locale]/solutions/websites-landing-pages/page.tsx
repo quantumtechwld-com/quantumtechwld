@@ -143,13 +143,6 @@ export default async function WebsiteLandingPagesSolutionPage({
         },
         areaServed: ["Brazil", "Portugal", "Europe", "United States"],
         url: solutionHref,
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.9",
-          ratingCount: "48",
-          bestRating: "5",
-          worstRating: "1",
-        },
       },
       {
         "@type": "BreadcrumbList",

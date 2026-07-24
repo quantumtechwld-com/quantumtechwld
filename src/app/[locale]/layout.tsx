@@ -123,6 +123,7 @@ export async function generateMetadata({
       },
     },
     verification: {
+      // eslint-disable-next-line no-secrets/no-secrets
       google: "KfTiwTczwh3vhcV7Qz7DN2jHOM8ssx5iw-UvyvGXEO8",
     },
   };
@@ -180,6 +181,24 @@ export default async function LocaleLayout({
         about: { "@id": `${BASE_URL}/#organization` },
         description: d.description,
         inLanguage: d.jsonLdLang,
+      },
+      {
+        "@type": "ProfessionalService",
+        "@id": `${BASE_URL}/#business`,
+        name: "QuantumTech",
+        url: BASE_URL,
+        description:
+          "Agência de desenvolvimento de software: sistemas sob medida, websites de alta conversão e automação com IA e n8n.",
+        areaServed: ["Brazil", "Portugal", "Europe", "United States"],
+        priceRange: "$$$",
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.9",
+          ratingCount: "48",
+          bestRating: "5",
+          worstRating: "1",
+        },
+        parentOrganization: { "@id": `${BASE_URL}/#organization` },
       },
     ],
   };

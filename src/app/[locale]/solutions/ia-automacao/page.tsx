@@ -146,13 +146,6 @@ export default async function IaAutomacaoSolutionPage({
         },
         areaServed: ["Brazil", "Portugal", "Europe", "United States"],
         url: solutionHref,
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.9",
-          ratingCount: "44",
-          bestRating: "5",
-          worstRating: "1",
-        },
       },
       {
         "@type": "BreadcrumbList",
