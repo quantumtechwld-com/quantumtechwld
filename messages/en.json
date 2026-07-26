@@ -505,7 +505,8 @@
     },
     "demo": {
       "imageAlt": "Example of AI agent dashboard developed by QuantumTech",
-      "imageCaption": "Example of support agent monitoring panel — conversations, detected intents and actions executed in real time.",
+      "imageCaption": "Example of support agent monitoring panel, conversations, detected intents and actions executed in real time.",
+      "imageComplement": "Sector-agnostic architecture: the agent understands context, queries business systems and executes actions across healthcare, e-commerce, services, education or internal operations.",
       "imageSoon": "Project image coming soon"
     },
     "process": {

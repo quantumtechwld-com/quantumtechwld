@@ -505,7 +505,8 @@
     },
     "demo": {
       "imageAlt": "Ejemplo de panel de agente de IA desarrollado por QuantumTech",
-      "imageCaption": "Ejemplo de panel de monitoreo de agente de atención — conversaciones, intenciones detectadas y acciones ejecutadas en tiempo real.",
+      "imageCaption": "Ejemplo de panel de monitoreo de agente de atención, conversaciones, intenciones detectadas y acciones ejecutadas en tiempo real.",
+      "imageComplement": "Arquitectura agnóstica al sector: el agente entiende el contexto, consulta sistemas de negocio y ejecuta acciones en salud, e-commerce, servicios, educación u operaciones internas.",
       "imageSoon": "Imagen del proyecto próximamente"
     },
     "process": {

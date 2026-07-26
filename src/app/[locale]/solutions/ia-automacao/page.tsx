@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import NextLink from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
@@ -9,7 +10,6 @@ import {
   CheckCircle2,
   ChevronRight,
   FileSearch,
-  LayoutDashboard,
   MessageSquare,
   Network,
   Rocket,
@@ -97,6 +97,7 @@ export default async function IaAutomacaoSolutionPage({
   const homeHref = withLocalePrefix(currentLocale, "/");
   const contactHref = getContactUrl(currentLocale);
   const solutionHref = `${BASE_URL}${withLocalePrefix(currentLocale, "/solutions/ia-automacao")}`;
+  const demoImageSrc = `/images/solutions/ia-automacao/agentops-hero-${currentLocale}.png`;
 
   const problems = [1, 2, 3].map((index) => ({
     title: t(`problems.card${index}.title`),
@@ -320,21 +321,26 @@ export default async function IaAutomacaoSolutionPage({
         </div>
       </section>
 
-      {/* ── DEMO IMAGE PLACEHOLDER ── */}
+      {/* ── DEMO IMAGE ── */}
       <section className="mx-auto max-w-6xl px-6 pb-4">
         <figure
-          aria-label={t("demo.imageAlt")}
-          className="overflow-hidden rounded-3xl border border-dashed border-white/15 bg-[#08101f]"
+          className="overflow-hidden rounded-3xl border border-white/10 bg-[#08101f] shadow-2xl shadow-emerald-950/30"
         >
-          <div className="flex min-h-80 flex-col items-center justify-center gap-4 p-10 text-center md:min-h-96">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-white/8 bg-white/3">
-              <LayoutDashboard size={28} className="text-slate-500" aria-hidden="true" />
-            </div>
-            <figcaption className="max-w-lg">
-              <p className="text-sm font-semibold text-slate-400">{t("demo.imageCaption")}</p>
-              <p className="mt-2 text-xs font-medium text-slate-600">{t("demo.imageSoon")}</p>
-            </figcaption>
+          <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+            <Image
+              src={demoImageSrc}
+              alt={t("demo.imageAlt")}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1152px) 1152px, 100vw"
+            />
           </div>
+          <figcaption className="border-t border-white/8 bg-[#07101f]/80 px-6 py-4 text-center">
+            <p className="text-sm font-semibold text-slate-300">{t("demo.imageCaption")}</p>
+            <p className="mx-auto mt-2 max-w-3xl text-xs font-medium leading-relaxed text-slate-400">
+              {t("demo.imageComplement")}
+            </p>
+          </figcaption>
         </figure>
       </section>
 

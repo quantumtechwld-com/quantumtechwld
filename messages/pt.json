@@ -505,7 +505,8 @@
     },
     "demo": {
       "imageAlt": "Exemplo de painel de agente de IA desenvolvido pela QuantumTech",
-      "imageCaption": "Exemplo de painel de monitoramento de agente de atendimento — conversas, intenções detectadas e ações executadas em tempo real.",
+      "imageCaption": "Exemplo de painel de monitoramento de agente de atendimento, conversas, intenções detectadas e ações executadas em tempo real.",
+      "imageComplement": "A arquitetura é agnóstica ao setor: o agente entende contexto, consulta sistemas e executa ações em saúde, e-commerce, serviços, educação ou operações internas.",
       "imageSoon": "Imagem do projeto em breve"
     },
     "process": {

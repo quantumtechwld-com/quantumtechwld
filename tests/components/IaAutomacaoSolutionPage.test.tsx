@@ -42,10 +42,14 @@ describe("IaAutomacaoSolutionPage", () => {
     expect(screen.getByText("useCases.card6.title")).toBeInTheDocument();
   });
 
-  it("renderiza o placeholder de imagem com caption", async () => {
+  it("renderiza a imagem de demonstração com caption e complemento", async () => {
     render(await IaAutomacaoSolutionPage({ params: Promise.resolve({ locale: "pt" }) }));
+    expect(screen.getByAltText("demo.imageAlt")).toHaveAttribute(
+      "src",
+      expect.stringContaining("agentops-hero-pt.png"),
+    );
     expect(screen.getByText("demo.imageCaption")).toBeInTheDocument();
-    expect(screen.getByText("demo.imageSoon")).toBeInTheDocument();
+    expect(screen.getByText("demo.imageComplement")).toBeInTheDocument();
   });
 
   it("renderiza os 8 itens do FAQ", async () => {
