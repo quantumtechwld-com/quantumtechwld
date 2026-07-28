@@ -1,4 +1,5 @@
 import SolutionHeader from "@/components/solutions/SolutionHeader";
+import SolutionRelated from "@/components/solutions/SolutionRelated";
 
 export default function SolutionsLayout({
   children,
@@ -7,6 +8,7 @@ export default function SolutionsLayout({
     <>
       <SolutionHeader />
       {children}
+      <SolutionRelated />
     </>
   );
 }
