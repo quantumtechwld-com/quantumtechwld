@@ -172,6 +172,16 @@ export default async function WebsiteLandingPagesSolutionPage({
           },
         })),
       },
+      {
+        "@type": "HowTo",
+        name: t("process.heading"),
+        step: processSteps.map((s, idx) => ({
+          "@type": "HowToStep",
+          position: idx + 1,
+          name: s.title,
+          text: s.description,
+        })),
+      },
     ],
   };
 

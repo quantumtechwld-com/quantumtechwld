@@ -84,7 +84,7 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(BASE_URL),
-    title: d.title,
+    title: { absolute: d.title },
     description: d.description,
     keywords: d.keywords,
     authors: [{ name: "QuantumTech", url: BASE_URL }],
@@ -105,11 +105,20 @@ export async function generateMetadata({
       siteName: "QuantumTech",
       title: d.title,
       description: d.description,
+      images: [
+        {
+          url: `${BASE_URL}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: "QuantumTech — Agência de Desenvolvimento de Software e Automação",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: d.title,
       description: d.description,
+      images: [`${BASE_URL}/opengraph-image`],
     },
     robots: {
       index: true,

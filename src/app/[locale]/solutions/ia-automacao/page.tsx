@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import NextLink from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
@@ -10,6 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   FileSearch,
+  LayoutDashboard,
   MessageSquare,
   Network,
   Rocket,
@@ -25,19 +25,19 @@ type Locale = (typeof routing.locales)[number];
 
 const metadataByLocale: Record<Locale, { title: string; description: string }> = {
   pt: {
-    title: "IA Generativa, Agentes Autônomos, RAG e Automação com LLM e n8n | QuantumTech",
+    title: "IA Generativa, RAG, Agentes Autônomos e Automação | QuantumTech",
     description:
-      "Desenvolvemos agentes de IA com LLM, sistemas RAG sobre documentos internos e automações com n8n. OpenAI, Claude, Gemini, LangChain e Agentic AI para empresas que precisam escalar sem crescer o time.",
+      "Desenvolvemos agentes de IA com LLM, RAG e n8n. OpenAI, Claude, Gemini, LangChain e Agentic AI para empresas que querem escalar sem crescer o time.",
   },
   en: {
-    title: "Generative AI, Autonomous Agents, RAG and LLM Automation with n8n | QuantumTech",
+    title: "Generative AI, RAG, Autonomous Agents and LLM Automation | QuantumTech",
     description:
-      "We build AI agents with LLMs, RAG systems over internal documents and n8n automations. OpenAI, Claude, Gemini, LangChain and Agentic AI for businesses that need to scale without growing the team.",
+      "We build AI agents with LLMs, RAG and n8n automations. OpenAI, Claude, Gemini, LangChain and Agentic AI for businesses that need to scale without growing the team.",
   },
   es: {
-    title: "IA Generativa, Agentes Autónomos, RAG y Automatización con LLM y n8n | QuantumTech",
+    title: "IA Generativa, RAG, Agentes Autónomos y Automatización LLM | QuantumTech",
     description:
-      "Desarrollamos agentes de IA con LLMs, sistemas RAG sobre documentos internos y automatizaciones con n8n. OpenAI, Claude, Gemini, LangChain y Agentic AI para empresas que necesitan escalar sin crecer el equipo.",
+      "Desarrollamos agentes de IA con LLMs, RAG y n8n. OpenAI, Claude, Gemini, LangChain y Agentic AI para empresas que necesitan escalar sin crecer el equipo.",
   },
 };
 
@@ -97,7 +97,6 @@ export default async function IaAutomacaoSolutionPage({
   const homeHref = withLocalePrefix(currentLocale, "/");
   const contactHref = getContactUrl(currentLocale);
   const solutionHref = `${BASE_URL}${withLocalePrefix(currentLocale, "/solutions/ia-automacao")}`;
-  const demoImageSrc = `/images/solutions/ia-automacao/agentops-hero-${currentLocale}.png`;
 
   const problems = [1, 2, 3].map((index) => ({
     title: t(`problems.card${index}.title`),
@@ -174,6 +173,16 @@ export default async function IaAutomacaoSolutionPage({
             "@type": "Answer",
             text: entry.answer,
           },
+        })),
+      },
+      {
+        "@type": "HowTo",
+        name: t("process.heading"),
+        step: processSteps.map((s, idx) => ({
+          "@type": "HowToStep",
+          position: idx + 1,
+          name: s.title,
+          text: s.description,
         })),
       },
     ],
@@ -321,26 +330,21 @@ export default async function IaAutomacaoSolutionPage({
         </div>
       </section>
 
-      {/* ── DEMO IMAGE ── */}
+      {/* ── DEMO IMAGE PLACEHOLDER ── */}
       <section className="mx-auto max-w-6xl px-6 pb-4">
         <figure
-          className="overflow-hidden rounded-3xl border border-white/10 bg-[#08101f] shadow-2xl shadow-emerald-950/30"
+          aria-label={t("demo.imageAlt")}
+          className="overflow-hidden rounded-3xl border border-dashed border-white/15 bg-[#08101f]"
         >
-          <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
-            <Image
-              src={demoImageSrc}
-              alt={t("demo.imageAlt")}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1152px) 1152px, 100vw"
-            />
+          <div className="flex min-h-80 flex-col items-center justify-center gap-4 p-10 text-center md:min-h-96">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-white/8 bg-white/3">
+              <LayoutDashboard size={28} className="text-slate-500" aria-hidden="true" />
+            </div>
+            <figcaption className="max-w-lg">
+              <p className="text-sm font-semibold text-slate-400">{t("demo.imageCaption")}</p>
+              <p className="mt-2 text-xs font-medium text-slate-600">{t("demo.imageSoon")}</p>
+            </figcaption>
           </div>
-          <figcaption className="border-t border-white/8 bg-[#07101f]/80 px-6 py-4 text-center">
-            <p className="text-sm font-semibold text-slate-300">{t("demo.imageCaption")}</p>
-            <p className="mx-auto mt-2 max-w-3xl text-xs font-medium leading-relaxed text-slate-400">
-              {t("demo.imageComplement")}
-            </p>
-          </figcaption>
         </figure>
       </section>
 

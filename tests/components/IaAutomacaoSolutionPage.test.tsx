@@ -44,12 +44,9 @@ describe("IaAutomacaoSolutionPage", () => {
 
   it("renderiza a imagem de demonstração com caption e complemento", async () => {
     render(await IaAutomacaoSolutionPage({ params: Promise.resolve({ locale: "pt" }) }));
-    expect(screen.getByAltText("demo.imageAlt")).toHaveAttribute(
-      "src",
-      expect.stringContaining("agentops-hero-pt.png"),
-    );
+    // Placeholder ativo
     expect(screen.getByText("demo.imageCaption")).toBeInTheDocument();
-    expect(screen.getByText("demo.imageComplement")).toBeInTheDocument();
+    expect(screen.getByText("demo.imageSoon")).toBeInTheDocument();
   });
 
   it("renderiza os 8 itens do FAQ", async () => {

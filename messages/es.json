@@ -421,7 +421,8 @@
         "item3": "Autenticación, control de permisos por perfil y auditoría de acciones críticas",
         "item4": "Integraciones vía REST, GraphQL, webhooks y automatizaciones con n8n",
         "item5": "Dashboards, informes y exportación de datos en tiempo real",
-        "item6": "Deploy en cloud con CI/CD, monitoreo de errores y soporte técnico continuo"
+        "item6": "Deploy en cloud con CI/CD, monitoreo de errores y soporte técnico continuo",
+        "item7": "GEO: contenido y schemas estructurados para que el sistema y su portal sean citados por Google AI Overviews, Perplexity y Bing Copilot"
       }
     },
     "proof": {
@@ -445,7 +446,8 @@
       "item2": { "question": "¿En cuánto tiempo se puede entregar un MVP de sistema?", "answer": "Un MVP funcional con las funcionalidades principales puede entregarse generalmente entre 4 y 10 semanas. Sistemas más simples (portales, CRMs básicos) están más cerca de las 4 semanas. Plataformas SaaS con billing y multi-tenancy, más cercanas a las 10 semanas." },
       "item3": { "question": "¿El sistema puede crecer con el negocio sin reescribir todo?", "answer": "Sí, siempre que la arquitectura inicial contemple ese crecimiento. Construimos con separación de módulos, modelado de datos extensible y APIs bien definidas para que las nuevas funcionalidades se agreguen sin impacto en lo que ya está en producción." },
       "item4": { "question": "¿Cuánto cuesta desarrollar un sistema a medida?", "answer": "La inversión depende del alcance, el número de módulos y las integraciones involucradas. Los proyectos de menor complejidad parten de un costo menor; las plataformas SaaS completas requieren una inversión proporcional. Ofrecemos un diagnóstico técnico gratuito para presentar una propuesta con alcance y estimación detallada." },
-      "item5": { "question": "¿Entregan el código fuente y la documentación técnica?", "answer": "Sí. El cliente recibe el código fuente completo, documentación técnica de arquitectura y acceso total al repositorio. No hay lock-in: el proyecto es suyo y puede ser evolucionado por cualquier equipo técnico futuro." }
+      "item5": { "question": "¿Entregan el código fuente y la documentación técnica?", "answer": "Sí. El cliente recibe el código fuente completo, documentación técnica de arquitectura y acceso total al repositorio. No hay lock-in: el proyecto es suyo y puede ser evolucionado por cualquier equipo técnico futuro." },
+      "item6": { "question": "¿Los sistemas a medida aparecen en los resultados de búsqueda con IA (Google AI Overviews)?", "answer": "Sí, cuando el sistema incluye un portal público, páginas de producto o base de conocimiento accesible. Implementamos GEO (Generative Engine Optimization) en el código del sistema — FAQPage schema, BreadcrumbList, contenido estructurado y prosa citable — para que el producto aparezca como fuente en respuestas generadas por Google AI Overviews, Perplexity y Bing Copilot." }
     },
     "cta": {
       "eyebrow": "Siguiente paso",
@@ -505,8 +507,7 @@
     },
     "demo": {
       "imageAlt": "Ejemplo de panel de agente de IA desarrollado por QuantumTech",
-      "imageCaption": "Ejemplo de panel de monitoreo de agente de atención, conversaciones, intenciones detectadas y acciones ejecutadas en tiempo real.",
-      "imageComplement": "Arquitectura agnóstica al sector: el agente entiende el contexto, consulta sistemas de negocio y ejecuta acciones en salud, e-commerce, servicios, educación u operaciones internas.",
+      "imageCaption": "Ejemplo de panel de monitoreo de agente de atención — conversaciones, intenciones detectadas y acciones ejecutadas en tiempo real.",
       "imageSoon": "Imagen del proyecto próximamente"
     },
     "process": {

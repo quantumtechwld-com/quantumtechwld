@@ -115,11 +115,11 @@ export default async function SistemasSobMedidaSolutionPage({
     description: t(`process.step${index}.description`),
   }));
 
-  const stackItems = [1, 2, 3, 4, 5, 6].map((index) => t(`stack.items.item${index}`));
+  const stackItems = [1, 2, 3, 4, 5, 6, 7].map((index) => t(`stack.items.item${index}`));
 
   const checklistItems = [1, 2, 3, 4].map((index) => t(`proof.checklist.item${index}`));
 
-  const faqEntries = [1, 2, 3, 4, 5].map((index) => ({
+  const faqEntries = [1, 2, 3, 4, 5, 6].map((index) => ({
     question: t(`faq.item${index}.question`),
     answer: t(`faq.item${index}.answer`),
   }));
@@ -169,6 +169,16 @@ export default async function SistemasSobMedidaSolutionPage({
             "@type": "Answer",
             text: entry.answer,
           },
+        })),
+      },
+      {
+        "@type": "HowTo",
+        name: t("process.heading"),
+        step: processSteps.map((s, idx) => ({
+          "@type": "HowToStep",
+          position: idx + 1,
+          name: s.title,
+          text: s.description,
         })),
       },
     ],
