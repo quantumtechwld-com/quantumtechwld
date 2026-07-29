@@ -32,9 +32,9 @@ const adminCopy: Record<ContactLocale, { subject: (s: string, n: string) => stri
 };
 
 const userCopy: Record<ContactLocale, { subject: string; greeting: (n: string) => string; body: string; closing: string }> = {
-  pt: { subject: "✅ Recebemos sua mensagem", greeting: (n) => `Olá ${n},`, body: "Recebemos sua mensagem e responderemos em breve pelo e-mail indicado.", closing: "Obrigado por entrar em contato!" },
-  en: { subject: "✅ We received your message", greeting: (n) => `Hi ${n},`, body: "We received your message and will get back to you shortly at the email address provided.", closing: "Thank you for reaching out!" },
-  es: { subject: "✅ Recibimos tu mensaje", greeting: (n) => `Hola ${n},`, body: "Recibimos tu mensaje y te responderemos pronto al correo electrónico indicado.", closing: "¡Gracias por contactarnos!" },
+  pt: { subject: "Recebemos sua mensagem", greeting: (n) => `Olá ${n},`, body: "Recebemos sua mensagem e responderemos em breve pelo e-mail indicado.", closing: "Obrigado por entrar em contato!" },
+  en: { subject: "We received your message", greeting: (n) => `Hi ${n},`, body: "We received your message and will get back to you shortly at the email address provided.", closing: "Thank you for reaching out!" },
+  es: { subject: "Recibimos tu mensaje", greeting: (n) => `Hola ${n},`, body: "Recibimos tu mensaje y te responderemos pronto al correo electrónico indicado.", closing: "¡Gracias por contactarnos!" },
 };
 
 export async function POST(request: NextRequest) {
