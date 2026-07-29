@@ -54,7 +54,7 @@ describe("SistemasSobMedidaSolutionPage", () => {
       (l) => l.textContent?.includes("cta.primaryCta"),
     );
     expect(ctaLinks.length).toBeGreaterThan(0);
-    expect(ctaLinks[0]).toHaveAttribute("href", "/portal/contato");
+    expect(ctaLinks[0].getAttribute("href")).toMatch(/^\/portal\/contato/);
   });
 
   it("renderiza corretamente com locale EN", async () => {

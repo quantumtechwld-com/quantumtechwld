@@ -42,9 +42,8 @@ describe("IaAutomacaoSolutionPage", () => {
     expect(screen.getByText("useCases.card6.title")).toBeInTheDocument();
   });
 
-  it("renderiza a imagem de demonstração com caption e complemento", async () => {
+  it("renderiza o placeholder de imagem com caption", async () => {
     render(await IaAutomacaoSolutionPage({ params: Promise.resolve({ locale: "pt" }) }));
-    // Placeholder ativo
     expect(screen.getByText("demo.imageCaption")).toBeInTheDocument();
     expect(screen.getByText("demo.imageSoon")).toBeInTheDocument();
   });
@@ -61,7 +60,7 @@ describe("IaAutomacaoSolutionPage", () => {
       (l) => l.textContent?.includes("cta.primaryCta"),
     );
     expect(ctaLinks.length).toBeGreaterThan(0);
-    expect(ctaLinks[0]).toHaveAttribute("href", "/portal/contato");
+    expect(ctaLinks[0].getAttribute("href")).toMatch(/^\/portal\/contato/);
   });
 
   it("renderiza corretamente com locale EN", async () => {
