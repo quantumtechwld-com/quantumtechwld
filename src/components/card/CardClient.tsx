@@ -70,16 +70,20 @@ export default function CardClient() {
   // URL localizada — direciona para o idioma atual do visitante
   const localizedWebsite = `https://quantumtechwld.com/${locale}`;
 
+  // Links com identificação de origem
+  const whatsappHref = `${CONTACT.whatsapp}?text=${encodeURIComponent(t("whatsappText"))}`;
+  const emailHref = `mailto:${CONTACT.email}?subject=${encodeURIComponent(t("emailSubject"))}`;
+
   const ACTION_LINKS: ActionLink[] = [
     {
       key: "whatsapp",
-      href: CONTACT.whatsapp,
+      href: whatsappHref,
       icon: <MessageCircle size={20} />,
       colorClass: "hover:border-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-400/10",
     },
     {
       key: "email",
-      href: `mailto:${CONTACT.email}`,
+      href: emailHref,
       icon: <Mail size={20} />,
       colorClass: "hover:border-accent/60 hover:text-accent hover:bg-accent/10",
     },

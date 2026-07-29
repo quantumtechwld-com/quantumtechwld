@@ -1021,6 +1021,8 @@
     "share": "Compartir",
     "qrLabel": "Escanea para visitar nuestro sitio",
     "copyLink": "Copiar enlace",
-    "copied": "¡Enlace copiado!"
+    "copied": "¡Enlace copiado!",
+    "whatsappText": "¡Hola! Vi tu tarjeta digital y me gustaría saber más sobre los servicios de QuantumTech.",
+    "emailSubject": "Contacto via tarjeta digital"
   }
 }
