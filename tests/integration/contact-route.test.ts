@@ -140,7 +140,7 @@ describe("POST /api/contact", () => {
       expect.objectContaining({ subject: "[Contact] Pricing question — John" })
     );
     expect(mocks.sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: "✅ We received your message" })
+      expect.objectContaining({ subject: "We received your message" })
     );
   });
 
@@ -163,7 +163,7 @@ describe("POST /api/contact", () => {
       expect.objectContaining({ subject: "[Contacto] Consulta de precios — Juan" })
     );
     expect(mocks.sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: "✅ Recibimos tu mensaje" })
+      expect.objectContaining({ subject: "Recibimos tu mensaje" })
     );
   });
 
