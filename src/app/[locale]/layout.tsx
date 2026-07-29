@@ -170,8 +170,14 @@ export default async function LocaleLayout({
         url: BASE_URL,
         logo: {
           "@type": "ImageObject",
-          url: `${BASE_URL}/favicon.ico`,
+          url: `${BASE_URL}/images/logo/logo-dark-square@400x400.png`,
+          width: 400,
+          height: 400,
         },
+        sameAs: [
+          "https://www.linkedin.com/company/quantumtech-software-agency/",
+          "https://www.instagram.com/quantumscale.dev/",
+        ],
       },
       {
         "@type": "WebSite",
