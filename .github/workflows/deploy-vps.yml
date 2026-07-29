@@ -16,6 +16,12 @@ name: Deploy → VPS HostGator
 on:
   push:
     branches: [main]    # ← Deploy automático a cada push em main
+    paths-ignore:       # ← Ignora commits que só alteram docs/testes
+      - "docs/**"
+      - "tests/**"
+      - "*.md"
+      - "AGENTS.md"
+      - "coverage/**"
   workflow_dispatch:   # ← Mantido para deploy manual quando necessário
   # (VPS HostGator é a infraestrutura de produção desde 11/05/2026)
 
