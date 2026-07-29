@@ -666,3 +666,85 @@ Resultado: `✓ Compiled successfully in 38.2s` · `BUILD_OK` · `[quantum-agenc
 - [ ] O `docs/DEPLOY.md` está sendo consultado antes de rebuilds manuais?
 - [ ] Existe smoke test automatizado que detectaria 502 em menos de 1 minuto?
 
+---
+
+## 19. ⚠️ Registro de Achados de Segurança Pendentes
+
+Achados de segurança que não causaram incidente mas requerem análise e correção planejada.
+Devem ser revisados mensalmente e priorizados com base no risco real de exploração.
+
+---
+
+### ACHADO-REGEX-001 — 29/07/2026 — ReDoS potencial em regex de validação de e-mail
+
+**Severidade:** Baixa (mitigada por rate limit e Zod)
+**Status:** Pendente de correção
+**Detectado por:** ESLint — regra `regexp/no-super-linear-backtracking`
+**Localização:** `src/app/api/contact/route.ts` · linha 12
+
+#### Descrição
+
+O regex utilizado para validação de e-mail na rota `/api/contact`:
+
+```typescript
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+```
+
+Foi sinalizado pelo ESLint como tendo potencial de **backtracking super-linear** — característica que pode ser explorada via **ReDoS** (Regular Expression Denial of Service). O motor de regex JavaScript pode executar um número exponencial de tentativas ao processar certas strings maliciosas, aumentando o tempo de CPU por requisição.
+
+#### Risco
+
+Um atacante que consiga enviar múltiplas requisições com strings como `aaaa...@bbb.c c c...` pode forçar o motor de regex a realizar milhares de tentativas de backtracking. Sem mitigação, isso resultaria em consumo de CPU anormal e possível degradação de serviço.
+
+#### Mitigação existente (que reduz o risco a Baixo)
+
+- Rate limit: 3 requisições por IP a cada 10 minutos — implementado em `createRateLimiter`
+- Zod valida o schema antes de aplicar o regex — a maior parte das entradas inválidas é rejeitada antes
+- Pipeline SAST (ESLint `eslint-plugin-security` + `no-secrets`) detecta o aviso na CI como warning
+
+#### Fix recomendado (quando priorizar)
+
+```typescript
+// Opção A — charset explícito sem backtracking catastrófico
+const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+// Opção B — delegar inteiramente ao Zod (elimina o regex manual)
+// Remover EMAIL_RE e alterar o schema para:
+email: z.string().trim().min(1).email(),
+```
+
+#### Escopo de auditoria — regex do projeto a revisar na próxima análise mensal
+
+| Arquivo | Regex / padrão | Prioridade de revisão |
+|---|---|---|
+| `src/app/api/contact/route.ts` | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | **Alta** — exposto em rota pública |
+| `src/lib/email.ts` | Verificar presença de regex de validação | Média |
+| `src/middleware.ts` | Verificar regex de rotas e locale matching | Média |
+| `src/lib/csrf.ts` | Verificar regex de token | Baixa |
+| `src/app/api/lead/route.ts` | Verificar validações manuais de string | Média |
+
+#### Padrão recomendado para novos validadores no projeto
+
+```typescript
+// ✅ Preferir sempre Zod nativo para validação de formatos conhecidos
+email:   z.string().email(),
+url:     z.string().url(),
+uuid:    z.string().uuid(),
+
+// ✅ Se regex for necessário, usar charset explícito e ancoragem simples
+// ❌ Evitar padrões como [^\s@]+, .+, .*  dentro de grupos repetidos
+```
+
+#### Checklist para próxima análise mensal
+
+- [ ] O `EMAIL_RE` em `/api/contact/route.ts` foi substituído por versão segura?
+- [ ] Varredura executada com `npx eslint src/ --rule 'regexp/no-super-linear-backtracking: error'` com 0 ocorrências?
+- [ ] Outros arquivos da tabela de escopo foram auditados?
+- [ ] Novos regex adicionados ao projeto passaram pela regra no ESLint?
+
+#### Histórico de revisões
+
+| Data | Ação |
+|---|---|
+| 29/07/2026 | Achado documentado — regex presente desde criação da rota, sinalizado pelo ESLint como warning no pipeline CI |
+
