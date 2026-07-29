@@ -138,7 +138,7 @@ async function handleApprove(proposal: ProposalDoc) {
   // E-mail ao admin
   await sendMail({
     to: adminEmail,
-    subject: `✅ Proposta aprovada — ${proposal.briefing.projectType}`,
+    subject: `Proposta aprovada — ${proposal.briefing.projectType}`,
     html: tplProposalApproved({
       adminEmail,
       clientEmail,
@@ -196,7 +196,7 @@ async function handleRevision(proposal: ProposalDoc, note: string | undefined) {
 
   await sendMail({
     to: adminEmail,
-    subject: `🔄 Revisão solicitada — ${proposal.briefing.projectType}`,
+    subject: `Revisao solicitada — ${proposal.briefing.projectType}`,
     html: tplRevisionRequested({
       adminEmail,
       projectType: proposal.briefing.projectType,
