@@ -12,11 +12,15 @@ const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, maxRequests:
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const ContactSchema = z.object({
-  name:    z.string().trim().min(1),
-  email:   z.string().trim().min(1).regex(EMAIL_RE),
-  subject: z.string().trim().min(1),
-  message: z.string().trim().min(1),
-  locale:  z.enum(["pt", "en", "es"]).optional().default("pt"),
+  name:         z.string().trim().min(1),
+  email:        z.string().trim().min(1).regex(EMAIL_RE),
+  subject:      z.string().trim().min(1),
+  message:      z.string().trim().min(1),
+  locale:       z.enum(["pt", "en", "es"]).optional().default("pt"),
+  utm_source:   z.string().trim().max(100).optional().default("direct"),
+  utm_medium:   z.string().trim().max(100).optional().default("none"),
+  utm_campaign: z.string().trim().max(100).optional().default("none"),
+  utm_content:  z.string().trim().max(100).optional().default("none"),
 });
 
 type ContactLocale = "pt" | "en" | "es";
@@ -55,7 +59,7 @@ export async function POST(request: NextRequest) {
   if (!result.success) {
     return NextResponse.json({ error: "Campos obrigatórios em falta ou inválidos." }, { status: 422 });
   }
-  const { name, email, subject, message, locale } = result.data;
+  const { name, email, subject, message, locale, utm_source, utm_medium, utm_campaign, utm_content } = result.data;
 
   // Persistir na base de dados
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,6 +84,7 @@ export async function POST(request: NextRequest) {
               <tr><td style="padding:6px 0;color:#64748b;width:100px">${ac.name}</td><td style="padding:6px 0;color:#1e293b">${name}</td></tr>
               <tr><td style="padding:6px 0;color:#64748b">${ac.email}</td><td style="padding:6px 0"><a href="mailto:${email}" style="color:#7c3aed">${email}</a></td></tr>
               <tr><td style="padding:6px 0;color:#64748b">${ac.subjectLabel}</td><td style="padding:6px 0;color:#1e293b">${subject}</td></tr>
+              <tr><td style="padding:6px 0;color:#64748b;font-size:11px">UTM</td><td style="padding:6px 0;color:#94a3b8;font-size:11px">source: ${utm_source} &nbsp;·&nbsp; medium: ${utm_medium} &nbsp;·&nbsp; campaign: ${utm_campaign} &nbsp;·&nbsp; content: ${utm_content}</td></tr>
             </table>
             <div style="background:#f8fafc;border-left:4px solid #7c3aed;padding:16px;border-radius:4px;white-space:pre-wrap;color:#1e293b">${message}</div>
           </div>

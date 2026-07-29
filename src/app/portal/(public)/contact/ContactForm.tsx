@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -8,13 +8,27 @@ export function ContactForm() {
   const t = useTranslations("portal");
   const locale = useLocale();
 
-  const [name,    setName]    = useState("");
-  const [email,   setEmail]   = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState("");
-  const [sent,    setSent]    = useState(false);
+  const [name,        setName]        = useState("");
+  const [email,       setEmail]       = useState("");
+  const [subject,     setSubject]     = useState("");
+  const [message,     setMessage]     = useState("");
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState("");
+  const [sent,        setSent]        = useState(false);
+
+  // UTM tracking — lido da URL ao montar o componente
+  const [utmSource,   setUtmSource]   = useState("direct");
+  const [utmMedium,   setUtmMedium]   = useState("none");
+  const [utmCampaign, setUtmCampaign] = useState("none");
+  const [utmContent,  setUtmContent]  = useState("none");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setUtmSource(params.get("utm_source")   || "direct");
+    setUtmMedium(params.get("utm_medium")   || "none");
+    setUtmCampaign(params.get("utm_campaign") || "none");
+    setUtmContent(params.get("utm_content")  || "none");
+  }, []);
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,7 +48,17 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method:  "POST",
         headers: { "Content-Type": "application/json", "x-csrf-token": csrf },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), subject: subject.trim(), message: message.trim(), locale }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          subject: subject.trim(),
+          message: message.trim(),
+          locale,
+          utm_source:   utmSource,
+          utm_medium:   utmMedium,
+          utm_campaign: utmCampaign,
+          utm_content:  utmContent,
+        }),
       });
 
       if (!res.ok) {

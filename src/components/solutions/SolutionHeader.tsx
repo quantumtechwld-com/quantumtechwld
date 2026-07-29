@@ -22,7 +22,12 @@ function homeHref(locale: string) {
 export default function SolutionHeader() {
   const locale = useLocale();
   const t = useTranslations("nav");
-  const contactHref = getContactUrl(locale);
+  const contactHref = getContactUrl(locale, {
+    source: "site",
+    medium: "organic",
+    campaign: "solution-nav",
+    content: "header-cta",
+  });
   const home = homeHref(locale);
 
   return (

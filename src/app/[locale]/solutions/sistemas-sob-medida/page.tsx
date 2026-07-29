@@ -91,7 +91,11 @@ export default async function SistemasSobMedidaSolutionPage({
   const t = await getTranslations("solutionSystems");
 
   const homeHref = withLocalePrefix(currentLocale, "/");
-  const contactHref = getContactUrl(currentLocale);
+  const contactHref = getContactUrl(currentLocale, {
+    source: "site",
+    medium: "organic",
+    campaign: "sistemas-sob-medida",
+  });
   const solutionHref = `${BASE_URL}${withLocalePrefix(currentLocale, "/solutions/sistemas-sob-medida")}`;
 
   const problems = [1, 2, 3].map((index) => ({

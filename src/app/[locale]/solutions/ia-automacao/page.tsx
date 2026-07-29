@@ -95,7 +95,11 @@ export default async function IaAutomacaoSolutionPage({
   const t = await getTranslations("solutionAI");
 
   const homeHref = withLocalePrefix(currentLocale, "/");
-  const contactHref = getContactUrl(currentLocale);
+  const contactHref = getContactUrl(currentLocale, {
+    source: "site",
+    medium: "organic",
+    campaign: "ia-automacao",
+  });
   const solutionHref = `${BASE_URL}${withLocalePrefix(currentLocale, "/solutions/ia-automacao")}`;
 
   const problems = [1, 2, 3].map((index) => ({

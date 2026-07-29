@@ -95,7 +95,11 @@ export default async function WebsiteLandingPagesSolutionPage({
   const t = await getTranslations("solutionWebsite");
 
   const homeHref = withLocalePrefix(currentLocale, "/");
-  const contactHref = getContactUrl(currentLocale);
+  const contactHref = getContactUrl(currentLocale, {
+    source: "site",
+    medium: "organic",
+    campaign: "websites-landing-pages",
+  });
   const solutionHref = `${BASE_URL}${withLocalePrefix(currentLocale, "/solutions/websites-landing-pages")}`;
 
   const problems = [1, 2, 3].map((index) => ({
